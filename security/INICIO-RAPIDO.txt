@@ -1,0 +1,128 @@
+╔════════════════════════════════════════════════════════════╗
+║   🛡️  FORTALEZA DIGITAL: GUÍA RÁPIDA DE INICIO           ║
+╚════════════════════════════════════════════════════════════╝
+
+📦 INSTALACIÓN COMPLETA
+═══════════════════════════════════════════════════════════
+
+Para instalar TODO el sistema de seguridad y alta disponibilidad:
+
+    cd /var/www/html/rustikan
+    sudo ./security/install-all.sh
+
+Este script instalará:
+  ✓ Hardenización del servidor (UFW, SSH, Fail2ban)
+  ✓ HTTPS con Let's Encrypt (requiere dominio)
+  ✓ Balanceador HAProxy con 2 backends
+  ✓ Sistema de backups automatizado
+  ✓ OWASP ZAP para análisis de vulnerabilidades
+
+
+🔒 INSTALACIÓN MODULAR
+═══════════════════════════════════════════════════════════
+
+Si prefieres instalar componentes por separado:
+
+1️⃣  HARDENIZACIÓN (Obligatorio primero)
+    sudo ./security/hardening.sh
+    Tiempo estimado: 5-10 minutos
+
+2️⃣  HTTPS/SSL (Requiere dominio real)
+    sudo ./security/setup-ssl.sh
+    Tiempo estimado: 2-3 minutos
+
+3️⃣  ALTA DISPONIBILIDAD (Recomendado)
+    sudo ./security/setup-haproxy.sh
+    Tiempo estimado: 3-5 minutos
+
+4️⃣  BACKUPS AUTOMATIZADOS (Muy importante)
+    sudo ./security/setup-backups.sh
+    Tiempo estimado: 2-3 minutos
+
+5️⃣  ANÁLISIS DE SEGURIDAD (Para encontrar vulnerabilidades)
+    ./security/setup-owasp-zap.sh
+    Tiempo estimado: 10-15 minutos (incluye descarga)
+
+
+⚡ COMANDOS RÁPIDOS
+═══════════════════════════════════════════════════════════
+
+VERIFICAR ESTADO:
+  sudo ufw status                    # Firewall
+  sudo fail2ban-client status        # Protección contra ataques
+  sudo systemctl status haproxy      # Balanceador de carga
+  firefox http://localhost:8404/stats  # Estadísticas HAProxy
+
+BACKUPS:
+  sudo /usr/local/bin/rustikan-backup.sh              # Backup manual
+  sudo /usr/local/bin/rustikan-restore.sh <archivo>   # Restaurar
+  sudo /usr/local/bin/rustikan-check-backups.sh       # Verificar
+
+ANÁLISIS DE SEGURIDAD:  
+  ./security/zap-scan-basic.sh       # Escaneo rápido (5 min)
+  ./security/zap-scan-full.sh        # Escaneo completo (30 min)
+  ./security/apply-security-patches.sh  # Aplicar parches
+
+VER REPORTES:
+  firefox security/reports/*.html    # Reportes de vulnerabilidades
+  ls -lh /var/backups/rustikan/daily/  # Lista de backups
+
+
+📊 UBICACIONES IMPORTANTES
+═══════════════════════════════════════════════════════════
+
+Scripts:       /var/www/html/rustikan/security/
+Backups:       /var/backups/rustikan/
+Reportes:      /var/www/html/rustikan/security/reports/
+Logs:          /var/log/ (apache2, haproxy, fail2ban, auth.log)
+
+
+📖 DOCUMENTACIÓN COMPLETA
+═══════════════════════════════════════════════════════════
+
+README completo:
+  cat security/README-COMPLETO.md
+
+O ábrelo en tu editor favorito:
+  nano security/README-COMPLETO.md
+  code security/README-COMPLETO.md
+
+
+🎯 PARA LA ASIGNATURA
+═══════════════════════════════════════════════════════════
+
+1. Ejecutar: sudo ./security/install-all.sh
+2. Tomar screenshots de:
+   - sudo ufw status verbose
+   - sudo fail2ban-client status
+   - firefox http://localhost:8404/stats
+   - ls -lh /var/backups/rustikan/daily/
+   - firefox security/reports/*.html
+
+3. Leer: security/README-COMPLETO.md
+   (Contiene toda la documentación necesaria)
+
+4. Generar reporte de seguridad:
+   ./security/generate-report.sh > mi-reporte.txt
+
+
+❓ AYUDA
+═══════════════════════════════════════════════════════════
+
+Si algo no funciona:
+1. Lee la sección "Troubleshooting" en README-COMPLETO.md
+2. Revisa los logs: sudo tail -f /var/log/syslog
+3. Verifica servicios: sudo systemctl status <servicio>
+
+
+✅ CHECKLIST RÁPIDO
+═══════════════════════════════════════════════════════════
+
+Antes de entregar, verifica:
+[ ] Firewall activo: sudo ufw status
+[ ] Fail2ban funcionando: sudo fail2ban-client status
+[ ] HAProxy balanceando: curl http://localhost
+[ ] Último backup reciente: ls /var/backups/rustikan/daily/
+[ ] Escaneo de seguridad realizado: ls security/reports/
+[ ] Screenshots tomados
+[ ] README-COMPLETO.md leído
