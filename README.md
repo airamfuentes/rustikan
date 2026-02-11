@@ -1,159 +1,111 @@
-# Rustikan
+# 🚀 Rustikan
 
-Proyecto final de ciclo formativo - Aplicación web desarrollada con Laravel, Vue.js y Tailwind CSS.
+Proyecto desarrollado con Laravel + Inertia.js + Vue 3
 
-## 🚀 Tecnologías
+## 📦 Stack Tecnológico
 
 - **Backend**: Laravel 12
 - **Frontend**: Vue.js 3 + Inertia.js
-- **Estilos**: Tailwind CSS
+- **Estilos**: Tailwind CSS v4
 - **Base de datos**: MySQL
 - **Autenticación**: Laravel Breeze
+- **Build**: Vite 7
 
-## 📋 Requisitos
+## ⚙️ Requisitos
 
 - PHP 8.4+
 - Composer
-- Node.js 18+
-- NPM
+- Node.js 20+
 - MySQL 8.0+
 
 ## 🛠️ Instalación
 
-### En Linux (Desarrollo)
+### 1. Instalar dependencias
 
-1. Clonar el repositorio:
-```bash
-git clone https://github.com/airamfuentes/rustikan.git
-cd rustikan
-```
-
-2. Instalar dependencias de PHP:
 ```bash
 composer install
-```
-
-3. Instalar dependencias de Node:
-```bash
 npm install --legacy-peer-deps
 ```
 
-4. Copiar el archivo de configuración:
+### 2. Configurar entorno
+
 ```bash
 cp .env.example .env
+php artisan key:generate
 ```
 
-5. Configurar la base de datos en `.env`:
+### 3. Configurar base de datos
+
+Edita `.env`:
 ```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
 DB_DATABASE=rustikan
 DB_USERNAME=tu_usuario
 DB_PASSWORD=tu_contraseña
 ```
 
-6. Generar la clave de la aplicación:
-```bash
-php artisan key:generate
-```
-
-7. Ejecutar las migraciones:
-```bash
-php artisan migrate
-```
-
-8. Compilar los assets:
-```bash
-npm run build
-```
-
-9. Iniciar el servidor de desarrollo:
-```bash
-php artisan serve
-```
-
-La aplicación estará disponible en `http://localhost:8000`
-
-### En Windows
-
-1. Clonar el repositorio:
-```cmd
-git clone https://github.com/airamfuentes/rustikan.git
-cd rustikan
-```
-
-2. Instalar dependencias de PHP:
-```cmd
-composer install
-```
-
-3. Instalar dependencias de Node:
-```cmd
-npm install --legacy-peer-deps
-```
-
-4. Copiar el archivo de configuración:
-```cmd
-copy .env.example .env
-```
-
-5. Configurar la base de datos en `.env` (usar tu XAMPP/WAMP/Laragon):
-```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=rustikan
-DB_USERNAME=root
-DB_PASSWORD=
-```
-
-6. Generar la clave de la aplicación:
-```cmd
-php artisan key:generate
-```
-
-7. Crear la base de datos en MySQL:
+Crear base de datos:
 ```sql
 CREATE DATABASE rustikan CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-8. Ejecutar las migraciones:
-```cmd
+### 4. Migrar base de datos
+
+```bash
 php artisan migrate
 ```
 
-9. Compilar los assets:
-```cmd
-npm run build
-```
-
-10. Iniciar el servidor de desarrollo:
-```cmd
-php artisan serve
-```
-
-## 🔧 Desarrollo
-
-Para desarrollo con hot-reload del frontend:
+### 5. Iniciar desarrollo
 
 ```bash
+# Terminal 1: Vite (hot reload)
 npm run dev
-```
 
-En otra terminal:
-
-```bash
+# Terminal 2: Laravel (opcional, Apache ya sirve en http://rustikan)
 php artisan serve
 ```
 
-## 📝 Comandos útiles
+## 🌐 URLs
 
-- `php artisan migrate:fresh` - Reiniciar base de datos
-- `php artisan db:seed` - Poblar base de datos
-- `php artisan tinker` - Consola interactiva
-- `npm run build` - Compilar assets para producción
-- `php artisan test` - Ejecutar tests
+- **Desarrollo**: http://rustikan o http://localhost:8000
+- **Vite**: http://localhost:5173
+
+## 📁 Estructura
+
+```
+resources/js/
+├── Components/       # Componentes Vue reutilizables
+├── Layouts/          # Layouts (Authenticated, Guest)
+├── Pages/            # Páginas de la aplicación
+│   ├── Auth/        # Login, Register, etc.
+│   ├── Profile/     # Gestión de perfil
+│   └── Home.vue     # Página principal
+├── app.js           # Entry point
+└── bootstrap.js     # Config Axios
+
+routes/
+└── web.php          # Rutas de la aplicación
+```
+
+## 🚀 Comandos útiles
+
+```bash
+# Desarrollo
+npm run dev              # Vite con hot reload
+npm run build            # Compilar para producción
+
+# Base de datos
+php artisan migrate      # Ejecutar migraciones
+php artisan migrate:fresh # Reiniciar BD
+php artisan db:seed      # Seeders
+
+# Cache
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
+
+# Otros
+php artisan tinker       # Consola interactiva
+```
 
 ## 👤 Autor
 
@@ -161,6 +113,3 @@ php artisan serve
 - GitHub: [@airamfuentes](https://github.com/airamfuentes)
 - Email: airamfuentes2020@gmail.com
 
-## 📄 Licencia
-
-Este proyecto es parte de un proyecto final de ciclo formativo.
