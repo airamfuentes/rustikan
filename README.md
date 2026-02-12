@@ -1,115 +1,50 @@
-# 🚀 Rustikan
+# Rustikan
 
-Proyecto desarrollado con Laravel + Inertia.js + Vue 3
+Proyecto Laravel + Inertia.js + Vue 3
 
-## 📦 Stack Tecnológico
+## Stack
 
-- **Backend**: Laravel 12
-- **Frontend**: Vue.js 3 + Inertia.js
-- **Estilos**: Tailwind CSS v4
-- **Base de datos**: MySQL
-- **Autenticación**: Laravel Breeze
-- **Build**: Vite 7
+- Laravel 12
+- Vue.js 3 + Inertia.js
+- Tailwind CSS v4
+- MySQL
+- Vite 7
 
-## ⚙️ Requisitos
-
-- PHP 8.4+
-- Composer
-- Node.js 20+
-- MySQL 8.0+
-
-## 🛠️ Instalación
-
-### 1. Instalar dependencias
+## Instalación
 
 ```bash
+# Dependencias
 composer install
 npm install --legacy-peer-deps
-```
 
-### 2. Configurar entorno
-
-```bash
+# Configurar entorno
 cp .env.example .env
 php artisan key:generate
-```
 
-### 3. Configurar base de datos
-
-Edita `.env`:
-```env
-DB_DATABASE=rustikan
-DB_USERNAME=tu_usuario
-DB_PASSWORD=tu_contraseña
-```
-
-Crear base de datos:
-```sql
-CREATE DATABASE rustikan CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
-### 4. Migrar base de datos
-
-```bash
+# Base de datos (edita .env primero)
 php artisan migrate
-```
 
-### 5. Iniciar desarrollo
-
-```bash
-# Terminal 1: Vite (hot reload)
+# Iniciar desarrollo
 npm run dev
-
-# Terminal 2: Laravel (opcional, Apache ya sirve en http://rustikan)
-php artisan serve
 ```
 
-## 🌐 URLs
-
-- **Desarrollo**: http://rustikan o http://localhost:8000
-- **Vite**: http://localhost:5173
-
-## 📁 Estructura
-
-```
-resources/js/
-├── Components/       # Componentes Vue reutilizables
-├── Layouts/          # Layouts (Authenticated, Guest)
-├── Pages/            # Páginas de la aplicación
-│   ├── Auth/        # Login, Register, etc.
-│   ├── Profile/     # Gestión de perfil
-│   └── Home.vue     # Página principal
-├── app.js           # Entry point
-└── bootstrap.js     # Config Axios
-
-routes/
-└── web.php          # Rutas de la aplicación
-```
-
-## 🚀 Comandos útiles
+## Desarrollo
 
 ```bash
-# Desarrollo
 npm run dev              # Vite con hot reload
-npm run build            # Compilar para producción
-
-# Base de datos
+php artisan serve        # Servidor Laravel
 php artisan migrate      # Ejecutar migraciones
-php artisan migrate:fresh # Reiniciar BD
-php artisan db:seed      # Seeders
-
-# Cache
-php artisan config:clear
-php artisan cache:clear
-php artisan view:clear
-
-# Otros
 php artisan tinker       # Consola interactiva
 ```
 
-## 👤 Autor
+## Estructura
 
-**Airam Fuentes**
-- GitHub: [@airamfuentes](https://github.com/airamfuentes)
-- Email: airamfuentes2020@gmail.com
+```
+resources/js/
+├── Components/     # Componentes reutilizables
+├── Layouts/        # Layouts (Authenticated, Guest)
+└── Pages/          # Páginas de la aplicación
+    ├── Auth/       # Autenticación
+    └── Profile/    # Perfil de usuario
+```
 
