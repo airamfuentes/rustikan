@@ -7,6 +7,14 @@ import AuthModal from '@/Components/AuthModal.vue';
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 
+// Props desde el backend
+const props = defineProps({
+    tiendas: {
+        type: Array,
+        default: () => []
+    }
+});
+
 const busqueda = ref('');
 const categoriaActiva = ref('Todos');
 const scrolled = ref(false);
@@ -18,6 +26,9 @@ const categoriesRef = ref(null);
 const showCategoriesDropdown = ref(false);
 let searchTimeout = null;
 let scrollTimeout = null;
+
+// Usar las tiendas del backend
+const tiendasFiltradas = ref(props.tiendas);
 
 // Detectar scroll con throttle
 const handleScroll = () => {
@@ -55,75 +66,27 @@ onUnmounted(() => {
     }
 });
 
-// Tiendas de Lanzarote
-const tiendas = ref([
-    {
-        id: 1,
-        nombre: 'Mi Tienda Lanzarote',
-        ubicacion: 'Arrecife, Lanzarote',
-        descripcion: 'Productos locales frescos de toda la isla. Especialidad en frutas tropicales y productos del mar.',
-        imagen: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&h=600&fit=crop',
-        valoracion: 5.0,
-        ventas: 0,
-        km: 0,
-    },
-    {
-        id: 2,
-        nombre: 'Finca La Geria',
-        ubicacion: 'La Geria, Lanzarote',
-        descripcion: 'Productos volcánicos de La Geria. Vinos, papas y hortalizas cultivadas en el malpais lanzaroteño.',
-        imagen: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=800&h=600&fit=crop',
-        valoracion: 4.8,
-        ventas: 156,
-        km: 0,
-    },
-    {
-        id: 3,
-        nombre: 'Mariscos de Arrieta',
-        ubicacion: 'Arrieta, Lanzarote',
-        descripcion: 'Pescado fresco y marisco del puerto de Arrieta. Lapas, burgados y pescado del día.',
-        imagen: 'https://images.unsplash.com/photo-1559737558-2f5a419b1e85?w=800&h=600&fit=crop',
-        valoracion: 4.9,
-        ventas: 89,
-        km: 0,
-    },
-    {
-        id: 4,
-        nombre: 'Quesería Haría',
-        ubicacion: 'Haría, Lanzarote',
-        descripcion: 'Quesos artesanales de cabra majorera de Haría. Recetas tradicionales lanzaroteñas.',
-        imagen: 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=800&h=600&fit=crop',
-        valoracion: 4.7,
-        ventas: 203,
-        km: 0,
-    },
-    {
-        id: 5,
-        nombre: 'Horno de Teguise',
-        ubicacion: 'Teguise, Lanzarote',
-        descripcion: 'Pan artesano y repostería tradicional. Horno de leña desde 1920.',
-        imagen: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&h=600&fit=crop',
-        valoracion: 4.6,
-        ventas: 312,
-        km: 0,
-    },
-]);
-
-const tiendasFiltradas = ref(tiendas.value);
-
+// Categorías disponibles
 const categorias = [
     { nombre: 'Todos', icono: '🏪' },
-    { nombre: 'Frutas', icono: '🍎' },
-    { nombre: 'Verduras', icono: '🥬' },
+    { nombre: 'Frutas y Verduras', icono: '🍎' },
     { nombre: 'Carnes', icono: '🥩' },
-    { nombre: 'Lácteos', icono: '🧀' },
+    { nombre: 'Pescados y Mariscos', icono: '🐟' },
     { nombre: 'Panadería', icono: '🥖' },
+    { nombre: 'Lácteos y Quesos', icono: '🧀' },
+    { nombre: 'Vinos y Bebidas', icono: '🍷' },
+    { nombre: 'Conservas y Mermeladas', icono: '🫙' },
+    { nombre: 'Artesanía', icono: '🏺' },
 ];
 
 const filtrarPorCategoria = (categoria) => {
     categoriaActiva.value = categoria;
     if (categoria === 'Todos') {
-        tiendasFiltradas.value = tiendas.value;
+        tiendasFiltradas.value = props.tiendas;
+    } else {
+        tiendasFiltradas.value = props.tiendas.filter(tienda => 
+            tienda.categoria.nombre === categoria
+        );
     }
     busqueda.value = '';
     showDropdown.value = false;
@@ -142,9 +105,10 @@ const buscarTiendas = () => {
             showDropdown.value = false;
             sugerenciasTiendas.value = [];
         } else {
-            sugerenciasTiendas.value = tiendas.value.filter(tienda => 
+            sugerenciasTiendas.value = props.tiendas.filter(tienda => 
                 tienda.nombre.toLowerCase().includes(busqueda.value.toLowerCase()) ||
-                tienda.ubicacion.toLowerCase().includes(busqueda.value.toLowerCase())
+                tienda.direccion.toLowerCase().includes(busqueda.value.toLowerCase()) ||
+                tienda.descripcion.toLowerCase().includes(busqueda.value.toLowerCase())
             );
             showDropdown.value = true;
         }
@@ -209,12 +173,12 @@ const buscarTiendas = () => {
                                     <Link
                                         v-for="tienda in sugerenciasTiendas"
                                         :key="tienda.id"
-                                        :href="`/tienda/${tienda.id}`"
+                                        :href="`/tienda/${tienda.slug}`"
                                         class="flex items-center gap-3 border-b border-gray-100 p-3 transition-colors hover:bg-gray-50 last:border-b-0"
                                     >
                                         <!-- Imagen -->
                                         <img
-                                            :src="tienda.imagen"
+                                            :src="tienda.imagen_portada || tienda.logo || '/images/logo.png'"
                                             :alt="tienda.nombre"
                                             loading="lazy"
                                             class="h-16 w-16 flex-shrink-0 rounded-lg object-cover"
@@ -230,7 +194,7 @@ const buscarTiendas = () => {
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                                 </svg>
-                                                {{ tienda.ubicacion }}
+                                                {{ tienda.direccion }}
                                             </p>
                                             <div class="flex items-center gap-2 mt-1">
                                                 <!-- Estrellas -->
@@ -239,9 +203,9 @@ const buscarTiendas = () => {
                                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                     </svg>
                                                 </div>
-                                                <span class="text-xs font-medium text-gray-700">{{ tienda.valoracion }}</span>
+                                                <span class="text-xs font-medium text-gray-700">{{ Number(tienda.valoracion).toFixed(1) }}</span>
                                                 <span class="text-xs text-gray-400">•</span>
-                                                <span class="text-xs text-gray-500">{{ tienda.ventas }} ventas</span>
+                                                <span class="text-xs text-gray-500">{{ tienda.total_resenas }} reseñas</span>
                                             </div>
                                         </div>
 
@@ -293,6 +257,15 @@ const buscarTiendas = () => {
                             <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                             </svg>
+                        </Link>
+
+                        <!-- Botón Panel Admin (solo para admin) -->
+                        <Link 
+                            v-if="user && user.role === 'admin'"
+                            :href="route('admin.dashboard')"
+                            class="rounded-lg bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 text-sm font-bold text-white shadow-lg transition-all hover:shadow-xl hover:from-orange-600 hover:to-red-600"
+                        >
+                            🛡️ Admin
                         </Link>
                     </div>
                 </div>
@@ -414,6 +387,18 @@ const buscarTiendas = () => {
             </div>
         </div>
 
+        <svg
+            class="block h-12 w-full text-primary-400"
+            viewBox="0 0 1200 120"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+        >
+            <path
+                d="M0 96L60 78C120 60 240 24 360 18C480 12 600 36 720 50C840 64 960 68 1080 62C1140 58 1170 54 1200 50V120H0Z"
+                fill="currentColor"
+            />
+        </svg>
+
         <!-- Sección Colabora con Rustikan -->
         <section class="relative overflow-hidden bg-primary-400 py-16">
             <!-- Ondas decorativas de fondo -->
@@ -510,7 +495,18 @@ const buscarTiendas = () => {
         </section>
 
         <!-- Footer -->
-        <footer class="bg-gray-900 text-gray-300">
+        <footer class="relative bg-gray-900 text-gray-300">
+            <svg
+                class="pointer-events-none absolute -top-16 left-0 h-16 w-full text-gray-900"
+                viewBox="0 0 1200 120"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+            >
+                <path
+                    d="M0 10L60 34C120 58 240 106 360 112C480 118 600 78 720 54C840 30 960 22 1080 32C1140 38 1170 46 1200 54V120H0Z"
+                    fill="currentColor"
+                />
+            </svg>
             <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
                 <div class="grid gap-8 md:grid-cols-4">
                     <!-- Columna 1: Logo y descripción -->

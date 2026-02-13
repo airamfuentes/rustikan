@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -26,98 +26,34 @@ onUnmounted(() => {
     window.removeEventListener('scroll', handleScroll);
 });
 
-const tabs = [
-    { nombre: 'Todos', count: 8 },
-    { nombre: 'Frutas', count: 3 },
-    { nombre: 'Verduras', count: 2 },
-    { nombre: 'Lácteos', count: 2 },
-    { nombre: 'Carnes', count: 1 },
-];
+// Obtener categorías únicas de los productos de esta tienda
+const tabs = computed(() => {
+    const categorias = {};
+    
+    props.tienda.productos.forEach(producto => {
+        const catNombre = producto.categoria.nombre;
+        categorias[catNombre] = (categorias[catNombre] || 0) + 1;
+    });
+    
+    const result = [{ nombre: 'Todos', count: props.tienda.productos.length }];
+    
+    Object.entries(categorias).forEach(([nombre, count]) => {
+        result.push({ nombre, count });
+    });
+    
+    return result;
+});
 
-const productos = ref([
-    {
-        id: 1,
-        nombre: 'Tomates Cherry',
-        categoria: 'Verduras',
-        precio: 3.50,
-        unidad: 'kg',
-        imagen: 'https://images.unsplash.com/photo-1592841200221-a6898f307baa?w=600&h=600&fit=crop',
-        km: 0,
-    },
-    {
-        id: 2,
-        nombre: 'Plátanos de Canarias',
-        categoria: 'Frutas',
-        precio: 2.80,
-        unidad: 'kg',
-        imagen: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=600&h=600&fit=crop',
-        km: 0,
-    },
-    {
-        id: 3,
-        nombre: 'Queso de Cabra',
-        categoria: 'Lácteos',
-        precio: 12.00,
-        unidad: 'ud',
-        imagen: 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=600&h=600&fit=crop',
-        km: 0,
-    },
-    {
-        id: 4,
-        nombre: 'Papas Arrugadas',
-        categoria: 'Verduras',
-        precio: 2.50,
-        unidad: 'kg',
-        imagen: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=600&h=600&fit=crop',
-        km: 0,
-    },
-    {
-        id: 5,
-        nombre: 'Mango de Tenerife',
-        categoria: 'Frutas',
-        precio: 4.20,
-        unidad: 'kg',
-        imagen: 'https://images.unsplash.com/photo-1605027990121-cbae9e0642df?w=600&h=600&fit=crop',
-        km: 0,
-    },
-    {
-        id: 6,
-        nombre: 'Cherne Fresco',
-        categoria: 'Carnes',
-        precio: 18.50,
-        unidad: 'kg',
-        imagen: 'https://images.unsplash.com/photo-1559737558-2f5a419b1e85?w=600&h=600&fit=crop',
-        km: 0,
-    },
-    {
-        id: 7,
-        nombre: 'Aguacates',
-        categoria: 'Frutas',
-        precio: 3.90,
-        unidad: 'kg',
-        imagen: 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=600&h=600&fit=crop',
-        km: 0,
-    },
-    {
-        id: 8,
-        nombre: 'Yogur Natural',
-        categoria: 'Lácteos',
-        precio: 1.80,
-        unidad: 'ud',
-        imagen: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=600&h=600&fit=crop',
-        km: 0,
-    },
-]);
-
-const productosFiltrados = ref(productos.value);
+// Productos filtrados por categoría
+const productosFiltrados = computed(() => {
+    if (tabActiva.value === 'Todos') {
+        return props.tienda.productos;
+    }
+    return props.tienda.productos.filter(p => p.categoria.nombre === tabActiva.value);
+});
 
 const filtrarPorCategoria = (categoria) => {
     tabActiva.value = categoria;
-    if (categoria === 'Todos') {
-        productosFiltrados.value = productos.value;
-    } else {
-        productosFiltrados.value = productos.value.filter(p => p.categoria === categoria);
-    }
 };
 
 const agregarAlCarrito = (producto) => {
@@ -169,7 +105,7 @@ const agregarAlCarrito = (producto) => {
         <!-- Banner de la tienda -->
         <div class="relative h-64 overflow-hidden bg-gradient-to-br from-primary-500 to-primary-600">
             <img 
-                :src="props.tienda.imagen" 
+                :src="props.tienda.imagen_portada || props.tienda.logo || '/images/logo.png'" 
                 :alt="props.tienda.nombre"
                 class="h-full w-full object-cover opacity-30"
             />
@@ -188,7 +124,7 @@ const agregarAlCarrito = (producto) => {
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                                <span>{{ props.tienda.ubicacion }}</span>
+                                <span>{{ props.tienda.direccion }}</span>
                             </div>
                             <div class="flex items-center gap-1">
                                 <svg 
@@ -203,19 +139,19 @@ const agregarAlCarrito = (producto) => {
                                 >
                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                 </svg>
-                                <span class="ml-1 font-semibold text-gray-900">{{ props.tienda.valoracion }}</span>
+                                <span class="ml-1 font-semibold text-gray-900">{{ Number(props.tienda.valoracion).toFixed(1) }}</span>
                             </div>
                         </div>
                     </div>
                     
                     <div class="flex items-center gap-3">
                         <div class="text-center">
-                            <div class="text-2xl font-bold text-gray-900">{{ productos.length }}</div>
+                            <div class="text-2xl font-bold text-gray-900">{{ props.tienda.productos.length }}</div>
                             <div class="text-sm text-gray-600">Productos</div>
                         </div>
                         <div class="h-12 w-px bg-gray-300"></div>
                         <div class="text-center">
-                            <div class="text-2xl font-bold text-gray-900">{{ props.tienda.ventas }}</div>
+                            <div class="text-2xl font-bold text-gray-900">{{ props.tienda.total_ventas || 0 }}</div>
                             <div class="text-sm text-gray-600">Ventas</div>
                         </div>
                     </div>
@@ -250,19 +186,34 @@ const agregarAlCarrito = (producto) => {
                         <!-- Imagen del producto -->
                         <div class="relative aspect-square overflow-hidden">
                             <img 
-                                :src="producto.imagen" 
+                                :src="producto.imagen || '/images/logo.png'" 
                                 :alt="producto.nombre"
                                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                             />
                             
                             <!-- Badge Km 0 -->
                             <div class="absolute left-3 top-3 rounded-full bg-primary-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
-                                Km {{ producto.km }}
+                                Km 0
                             </div>
 
                             <!-- Badge de categoría -->
                             <div class="absolute right-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-700 backdrop-blur-sm">
-                                {{ producto.categoria }}
+                                {{ producto.categoria.nombre }}
+                            </div>
+
+                            <!-- Badge destacado -->
+                            <div v-if="producto.destacado" class="absolute bottom-3 left-3 rounded-full bg-yellow-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
+                                ⭐ Destacado
+                            </div>
+
+                            <!-- Badge stock bajo -->
+                            <div v-if="producto.stock <= producto.stock_minimo && producto.stock > 0" class="absolute bottom-3 right-3 rounded-full bg-orange-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
+                                ¡Últimas unidades!
+                            </div>
+
+                            <!-- Badge sin stock -->
+                            <div v-if="producto.stock === 0" class="absolute inset-0 flex items-center justify-center bg-black/50">
+                                <span class="rounded-full bg-red-600 px-4 py-2 text-sm font-bold text-white">Agotado</span>
                             </div>
                         </div>
 
@@ -270,19 +221,34 @@ const agregarAlCarrito = (producto) => {
                         <div class="p-4">
                             <h3 class="text-lg font-bold text-gray-900">{{ producto.nombre }}</h3>
                             
+                            <p v-if="producto.descripcion" class="mt-1 text-sm text-gray-600 line-clamp-2">
+                                {{ producto.descripcion }}
+                            </p>
+
                             <div class="mt-3 flex items-center justify-between">
                                 <div>
-                                    <span class="text-2xl font-bold text-primary-600">{{ producto.precio.toFixed(2) }}€</span>
+                                    <span class="text-2xl font-bold text-primary-600">{{ Number(producto.precio).toFixed(2) }}€</span>
                                     <span class="text-sm text-gray-500">/{{ producto.unidad }}</span>
                                 </div>
+                            </div>
+
+                            <!-- Stock disponible -->
+                            <div v-if="producto.stock > 0" class="mt-2 text-xs text-gray-500">
+                                {{ producto.stock }} unidades disponibles
                             </div>
 
                             <!-- Botón agregar -->
                             <button 
                                 @click="agregarAlCarrito(producto)"
-                                class="mt-4 w-full rounded-lg bg-primary-500 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-600"
+                                :disabled="producto.stock === 0"
+                                :class="[
+                                    'mt-4 w-full rounded-lg py-2 text-sm font-semibold transition-colors',
+                                    producto.stock === 0
+                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                        : 'bg-primary-500 text-white hover:bg-primary-600'
+                                ]"
                             >
-                                Agregar al carrito
+                                {{ producto.stock === 0 ? 'Agotado' : 'Agregar al carrito' }}
                             </button>
                         </div>
                     </div>
@@ -290,7 +256,10 @@ const agregarAlCarrito = (producto) => {
 
                 <!-- Sin resultados -->
                 <div v-if="productosFiltrados.length === 0" class="py-16 text-center">
-                    <p class="text-gray-500">No hay productos en esta categoría</p>
+                    <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                    </svg>
+                    <p class="mt-4 text-gray-500">No hay productos en esta categoría</p>
                 </div>
             </div>
         </div>

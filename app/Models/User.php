@@ -21,6 +21,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'telefono',
+        'direccion',
     ];
 
     /**
@@ -44,5 +47,29 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Check if user is admin
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Get the tiendas owned by the user
+     */
+    public function tiendas()
+    {
+        return $this->hasMany(Tienda::class);
+    }
+
+    /**
+     * Get the pedidos placed by the user
+     */
+    public function pedidos()
+    {
+        return $this->hasMany(Pedido::class);
     }
 }

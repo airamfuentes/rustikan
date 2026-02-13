@@ -25,7 +25,7 @@ const ondaPath = computed(() => {
 
 <template>
     <Link 
-        :href="`/tienda/${tienda.id}`"
+        :href="`/tienda/${tienda.slug}`"
         class="group block overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 hover:shadow-xl"
     >
         <!-- Imagen de la tienda -->
@@ -36,14 +36,15 @@ const ondaPath = computed(() => {
             </svg>
             
             <img 
-                :src="tienda.imagen" 
+                :src="tienda.imagen_portada || tienda.logo || '/images/logo.png'" 
                 :alt="tienda.nombre"
                 class="relative z-10 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
             />
             
-            <!-- Badge Km 0 -->
-            <div class="absolute left-3 top-3 z-20 rounded-full bg-primary-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
-                Km {{ tienda.km }}
+            <!-- Badge Categoría -->
+            <div class="absolute left-3 top-3 z-20 flex items-center gap-1 rounded-full bg-primary-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
+                <span>{{ tienda.categoria.icono }}</span>
+                <span>{{ tienda.categoria.nombre }}</span>
             </div>
 
             <!-- Botón favorito -->
@@ -70,10 +71,10 @@ const ondaPath = computed(() => {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span>{{ tienda.ubicacion }}</span>
+                <span>{{ tienda.direccion }}</span>
             </div>
 
-            <!-- Valoración y ventas -->
+            <!-- Valoración y reseñas -->
             <div class="mt-3 flex items-center justify-between">
                 <!-- Estrellas -->
                 <div class="flex items-center gap-1">
@@ -89,12 +90,12 @@ const ondaPath = computed(() => {
                     >
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
-                    <span class="ml-1 text-sm font-semibold text-gray-900">{{ tienda.valoracion }}</span>
+                    <span class="ml-1 text-sm font-semibold text-gray-900">{{ Number(tienda.valoracion).toFixed(1) }}</span>
                 </div>
 
-                <!-- Ventas -->
+                <!-- Reseñas -->
                 <div class="text-sm text-gray-500">
-                    {{ tienda.ventas }} ventas
+                    {{ tienda.total_resenas }} reseñas
                 </div>
             </div>
         </div>

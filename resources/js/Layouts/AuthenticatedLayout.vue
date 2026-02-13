@@ -1,13 +1,15 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import { Link } from '@inertiajs/vue3';
+import Toast from '@/Components/Toast.vue';
+import { Link, usePage } from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
 const scrolled = ref(false);
+const toasts = ref([]);
 
 // Detectar scroll
 const handleScroll = () => {
@@ -21,10 +23,53 @@ onMounted(() => {
 onUnmounted(() => {
     window.removeEventListener('scroll', handleScroll);
 });
+
+// Funciones para manejar toasts
+const showToast = (type, title, message) => {
+    const id = Date.now();
+    toasts.value.push({ id, type, title, message });
+};
+
+const removeToast = (id) => {
+    toasts.value = toasts.value.filter((toast) => toast.id !== id);
+};
+
+// Escuchar mensajes flash de sesión
+const page = usePage();
+watch(
+    () => page.props.flash,
+    (flash) => {
+        if (flash && Object.keys(flash).length > 0) {
+            // Determinar el tipo de mensaje
+            if (flash.success) {
+                showToast('success', 'Éxito', flash.success);
+            } else if (flash.error) {
+                showToast('error', 'Error', flash.error);
+            } else if (flash.info) {
+                showToast('info', 'Información', flash.info);
+            } else if (flash.warning) {
+                showToast('warning', 'Advertencia', flash.warning);
+            }
+        }
+    },
+    { deep: true, immediate: true }
+);
 </script>
 
 <template>
     <div>
+        <!-- Toast Notifications -->
+        <div class="pointer-events-none fixed inset-0 z-50 flex flex-col items-end justify-start space-y-4 p-6 sm:p-6">
+            <Toast
+                v-for="toast in toasts"
+                :key="toast.id"
+                :type="toast.type"
+                :title="toast.title"
+                :message="toast.message"
+                @close="removeToast(toast.id)"
+            />
+        </div>
+
         <div class="min-h-screen bg-gray-50">
             <nav 
                 :class="[
@@ -53,13 +98,24 @@ onUnmounted(() => {
                                 <NavLink :href="route('home')" :active="route().current('home')">
                                     Tiendas
                                 </NavLink>
-                                <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                                    Mis Pedidos
+                                <!-- Admin Panel Link -->
+                                <NavLink 
+                                    v-if="$page.props.auth.user.role === 'admin'" 
+                                    :href="route('admin.dashboard')" 
+                                    :active="route().current('admin.*')"
+                                    class="!text-orange-600 font-bold"
+                                >
+                                    🛡️ Panel Admin
                                 </NavLink>
                             </div>
                         </div>
 
                         <div class="hidden sm:ms-6 sm:flex sm:items-center">
+                            <!-- Badge Admin -->
+                            <div v-if="$page.props.auth.user.role === 'admin'" class="mr-4 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
+                                ADMIN
+                            </div>
+                            
                             <!-- Carrito -->
                             <button class="relative mr-4">
                                 <svg class="h-6 w-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -163,16 +219,26 @@ onUnmounted(() => {
                         <ResponsiveNavLink :href="route('home')" :active="route().current('home')">
                             Tiendas
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                            Mis Pedidos
+                        <ResponsiveNavLink 
+                            v-if="$page.props.auth.user.role === 'admin'" 
+                            :href="route('admin.dashboard')" 
+                            :active="route().current('admin.*')"
+                            class="!text-orange-600 !font-bold"
+                        >
+                            🛡️ Panel Admin
                         </ResponsiveNavLink>
                     </div>
 
                     <!-- Responsive Settings Options -->
                     <div class="border-t border-gray-200 pb-1 pt-4">
                         <div class="px-4">
-                            <div class="text-base font-medium text-gray-800">
-                                {{ $page.props.auth.user.name }}
+                            <div class="flex items-center gap-2">
+                                <div class="text-base font-medium text-gray-800">
+                                    {{ $page.props.auth.user.name }}
+                                </div>
+                                <span v-if="$page.props.auth.user.role === 'admin'" class="rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-2 py-0.5 text-xs font-bold text-white">
+                                    ADMIN
+                                </span>
                             </div>
                             <div class="text-sm font-medium text-gray-600">
                                 {{ $page.props.auth.user.email }}

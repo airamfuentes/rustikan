@@ -11,6 +11,46 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Tus seeders aquí
+        // Create admin user
+        \App\Models\User::firstOrCreate(
+            ['email' => 'admin@rustikan.com'],
+            [
+                'name' => 'Admin Rustikan',
+                'password' => bcrypt('password'),
+                'role' => 'admin',
+                'telefono' => '928123456',
+                'direccion' => 'Arrecife, Lanzarote',
+            ]
+        );
+
+        // Create some regular users
+        \App\Models\User::firstOrCreate(
+            ['email' => 'juan@example.com'],
+            [
+                'name' => 'Juan García',
+                'password' => bcrypt('password'),
+                'role' => 'user',
+                'telefono' => '928234567',
+                'direccion' => 'Teguise, Lanzarote',
+            ]
+        );
+
+        \App\Models\User::firstOrCreate(
+            ['email' => 'maria@example.com'],
+            [
+                'name' => 'María López',
+                'password' => bcrypt('password'),
+                'role' => 'user',
+                'telefono' => '928345678',
+                'direccion' => 'Puerto del Carmen, Lanzarote',
+            ]
+        );
+
+        // Call other seeders
+        $this->call([
+            CategoriaSeeder::class,
+            TiendaSeeder::class,
+            ProductoSeeder::class,
+        ]);
     }
 }
