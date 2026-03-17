@@ -1,10 +1,16 @@
-<template>
+﻿<template>
     <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center justify-between">
-                <h2 class="text-xl font-semibold leading-tight text-gray-800">Nuevo Producto</h2>
-                <Link :href="route('admin.productos.index')" class="rounded-lg bg-gray-600 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-700">
-                    ← Volver
+                <div class="flex items-center gap-2 text-xl font-semibold text-gray-800">
+                    <Link :href="route('admin.tiendas.index')" class="text-gray-400 hover:text-gray-700">Tiendas</Link>
+                    <span class="text-gray-300">/</span>
+                    <Link :href="route('admin.tiendas.productos.index', tienda.id)" class="text-gray-400 hover:text-gray-700">{{ tienda.nombre }}</Link>
+                    <span class="text-gray-300">/</span>
+                    <span>Editar Producto</span>
+                </div>
+                <Link :href="route('admin.tiendas.productos.index', tienda.id)" class="rounded-lg bg-gray-600 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-700">
+                    Volver
                 </Link>
             </div>
         </template>
@@ -23,23 +29,18 @@
                                     required
                                     class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                 />
-                                <p v-if="form.errors.nombre" class="mt-1 text-sm text-red-600">{{ form.errors.nombre }}</p>
+                                <p v-if="errors.nombre" class="mt-1 text-sm text-red-600">{{ errors.nombre }}</p>
                             </div>
 
-                            <!-- Tienda -->
+                            <!-- Tienda (bloqueada) -->
                             <div>
-                                <label class="mb-2 block text-sm font-medium text-gray-700">Tienda *</label>
-                                <select
-                                    v-model="form.tienda_id"
-                                    required
-                                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                                >
-                                    <option value="">Selecciona una tienda</option>
-                                    <option v-for="tienda in tiendas" :key="tienda.id" :value="tienda.id">
-                                        {{ tienda.nombre }}
-                                    </option>
-                                </select>
-                                <p v-if="form.errors.tienda_id" class="mt-1 text-sm text-red-600">{{ form.errors.tienda_id }}</p>
+                                <label class="mb-2 block text-sm font-medium text-gray-700">Tienda</label>
+                                <div class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                                    <img v-if="tienda.logo" :src="tienda.logo" class="h-8 w-8 rounded-full object-cover" />
+                                    <div v-else class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-sm font-semibold text-primary-600">{{ tienda.nombre.charAt(0) }}</div>
+                                    <span class="font-medium text-gray-900">{{ tienda.nombre }}</span>
+                                    <span class="text-sm text-gray-500">· {{ tienda.categoria?.nombre }}</span>
+                                </div>
                             </div>
 
                             <!-- Descripción -->
@@ -50,7 +51,7 @@
                                     rows="4"
                                     class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                 ></textarea>
-                                <p v-if="form.errors.descripcion" class="mt-1 text-sm text-red-600">{{ form.errors.descripcion }}</p>
+                                <p v-if="errors.descripcion" class="mt-1 text-sm text-red-600">{{ errors.descripcion }}</p>
                             </div>
 
                             <!-- Precios en Grid -->
@@ -66,7 +67,7 @@
                                         required
                                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     />
-                                    <p v-if="form.errors.precio" class="mt-1 text-sm text-red-600">{{ form.errors.precio }}</p>
+                                    <p v-if="errors.precio" class="mt-1 text-sm text-red-600">{{ errors.precio }}</p>
                                 </div>
 
                                 <!-- Precio Oferta -->
@@ -79,7 +80,7 @@
                                         min="0"
                                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     />
-                                    <p v-if="form.errors.precio_oferta" class="mt-1 text-sm text-red-600">{{ form.errors.precio_oferta }}</p>
+                                    <p v-if="errors.precio_oferta" class="mt-1 text-sm text-red-600">{{ errors.precio_oferta }}</p>
                                 </div>
 
                                 <!-- Unidad -->
@@ -92,7 +93,7 @@
                                         required
                                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     />
-                                    <p v-if="form.errors.unidad" class="mt-1 text-sm text-red-600">{{ form.errors.unidad }}</p>
+                                    <p v-if="errors.unidad" class="mt-1 text-sm text-red-600">{{ errors.unidad }}</p>
                                 </div>
                             </div>
 
@@ -100,7 +101,7 @@
                             <div class="grid gap-4 md:grid-cols-2">
                                 <!-- Stock -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Stock Inicial *</label>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700">Stock Actual *</label>
                                     <input
                                         v-model.number="form.stock"
                                         type="number"
@@ -108,7 +109,7 @@
                                         required
                                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     />
-                                    <p v-if="form.errors.stock" class="mt-1 text-sm text-red-600">{{ form.errors.stock }}</p>
+                                    <p v-if="errors.stock" class="mt-1 text-sm text-red-600">{{ errors.stock }}</p>
                                 </div>
 
                                 <!-- Stock Mínimo -->
@@ -121,7 +122,7 @@
                                         required
                                         class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     />
-                                    <p v-if="form.errors.stock_minimo" class="mt-1 text-sm text-red-600">{{ form.errors.stock_minimo }}</p>
+                                    <p v-if="errors.stock_minimo" class="mt-1 text-sm text-red-600">{{ errors.stock_minimo }}</p>
                                 </div>
                             </div>
 
@@ -134,7 +135,7 @@
                                     placeholder="https://..."
                                     class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                 />
-                                <p v-if="form.errors.imagen" class="mt-1 text-sm text-red-600">{{ form.errors.imagen }}</p>
+                                <p v-if="errors.imagen" class="mt-1 text-sm text-red-600">{{ errors.imagen }}</p>
                                 <div v-if="form.imagen" class="mt-2">
                                     <img :src="form.imagen" alt="Vista previa" class="h-32 w-32 rounded-lg object-cover shadow">
                                 </div>
@@ -154,10 +155,10 @@
                                                 v-model="form.disponible"
                                                 type="checkbox"
                                                 class="peer sr-only"
-                                                id="disponible"
+                                                :id="'disponible'"
                                             />
                                             <label
-                                                for="disponible"
+                                                :for="'disponible'"
                                                 class="flex h-6 w-11 cursor-pointer items-center rounded-full bg-gray-300 transition-colors peer-checked:bg-green-500"
                                             >
                                                 <span class="ml-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5"></span>
@@ -178,10 +179,10 @@
                                                 v-model="form.destacado"
                                                 type="checkbox"
                                                 class="peer sr-only"
-                                                id="destacado"
+                                                :id="'destacado'"
                                             />
                                             <label
-                                                for="destacado"
+                                                :for="'destacado'"
                                                 class="flex h-6 w-11 cursor-pointer items-center rounded-full bg-gray-300 transition-colors peer-checked:bg-yellow-500"
                                             >
                                                 <span class="ml-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5"></span>
@@ -195,7 +196,7 @@
                         <!-- Botones -->
                         <div class="mt-8 flex items-center justify-end gap-3 border-t pt-6">
                             <Link
-                                :href="route('admin.productos.index')"
+                                :href="route('admin.tiendas.productos.index', tienda.id)"
                                 class="rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
                             >
                                 Cancelar
@@ -205,7 +206,7 @@
                                 :disabled="form.processing"
                                 class="rounded-lg bg-primary-600 px-6 py-2 text-sm font-semibold text-white hover:bg-primary-700 disabled:opacity-50"
                             >
-                                {{ form.processing ? 'Guardando...' : 'Crear Producto' }}
+                                {{ form.processing ? 'Guardando...' : 'Guardar Cambios' }}
                             </button>
                         </div>
                     </form>
@@ -216,28 +217,32 @@
 </template>
 
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import { Link, useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
-    tiendas: Array,
+    producto: Object,
+    tienda: Object,
+    errors: Object,
 });
 
 const form = useForm({
-    tienda_id: '',
-    nombre: '',
-    descripcion: '',
-    precio: null,
-    precio_oferta: null,
-    unidad: '',
-    imagen: '',
-    stock: 0,
-    stock_minimo: 0,
-    disponible: true,
-    destacado: false,
+    tienda_id: props.tienda.id,
+    nombre: props.producto.nombre,
+    descripcion: props.producto.descripcion || '',
+    precio: props.producto.precio,
+    precio_oferta: props.producto.precio_oferta || '',
+    unidad: props.producto.unidad,
+    imagen: props.producto.imagen || '',
+    stock: props.producto.stock,
+    stock_minimo: props.producto.stock_minimo,
+    disponible: props.producto.disponible,
+    destacado: props.producto.destacado,
 });
 
 const submit = () => {
-    form.post(route('admin.productos.store'));
+    form.put(route('admin.productos.update', props.producto.id), {
+        preserveScroll: true,
+    });
 };
 </script>

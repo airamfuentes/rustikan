@@ -13,49 +13,52 @@ use Illuminate\Support\Str;
 class ProductoController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Redirect old index to tiendas list (products are now nested under tienda).
      */
     public function index(Request $request)
     {
-        $query = Producto::with(['tienda.categoria']);
+        return redirect()->route('admin.tiendas.index');
+    }
 
-        // Búsqueda por nombre de producto o tienda
+    /**
+     * List products for a specific tienda.
+     */
+    public function tiendaProductos(Request $request, Tienda $tienda)
+    {
+        $query = Producto::where('tienda_id', $tienda->id);
+
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhereHas('tienda', function($q) use ($search) {
-                      $q->where('nombre', 'like', "%{$search}%");
-                  });
-            });
+            $query->where('nombre', 'like', "%{$request->search}%");
         }
 
-        // Filter by low stock
-        if ($request->filled('bajo_stock') && $request->bajo_stock) {
-            $query->whereRaw('stock <= stock_minimo');
-        }
-
-        // Filter by disponible
         if ($request->filled('disponible') && $request->disponible !== '') {
             $query->where('disponible', $request->disponible == '1');
         }
 
-        // Ordenar
         $productos = $query->latest()->paginate(20)->withQueryString();
 
-        // Estadísticas
         $stats = [
-            'total' => Producto::count(),
-            'disponibles' => Producto::where('disponible', true)->count(),
-            'no_disponibles' => Producto::where('disponible', false)->count(),
-            'bajo_stock' => Producto::whereRaw('stock <= stock_minimo')->count(),
-            'destacados' => Producto::where('destacado', true)->count(),
+            'total'         => Producto::where('tienda_id', $tienda->id)->count(),
+            'disponibles'   => Producto::where('tienda_id', $tienda->id)->where('disponible', true)->count(),
+            'no_disponibles'=> Producto::where('tienda_id', $tienda->id)->where('disponible', false)->count(),
+            'destacados'    => Producto::where('tienda_id', $tienda->id)->where('destacado', true)->count(),
         ];
 
         return Inertia::render('Admin/Productos/Index', [
+            'tienda'    => $tienda->load('categoria'),
             'productos' => $productos,
-            'stats' => $stats,
-            'filters' => $request->only(['search', 'bajo_stock', 'disponible']),
+            'stats'     => $stats,
+            'filters'   => $request->only(['search', 'disponible']),
+        ]);
+    }
+
+    /**
+     * Show create form locked to a specific tienda.
+     */
+    public function tiendaCrear(Tienda $tienda)
+    {
+        return Inertia::render('Admin/Productos/Crear', [
+            'tienda' => $tienda->load('categoria'),
         ]);
     }
 
@@ -66,7 +69,7 @@ class ProductoController extends Controller
     {
         $tiendas = Tienda::where('activa', true)->get();
         
-        return Inertia::render('Admin/Productos/Create', [
+        return Inertia::render('Admin/Productos/Crear', [
             'tiendas' => $tiendas,
         ]);
     }
@@ -103,7 +106,7 @@ class ProductoController extends Controller
             $producto
         );
 
-        return redirect()->route('admin.productos.index')
+        return redirect()->route('admin.tiendas.productos.index', $validated['tienda_id'])
             ->with('success', 'Producto creado exitosamente');
     }
 
@@ -114,7 +117,7 @@ class ProductoController extends Controller
     {
         $producto->load('tienda.categoria');
         
-        return Inertia::render('Admin/Productos/Show', [
+        return Inertia::render('Admin/Productos/Detalle', [
             'producto' => $producto,
         ]);
     }
@@ -124,11 +127,9 @@ class ProductoController extends Controller
      */
     public function edit(Producto $producto)
     {
-        $tiendas = Tienda::all();
-        
-        return Inertia::render('Admin/Productos/Edit', [
+        return Inertia::render('Admin/Productos/Editar', [
             'producto' => $producto,
-            'tiendas' => $tiendas,
+            'tienda'   => $producto->tienda()->with('categoria')->first(),
         ]);
     }
 
@@ -182,6 +183,7 @@ class ProductoController extends Controller
      */
     public function destroy(Producto $producto)
     {
+        $tiendaId = $producto->tienda_id;
         $nombre = $producto->nombre;
         $producto->delete();
 
@@ -193,7 +195,7 @@ class ProductoController extends Controller
             'red'
         );
 
-        return redirect()->route('admin.productos.index')
+        return redirect()->route('admin.tiendas.productos.index', $tiendaId)
             ->with('success', 'Producto eliminado exitosamente');
     }
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CategoriaController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -9,11 +10,19 @@ Route::get('/', function () {
         ->where('visible', true)
         ->where('activa', true)
         ->get();
-        
-    return Inertia::render('Home', [
-        'tiendas' => $tiendas,
+
+    $categorias = \App\Models\Categoria::withCount(['tiendas' => function ($q) {
+        $q->where('visible', true)->where('activa', true);
+    }])->get();
+
+    return Inertia::render('Inicio', [
+        'tiendas'    => $tiendas,
+        'categorias' => $categorias,
     ]);
 })->name('home');
+
+Route::get('/categoria/{categoria:slug}', [CategoriaController::class, 'show'])
+    ->name('categoria.tiendas');
 
 Route::get('/tienda/{tienda:slug}', function (\App\Models\Tienda $tienda) {
     $tienda->load(['categoria', 'user', 'productos' => function ($query) {
@@ -27,7 +36,7 @@ Route::get('/tienda/{tienda:slug}', function (\App\Models\Tienda $tienda) {
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
+        return redirect()->route('admin.dashboard');
     })->name('dashboard');
     
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -44,7 +53,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/tiendas/{tienda}/toggle-visible', [\App\Http\Controllers\Admin\TiendaController::class, 'toggleVisible'])->name('tiendas.toggle-visible');
     Route::post('/tiendas/{tienda}/toggle-active', [\App\Http\Controllers\Admin\TiendaController::class, 'toggleActive'])->name('tiendas.toggle-active');
     
-    // Productos
+    // Productos (anidados bajo tiendas)
+    Route::get('/tiendas/{tienda}/productos', [\App\Http\Controllers\Admin\ProductoController::class, 'tiendaProductos'])->name('tiendas.productos.index');
+    Route::get('/tiendas/{tienda}/productos/crear', [\App\Http\Controllers\Admin\ProductoController::class, 'tiendaCrear'])->name('tiendas.productos.create');
+
+    // Productos resource (edit/update/destroy/store reutilizados)
     Route::resource('productos', \App\Http\Controllers\Admin\ProductoController::class);
     Route::post('/productos/{producto}/update-stock', [\App\Http\Controllers\Admin\ProductoController::class, 'updateStock'])->name('productos.update-stock');
     

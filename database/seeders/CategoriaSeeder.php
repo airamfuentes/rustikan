@@ -44,16 +44,10 @@ class CategoriaSeeder extends Seeder
                 'descripcion' => 'Productos lácteos y quesos artesanales',
             ],
             [
-                'nombre' => 'Vinos y Bebidas',
-                'slug' => 'vinos-y-bebidas',
+                'nombre' => 'Vinoteca',
+                'slug' => 'vinoteca',
                 'icono' => '🍷',
                 'descripcion' => 'Vinos locales y bebidas artesanales',
-            ],
-            [
-                'nombre' => 'Conservas y Mermeladas',
-                'slug' => 'conservas-y-mermeladas',
-                'icono' => '🫙',
-                'descripcion' => 'Conservas y mermeladas caseras',
             ],
             [
                 'nombre' => 'Artesanía',

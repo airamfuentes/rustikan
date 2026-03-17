@@ -1,52 +1,41 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
-import TiendaCard from '@/Components/TiendaCard.vue';
-import AuthModal from '@/Components/AuthModal.vue';
+import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 
-// Props desde el backend
 const props = defineProps({
     tiendas: {
         type: Array,
-        default: () => []
-    }
+        default: () => [],
+    },
+    categorias: {
+        type: Array,
+        default: () => [],
+    },
 });
 
-const busqueda = ref('');
-const categoriaActiva = ref('Todos');
 const scrolled = ref(false);
-const showAuthModal = ref(false);
-const showDropdown = ref(false);
+const busqueda           = ref('');
+const showDropdown       = ref(false);
 const sugerenciasTiendas = ref([]);
-const searchRef = ref(null);
-const categoriesRef = ref(null);
-const showCategoriesDropdown = ref(false);
-let searchTimeout = null;
-let scrollTimeout = null;
+const searchRef          = ref(null);
+let scrollTimeout        = null;
+let searchTimeout        = null;
 
-// Usar las tiendas del backend
-const tiendasFiltradas = ref(props.tiendas);
-
-// Detectar scroll con throttle
 const handleScroll = () => {
     if (scrollTimeout) return;
-    
     scrollTimeout = setTimeout(() => {
         scrolled.value = window.scrollY > 20;
         scrollTimeout = null;
     }, 100);
 };
 
-// Cerrar dropdown al hacer clic fuera
 const handleClickOutside = (event) => {
     if (searchRef.value && !searchRef.value.contains(event.target)) {
         showDropdown.value = false;
-    }
-    if (categoriesRef.value && !categoriesRef.value.contains(event.target)) {
-        showCategoriesDropdown.value = false;
     }
 };
 
@@ -58,57 +47,27 @@ onMounted(() => {
 onUnmounted(() => {
     window.removeEventListener('scroll', handleScroll);
     document.removeEventListener('click', handleClickOutside);
-    if (searchTimeout) {
-        clearTimeout(searchTimeout);
-    }
-    if (scrollTimeout) {
-        clearTimeout(scrollTimeout);
-    }
+    if (searchTimeout) clearTimeout(searchTimeout);
+    if (scrollTimeout) clearTimeout(scrollTimeout);
 });
 
-// Categorías disponibles
-const categorias = [
-    { nombre: 'Todos', icono: '🏪' },
-    { nombre: 'Frutas y Verduras', icono: '🍎' },
-    { nombre: 'Carnes', icono: '🥩' },
-    { nombre: 'Pescados y Mariscos', icono: '🐟' },
-    { nombre: 'Panadería', icono: '🥖' },
-    { nombre: 'Lácteos y Quesos', icono: '🧀' },
-    { nombre: 'Vinos y Bebidas', icono: '🍷' },
-    { nombre: 'Conservas y Mermeladas', icono: '🫙' },
-    { nombre: 'Artesanía', icono: '🏺' },
-];
-
-const filtrarPorCategoria = (categoria) => {
-    categoriaActiva.value = categoria;
-    if (categoria === 'Todos') {
-        tiendasFiltradas.value = props.tiendas;
-    } else {
-        tiendasFiltradas.value = props.tiendas.filter(tienda => 
-            tienda.categoria.nombre === categoria
-        );
-    }
-    busqueda.value = '';
-    showDropdown.value = false;
-    showCategoriesDropdown.value = false;
-};
+// Normaliza un texto: minúsculas + sin tildes/diacríticos
+const normalizar = (str) =>
+    (str ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
 const buscarTiendas = () => {
-    // Cancelar búsqueda anterior si existe
-    if (searchTimeout) {
-        clearTimeout(searchTimeout);
-    }
-
-    // Ejecutar búsqueda después de 300ms de inactividad
+    if (searchTimeout) clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
-        if (busqueda.value.trim() === '') {
+        const q = normalizar(busqueda.value.trim());
+        if (q === '') {
             showDropdown.value = false;
             sugerenciasTiendas.value = [];
         } else {
-            sugerenciasTiendas.value = props.tiendas.filter(tienda => 
-                tienda.nombre.toLowerCase().includes(busqueda.value.toLowerCase()) ||
-                tienda.direccion.toLowerCase().includes(busqueda.value.toLowerCase()) ||
-                tienda.descripcion.toLowerCase().includes(busqueda.value.toLowerCase())
+            sugerenciasTiendas.value = props.tiendas.filter(tienda =>
+                normalizar(tienda.nombre).includes(q) ||
+                normalizar(tienda.direccion).includes(q) ||
+                normalizar(tienda.descripcion).includes(q) ||
+                normalizar(tienda.categoria?.nombre).includes(q)
             );
             showDropdown.value = true;
         }
@@ -121,18 +80,15 @@ const buscarTiendas = () => {
 
     <div class="min-h-screen bg-gray-50">
         <!-- Navbar Transformable -->
-        <nav 
+        <nav
             :class="[
-                'sticky top-0 z-50 bg-white transition-all duration-300',
-                scrolled 
-                    ? 'border-b border-gray-200 shadow-md' 
-                    : 'mx-12 mt-4 rounded-2xl border border-gray-200 shadow-sm'
+                'fixed z-50 bg-white transition-all duration-300',
+                scrolled
+                    ? 'top-0 left-0 right-0 border-b border-gray-200 shadow-md'
+                    : 'top-4 left-12 right-12 rounded-2xl border border-gray-200 shadow-sm'
             ]"
         >
-            <div :class="[
-                'mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-300',
-                scrolled ? 'max-w-full' : 'max-w-7xl'
-            ]">
+            <div class="mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex h-16 items-center justify-between gap-4">
                     <!-- Logo -->
                     <div class="flex shrink-0 items-center">
@@ -239,18 +195,21 @@ const buscarTiendas = () => {
                             </span>
                         </button>
 
+                        <!-- Selector de idioma -->
+                        <LanguageSwitcher />
+
                         <!-- Botón Acceder (no autenticado) -->
-                        <button 
+                        <Link
                             v-if="!user"
-                            @click="showAuthModal = true"
+                            :href="route('login')"
                             class="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600"
                         >
                             Acceder
-                        </button>
+                        </Link>
 
-                        <!-- Avatar (autenticado) -->
-                        <Link 
-                            v-else
+                        <!-- Avatar (autenticado, solo si NO es admin) -->
+                        <Link
+                            v-else-if="user && user.role !== 'admin'"
                             :href="route('dashboard')"
                             class="flex h-10 w-10 items-center justify-center rounded-full bg-primary-500 text-white hover:bg-primary-600 transition-colors"
                         >
@@ -260,7 +219,7 @@ const buscarTiendas = () => {
                         </Link>
 
                         <!-- Botón Panel Admin (solo para admin) -->
-                        <Link 
+                        <Link
                             v-if="user && user.role === 'admin'"
                             :href="route('admin.dashboard')"
                             class="rounded-lg bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 text-sm font-bold text-white shadow-lg transition-all hover:shadow-xl hover:from-orange-600 hover:to-red-600"
@@ -272,120 +231,67 @@ const buscarTiendas = () => {
             </div>
         </nav>
 
-        <!-- Sección de Bienvenida / Hero -->
-        <div class="relative h-[500px] overflow-hidden">
-            <!-- Imagen de fondo -->
-            <div 
+        <!-- Hero: imagen de portada a pantalla completa -->
+        <div class="relative h-[520px] overflow-hidden">
+            <div
                 class="absolute inset-0 bg-cover bg-no-repeat"
                 style="background-image: url('/images/fondo_1.png'); background-position: center 35%;"
             ></div>
-            
-            <!-- Overlay con gradiente -->
-            <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent"></div>
-            
-            <!-- Contenido -->
-            <div class="relative z-10 mx-auto flex h-full max-w-7xl items-center px-4 sm:px-6 lg:px-8">
-                <div class="max-w-2xl">
-                    <h1 class="mb-4 text-5xl font-extrabold leading-tight text-white sm:text-6xl">
-                        Sabores Auténticos de <span class="text-primary-400">Lanzarote</span>
-                    </h1>
-                    <p class="mb-8 text-lg text-gray-200 sm:text-xl">
-                        Conectamos productores locales con tu mesa. Productos frescos, naturales y de kilómetro cero. 
-                        Apoya a los agricultores y pescadores de nuestra tierra.
-                    </p>
-                    <div class="flex flex-wrap gap-4">
-                        <button 
-                            @click="() => document.getElementById('productores')?.scrollIntoView({ behavior: 'smooth' })"
-                            class="rounded-lg bg-primary-500 px-8 py-3 text-base font-semibold text-white shadow-lg transition-all hover:bg-primary-600 hover:shadow-xl"
-                        >
-                            Explorar Productores
-                        </button>
-                        <button 
-                            class="rounded-lg border-2 border-white bg-white/10 px-8 py-3 text-base font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20"
-                        >
-                            Cómo Funciona
-                        </button>
-                    </div>
-                </div>
+            <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-transparent"></div>
+
+            <!-- Curva inferior -->
+            <div class="absolute bottom-0 left-0 right-0 z-10">
+                <svg viewBox="0 0 1200 50" preserveAspectRatio="none" class="h-12 w-full text-gray-50" fill="currentColor">
+                    <path d="M0 50C300 10 900 10 1200 50V50H0Z" />
+                </svg>
             </div>
         </div>
 
-        <!-- Contenido Principal -->
-        <div id="productores" class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-            <!-- Título sección -->
-            <div class="mb-6">
-                <div class="flex items-center justify-between mb-3">
-                    <h2 class="text-2xl font-bold text-gray-900">Nuestros Productores</h2>
-                    
-                    <div class="flex items-center gap-1 text-primary-500">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        <span class="text-sm font-medium">{{ tiendasFiltradas.length }} tiendas</span>
-                    </div>
+        <!-- Sección de Categorías -->
+        <section id="categorias" class="py-16">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <!-- Encabezado -->
+                <div class="mb-10 text-center">
+                    <h2 class="text-4xl font-extrabold tracking-tight text-gray-900">¿Qué estás buscando?</h2>
                 </div>
-                
-                <!-- Dropdown de categorías horizontal -->
-                <div ref="categoriesRef" class="relative">
-                    <button
-                        @click="showCategoriesDropdown = !showCategoriesDropdown"
-                        class="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-                    >
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                        </svg>
-                        <span>¿Qué tipo de producto buscas?</span>
-                        <svg class="h-4 w-4 transition-transform duration-200" :class="showCategoriesDropdown ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
 
-                    <!-- Dropdown menu horizontal -->
-                    <Transition
-                        enter-active-class="transition ease-out duration-200"
-                        enter-from-class="opacity-0 translate-y-1"
-                        enter-to-class="opacity-100 translate-y-0"
-                        leave-active-class="transition ease-in duration-150"
-                        leave-from-class="opacity-100 translate-y-0"
-                        leave-to-class="opacity-0 translate-y-1"
+                <!-- Grid de categorías circulares -->
+                <div class="flex flex-wrap justify-center gap-8">
+                    <Link
+                        v-for="(cat, index) in categorias"
+                        :key="cat.id"
+                        :href="route('categoria.tiendas', cat.slug)"
+                        class="group flex flex-col items-center"
                     >
-                        <div
-                            v-if="showCategoriesDropdown"
-                            class="absolute left-0 top-full z-30 mt-2 flex gap-2 rounded-lg border border-gray-200 bg-white p-2 shadow-xl"
-                        >
-                            <button
-                                v-for="cat in categorias"
-                                :key="cat.nombre"
-                                @click="filtrarPorCategoria(cat.nombre); showCategoriesDropdown = false"
-                                :class="[
-                                    'flex flex-col items-center justify-center gap-1 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 hover:scale-105',
-                                    categoriaActiva === cat.nombre
-                                        ? 'bg-primary-500 text-white shadow-md'
-                                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
-                                ]"
+                        <!-- Círculo + etiqueta superpuesta -->
+                        <div class="relative flex h-24 w-24 items-center justify-center rounded-full border-2 border-gray-200 bg-white shadow-sm transition-all duration-300 group-hover:scale-105 group-hover:border-primary-400 group-hover:shadow-xl">
+                            <span class="flex select-none items-center justify-center pb-4 text-3xl leading-none">{{ cat.icono }}</span>
+
+                            <!-- Badge número de tiendas -->
+                            <span
+                                v-if="cat.tiendas_count > 0"
+                                class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-500 text-[10px] font-bold text-white ring-2 ring-white"
                             >
-                                <span class="text-2xl">{{ cat.icono }}</span>
-                                <span class="whitespace-nowrap text-xs">{{ cat.nombre }}</span>
-                            </button>
+                                {{ cat.tiendas_count }}
+                            </span>
+
+                            <!-- Etiqueta superpuesta abajo -->
+                            <span class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 whitespace-nowrap rounded-full bg-white px-3 py-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-700 shadow ring-1 ring-gray-200 transition-colors group-hover:bg-primary-500 group-hover:text-white group-hover:ring-primary-500">
+                                {{ cat.nombre }}
+                            </span>
                         </div>
-                    </Transition>
+
+                        <!-- Espaciado para la etiqueta que sobresale -->
+                        <div class="h-4"></div>
+                    </Link>
+                </div>
+
+                <!-- Estado vacío -->
+                <div v-if="categorias.length === 0" class="py-12 text-center text-gray-400">
+                    Cargando categorías...
                 </div>
             </div>
-
-            <!-- Grid de tiendas -->
-            <div v-if="tiendasFiltradas.length > 0" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                <TiendaCard
-                    v-for="tienda in tiendasFiltradas"
-                    :key="tienda.id"
-                    :tienda="tienda"
-                />
-            </div>
-
-            <!-- Sin resultados -->
-            <div v-else class="py-16 text-center">
-                <p class="text-gray-500">No se encontraron tiendas</p>
-            </div>
-        </div>
+        </section>
 
         <svg
             class="block h-12 w-full text-primary-400"
@@ -418,7 +324,7 @@ const buscarTiendas = () => {
                             </svg>
                         </div>
                     </div>
-                    <h2 class="text-3xl font-bold text-white">Colabora con Rustikan</h2>
+                    <h2 class="text-4xl font-extrabold tracking-tight text-white">Colabora con Rustikan</h2>
                 </div>
 
                 <!-- Grid de opciones -->
@@ -579,8 +485,6 @@ const buscarTiendas = () => {
             </div>
         </footer>
 
-        <!-- Modal de Autenticación -->
-        <AuthModal :show="showAuthModal" @close="showAuthModal = false" />
     </div>
 </template>
     {

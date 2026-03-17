@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Tienda;
-use App\Models\Producto;
 use App\Models\Pedido;
 use App\Models\User;
 use App\Models\ActivityLog;
@@ -45,32 +44,12 @@ class DashboardController extends Controller
             'ingresos_totales' => Pedido::where('estado', 'entregado')->sum('total'),
         ];
 
-        // Estadísticas de tiendas y productos
+        // Estadísticas de tiendas
         $tiendas_stats = [
             'total' => Tienda::count(),
             'activas' => Tienda::where('activa', true)->count(),
             'visibles' => Tienda::where('visible', true)->count(),
         ];
-
-        $productos_stats = [
-            'total' => Producto::count(),
-            'disponibles' => Producto::where('disponible', true)->count(),
-            'sin_stock' => Producto::where('stock', 0)->count(),
-            'bajo_stock' => Producto::whereRaw('stock <= stock_minimo')->where('stock', '>', 0)->count(),
-        ];
-
-        // Productos con alertas de stock
-        $productos_bajo_stock = Producto::with(['tienda', 'categoria'])
-            ->whereRaw('stock <= stock_minimo')
-            ->where('stock', '>', 0)
-            ->orderBy('stock', 'asc')
-            ->take(10)
-            ->get();
-
-        $productos_sin_stock = Producto::with(['tienda', 'categoria'])
-            ->where('stock', 0)
-            ->take(10)
-            ->get();
 
         // Actividad reciente con filtros
         $actividadQuery = ActivityLog::with('user')->latest();
@@ -95,15 +74,12 @@ class DashboardController extends Controller
                 'usuario' => $log->user?->name ?? 'Sistema',
             ]);
 
-        return Inertia::render('Admin/Dashboard', [
+        return Inertia::render('Admin/Panel', [
             'usuarios_recientes' => $usuarios_recientes,
             'total_usuarios' => $total_usuarios,
             'pedidos_recientes' => $pedidos_recientes,
             'pedidos_stats' => $pedidos_stats,
             'tiendas_stats' => $tiendas_stats,
-            'productos_stats' => $productos_stats,
-            'productos_bajo_stock' => $productos_bajo_stock,
-            'productos_sin_stock' => $productos_sin_stock,
             'actividad_reciente' => $actividad_reciente,
             'filtros_aplicados' => $request->only(['fecha_desde', 'fecha_hasta']),
         ]);

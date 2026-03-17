@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center justify-between">
@@ -163,6 +163,9 @@
                                         </td>
                                         <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                                             <div class="flex justify-end gap-2">
+                                                <Link :href="route('admin.tiendas.productos.index', tienda.id)" class="text-green-600 hover:text-green-900">
+                                                    Productos
+                                                </Link>
                                                 <Link :href="route('admin.tiendas.edit', tienda.id)" class="text-blue-600 hover:text-blue-900">
                                                     Editar
                                                 </Link>
@@ -250,7 +253,7 @@
 </template>
 
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { reactive } from 'vue';
 

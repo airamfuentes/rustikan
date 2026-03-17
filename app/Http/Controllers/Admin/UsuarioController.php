@@ -66,7 +66,7 @@ class UsuarioController extends Controller
                   ->limit(50);
         }]);
 
-        return Inertia::render('Admin/Usuarios/Show', [
+        return Inertia::render('Admin/Usuarios/Detalle', [
             'usuario' => $usuario,
         ]);
     }
@@ -76,7 +76,7 @@ class UsuarioController extends Controller
         $usuario->loadCount('pedidos');
         $usuario->loadSum('pedidos', 'total');
 
-        return Inertia::render('Admin/Usuarios/Edit', [
+        return Inertia::render('Admin/Usuarios/Editar', [
             'usuario' => $usuario,
         ]);
     }

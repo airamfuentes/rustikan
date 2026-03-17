@@ -71,7 +71,7 @@ class PedidoController extends Controller
     {
         $pedido->load(['user', 'items.producto', 'items.tienda']);
 
-        return Inertia::render('Admin/Pedidos/Show', [
+        return Inertia::render('Admin/Pedidos/Detalle', [
             'pedido' => $pedido,
         ]);
     }

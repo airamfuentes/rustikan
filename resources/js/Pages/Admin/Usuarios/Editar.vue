@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center justify-between">
@@ -135,7 +135,7 @@
 </template>
 
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import { Link, useForm } from '@inertiajs/vue3';
 
 const props = defineProps({

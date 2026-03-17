@@ -80,7 +80,7 @@ class TiendaController extends Controller
         $categorias = Categoria::all();
         $usuarios = User::all(['id', 'name', 'email']);
         
-        return Inertia::render('Admin/Tiendas/Create', [
+        return Inertia::render('Admin/Tiendas/Crear', [
             'categorias' => $categorias,
             'usuarios' => $usuarios,
         ]);
@@ -141,7 +141,7 @@ class TiendaController extends Controller
     {
         $tienda->load(['user', 'categoria', 'productos']);
         
-        return Inertia::render('Admin/Tiendas/Show', [
+        return Inertia::render('Admin/Tiendas/Detalle', [
             'tienda' => $tienda,
         ]);
     }
@@ -153,7 +153,7 @@ class TiendaController extends Controller
     {
         $categorias = Categoria::all();
         
-        return Inertia::render('Admin/Tiendas/Edit', [
+        return Inertia::render('Admin/Tiendas/Editar', [
             'tienda' => $tienda,
             'categorias' => $categorias,
         ]);
@@ -165,43 +165,57 @@ class TiendaController extends Controller
     public function update(Request $request, Tienda $tienda)
     {
         $validated = $request->validate([
-            'categoria_id' => 'sometimes|exists:categorias,id',
-            'nombre' => 'sometimes|string|max:255',
-            'descripcion' => 'nullable|string',
-            'telefono' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'direccion' => 'nullable|string',
-            'logo' => 'nullable|image|max:2048',
-            'imagen_portada' => 'nullable|image|max:2048',
-            'activa' => 'sometimes|boolean',
-            'visible' => 'sometimes|boolean',
+            'categoria_id'          => 'sometimes|exists:categorias,id',
+            'nombre'                => 'sometimes|string|max:255',
+            'descripcion'           => 'nullable|string',
+            'telefono'              => 'nullable|string|max:20',
+            'email'                 => 'nullable|email|max:255',
+            'direccion'             => 'nullable|string',
+            'logo'                  => 'nullable|image|max:2048',
+            'imagen_portada'        => 'nullable|image|max:2048',
+            'delete_logo'           => 'nullable|boolean',
+            'delete_imagen_portada' => 'nullable|boolean',
+            'activa'                => 'sometimes|boolean',
+            'visible'               => 'sometimes|boolean',
         ]);
 
         if (isset($validated['nombre'])) {
             $validated['slug'] = Str::slug($validated['nombre']);
         }
 
-        // Manejar subida de logo
+        // Eliminar logo si se solicitó
+        if ($request->boolean('delete_logo') && $tienda->logo) {
+            Storage::disk('public')->delete($tienda->logo);
+            $validated['logo'] = null;
+        }
+
+        // Eliminar portada si se solicitó
+        if ($request->boolean('delete_imagen_portada') && $tienda->imagen_portada) {
+            Storage::disk('public')->delete($tienda->imagen_portada);
+            $validated['imagen_portada'] = null;
+        }
+
+        // Subir nuevo logo
         if ($request->hasFile('logo')) {
-            // Eliminar logo anterior si existe
             if ($tienda->logo) {
                 Storage::disk('public')->delete($tienda->logo);
             }
             $validated['logo'] = $request->file('logo')->store('tiendas/logos', 'public');
         }
 
-        // Manejar subida de imagen de portada
+        // Subir nueva portada
         if ($request->hasFile('imagen_portada')) {
-            // Eliminar imagen anterior si existe
             if ($tienda->imagen_portada) {
                 Storage::disk('public')->delete($tienda->imagen_portada);
             }
             $validated['imagen_portada'] = $request->file('imagen_portada')->store('tiendas/portadas', 'public');
         }
 
+        // Limpiar flags auxiliares antes de guardar
+        unset($validated['delete_logo'], $validated['delete_imagen_portada']);
+
         $tienda->update($validated);
 
-        // Registrar actividad
         ActivityLog::log(
             'actualizar_tienda',
             "Tienda actualizada: {$tienda->nombre}",
