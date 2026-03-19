@@ -14,6 +14,7 @@ class CategoriaController extends Controller
     {
         $tiendas = $categoria->tiendas()
             ->with(['user', 'categoria'])
+            ->withCount('productos')
             ->where('visible', true)
             ->where('activa', true)
             ->orderBy('valoracion', 'desc')

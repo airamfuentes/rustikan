@@ -28,11 +28,15 @@ Route::get('/tienda/{tienda:slug}', function (\App\Models\Tienda $tienda) {
     $tienda->load(['categoria', 'user', 'productos' => function ($query) {
         $query->where('disponible', true)->orderBy('destacado', 'desc');
     }]);
-    
+
     return Inertia::render('TiendaDetalle', [
-        'tienda' => $tienda
+        'tienda' => $tienda,
     ]);
 })->name('tienda.detalle');
+
+Route::get('/carrito', function () {
+    return Inertia::render('Carrito');
+})->name('carrito');
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {

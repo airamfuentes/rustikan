@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
+import CarritoCompra from '@/Components/CarritoCompra.vue';
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
@@ -186,14 +187,7 @@ const buscarTiendas = () => {
                     <!-- Acciones derecha -->
                     <div class="flex shrink-0 items-center gap-4">
                         <!-- Carrito -->
-                        <button class="relative">
-                            <svg class="h-6 w-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                            </svg>
-                            <span class="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary-500 text-xs font-bold text-white">
-                                0
-                            </span>
-                        </button>
+                        <CarritoCompra />
 
                         <!-- Selector de idioma -->
                         <LanguageSwitcher />
@@ -309,7 +303,7 @@ const buscarTiendas = () => {
         <section class="relative overflow-hidden bg-primary-400 py-16">
             <!-- Ondas decorativas de fondo -->
             <div class="absolute inset-0 overflow-hidden opacity-15 pointer-events-none">
-                <svg class="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 text-primary-600" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <svg class="absolute left-1/2 top-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 text-primary-600" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
                     <path fill="currentColor" d="M47.1,-78.5C60.9,-70.8,71.8,-57.1,78.3,-41.5C84.8,-25.9,86.9,-8.4,84.3,7.9C81.7,24.2,74.4,39.3,64.2,51.9C54,64.5,40.9,74.6,25.8,79.8C10.7,85,-6.4,85.3,-22.3,81.5C-38.2,77.7,-53,69.8,-64.5,58.3C-76,46.8,-84.2,31.7,-86.8,15.3C-89.4,-1.1,-86.4,-18.8,-78.8,-33.8C-71.2,-48.8,-59,-61.1,-44.5,-68.2C-30,-75.3,-13.2,-77.2,2.8,-81.7C18.8,-86.2,33.3,-86.2,47.1,-78.5Z" transform="translate(100 100)" />
                 </svg>
             </div>

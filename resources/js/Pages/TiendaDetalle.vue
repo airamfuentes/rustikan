@@ -1,6 +1,8 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
+import CarritoCompra from '@/Components/CarritoCompra.vue';
+import { useCarrito } from '@/Composables/useCarrito';
 
 const props = defineProps({
     tienda: {
@@ -56,8 +58,10 @@ const filtrarPorCategoria = (categoria) => {
     tabActiva.value = categoria;
 };
 
+const { agregarItem } = useCarrito();
+
 const agregarAlCarrito = (producto) => {
-    alert(`${producto.nombre} agregado al carrito`);
+    agregarItem(producto, props.tienda);
 };
 </script>
 
@@ -89,14 +93,7 @@ const agregarAlCarrito = (producto) => {
                     </div>
 
                     <div class="flex items-center gap-4">
-                        <button class="relative">
-                            <svg class="h-6 w-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                            </svg>
-                            <span class="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary-500 text-xs font-bold text-white">
-                                0
-                            </span>
-                        </button>
+                        <CarritoCompra />
                     </div>
                 </div>
             </div>
