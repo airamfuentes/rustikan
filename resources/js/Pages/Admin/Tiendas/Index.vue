@@ -118,7 +118,7 @@
                                         <td class="whitespace-nowrap px-6 py-4">
                                             <div class="flex items-center">
                                                 <div class="h-10 w-10 flex-shrink-0">
-                                                    <img v-if="tienda.logo" class="h-10 w-10 rounded-full object-cover" :src="tienda.logo" :alt="tienda.nombre" />
+                                                    <img v-if="tienda.logo" class="h-10 w-10 rounded-full object-cover" :src="`/storage/${tienda.logo}`" :alt="tienda.nombre" />
                                                     <div v-else class="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-primary-600">
                                                         {{ tienda.nombre.charAt(0) }}
                                                     </div>

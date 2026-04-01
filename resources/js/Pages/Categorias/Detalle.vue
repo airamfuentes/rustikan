@@ -1,8 +1,9 @@
 ﻿<script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
 import CarritoCompra from '@/Components/CarritoCompra.vue';
+import MapaTiendas from '@/Components/MapaTiendas.vue';
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
@@ -26,6 +27,9 @@ const handleScroll = () => {
 
 const busqueda    = ref('');
 const ordenActivo = ref('valoracion');
+const vistaActiva = ref('grid');
+const showMap     = ref(false);
+const cardRefs    = ref([]);
 
 const normalizar = (str) =>
     (str ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -40,9 +44,10 @@ const tiendasOrdenadas = computed(() => {
           )
         : [...props.tiendas];
     switch (ordenActivo.value) {
-        case 'nombre':   return lista.sort((a, b) => a.nombre.localeCompare(b.nombre));
-        case 'resenas':  return lista.sort((a, b) => b.total_resenas - a.total_resenas);
-        default:         return lista.sort((a, b) => b.valoracion - a.valoracion);
+        case 'nombre':    return lista.sort((a, b) => a.nombre.localeCompare(b.nombre));
+        case 'resenas':   return lista.sort((a, b) => b.total_resenas - a.total_resenas);
+        case 'productos': return lista.sort((a, b) => (b.productos_count ?? 0) - (a.productos_count ?? 0));
+        default:          return lista.sort((a, b) => b.valoracion - a.valoracion);
     }
 });
 
@@ -57,32 +62,50 @@ const avgValoracion = computed(() => {
     return (props.tiendas.reduce((s, t) => s + Number(t.valoracion), 0) / props.tiendas.length).toFixed(1);
 });
 
-const emojiFloating = {
-    'frutas-y-verduras':   ['','','','','','','',''],
-    'carnes':              ['','','','','','','',''],
-    'pescados-y-mariscos': ['','','','','','','',''],
-    'panaderia':           ['','','','','','','',''],
-    'lacteos-y-quesos':    ['','','','','','','',''],
-    'vinoteca':            ['','','','','','','',''],
-    'artesania':           ['','','','','','','',''],
+const tiendasConMapa = computed(() =>
+    props.tiendas.filter(t => t.latitud && t.longitud).length > 0
+);
+
+// Intersection Observer para animaciones de entrada
+let observer = null;
+
+const setupObserver = () => {
+    observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('card-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        },
+        { threshold: 0.1, rootMargin: '50px' }
+    );
 };
 
-const emojisDecor = computed(() =>
-    emojiFloating[props.categoria.slug] ?? [props.categoria.icono, '', '', '']
-);
+const observeCards = () => {
+    nextTick(() => {
+        document.querySelectorAll('.card-animate').forEach((el) => {
+            if (observer) observer.observe(el);
+        });
+    });
+};
 
 onMounted(() => {
     window.addEventListener('scroll', handleScroll);
+    setupObserver();
+    observeCards();
 });
 
 onUnmounted(() => {
     window.removeEventListener('scroll', handleScroll);
     if (scrollTimeout) clearTimeout(scrollTimeout);
+    if (observer) observer.disconnect();
 });
 </script>
 
 <template>
-    <Head :title="`${categoria.nombre}  Rustikan`" />
+    <Head :title="`${categoria.nombre} – Rustikan`" />
 
     <div class="min-h-screen bg-gray-50">
 
@@ -110,8 +133,9 @@ onUnmounted(() => {
                             </div>
                             <input
                                 v-model="busqueda"
+                                @input="observeCards"
                                 type="text"
-                                :placeholder="`Buscar en ${categoria.nombre}`"
+                                :placeholder="`Buscar en ${categoria.nombre}...`"
                                 class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-12 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                             />
                         </div>
@@ -138,7 +162,7 @@ onUnmounted(() => {
                             v-if="user && user.role === 'admin'"
                             :href="route('admin.dashboard')"
                             class="rounded-lg bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 text-sm font-bold text-white shadow-lg transition-all hover:shadow-xl"
-                        > Admin</Link>
+                        >🛡️ Admin</Link>
                     </div>
                 </div>
             </div>
@@ -147,22 +171,6 @@ onUnmounted(() => {
         <!-- Hero de categoría -->
         <div class="relative overflow-hidden bg-gray-900 pt-24 pb-0">
             <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(249,115,22,0.18)_0%,_rgba(17,24,39,1)_70%)]"></div>
-
-            <!-- Emojis flotantes -->
-            <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-                <span
-                    v-for="(emoji, i) in emojisDecor"
-                    :key="i"
-                    class="absolute animate-float select-none opacity-30"
-                    :style="{
-                        left:             `${8 + (i * 13) % 84}%`,
-                        top:              `${5 + (i * 17) % 80}%`,
-                        animationDelay:   `${i * 0.7}s`,
-                        animationDuration:`${4 + (i % 3)}s`,
-                        fontSize:         `${1.2 + (i % 3) * 0.4}rem`,
-                    }"
-                >{{ emoji }}</span>
-            </div>
 
             <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14">
                 <!-- Miga de pan -->
@@ -223,6 +231,7 @@ onUnmounted(() => {
         <!-- Barra de controles -->
         <div class="sticky top-0 z-40 border-b border-gray-200 bg-white/95 backdrop-blur-sm">
             <div class="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+                <!-- Buscador móvil -->
                 <div class="relative md:hidden">
                     <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                         <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -231,24 +240,26 @@ onUnmounted(() => {
                     </div>
                     <input
                         v-model="busqueda"
+                        @input="observeCards"
                         type="text"
-                        :placeholder="`Buscar en ${categoria.nombre}`"
+                        :placeholder="`Buscar en ${categoria.nombre}...`"
                         class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                     />
                 </div>
 
-                <div class="flex items-center gap-2">
-                    <span class="hidden text-xs font-medium text-gray-400 sm:block">Ordenar por:</span>
+                <div class="flex items-center gap-2 overflow-x-auto">
+                    <span class="hidden text-xs font-medium text-gray-400 sm:block">Ordenar:</span>
                     <button
                         v-for="op in [
-                            { key: 'valoracion', label: ' Valoración' },
-                            { key: 'resenas',    label: ' Reseñas' },
-                            { key: 'nombre',     label: ' Nombre' },
+                            { key: 'valoracion', label: '⭐ Valoración' },
+                            { key: 'resenas',    label: '💬 Reseñas' },
+                            { key: 'productos',  label: '📦 Productos' },
+                            { key: 'nombre',     label: '🔤 Nombre' },
                         ]"
                         :key="op.key"
-                        @click="ordenActivo = op.key"
+                        @click="ordenActivo = op.key; observeCards()"
                         :class="[
-                            'rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
+                            'whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
                             ordenActivo === op.key
                                 ? 'bg-primary-500 text-white shadow-sm'
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
@@ -256,11 +267,65 @@ onUnmounted(() => {
                     >{{ op.label }}</button>
                 </div>
 
-                <span class="hidden text-xs text-gray-400 sm:block">
-                    {{ tiendasOrdenadas.length }} resultado{{ tiendasOrdenadas.length !== 1 ? 's' : '' }}
-                </span>
+                <div class="flex items-center gap-2">
+                    <!-- Botón mapa -->
+                    <button
+                        v-if="tiendasConMapa"
+                        @click="showMap = !showMap"
+                        :class="[
+                            'rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
+                            showMap
+                                ? 'bg-primary-500 text-white'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
+                        ]"
+                    >🗺️ Mapa</button>
+
+                    <!-- Toggle vista -->
+                    <div class="hidden items-center gap-1 rounded-lg border border-gray-200 bg-white p-0.5 sm:flex">
+                        <button
+                            @click="vistaActiva = 'grid'"
+                            :class="['rounded-md p-1.5 transition-colors', vistaActiva === 'grid' ? 'bg-primary-500 text-white' : 'text-gray-400 hover:text-gray-600']"
+                        >
+                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M1 2.5A1.5 1.5 0 012.5 1h3A1.5 1.5 0 017 2.5v3A1.5 1.5 0 015.5 7h-3A1.5 1.5 0 011 5.5v-3zm8 0A1.5 1.5 0 0110.5 1h3A1.5 1.5 0 0115 2.5v3A1.5 1.5 0 0113.5 7h-3A1.5 1.5 0 019 5.5v-3zm-8 8A1.5 1.5 0 012.5 9h3A1.5 1.5 0 017 10.5v3A1.5 1.5 0 015.5 15h-3A1.5 1.5 0 011 13.5v-3zm8 0A1.5 1.5 0 0110.5 9h3a1.5 1.5 0 011.5 1.5v3a1.5 1.5 0 01-1.5 1.5h-3A1.5 1.5 0 019 13.5v-3z"/>
+                            </svg>
+                        </button>
+                        <button
+                            @click="vistaActiva = 'list'"
+                            :class="['rounded-md p-1.5 transition-colors', vistaActiva === 'list' ? 'bg-primary-500 text-white' : 'text-gray-400 hover:text-gray-600']"
+                        >
+                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M2.5 12a.5.5 0 01.5-.5h10a.5.5 0 010 1H3a.5.5 0 01-.5-.5zm0-4a.5.5 0 01.5-.5h10a.5.5 0 010 1H3a.5.5 0 01-.5-.5zm0-4a.5.5 0 01.5-.5h10a.5.5 0 010 1H3a.5.5 0 01-.5-.5z"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <span class="hidden text-xs text-gray-400 sm:block">
+                        {{ tiendasOrdenadas.length }} resultado{{ tiendasOrdenadas.length !== 1 ? 's' : '' }}
+                    </span>
+                </div>
             </div>
         </div>
+
+        <!-- Mapa expandible -->
+        <Transition
+            enter-active-class="transition-all duration-500 ease-out"
+            enter-from-class="max-h-0 opacity-0"
+            enter-to-class="max-h-[600px] opacity-100"
+            leave-active-class="transition-all duration-300 ease-in"
+            leave-from-class="max-h-[600px] opacity-100"
+            leave-to-class="max-h-0 opacity-0"
+        >
+            <div v-if="showMap" class="overflow-hidden bg-white border-b border-gray-200">
+                <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                    <MapaTiendas
+                        :tiendas="tiendasOrdenadas"
+                        :categorias="[]"
+                        height="400px"
+                    />
+                </div>
+            </div>
+        </Transition>
 
         <!-- Contenido principal -->
         <main class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -274,13 +339,13 @@ onUnmounted(() => {
                 </h2>
                 <p class="mt-2 text-sm text-gray-400">Pronto encontrarás productores locales de {{ categoria.nombre }} aquí.</p>
                 <Link href="/" class="mt-6 rounded-lg bg-primary-500 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-600">
-                     Volver al inicio
+                    ← Volver al inicio
                 </Link>
             </div>
 
             <template v-else>
                 <!-- Tienda Destacada -->
-                <div class="mb-10">
+                <div class="mb-10 card-animate" style="--delay: 0ms">
                     <div class="mb-4 flex items-center gap-2">
                         <span class="inline-block h-1 w-8 rounded-full bg-primary-500"></span>
                         <span class="text-xs font-bold uppercase tracking-widest text-primary-500">Destacada</span>
@@ -288,18 +353,19 @@ onUnmounted(() => {
 
                     <Link
                         :href="`/tienda/${tiendaDestacada.slug}`"
-                        class="group relative flex overflow-hidden rounded-3xl bg-white shadow-md transition-all duration-300 hover:shadow-xl"
+                        class="group relative flex flex-col overflow-hidden rounded-3xl bg-white shadow-md transition-all duration-300 hover:shadow-xl sm:flex-row"
                     >
-                        <div class="relative hidden h-72 w-2/5 overflow-hidden sm:block">
+                        <div class="relative h-56 overflow-hidden sm:h-72 sm:w-2/5">
                             <img
-                                :src="tiendaDestacada.imagen_portada || tiendaDestacada.logo || '/images/logo.png'"
+                                :src="tiendaDestacada.imagen_portada ? `/storage/${tiendaDestacada.imagen_portada}` : tiendaDestacada.logo ? `/storage/${tiendaDestacada.logo}` : '/images/logo.png'"
                                 :alt="tiendaDestacada.nombre"
                                 class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                             />
-                            <div class="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-white to-transparent"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent to-white/50 hidden sm:block"></div>
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent sm:hidden"></div>
                         </div>
 
-                        <div class="flex flex-1 flex-col justify-between p-8">
+                        <div class="flex flex-1 flex-col justify-between p-6 sm:p-8">
                             <div>
                                 <div class="mb-3 flex flex-wrap items-center gap-2">
                                     <span class="rounded-full bg-primary-100 px-3 py-1 text-xs font-bold text-primary-700">
@@ -310,14 +376,14 @@ onUnmounted(() => {
                                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                         </svg>
                                         {{ Number(tiendaDestacada.valoracion).toFixed(1) }}
-                                        <span class="font-normal text-yellow-600">({{ tiendaDestacada.total_resenas }} reseñas)</span>
+                                        <span class="font-normal text-yellow-600">({{ tiendaDestacada.total_resenas }})</span>
                                     </span>
                                     <span v-if="tiendaDestacada.productos_count" class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">
-                                        {{ tiendaDestacada.productos_count }} productos
+                                        📦 {{ tiendaDestacada.productos_count }} productos
                                     </span>
                                 </div>
                                 <h2 class="text-2xl font-extrabold text-gray-900 sm:text-3xl">{{ tiendaDestacada.nombre }}</h2>
-                                <p class="mt-2 text-sm leading-relaxed text-gray-500 line-clamp-2">{{ tiendaDestacada.descripcion }}</p>
+                                <p class="mt-2 text-sm leading-relaxed text-gray-500 line-clamp-3">{{ tiendaDestacada.descripcion }}</p>
                             </div>
 
                             <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
@@ -346,16 +412,18 @@ onUnmounted(() => {
                         <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Todas las tiendas</span>
                     </div>
 
-                    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    <!-- Vista Cuadrícula -->
+                    <div v-if="vistaActiva === 'grid'" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         <Link
                             v-for="(tienda, idx) in restoTiendas"
                             :key="tienda.id"
                             :href="`/tienda/${tienda.slug}`"
-                            class="group relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                            class="card-animate group relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                            :style="{ '--delay': `${(idx + 1) * 80}ms` }"
                         >
                             <div class="relative h-48 overflow-hidden">
                                 <img
-                                    :src="tienda.imagen_portada || tienda.logo || '/images/logo.png'"
+                                    :src="tienda.imagen_portada ? `/storage/${tienda.imagen_portada}` : tienda.logo ? `/storage/${tienda.logo}` : '/images/logo.png'"
                                     :alt="tienda.nombre"
                                     loading="lazy"
                                     class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -385,7 +453,7 @@ onUnmounted(() => {
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                         </svg>
-                                        <span class="max-w-[120px] truncate">{{ tienda.direccion }}</span>
+                                        <span class="max-w-[140px] truncate">{{ tienda.direccion }}</span>
                                     </div>
                                     <span class="flex items-center gap-1 text-xs text-gray-400">
                                         <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -396,7 +464,64 @@ onUnmounted(() => {
                                 </div>
                             </div>
 
-                            <!-- Barra de acento en hover -->
+                            <div class="absolute bottom-0 left-0 right-0 h-0.5 origin-left scale-x-0 rounded-b-2xl bg-primary-500 transition-transform duration-300 group-hover:scale-x-100"></div>
+                        </Link>
+                    </div>
+
+                    <!-- Vista Lista -->
+                    <div v-else class="space-y-4">
+                        <Link
+                            v-for="(tienda, idx) in restoTiendas"
+                            :key="tienda.id"
+                            :href="`/tienda/${tienda.slug}`"
+                            class="card-animate group relative flex overflow-hidden rounded-2xl bg-white shadow-sm transition-all duration-300 hover:shadow-lg"
+                            :style="{ '--delay': `${(idx + 1) * 60}ms` }"
+                        >
+                            <div class="relative h-auto w-28 flex-shrink-0 overflow-hidden sm:w-40">
+                                <img
+                                    :src="tienda.imagen_portada ? `/storage/${tienda.imagen_portada}` : tienda.logo ? `/storage/${tienda.logo}` : '/images/logo.png'"
+                                    :alt="tienda.nombre"
+                                    loading="lazy"
+                                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                />
+                            </div>
+
+                            <div class="flex flex-1 flex-col justify-between p-4 sm:p-5">
+                                <div>
+                                    <div class="flex flex-wrap items-center gap-2 mb-1">
+                                        <h3 class="font-bold text-gray-900 group-hover:text-primary-600 transition-colors">{{ tienda.nombre }}</h3>
+                                        <div class="flex items-center gap-1 rounded-full bg-yellow-50 px-2 py-0.5 text-xs font-bold text-yellow-700">
+                                            <svg class="h-3 w-3 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            </svg>
+                                            {{ Number(tienda.valoracion).toFixed(1) }}
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-gray-500 line-clamp-2">{{ tienda.descripcion }}</p>
+                                </div>
+                                <div class="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-400">
+                                    <span class="flex items-center gap-1">
+                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        {{ tienda.direccion }}
+                                    </span>
+                                    <span v-if="tienda.productos_count" class="flex items-center gap-1">
+                                        📦 {{ tienda.productos_count }} productos
+                                    </span>
+                                    <span class="flex items-center gap-1">
+                                        💬 {{ tienda.total_resenas }} reseñas
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="hidden items-center pr-5 sm:flex">
+                                <svg class="h-5 w-5 text-gray-300 transition-colors group-hover:text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+
                             <div class="absolute bottom-0 left-0 right-0 h-0.5 origin-left scale-x-0 rounded-b-2xl bg-primary-500 transition-transform duration-300 group-hover:scale-x-100"></div>
                         </Link>
                     </div>
@@ -411,15 +536,21 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-@keyframes float {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    33%       { transform: translateY(-12px) rotate(5deg); }
-    66%       { transform: translateY(-6px) rotate(-3deg); }
-}
 @keyframes ping-slow {
     0%   { transform: scale(1);   opacity: 0.6; }
     100% { transform: scale(1.8); opacity: 0; }
 }
-.animate-float     { animation: float     linear infinite; }
 .animate-ping-slow { animation: ping-slow 2.5s ease-out infinite; }
+
+/* Animaciones de entrada escalonadas */
+.card-animate {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    transition-delay: var(--delay, 0ms);
+}
+.card-animate.card-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
 </style>

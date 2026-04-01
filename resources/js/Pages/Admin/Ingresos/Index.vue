@@ -130,7 +130,7 @@
                                     {{ index + 1 }}
                                 </div>
                                 <div class="h-10 w-10 flex-shrink-0">
-                                    <img v-if="tienda.logo" :src="tienda.logo" :alt="tienda.nombre" class="h-10 w-10 rounded-full object-cover">
+                                    <img v-if="tienda.logo" :src="`/storage/${tienda.logo}`" :alt="tienda.nombre" class="h-10 w-10 rounded-full object-cover">
                                     <div v-else class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-gray-600 font-semibold">
                                         {{ tienda.nombre.charAt(0) }}
                                     </div>

@@ -36,7 +36,7 @@
                             <div>
                                 <label class="mb-2 block text-sm font-medium text-gray-700">Tienda</label>
                                 <div class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-                                    <img v-if="tienda.logo" :src="tienda.logo" class="h-8 w-8 rounded-full object-cover" />
+                                    <img v-if="tienda.logo" :src="`/storage/${tienda.logo}`" class="h-8 w-8 rounded-full object-cover" />
                                     <div v-else class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-sm font-semibold text-primary-600">{{ tienda.nombre.charAt(0) }}</div>
                                     <span class="font-medium text-gray-900">{{ tienda.nombre }}</span>
                                     <span class="text-sm text-gray-500">· {{ tienda.categoria?.nombre }}</span>
