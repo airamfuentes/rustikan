@@ -99,6 +99,8 @@ class TiendaController extends Controller
             'telefono' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
             'direccion' => 'nullable|string',
+            'latitud' => 'nullable|numeric|between:-90,90',
+            'longitud' => 'nullable|numeric|between:-180,180',
             'logo' => 'nullable|image|max:2048',
             'imagen_portada' => 'nullable|image|max:2048',
         ]);
@@ -171,6 +173,8 @@ class TiendaController extends Controller
             'telefono'              => 'nullable|string|max:20',
             'email'                 => 'nullable|email|max:255',
             'direccion'             => 'nullable|string',
+            'latitud'               => 'nullable|numeric|between:-90,90',
+            'longitud'              => 'nullable|numeric|between:-180,180',
             'logo'                  => 'nullable|image|max:2048',
             'imagen_portada'        => 'nullable|image|max:2048',
             'delete_logo'           => 'nullable|boolean',

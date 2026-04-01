@@ -20,6 +20,8 @@ class Tienda extends Model
         'telefono',
         'email',
         'direccion',
+        'latitud',
+        'longitud',
         'valoracion',
         'total_resenas',
         'activa',
@@ -30,6 +32,8 @@ class Tienda extends Model
         'activa' => 'boolean',
         'visible' => 'boolean',
         'valoracion' => 'decimal:2',
+        'latitud' => 'decimal:7',
+        'longitud' => 'decimal:7',
     ];
 
     /**

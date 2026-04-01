@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
 import CarritoCompra from '@/Components/CarritoCompra.vue';
+import MapaTiendas from '@/Components/MapaTiendas.vue';
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
@@ -135,10 +136,10 @@ const buscarTiendas = () => {
                                     >
                                         <!-- Imagen -->
                                         <img
-                                            :src="tienda.imagen_portada || tienda.logo || '/images/logo.png'"
+                                            :src="tienda.imagen_portada ? `/storage/${tienda.imagen_portada}` : tienda.logo ? `/storage/${tienda.logo}` : '/images/logo.png'"
                                             :alt="tienda.nombre"
                                             loading="lazy"
-                                            class="h-16 w-16 flex-shrink-0 rounded-lg object-cover"
+                                            class="h-16 w-16 flex-shrink-0 rounded-full object-cover"
                                         />
 
                                         <!-- Información -->
@@ -284,6 +285,26 @@ const buscarTiendas = () => {
                 <div v-if="categorias.length === 0" class="py-12 text-center text-gray-400">
                     Cargando categorías...
                 </div>
+            </div>
+        </section>
+
+        <!-- Sección Mapa de Tiendas -->
+        <section id="mapa" class="py-16 bg-white">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="mb-8 text-center">
+                    <h2 class="text-4xl font-extrabold tracking-tight text-gray-900">
+                        Encuentra tiendas cerca de ti
+                    </h2>
+                    <p class="mt-3 text-lg text-gray-500">
+                        Explora los productores locales en el mapa interactivo
+                    </p>
+                </div>
+
+                <MapaTiendas
+                    :tiendas="tiendas"
+                    :categorias="categorias"
+                    height="480px"
+                />
             </div>
         </section>
 

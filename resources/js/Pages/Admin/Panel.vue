@@ -14,7 +14,7 @@
                 <div class="space-y-6">
                 
                 <!-- BOTONES DE GESTIÓN -->
-                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <!-- Gestionar Usuarios -->
                     <Link :href="route('admin.usuarios.index')" class="group rounded-xl bg-white border-2 border-gray-200 p-6 shadow-sm transition-all hover:shadow-md hover:border-purple-400 hover:-translate-y-1">
                         <div class="mb-4 inline-flex rounded-lg bg-purple-100 p-3">
