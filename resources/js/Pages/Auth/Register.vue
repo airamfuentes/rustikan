@@ -1,21 +1,57 @@
 ﻿<script setup>
+import Checkbox from '@/Components/Checkbox.vue';
 import GuestLayout from '@/Layouts/LayoutPublico.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
+import Recaptcha from '@/Components/Recaptcha.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
+
+const RECAPTCHA_SITE_KEY = '6LceSbUsAAAAAA9bdOLoaga8Mzy3lZ7uBuQjSK9_';
 
 const form = useForm({
     name: '',
+    apellidos: '',
+    telefono: '',
     email: '',
+    edad: '',
+    direccion: '',
+    sms_verification_code: '',
+    accept_terms: false,
     password: '',
     password_confirmation: '',
+    recaptcha_token: '',
 });
 
+const smsSent = ref(false);
+
+const onVerify  = (token) => { form.recaptcha_token = token; };
+const onExpire  = ()      => { form.recaptcha_token = ''; };
+const onError   = ()      => { form.recaptcha_token = ''; };
+
+const sendSmsCode = () => {
+    if (!form.telefono) {
+        form.setError('telefono', 'Introduce un número de teléfono para recibir el SMS.');
+        return;
+    }
+
+    smsSent.value = true;
+    form.clearErrors('telefono');
+};
+
 const submit = () => {
+    if (!smsSent.value) {
+        form.setError('sms_verification_code', 'Envía primero el código SMS (simulado).');
+        return;
+    }
+
     form.post(route('register'), {
-        onFinish: () => form.reset('password', 'password_confirmation'),
+        onSuccess: () => {
+            smsSent.value = false;
+        },
+        onFinish: () => form.reset('password', 'password_confirmation', 'sms_verification_code'),
     });
 };
 </script>
@@ -24,24 +60,79 @@ const submit = () => {
     <GuestLayout>
         <Head title="Registrarse" />
 
-        <form @submit.prevent="submit">
+        <form @submit.prevent="submit" class="space-y-5">
             <div>
-                <InputLabel for="name" value="Nombre" />
-
-                <TextInput
-                    id="name"
-                    type="text"
-                    class="mt-1 block w-full"
-                    v-model="form.name"
-                    required
-                    autofocus
-                    autocomplete="name"
-                />
-
-                <InputError class="mt-2" :message="form.errors.name" />
+                <p class="text-sm text-tierra-500">Completa los datos para continuar.</p>
             </div>
 
-            <div class="mt-4">
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <InputLabel for="name" value="Nombre" />
+
+                    <TextInput
+                        id="name"
+                        type="text"
+                        class="mt-1 block w-full"
+                        v-model="form.name"
+                        required
+                        autofocus
+                        autocomplete="given-name"
+                    />
+
+                    <InputError class="mt-2" :message="form.errors.name" />
+                </div>
+
+                <div>
+                    <InputLabel for="apellidos" value="Apellidos" />
+
+                    <TextInput
+                        id="apellidos"
+                        type="text"
+                        class="mt-1 block w-full"
+                        v-model="form.apellidos"
+                        required
+                        autocomplete="family-name"
+                    />
+
+                    <InputError class="mt-2" :message="form.errors.apellidos" />
+                </div>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <InputLabel for="telefono" value="Teléfono" />
+
+                    <TextInput
+                        id="telefono"
+                        type="tel"
+                        class="mt-1 block w-full"
+                        v-model="form.telefono"
+                        required
+                        autocomplete="tel"
+                        placeholder="Ej: 612345678"
+                    />
+
+                    <InputError class="mt-2" :message="form.errors.telefono" />
+                </div>
+
+                <div>
+                    <InputLabel for="edad" value="Edad (opcional)" />
+
+                    <TextInput
+                        id="edad"
+                        type="number"
+                        class="mt-1 block w-full"
+                        v-model="form.edad"
+                        min="14"
+                        max="120"
+                        inputmode="numeric"
+                    />
+
+                    <InputError class="mt-2" :message="form.errors.edad" />
+                </div>
+            </div>
+
+            <div>
                 <InputLabel for="email" value="Correo Electrónico" />
 
                 <TextInput
@@ -56,7 +147,53 @@ const submit = () => {
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
-            <div class="mt-4">
+            <div>
+                <InputLabel for="direccion" value="Dirección (opcional)" />
+
+                <TextInput
+                    id="direccion"
+                    type="text"
+                    class="mt-1 block w-full"
+                    v-model="form.direccion"
+                    autocomplete="street-address"
+                    placeholder="Calle, número, ciudad"
+                />
+
+                <InputError class="mt-2" :message="form.errors.direccion" />
+            </div>
+
+            <div class="rounded-lg border border-tierra-200 bg-tierra-50 p-4">
+                <p class="text-sm font-medium text-tierra-800">Verificación por SMS</p>
+                <p class="mt-1 text-xs text-tierra-600">
+                    Simulación activa: por ahora puedes introducir cualquier código para continuar.
+                </p>
+
+                <div class="mt-3 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+                    <div>
+                        <InputLabel for="sms_verification_code" value="Código SMS" />
+                        <TextInput
+                            id="sms_verification_code"
+                            type="text"
+                            class="mt-1 block w-full"
+                            v-model="form.sms_verification_code"
+                            :disabled="!smsSent"
+                            placeholder="Ej: 123456"
+                        />
+                    </div>
+
+                    <button
+                        type="button"
+                        @click="sendSmsCode"
+                        class="inline-flex items-center justify-center rounded-md border border-primary-500 px-4 py-2 text-sm font-medium text-primary-600 transition hover:bg-primary-50"
+                    >
+                        {{ smsSent ? 'Reenviar SMS' : 'Enviar SMS' }}
+                    </button>
+                </div>
+
+                <InputError class="mt-2" :message="form.errors.sms_verification_code" />
+            </div>
+
+            <div>
                 <InputLabel for="password" value="Contraseña" />
 
                 <TextInput
@@ -71,7 +208,7 @@ const submit = () => {
                 <InputError class="mt-2" :message="form.errors.password" />
             </div>
 
-            <div class="mt-4">
+            <div>
                 <InputLabel
                     for="password_confirmation"
                     value="Confirmar Contraseña"
@@ -92,20 +229,39 @@ const submit = () => {
                 />
             </div>
 
-            <div class="mt-4 flex items-center justify-end">
+            <div class="flex items-center gap-2">
+                <Checkbox name="accept_terms" v-model:checked="form.accept_terms" />
+                <span class="text-sm text-tierra-700">
+                    Acepto los términos y condiciones de uso
+                </span>
+            </div>
+            <InputError :message="form.errors.accept_terms" />
+
+            <!-- reCAPTCHA -->
+            <div>
+                <Recaptcha
+                    :sitekey="RECAPTCHA_SITE_KEY"
+                    @verify="onVerify"
+                    @expire="onExpire"
+                    @error="onError"
+                />
+                <InputError class="mt-1" :message="form.errors.recaptcha_token" />
+            </div>
+
+            <div class="flex flex-col-reverse items-start gap-3 pt-1 sm:flex-row sm:items-center sm:justify-between">
                 <Link
                     :href="route('login')"
                     class="rounded-md text-sm text-tierra-600 underline hover:text-tierra-900 focus:outline-none focus:ring-2 focus:ring-tierra-500 focus:ring-offset-2"
                 >
-                    ¿Ya estás registrado?
+                    ¿Ya tienes cuenta? Inicia sesión
                 </Link>
 
                 <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
+                    class="w-full justify-center sm:w-auto"
+                    :class="{ 'opacity-25': form.processing || !form.recaptcha_token }"
+                    :disabled="form.processing || !form.recaptcha_token"
                 >
-                    Registrarse
+                    Crear cuenta
                 </PrimaryButton>
             </div>
         </form>

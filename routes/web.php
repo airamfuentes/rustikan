@@ -39,12 +39,16 @@ Route::get('/carrito', function () {
 })->name('carrito');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return redirect()->route('admin.dashboard');
+    Route::get('/dashboard', function (\Illuminate\Http\Request $request) {
+        if ($request->user()->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+        return redirect()->route('profile.edit');
     })->name('dashboard');
     
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 

@@ -5,6 +5,7 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
+import Recaptcha from '@/Components/Recaptcha.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
 defineProps({
@@ -16,11 +17,18 @@ defineProps({
     },
 });
 
+const RECAPTCHA_SITE_KEY = '6LceSbUsAAAAAA9bdOLoaga8Mzy3lZ7uBuQjSK9_';
+
 const form = useForm({
     email: '',
     password: '',
     remember: false,
+    recaptcha_token: '',
 });
+
+const onVerify  = (token) => { form.recaptcha_token = token; };
+const onExpire  = ()      => { form.recaptcha_token = ''; };
+const onError   = ()      => { form.recaptcha_token = ''; };
 
 const submit = () => {
     form.post(route('login'), {
@@ -78,6 +86,17 @@ const submit = () => {
                 </label>
             </div>
 
+            <!-- reCAPTCHA -->
+            <div class="mt-4">
+                <Recaptcha
+                    :sitekey="RECAPTCHA_SITE_KEY"
+                    @verify="onVerify"
+                    @expire="onExpire"
+                    @error="onError"
+                />
+                <InputError class="mt-1" :message="form.errors.recaptcha_token" />
+            </div>
+
             <div class="mt-4 flex items-center justify-end">
                 <Link
                     v-if="canResetPassword"
@@ -89,11 +108,21 @@ const submit = () => {
 
                 <PrimaryButton
                     class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
+                    :class="{ 'opacity-25': form.processing || !form.recaptcha_token }"
+                    :disabled="form.processing || !form.recaptcha_token"
                 >
                     Iniciar Sesión
                 </PrimaryButton>
+            </div>
+
+            <div class="mt-6 rounded-lg border border-tierra-200 bg-tierra-50 p-4 text-center">
+                <p class="text-sm text-tierra-700">¿Aún no tienes cuenta?</p>
+                <Link
+                    :href="route('register')"
+                    class="mt-2 inline-flex items-center justify-center rounded-md border border-primary-500 px-4 py-2 text-sm font-medium text-primary-600 transition hover:bg-primary-50"
+                >
+                    Crear cuenta nueva
+                </Link>
             </div>
         </form>
     </GuestLayout>

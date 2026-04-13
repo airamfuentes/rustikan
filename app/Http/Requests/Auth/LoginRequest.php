@@ -5,6 +5,7 @@ namespace App\Http\Requests\Auth;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -27,9 +28,30 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
+            'email'           => ['required', 'string', 'email'],
+            'password'        => ['required', 'string'],
+            'recaptcha_token' => ['required', 'string'],
         ];
+    }
+
+    /**
+     * Verify the reCAPTCHA token with Google.
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function verifyRecaptcha(): void
+    {
+        $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+            'secret'   => config('services.recaptcha.secret'),
+            'response' => $this->input('recaptcha_token'),
+            'remoteip' => $this->ip(),
+        ]);
+
+        if (! $response->json('success')) {
+            throw ValidationException::withMessages([
+                'recaptcha_token' => 'La verificación reCAPTCHA ha fallado. Inténtalo de nuevo.',
+            ]);
+        }
     }
 
     /**
@@ -39,6 +61,7 @@ class LoginRequest extends FormRequest
      */
     public function authenticate(): void
     {
+        $this->verifyRecaptcha();
         $this->ensureIsNotRateLimited();
 
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {

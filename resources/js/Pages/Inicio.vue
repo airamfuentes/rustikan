@@ -22,8 +22,10 @@ const props = defineProps({
 const scrolled = ref(false);
 const busqueda           = ref('');
 const showDropdown       = ref(false);
+const showProfileMenu    = ref(false);
 const sugerenciasTiendas = ref([]);
 const searchRef          = ref(null);
+const profileMenuRef     = ref(null);
 let scrollTimeout        = null;
 let searchTimeout        = null;
 
@@ -38,6 +40,9 @@ const handleScroll = () => {
 const handleClickOutside = (event) => {
     if (searchRef.value && !searchRef.value.contains(event.target)) {
         showDropdown.value = false;
+    }
+    if (profileMenuRef.value && !profileMenuRef.value.contains(event.target)) {
+        showProfileMenu.value = false;
     }
 };
 
@@ -202,25 +207,96 @@ const buscarTiendas = () => {
                             Acceder
                         </Link>
 
-                        <!-- Avatar (autenticado, solo si NO es admin) -->
-                        <Link
-                            v-else-if="user && user.role !== 'admin'"
-                            :href="route('dashboard')"
-                            class="flex h-10 w-10 items-center justify-center rounded-full bg-primary-500 text-white hover:bg-primary-600 transition-colors"
+                        <!-- Avatar + Dropdown (autenticado) -->
+                        <div
+                            v-else-if="user"
+                            ref="profileMenuRef"
+                            class="relative"
                         >
-                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                            </svg>
-                        </Link>
+                            <button
+                                @click="showProfileMenu = !showProfileMenu"
+                                class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-primary-500 text-white transition-colors hover:bg-primary-600 focus:outline-none"
+                            >
+                                <img v-if="user.avatar" :src="`/storage/${user.avatar}`" class="h-full w-full object-cover" alt="Avatar" />
+                                <span v-else class="text-sm font-semibold">{{ user.name?.charAt(0)?.toUpperCase() }}</span>
+                            </button>
 
-                        <!-- Botón Panel Admin (solo para admin) -->
-                        <Link
-                            v-if="user && user.role === 'admin'"
-                            :href="route('admin.dashboard')"
-                            class="rounded-lg bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 text-sm font-bold text-white shadow-lg transition-all hover:shadow-xl hover:from-orange-600 hover:to-red-600"
-                        >
-                            🛡️ Admin
-                        </Link>
+                            <!-- Menú desplegable -->
+                            <Transition
+                                enter-active-class="transition ease-out duration-150"
+                                enter-from-class="opacity-0 scale-95"
+                                enter-to-class="opacity-100 scale-100"
+                                leave-active-class="transition ease-in duration-100"
+                                leave-from-class="opacity-100 scale-100"
+                                leave-to-class="opacity-0 scale-95"
+                            >
+                                <div
+                                    v-if="showProfileMenu"
+                                    class="absolute right-0 top-12 z-50 w-52 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-lg"
+                                >
+                                    <div class="border-b border-gray-100 px-4 py-3">
+                                        <p class="truncate text-sm font-medium text-gray-900">{{ user.name }}</p>
+                                        <p class="truncate text-xs text-gray-500">{{ user.email }}</p>
+                                        <p v-if="user.telefono" class="truncate text-xs text-gray-400 mt-0.5">{{ user.telefono }}</p>
+                                    </div>
+                                    <Link
+                                        :href="route('profile.edit')"
+                                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-50"
+                                        @click="showProfileMenu = false"
+                                    >
+                                        <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                        Mi perfil
+                                    </Link>
+                                    <Link
+                                        :href="route('carrito')"
+                                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-50"
+                                        @click="showProfileMenu = false"
+                                    >
+                                        <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                        Ver carrito
+                                    </Link>
+                                    <Link
+                                        :href="route('home')"
+                                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-50"
+                                        @click="showProfileMenu = false"
+                                    >
+                                        <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                        </svg>
+                                        Contáctanos
+                                    </Link>
+                                    <Link
+                                        v-if="user.role === 'admin'"
+                                        :href="route('admin.dashboard')"
+                                        class="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-orange-600 transition-colors hover:bg-orange-50"
+                                        @click="showProfileMenu = false"
+                                    >
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                        </svg>
+                                        Panel de administración
+                                    </Link>
+                                    <div class="border-t border-gray-100">
+                                        <Link
+                                            :href="route('logout')"
+                                            method="post"
+                                            as="button"
+                                            class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50"
+                                        >
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                            </svg>
+                                            Cerrar sesión
+                                        </Link>
+                                    </div>
+                                </div>
+                            </Transition>
+                        </div>
+
                     </div>
                 </div>
             </div>

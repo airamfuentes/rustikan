@@ -19,11 +19,17 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'apellidos',
+        'avatar',
         'email',
         'password',
         'role',
         'telefono',
         'direccion',
+        'edad',
+        'telefono_verificado_at',
+        'sms_verification_token',
+        'sms_verification_expires_at',
     ];
 
     /**
@@ -34,6 +40,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'sms_verification_token',
     ];
 
     /**
@@ -46,6 +53,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'telefono_verificado_at' => 'datetime',
+            'sms_verification_expires_at' => 'datetime',
         ];
     }
 

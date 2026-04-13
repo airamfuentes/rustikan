@@ -16,7 +16,8 @@
                     <div class="lg:col-span-1">
                         <div class="rounded-lg bg-white p-6 shadow">
                             <div class="mb-6 flex items-center justify-center">
-                                <div class="flex h-24 w-24 items-center justify-center rounded-full bg-primary-600 text-4xl font-bold text-white">
+                                <img v-if="usuario.avatar" :src="`/storage/${usuario.avatar}`" class="h-24 w-24 rounded-full object-cover shadow-lg" :alt="usuario.name" />
+                                <div v-else class="flex h-24 w-24 items-center justify-center rounded-full bg-primary-600 text-4xl font-bold text-white">
                                     {{ usuario.name.charAt(0).toUpperCase() }}
                                 </div>
                             </div>

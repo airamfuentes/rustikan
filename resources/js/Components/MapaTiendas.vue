@@ -8,31 +8,37 @@ import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
 const props = defineProps({
-    tiendas: { type: Array, default: () => [] },
+    tiendas:    { type: Array, default: () => [] },
     categorias: { type: Array, default: () => [] },
-    height: { type: String, default: '500px' },
+    height:     { type: String, default: '500px' },
 });
 
 const emit = defineEmits(['tienda-click']);
 
 const mapContainer = ref(null);
 const activePopupId = ref(null);
-const filtroCategoria = ref(null);
 let map = null;
 let clusterGroup = null;
 
 // Tiendas que tienen coordenadas
 const tiendasConCoords = () =>
-    props.tiendas.filter(t => t.latitud && t.longitud && (filtroCategoria.value === null || t.categoria_id === filtroCategoria.value));
+    props.tiendas.filter(t => t.latitud && t.longitud);
 
 const crearIcono = (tienda) => {
     const emoji = tienda.categoria?.icono || '📍';
     return L.divIcon({
-        html: `<div class="mapa-marker"><span class="mapa-marker-emoji">${emoji}</span></div>`,
-        className: 'mapa-marker-container',
-        iconSize: [40, 40],
-        iconAnchor: [20, 40],
-        popupAnchor: [0, -42],
+        html: `
+            <div class="mapa-pin">
+                <div class="mapa-pin-bubble">
+                    <span class="mapa-pin-emoji">${emoji}</span>
+                </div>
+                <div class="mapa-pin-tail"></div>
+            </div>
+        `,
+        className: 'mapa-pin-container',
+        iconSize:    [44, 52],
+        iconAnchor:  [22, 52],
+        popupAnchor: [0, -56],
     });
 };
 
@@ -97,15 +103,16 @@ const initMap = () => {
         zoom: 11,
         zoomControl: false,
         scrollWheelZoom: false,
+        attributionControl: false,
     });
 
     // Control de zoom en la esquina derecha
     L.control.zoom({ position: 'topright' }).addTo(map);
 
-    // Tile layer de OpenStreetMap con estilo limpio
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 18,
+    // Tile layer CartoDB Positron (limpio, moderno, usado por apps de entrega)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        subdomains: 'abcd',
+        maxZoom: 19,
     }).addTo(map);
 
     // Habilitar scroll zoom con Ctrl
@@ -135,10 +142,6 @@ const initMap = () => {
     cargarMarcadores();
 };
 
-watch(filtroCategoria, () => {
-    cargarMarcadores();
-});
-
 watch(() => props.tiendas, () => {
     nextTick(() => cargarMarcadores());
 }, { deep: true });
@@ -158,24 +161,6 @@ onUnmounted(() => {
 
 <template>
     <div class="mapa-tiendas-wrapper">
-        <!-- Filtros por categoría -->
-        <div v-if="categorias.length > 0" class="mapa-filtros">
-            <button
-                :class="['mapa-filtro-btn', filtroCategoria === null && 'activo']"
-                @click="filtroCategoria = null"
-            >
-                📍 Todas
-            </button>
-            <button
-                v-for="cat in categorias"
-                :key="cat.id"
-                :class="['mapa-filtro-btn', filtroCategoria === cat.id && 'activo']"
-                @click="filtroCategoria = filtroCategoria === cat.id ? null : cat.id"
-            >
-                {{ cat.icono }} {{ cat.nombre }}
-            </button>
-        </div>
-
         <!-- Mapa -->
         <div
             ref="mapContainer"
@@ -207,45 +192,6 @@ onUnmounted(() => {
     z-index: 1;
 }
 
-.mapa-filtros {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    z-index: 1000;
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    max-width: calc(100% - 5rem);
-}
-
-.mapa-filtro-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.375rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    background: white;
-    color: #374151;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-}
-
-.mapa-filtro-btn:hover {
-    background: #f9fafb;
-    border-color: #f97316;
-}
-
-.mapa-filtro-btn.activo {
-    background: #f97316;
-    color: white;
-    border-color: #f97316;
-}
-
 .mapa-empty {
     position: absolute;
     inset: 0;
@@ -260,36 +206,54 @@ onUnmounted(() => {
 </style>
 
 <style>
-/* Estilos globales para marcadores y popups de Leaflet */
-.mapa-marker-container {
+/* ── Contenedor del pin (sin fondo de Leaflet) ─────────────────────────────── */
+.mapa-pin-container {
     background: transparent !important;
     border: none !important;
 }
 
-.mapa-marker {
-    width: 40px;
-    height: 40px;
+/* ── Pin completo (burbuja + cola) ──────────────────────────────────────────── */
+.mapa-pin {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    filter: drop-shadow(0 4px 10px rgb(0 0 0 / 0.22));
+    transition: transform 0.15s ease;
+}
+
+.mapa-pin:hover {
+    transform: translateY(-3px) scale(1.08);
+}
+
+/* Burbuja circular blanca */
+.mapa-pin-bubble {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2.5px solid #f97316;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: white;
-    border-radius: 50% 50% 50% 0;
-    transform: rotate(-45deg);
-    box-shadow: 0 2px 8px rgb(0 0 0 / 0.2);
-    border: 2px solid #f97316;
-    transition: transform 0.2s;
 }
 
-.mapa-marker:hover {
-    transform: rotate(-45deg) scale(1.15);
-}
-
-.mapa-marker-emoji {
-    transform: rotate(45deg);
-    font-size: 1.1rem;
+.mapa-pin-emoji {
+    font-size: 1.35rem;
     line-height: 1;
+    display: block;
 }
 
+/* Cola triangular del pin */
+.mapa-pin-tail {
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid #f97316;
+    margin-top: -1px;
+}
+
+/* ── Cluster ────────────────────────────────────────────────────────────────── */
 .mapa-cluster-container {
     background: transparent !important;
     border: none !important;
@@ -315,9 +279,10 @@ onUnmounted(() => {
 
 @keyframes cluster-pulse {
     0%, 100% { box-shadow: 0 2px 10px rgb(249 115 22 / 0.4); }
-    50% { box-shadow: 0 2px 20px rgb(249 115 22 / 0.6); }
+    50%       { box-shadow: 0 2px 22px rgb(249 115 22 / 0.65); }
 }
 
+/* ── Popup ──────────────────────────────────────────────────────────────────── */
 .mapa-popup-wrapper .leaflet-popup-content-wrapper {
     border-radius: 1rem;
     padding: 0;

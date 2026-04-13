@@ -108,7 +108,8 @@
                             <tr v-for="usuario in usuarios.data" :key="usuario.id" class="hover:bg-gray-50">
                                 <td class="whitespace-nowrap px-6 py-4">
                                     <div class="flex items-center">
-                                        <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-purple-600 text-sm font-bold text-white">
+                                        <img v-if="usuario.avatar" :src="`/storage/${usuario.avatar}`" class="h-10 w-10 flex-shrink-0 rounded-full object-cover" :alt="usuario.name" />
+                                        <div v-else class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-purple-600 text-sm font-bold text-white">
                                             {{ usuario.name.charAt(0).toUpperCase() }}
                                         </div>
                                         <div class="ml-4">

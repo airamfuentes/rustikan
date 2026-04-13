@@ -10,18 +10,28 @@ import { Link, usePage } from '@inertiajs/vue3';
 const showingNavigationDropdown = ref(false);
 const scrolled = ref(false);
 const toasts = ref([]);
+const showProfileMenu = ref(false);
+const profileMenuRef = ref(null);
 
 // Detectar scroll
 const handleScroll = () => {
     scrolled.value = window.scrollY > 20;
 };
 
+const handleClickOutside = (e) => {
+    if (profileMenuRef.value && !profileMenuRef.value.contains(e.target)) {
+        showProfileMenu.value = false;
+    }
+};
+
 onMounted(() => {
     window.addEventListener('scroll', handleScroll);
+    document.addEventListener('click', handleClickOutside);
 });
 
 onUnmounted(() => {
     window.removeEventListener('scroll', handleScroll);
+    document.removeEventListener('click', handleClickOutside);
 });
 
 // Funciones para manejar toasts
@@ -126,46 +136,79 @@ watch(
                                 </span>
                             </button>
 
-                            <!-- Settings Dropdown -->
-                            <div class="relative ms-3">
-                                <Dropdown align="right" width="48">
-                                    <template #trigger>
-                                        <span class="inline-flex rounded-md">
-                                            <button
-                                                type="button"
-                                                class="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-700 transition duration-150 ease-in-out hover:text-gray-900 focus:outline-none"
-                                            >
-                                                {{ $page.props.auth.user.name }}
+                            <!-- Avatar + Dropdown -->
+                            <div ref="profileMenuRef" class="relative ms-3">
+                                <button
+                                    @click="showProfileMenu = !showProfileMenu"
+                                    class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-primary-500 text-white transition-colors hover:bg-primary-600 focus:outline-none"
+                                >
+                                    <img v-if="$page.props.auth.user.avatar" :src="`/storage/${$page.props.auth.user.avatar}`" class="h-full w-full object-cover" alt="Avatar" />
+                                    <span v-else class="text-sm font-semibold">{{ $page.props.auth.user.name?.charAt(0)?.toUpperCase() }}</span>
+                                </button>
 
-                                                <svg
-                                                    class="-me-0.5 ms-2 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fill-rule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clip-rule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </template>
-
-                                    <template #content>
-                                        <DropdownLink :href="route('profile.edit')">
-                                            Perfil
-                                        </DropdownLink>
-                                        <DropdownLink
-                                            :href="route('logout')"
-                                            method="post"
-                                            as="button"
+                                <Transition
+                                    enter-active-class="transition ease-out duration-150"
+                                    enter-from-class="opacity-0 scale-95"
+                                    enter-to-class="opacity-100 scale-100"
+                                    leave-active-class="transition ease-in duration-100"
+                                    leave-from-class="opacity-100 scale-100"
+                                    leave-to-class="opacity-0 scale-95"
+                                >
+                                    <div
+                                        v-if="showProfileMenu"
+                                        class="absolute right-0 top-12 z-50 w-52 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-lg"
+                                    >
+                                        <div class="border-b border-gray-100 px-4 py-3">
+                                            <p class="truncate text-sm font-medium text-gray-900">{{ $page.props.auth.user.name }}</p>
+                                            <p class="truncate text-xs text-gray-500">{{ $page.props.auth.user.email }}</p>
+                                            <p v-if="$page.props.auth.user.telefono" class="mt-0.5 truncate text-xs text-gray-400">{{ $page.props.auth.user.telefono }}</p>
+                                        </div>
+                                        <Link
+                                            :href="route('admin.dashboard')"
+                                            class="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-orange-600 transition-colors hover:bg-orange-50"
+                                            @click="showProfileMenu = false"
                                         >
-                                            Cerrar Sesión
-                                        </DropdownLink>
-                                    </template>
-                                </Dropdown>
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                            </svg>
+                                            Panel de administración
+                                        </Link>
+                                        <Link
+                                            :href="route('profile.edit')"
+                                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-50"
+                                            @click="showProfileMenu = false"
+                                        >
+                                            <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                            </svg>
+                                            Mi perfil
+                                        </Link>
+                                        <Link
+                                            :href="route('home')"
+                                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-50"
+                                            @click="showProfileMenu = false"
+                                        >
+                                            <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                            </svg>
+                                            Contáctanos
+                                        </Link>
+                                        <div class="border-t border-gray-100">
+                                            <Link
+                                                :href="route('logout')"
+                                                method="post"
+                                                as="button"
+                                                class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50"
+                                                @click="showProfileMenu = false"
+                                            >
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                                </svg>
+                                                Cerrar sesión
+                                            </Link>
+                                        </div>
+                                    </div>
+                                </Transition>
                             </div>
                         </div>
 

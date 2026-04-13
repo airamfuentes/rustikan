@@ -6,6 +6,7 @@ use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
@@ -18,9 +19,17 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
+        $pedidos = $request->user()
+            ->pedidos()
+            ->with('items')
+            ->latest()
+            ->take(20)
+            ->get();
+
         return Inertia::render('Profile/Editar', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
-            'status' => session('status'),
+            'status'          => session('status'),
+            'pedidos'         => $pedidos,
         ]);
     }
 
@@ -29,15 +38,37 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $validated = $request->validated();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
-        }
+        // Email and phone are locked once set — never overwrite them.
+        unset($validated['email'], $validated['telefono']);
 
+        $request->user()->fill($validated);
         $request->user()->save();
 
-        return Redirect::route('profile.edit');
+        return Redirect::route('profile.edit')
+            ->with('success', 'Perfil actualizado correctamente.');
+    }
+
+    /**
+     * Update the user's avatar photo.
+     */
+    public function updateAvatar(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'avatar' => ['required', 'image', 'max:2048'],
+        ]);
+
+        $user = $request->user();
+
+        if ($user->avatar) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
+        $path = $request->file('avatar')->store('avatars', 'public');
+        $user->update(['avatar' => $path]);
+
+        return back()->with('success', 'Foto de perfil actualizada.');
     }
 
     /**
