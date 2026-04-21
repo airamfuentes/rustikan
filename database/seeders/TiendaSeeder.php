@@ -59,6 +59,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=800',
                 'telefono' => '928835001', 'email' => 'info@fincaelnido.com',
                 'direccion' => 'Haría, Lanzarote', 'valoracion' => 4.8, 'total_resenas' => 124,
+                'latitud' => 29.1455, 'longitud' => -13.5150,
                 'activa' => true, 'visible' => true,
             ],
             [
@@ -68,6 +69,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800',
                 'telefono' => '928836271', 'email' => 'hola@huertalosJameos.com',
                 'direccion' => 'Haría, Lanzarote', 'valoracion' => 4.6, 'total_resenas' => 87,
+                'latitud' => 29.1520, 'longitud' => -13.4310,
                 'activa' => true, 'visible' => true,
             ],
             [
@@ -77,6 +79,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=800',
                 'telefono' => '928734512', 'email' => 'ventas@malpaisverde.es',
                 'direccion' => 'Tinajo, Lanzarote', 'valoracion' => 4.5, 'total_resenas' => 63,
+                'latitud' => 29.0651, 'longitud' => -13.7100,
                 'activa' => true, 'visible' => true,
             ],
             [
@@ -86,6 +89,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=800',
                 'telefono' => '928836900', 'email' => 'pedidos@cestayaiza.com',
                 'direccion' => 'Yaiza, Lanzarote', 'valoracion' => 4.3, 'total_resenas' => 41,
+                'latitud' => 28.9560, 'longitud' => -13.7690,
                 'activa' => true, 'visible' => true,
             ],
 
@@ -97,6 +101,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=800',
                 'telefono' => '928746231', 'email' => 'info@carniceriavolcan.com',
                 'direccion' => 'San Bartolomé, Lanzarote', 'valoracion' => 4.7, 'total_resenas' => 92,
+                'latitud' => 29.0042, 'longitud' => -13.6215,
                 'activa' => true, 'visible' => true,
             ],
             [
@@ -106,6 +111,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=800',
                 'telefono' => '928845612', 'email' => 'ventas@majadateguise.com',
                 'direccion' => 'Teguise, Lanzarote', 'valoracion' => 4.9, 'total_resenas' => 148,
+                'latitud' => 29.0624, 'longitud' => -13.5617,
                 'activa' => true, 'visible' => true,
             ],
             [
@@ -115,6 +121,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=800',
                 'telefono' => '928736891', 'email' => 'granja@loshelechos.es',
                 'direccion' => 'Femés, Lanzarote', 'valoracion' => 4.4, 'total_resenas' => 55,
+                'latitud' => 28.9350, 'longitud' => -13.7420,
                 'activa' => true, 'visible' => true,
             ],
 
@@ -126,6 +133,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1559717865-a99cac1c95d8?w=800',
                 'telefono' => '928842123', 'email' => 'info@marazul.com',
                 'direccion' => 'Órzola, Lanzarote', 'valoracion' => 4.9, 'total_resenas' => 98,
+                'latitud' => 29.2135, 'longitud' => -13.4390,
                 'activa' => true, 'visible' => true,
             ],
             [
@@ -135,6 +143,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1534482421-64566f976cfa?w=800',
                 'telefono' => '928810345', 'email' => 'info@lonjarrecife.com',
                 'direccion' => 'Arrecife, Lanzarote', 'valoracion' => 4.8, 'total_resenas' => 175,
+                'latitud' => 28.9635, 'longitud' => -13.5477,
                 'activa' => true, 'visible' => true,
             ],
             [
@@ -144,6 +153,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?w=800',
                 'telefono' => '928851789', 'email' => 'pedidos@islotedelmar.com',
                 'direccion' => 'Puerto del Carmen, Lanzarote', 'valoracion' => 4.6, 'total_resenas' => 64,
+                'latitud' => 28.9200, 'longitud' => -13.6580,
                 'activa' => true, 'visible' => true,
             ],
 
@@ -155,6 +165,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800',
                 'telefono' => '928815234', 'email' => 'info@latahona.com',
                 'direccion' => 'Teguise, Lanzarote', 'valoracion' => 4.7, 'total_resenas' => 156,
+                'latitud' => 29.0635, 'longitud' => -13.5620,
                 'activa' => true, 'visible' => true,
             ],
             [
@@ -164,6 +175,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=800',
                 'telefono' => '928736190', 'email' => 'hola@obradorlacaleta.com',
                 'direccion' => 'Playa Blanca, Lanzarote', 'valoracion' => 4.8, 'total_resenas' => 201,
+                'latitud' => 28.8634, 'longitud' => -13.8281,
                 'activa' => true, 'visible' => true,
             ],
             [
@@ -173,6 +185,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1486427944299-d1955d23e34d?w=800',
                 'telefono' => '928835556', 'email' => 'info@hornoharia.es',
                 'direccion' => 'Haría, Lanzarote', 'valoracion' => 4.5, 'total_resenas' => 89,
+                'latitud' => 29.1460, 'longitud' => -13.5160,
                 'activa' => true, 'visible' => true,
             ],
 
@@ -184,6 +197,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1452195100486-9cc805987862?w=800',
                 'telefono' => '928734781', 'email' => 'info@queseriamayorera.com',
                 'direccion' => 'Tinajo, Lanzarote', 'valoracion' => 4.9, 'total_resenas' => 312,
+                'latitud' => 29.0700, 'longitud' => -13.7050,
                 'activa' => true, 'visible' => true,
             ],
             [
@@ -193,6 +207,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=800',
                 'telefono' => '928736422', 'email' => 'lacteos@caserioFemes.com',
                 'direccion' => 'Femés, Lanzarote', 'valoracion' => 4.6, 'total_resenas' => 73,
+                'latitud' => 28.9360, 'longitud' => -13.7400,
                 'activa' => true, 'visible' => true,
             ],
             [
@@ -202,6 +217,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1612187759853-20bfbde129f0?w=800',
                 'telefono' => '928747001', 'email' => 'info@cabrafeliz.es',
                 'direccion' => 'San Bartolomé, Lanzarote', 'valoracion' => 4.4, 'total_resenas' => 47,
+                'latitud' => 29.0050, 'longitud' => -13.6190,
                 'activa' => true, 'visible' => true,
             ],
 
@@ -213,6 +229,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=800',
                 'telefono' => '928173456', 'email' => 'info@losvolcanes.com',
                 'direccion' => 'La Geria, Lanzarote', 'valoracion' => 4.9, 'total_resenas' => 210,
+                'latitud' => 28.9850, 'longitud' => -13.6870,
                 'activa' => true, 'visible' => true,
             ],
             [
@@ -222,6 +239,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1474722883778-792e7990302f?w=800',
                 'telefono' => '928176234', 'email' => 'vinos@lacaldera.es',
                 'direccion' => 'La Geria, Lanzarote', 'valoracion' => 4.8, 'total_resenas' => 183,
+                'latitud' => 28.9900, 'longitud' => -13.6950,
                 'activa' => true, 'visible' => true,
             ],
             [
@@ -231,6 +249,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=800',
                 'telefono' => '928524036', 'email' => 'tienda@elgrifo.com',
                 'direccion' => 'San Bartolomé, Lanzarote', 'valoracion' => 5.0, 'total_resenas' => 547,
+                'latitud' => 29.0030, 'longitud' => -13.6180,
                 'activa' => true, 'visible' => true,
             ],
             [
@@ -240,6 +259,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1608270586620-248524c67de9?w=800',
                 'telefono' => '928720189', 'email' => 'hola@mezclaatlantico.com',
                 'direccion' => 'Arrecife, Lanzarote', 'valoracion' => 4.5, 'total_resenas' => 96,
+                'latitud' => 28.9640, 'longitud' => -13.5460,
                 'activa' => true, 'visible' => true,
             ],
 
@@ -251,6 +271,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=800',
                 'telefono' => '928835741', 'email' => 'tinaja@artesania.es',
                 'direccion' => 'Haría, Lanzarote', 'valoracion' => 4.8, 'total_resenas' => 118,
+                'latitud' => 29.1440, 'longitud' => -13.5130,
                 'activa' => true, 'visible' => true,
             ],
             [
@@ -260,6 +281,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800',
                 'telefono' => '928736120', 'email' => 'info@tejidosvolcanicos.com',
                 'direccion' => 'Teguise, Lanzarote', 'valoracion' => 4.6, 'total_resenas' => 77,
+                'latitud' => 29.0610, 'longitud' => -13.5600,
                 'activa' => true, 'visible' => true,
             ],
             [
@@ -269,6 +291,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1578926288207-a90a103da813?w=800',
                 'telefono' => '928812567', 'email' => 'arte@estudiocesar.es',
                 'direccion' => 'Arrecife, Lanzarote', 'valoracion' => 4.9, 'total_resenas' => 265,
+                'latitud' => 28.9620, 'longitud' => -13.5490,
                 'activa' => true, 'visible' => true,
             ],
             [
@@ -278,6 +301,7 @@ class TiendaSeeder extends Seeder
                 'imagen_portada' => 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800',
                 'telefono' => '928736015', 'email' => 'info@saljanubio.com',
                 'direccion' => 'Las Salinas, Lanzarote', 'valoracion' => 4.7, 'total_resenas' => 143,
+                'latitud' => 28.9130, 'longitud' => -13.7900,
                 'activa' => true, 'visible' => true,
             ],
         ];

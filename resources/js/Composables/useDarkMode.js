@@ -1,0 +1,33 @@
+import { ref, watch } from 'vue'
+
+// Singleton — estado compartido entre todos los componentes
+const isDark = ref(false)
+let initialized = false
+
+function initDarkMode() {
+    if (initialized || typeof window === 'undefined') return
+    initialized = true
+
+    const saved = localStorage.getItem('theme')
+    isDark.value =
+        saved === 'dark' ||
+        (saved === null && window.matchMedia('(prefers-color-scheme: dark)').matches)
+
+    // Sincroniza la clase HTML con el estado reactivo
+    document.documentElement.classList.toggle('dark', isDark.value)
+
+    watch(isDark, (val) => {
+        document.documentElement.classList.toggle('dark', val)
+        localStorage.setItem('theme', val ? 'dark' : 'light')
+    })
+}
+
+export function useDarkMode() {
+    initDarkMode()
+
+    const toggleDark = () => {
+        isDark.value = !isDark.value
+    }
+
+    return { isDark, toggleDark }
+}

@@ -43,39 +43,39 @@
 
                 <!-- Estadísticas Principales -->
                 <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <div class="rounded-lg bg-gradient-to-br from-green-500 to-green-700 p-6 shadow-lg text-white">
+                    <div class="rounded-lg bg-white p-6 shadow">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm font-medium opacity-90">Ingresos Totales</p>
-                                <p class="mt-2 text-3xl font-bold">{{ formatPrice(stats.ingresos_totales) }}€</p>
+                                <p class="text-sm font-medium text-gray-500">Ingresos Totales</p>
+                                <p class="mt-2 text-3xl font-bold text-gray-800">{{ formatPrice(stats.ingresos_totales) }}€</p>
                             </div>
                             <div class="text-4xl">💰</div>
                         </div>
                     </div>
-                    <div class="rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 p-6 shadow-lg text-white">
+                    <div class="rounded-lg bg-white p-6 shadow">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm font-medium opacity-90">Periodo Actual</p>
-                                <p class="mt-2 text-3xl font-bold">{{ formatPrice(stats.ingresos_periodo) }}€</p>
+                                <p class="text-sm font-medium text-gray-500">Periodo Actual</p>
+                                <p class="mt-2 text-3xl font-bold text-gray-800">{{ formatPrice(stats.ingresos_periodo) }}€</p>
                             </div>
                             <div class="text-4xl">📅</div>
                         </div>
                     </div>
-                    <div class="rounded-lg bg-gradient-to-br from-purple-500 to-purple-700 p-6 shadow-lg text-white">
+                    <div class="rounded-lg bg-white p-6 shadow">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm font-medium opacity-90">Ticket Promedio</p>
-                                <p class="mt-2 text-3xl font-bold">{{ formatPrice(stats.ticket_promedio) }}€</p>
+                                <p class="text-sm font-medium text-gray-500">Ticket Promedio</p>
+                                <p class="mt-2 text-3xl font-bold text-gray-800">{{ formatPrice(stats.ticket_promedio) }}€</p>
                             </div>
                             <div class="text-4xl">🎫</div>
                         </div>
                     </div>
-                    <div class="rounded-lg bg-gradient-to-br from-orange-500 to-orange-700 p-6 shadow-lg text-white">
+                    <div class="rounded-lg bg-white p-6 shadow">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm font-medium opacity-90">Este Mes</p>
-                                <p class="mt-2 text-3xl font-bold">{{ formatPrice(stats.ingresos_mes_actual) }}€</p>
-                                <p class="mt-1 text-xs opacity-75">
+                                <p class="text-sm font-medium text-gray-500">Este Mes</p>
+                                <p class="mt-2 text-3xl font-bold text-gray-800">{{ formatPrice(stats.ingresos_mes_actual) }}€</p>
+                                <p class="mt-1 text-xs text-gray-400">
                                     {{ stats.crecimiento_mensual >= 0 ? '↗' : '↘' }}
                                     {{ Math.abs(stats.crecimiento_mensual).toFixed(1) }}% vs mes anterior
                                 </p>

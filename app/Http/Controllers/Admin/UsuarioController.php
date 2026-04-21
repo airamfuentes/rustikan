@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class UsuarioController extends Controller
@@ -84,21 +85,31 @@ class UsuarioController extends Controller
     public function update(Request $request, User $usuario)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $usuario->id,
-            'role' => 'required|in:user,admin',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users,email,' . $usuario->id,
+            'role'     => 'required|in:user,admin',
             'password' => 'nullable|confirmed|min:8',
+            'avatar'   => 'nullable|image|max:2048',
         ]);
 
         // Guardar valores anteriores antes de actualizar
         $rolAnterior = $usuario->role;
 
-        // Remover password_confirmation si existe
-        if (isset($validated['password_confirmation'])) {
-            unset($validated['password_confirmation']);
+        // Gestión del avatar
+        if ($request->hasFile('avatar')) {
+            if ($usuario->avatar) {
+                Storage::disk('public')->delete($usuario->avatar);
+            }
+            $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        } elseif ($request->boolean('delete_avatar')) {
+            if ($usuario->avatar) {
+                Storage::disk('public')->delete($usuario->avatar);
+            }
+            $validated['avatar'] = null;
         }
 
-        // Solo actualizar la contraseña si se proporcionó
+        unset($validated['password_confirmation']);
+
         if (!empty($validated['password'])) {
             $validated['password'] = bcrypt($validated['password']);
         } else {

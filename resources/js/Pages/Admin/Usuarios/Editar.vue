@@ -14,16 +14,45 @@
                 <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                     <form @submit.prevent="submit" class="p-6">
                         <div class="space-y-6">
-                            <!-- Información del Usuario -->
+                            <!-- Foto de perfil -->
                             <div class="rounded-lg bg-gray-50 p-4">
-                                <div class="flex items-center gap-4">
-                                    <div class="flex h-16 w-16 items-center justify-center rounded-full bg-primary-600 text-2xl font-bold text-white">
-                                        {{ usuario.name.charAt(0).toUpperCase() }}
+                                <h3 class="mb-3 text-sm font-semibold text-gray-700">Foto de perfil</h3>
+                                <div class="flex items-center gap-5">
+                                    <div class="relative shrink-0">
+                                        <img
+                                            v-if="avatarPreview"
+                                            :src="avatarPreview"
+                                            alt="Avatar"
+                                            class="h-20 w-20 rounded-full object-cover ring-2 ring-gray-200"
+                                        />
+                                        <div
+                                            v-else
+                                            class="flex h-20 w-20 items-center justify-center rounded-full bg-primary-600 text-2xl font-bold text-white"
+                                        >
+                                            {{ usuario.name.charAt(0).toUpperCase() }}
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p class="text-sm text-gray-600">Usuario desde</p>
-                                        <p class="font-medium text-gray-900">{{ new Date(usuario.created_at).toLocaleDateString('es-ES') }}</p>
+                                    <div class="flex flex-col gap-2">
+                                        <label class="cursor-pointer inline-flex items-center gap-2 rounded-lg border border-primary-300 bg-primary-50 px-3 py-1.5 text-sm font-medium text-primary-700 hover:bg-primary-100 transition-colors">
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                            Cambiar foto
+                                            <input type="file" accept="image/*" class="hidden" @change="onAvatarChange" />
+                                        </label>
+                                        <button
+                                            v-if="avatarPreview"
+                                            type="button"
+                                            @click="removeAvatar"
+                                            class="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                                        >
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                            Eliminar foto
+                                        </button>
+                                        <p class="text-xs text-gray-400">JPG, PNG o GIF · Máx. 2MB</p>
                                     </div>
+                                </div>
+                                <p v-if="form.errors.avatar" class="mt-2 text-sm text-red-600">{{ form.errors.avatar }}</p>
+                                <div class="mt-3 border-t border-gray-200 pt-3">
+                                    <p class="text-xs text-gray-500">Usuario desde <span class="font-medium text-gray-700">{{ new Date(usuario.created_at).toLocaleDateString('es-ES') }}</span></p>
                                 </div>
                             </div>
 
@@ -137,10 +166,13 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import { Link, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 const props = defineProps({
     usuario: Object,
 });
+
+const avatarPreview = ref(props.usuario.avatar ? '/storage/' + props.usuario.avatar : null);
 
 const form = useForm({
     name: props.usuario.name,
@@ -148,11 +180,29 @@ const form = useForm({
     role: props.usuario.role,
     password: '',
     password_confirmation: '',
+    avatar: null,
+    delete_avatar: false,
 });
 
+const onAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    form.avatar = file;
+    form.delete_avatar = false;
+    avatarPreview.value = URL.createObjectURL(file);
+};
+
+const removeAvatar = () => {
+    form.avatar = null;
+    form.delete_avatar = true;
+    avatarPreview.value = null;
+};
+
 const submit = () => {
-    form.put(route('admin.usuarios.update', props.usuario.id), {
-        preserveScroll: true,
-    });
+    form.transform((data) => ({ ...data, _method: 'PUT' }))
+        .post(route('admin.usuarios.update', props.usuario.id), {
+            preserveScroll: true,
+            forceFormData: true,
+        });
 };
 </script>

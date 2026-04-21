@@ -26,7 +26,7 @@ Route::get('/categoria/{categoria:slug}', [CategoriaController::class, 'show'])
 
 Route::get('/tienda/{tienda:slug}', function (\App\Models\Tienda $tienda) {
     $tienda->load(['categoria', 'user', 'productos' => function ($query) {
-        $query->where('disponible', true)->orderBy('destacado', 'desc');
+        $query->with('categoria')->where('disponible', true)->orderBy('destacado', 'desc');
     }]);
 
     return Inertia::render('TiendaDetalle', [
@@ -37,6 +37,13 @@ Route::get('/tienda/{tienda:slug}', function (\App\Models\Tienda $tienda) {
 Route::get('/carrito', function () {
     return Inertia::render('Carrito');
 })->name('carrito');
+
+// Pedidos (usuario autenticado)
+Route::middleware('auth')->group(function () {
+    Route::post('/pedidos', [\App\Http\Controllers\PedidoController::class, 'store'])->name('pedidos.store');
+    Route::get('/pedidos/{pedido}/confirmacion', [\App\Http\Controllers\PedidoController::class, 'show'])->name('pedidos.confirmacion');
+    Route::get('/mis-pedidos', [\App\Http\Controllers\PedidoController::class, 'index'])->name('pedidos.index');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function (\Illuminate\Http\Request $request) {

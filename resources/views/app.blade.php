@@ -10,6 +10,16 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
+        <!-- Dark mode: apply class before render to prevent FOUC -->
+        <script>
+            (function(){
+                var t=localStorage.getItem('theme');
+                if(t==='dark'||(t===null&&window.matchMedia('(prefers-color-scheme: dark)').matches)){
+                    document.documentElement.classList.add('dark');
+                }
+            })();
+        </script>
+
         <!-- Scripts -->
         @routes
         @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])

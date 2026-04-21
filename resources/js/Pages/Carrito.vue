@@ -1,7 +1,10 @@
 <script setup>
-import { computed } from 'vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { useCarrito } from '@/Composables/useCarrito';
+
+const page  = usePage();
+const user  = computed(() => page.props.auth?.user);
 
 const {
     items,
@@ -13,21 +16,81 @@ const {
     vaciarCarrito,
 } = useCarrito();
 
-/** Gastos de envío estimados (lógica futura) */
-const gastosEnvio = computed(() => (totalPrecio.value > 0 ? 2.5 : 0));
+/** Envío gratis a partir de 50 € */
+const gastosEnvio = computed(() => (totalPrecio.value >= 50 ? 0 : totalPrecio.value > 0 ? 2.5 : 0));
 
 /** Total final incluyendo envío */
 const totalFinal = computed(() => totalPrecio.value + gastosEnvio.value);
 
-/** Navegar a inicio si el carrito está vacío tras vaciar */
-const handleVaciar = () => {
-    vaciarCarrito();
+/** Vaciar carrito */
+const handleVaciar = () => vaciarCarrito();
+
+// ─── Checkout modal ─────────────────────────────────────────────────────────
+const mostrarCheckout = ref(false);
+const enviando        = ref(false);
+const errores         = ref({});
+
+const form = ref({
+    direccion_envio:   user.value?.direccion  ?? '',
+    telefono_contacto: user.value?.telefono   ?? '',
+    notas:             '',
+});
+
+const abrirCheckout = () => {
+    if (!user.value) {
+        router.visit(route('login'));
+        return;
+    }
+    // Re-sincronizar con datos del usuario por si cambió
+    form.value.direccion_envio   = form.value.direccion_envio   || user.value?.direccion  || '';
+    form.value.telefono_contacto = form.value.telefono_contacto || user.value?.telefono   || '';
+    errores.value = {};
+    mostrarCheckout.value = true;
 };
 
-/** Proceder al pago — en el futuro conectar con pasarela */
-const procederAlPago = () => {
-    // TODO: Integrar pasarela de pago
-    alert('El proceso de pago se implementará próximamente.');
+const cerrarCheckout = () => { mostrarCheckout.value = false; };
+
+const confirmarPedido = () => {
+    errores.value = {};
+
+    // Validación básica cliente
+    if (!form.value.direccion_envio.trim()) {
+        errores.value.direccion_envio = 'La dirección de envío es obligatoria.';
+        return;
+    }
+    if (!form.value.telefono_contacto.trim()) {
+        errores.value.telefono_contacto = 'El teléfono de contacto es obligatorio.';
+        return;
+    }
+
+    enviando.value = true;
+
+    router.post(route('pedidos.store'), {
+        items: items.value.map(i => ({
+            id:           i.id,
+            cantidad:     i.cantidad,
+            precio:       i.precio,
+            nombre:       i.nombre,
+            tienda_id:    i.tienda_id,
+            tienda_nombre:i.tienda_nombre,
+            imagen:       i.imagen,
+            unidad:       i.unidad,
+        })),
+        direccion_envio:   form.value.direccion_envio.trim(),
+        telefono_contacto: form.value.telefono_contacto.trim(),
+        notas:             form.value.notas.trim(),
+    }, {
+        onSuccess: () => {
+            vaciarCarrito();
+            mostrarCheckout.value = false;
+        },
+        onError: (e) => {
+            errores.value = e;
+        },
+        onFinish: () => {
+            enviando.value = false;
+        },
+    });
 };
 </script>
 
@@ -225,7 +288,7 @@ const procederAlPago = () => {
                         <!-- CTA: Proceder al pago -->
                         <div class="px-6 pb-6">
                             <button
-                                @click="procederAlPago"
+                                @click="abrirCheckout"
                                 class="group flex w-full items-center justify-center gap-2 rounded-xl bg-primary-500 py-4 text-sm font-bold text-white shadow-sm transition-all hover:bg-primary-600 hover:shadow-md"
                             >
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -263,4 +326,154 @@ const procederAlPago = () => {
             </div>
         </main>
     </div>
+
+    <!-- ── Modal de checkout ────────────────────────────────────────────────── -->
+    <Transition
+        enter-active-class="transition duration-300"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition duration-200"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+    >
+        <div
+            v-if="mostrarCheckout"
+            class="fixed inset-0 z-50 flex items-end justify-center bg-black/50 px-4 pb-0 sm:items-center sm:pb-4"
+            @click.self="cerrarCheckout"
+        >
+            <Transition
+                enter-active-class="transition duration-300"
+                enter-from-class="translate-y-full sm:translate-y-0 sm:scale-95 sm:opacity-0"
+                enter-to-class="translate-y-0 sm:scale-100 sm:opacity-100"
+                leave-active-class="transition duration-200"
+                leave-from-class="translate-y-0 sm:scale-100 sm:opacity-100"
+                leave-to-class="translate-y-full sm:translate-y-0 sm:scale-95 sm:opacity-0"
+                appear
+            >
+                <div class="w-full max-w-lg overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl">
+
+                    <!-- Header del modal -->
+                    <div class="flex items-center justify-between border-b border-gray-100 px-6 py-5">
+                        <div>
+                            <h2 class="text-xl font-extrabold text-gray-900">Confirmar pedido</h2>
+                            <p class="mt-0.5 text-sm text-gray-500">{{ totalItems }} producto{{ totalItems !== 1 ? 's' : '' }} · <span class="font-semibold text-primary-600">{{ totalFinal.toFixed(2) }}€</span></p>
+                        </div>
+                        <button
+                            @click="cerrarCheckout"
+                            class="flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                        >
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Formulario -->
+                    <div class="space-y-5 px-6 py-6">
+
+                        <!-- Error de stock -->
+                        <div v-if="errores.stock" class="flex items-start gap-3 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                            <svg class="mt-0.5 h-4 w-4 shrink-0 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {{ errores.stock }}
+                        </div>
+
+                        <!-- Dirección de envío -->
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-gray-700">
+                                Dirección de envío <span class="text-red-500">*</span>
+                            </label>
+                            <textarea
+                                v-model="form.direccion_envio"
+                                rows="2"
+                                placeholder="Calle, número, piso… Municipio, Lanzarote"
+                                :class="[
+                                    'w-full resize-none rounded-xl border px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:ring-2',
+                                    errores.direccion_envio
+                                        ? 'border-red-400 focus:ring-red-300'
+                                        : 'border-gray-200 focus:border-primary-400 focus:ring-primary-200',
+                                ]"
+                            />
+                            <p v-if="errores.direccion_envio" class="mt-1 text-xs text-red-500">{{ errores.direccion_envio }}</p>
+                        </div>
+
+                        <!-- Teléfono -->
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-gray-700">
+                                Teléfono de contacto <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                v-model="form.telefono_contacto"
+                                type="tel"
+                                placeholder="+34 600 000 000"
+                                :class="[
+                                    'w-full rounded-xl border px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:ring-2',
+                                    errores.telefono_contacto
+                                        ? 'border-red-400 focus:ring-red-300'
+                                        : 'border-gray-200 focus:border-primary-400 focus:ring-primary-200',
+                                ]"
+                            />
+                            <p v-if="errores.telefono_contacto" class="mt-1 text-xs text-red-500">{{ errores.telefono_contacto }}</p>
+                        </div>
+
+                        <!-- Notas -->
+                        <div>
+                            <label class="mb-1.5 block text-sm font-semibold text-gray-700">
+                                Notas del pedido <span class="text-xs font-normal text-gray-400">(opcional)</span>
+                            </label>
+                            <textarea
+                                v-model="form.notas"
+                                rows="2"
+                                placeholder="Instrucciones de entrega, alergias, preferencias…"
+                                class="w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-primary-400 focus:ring-2 focus:ring-primary-200"
+                            />
+                        </div>
+
+                        <!-- Resumen rápido -->
+                        <div class="rounded-xl bg-gray-50 px-4 py-4 text-sm">
+                            <div class="flex justify-between text-gray-600">
+                                <span>Subtotal</span>
+                                <span class="font-medium text-gray-800">{{ totalPrecio.toFixed(2) }}€</span>
+                            </div>
+                            <div class="mt-1 flex justify-between text-gray-600">
+                                <span>Envío</span>
+                                <span :class="gastosEnvio === 0 ? 'font-medium text-green-600' : 'font-medium text-gray-800'">
+                                    {{ gastosEnvio === 0 ? 'GRATIS' : gastosEnvio.toFixed(2) + '€' }}
+                                </span>
+                            </div>
+                            <div v-if="gastosEnvio > 0" class="mt-1 text-xs text-gray-400">
+                                Envío gratis a partir de 50€
+                            </div>
+                            <div class="mt-3 flex justify-between border-t border-gray-200 pt-3">
+                                <span class="font-bold text-gray-900">Total</span>
+                                <span class="text-lg font-extrabold text-primary-600">{{ totalFinal.toFixed(2) }}€</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer con botón -->
+                    <div class="border-t border-gray-100 px-6 py-4">
+                        <button
+                            @click="confirmarPedido"
+                            :disabled="enviando"
+                            class="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-500 py-4 text-sm font-bold text-white shadow-sm transition-all hover:bg-primary-600 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            <svg v-if="enviando" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                            </svg>
+                            <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            {{ enviando ? 'Procesando…' : 'Confirmar pedido' }}
+                        </button>
+                        <p class="mt-3 text-center text-xs text-gray-400">
+                            Al confirmar aceptas nuestros <span class="text-primary-500 cursor-pointer hover:underline">términos de servicio</span>
+                        </p>
+                    </div>
+                </div>
+            </Transition>
+        </div>
+    </Transition>
 </template>
