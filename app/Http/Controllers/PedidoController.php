@@ -120,7 +120,17 @@ class PedidoController extends Controller
      */
     public function index()
     {
-        $pedidos = Pedido::where('user_id', auth()->id())
+        $userId = auth()->id();
+
+        $pedidosActivos = Pedido::where('user_id', $userId)
+            ->whereIn('estado', ['pendiente', 'confirmado', 'preparando', 'en_camino'])
+            ->with('items')
+            ->withCount('items')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $pedidosHistorial = Pedido::where('user_id', $userId)
+            ->whereIn('estado', ['entregado', 'cancelado'])
             ->with('items')
             ->withCount('items')
             ->orderBy('created_at', 'desc')
@@ -128,7 +138,8 @@ class PedidoController extends Controller
             ->withQueryString();
 
         return Inertia::render('MisPedidos', [
-            'pedidos' => $pedidos,
+            'pedidosActivos'   => $pedidosActivos,
+            'pedidosHistorial' => $pedidosHistorial,
         ]);
     }
 }

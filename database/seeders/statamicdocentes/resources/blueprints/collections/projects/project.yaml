@@ -1,0 +1,109 @@
+title: Project
+tabs:
+  main:
+    display: Main
+    sections:
+      -
+        fields:
+          -
+            handle: project_image
+            field:
+              max_files: 1
+              container: assets
+              type: assets
+              display: 'Project Image'
+          -
+            handle: title
+            field:
+              type: text
+              required: true
+              validate:
+                - required
+          -
+            handle: description
+            field:
+              type: textarea
+              display: Description
+          -
+            handle: second_description
+            field:
+              type: textarea
+              display: 'Second Description'
+          -
+            handle: internal_project_image
+            field:
+              container: assets
+              type: assets
+              display: 'Internal Project Image'
+              max_files: 1
+          -
+            handle: activity_images
+            field:
+              max_files: 6
+              container: assets
+              type: assets
+              display: 'Activity Images'
+          -
+            handle: video
+            field:
+              type: video
+              display: Video
+          -
+            handle: genially
+            field:
+              type: textarea
+              display: Genially
+          -
+            handle: second_genially
+            field:
+              type: textarea
+              display: 'Second Genially'
+          -
+            handle: content
+            field:
+              type: markdown
+              display: Content
+              localizable: true
+          -
+            handle: author
+            field:
+              type: users
+              display: Author
+              default: current
+              localizable: true
+              max_items: 1
+          -
+            handle: template
+            field:
+              type: template
+              display: Template
+              localizable: true
+      -
+        display: Encargados
+        fields:
+          -
+            handle: encargados
+            field:
+              collections:
+                - team
+              type: entries
+              display: Encargados
+  sidebar:
+    display: Sidebar
+    sections:
+      -
+        fields:
+          -
+            handle: slug
+            field:
+              type: slug
+              localizable: true
+              validate: 'max:200'
+          -
+            handle: tags
+            field:
+              type: terms
+              taxonomies:
+                - tags
+              display: Tags
+              mode: select

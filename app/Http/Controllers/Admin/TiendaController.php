@@ -14,6 +14,21 @@ use Illuminate\Support\Str;
 
 class TiendaController extends Controller
 {
+    // ── Helper: descargar imagen desde URL y guardarla ───────────────────────
+    private function storeFromUrl(string $url, string $folder): ?string
+    {
+        try {
+            $contents = @file_get_contents($url);
+            if ($contents === false) return null;
+            $ext = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
+            if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) $ext = 'jpg';
+            $filename = $folder . '/' . Str::uuid() . '.' . $ext;
+            Storage::disk('public')->put($filename, $contents);
+            return $filename;
+        } catch (\Throwable) {
+            return null;
+        }
+    }
     /**
      * Display a listing of the resource.
      */
@@ -103,6 +118,8 @@ class TiendaController extends Controller
             'longitud' => 'nullable|numeric|between:-180,180',
             'logo' => 'nullable|image|max:2048',
             'imagen_portada' => 'nullable|image|max:2048',
+            'logo_url' => 'nullable|url|max:2048',
+            'imagen_portada_url' => 'nullable|url|max:2048',
         ]);
 
         $validated['slug'] = Str::slug($validated['nombre']);
@@ -110,6 +127,8 @@ class TiendaController extends Controller
         // Manejar subida de logo
         if ($request->hasFile('logo')) {
             $validated['logo'] = $request->file('logo')->store('tiendas/logos', 'public');
+        } elseif ($request->filled('logo_url')) {
+            $validated['logo'] = $this->storeFromUrl($request->logo_url, 'tiendas/logos');
         } else {
             unset($validated['logo']);
         }
@@ -117,9 +136,13 @@ class TiendaController extends Controller
         // Manejar subida de imagen de portada
         if ($request->hasFile('imagen_portada')) {
             $validated['imagen_portada'] = $request->file('imagen_portada')->store('tiendas/portadas', 'public');
+        } elseif ($request->filled('imagen_portada_url')) {
+            $validated['imagen_portada'] = $this->storeFromUrl($request->imagen_portada_url, 'tiendas/portadas');
         } else {
             unset($validated['imagen_portada']);
         }
+
+        unset($validated['logo_url'], $validated['imagen_portada_url']);
 
         $tienda = Tienda::create($validated);
 
@@ -177,6 +200,8 @@ class TiendaController extends Controller
             'longitud'              => 'nullable|numeric|between:-180,180',
             'logo'                  => 'nullable|image|max:2048',
             'imagen_portada'        => 'nullable|image|max:2048',
+            'logo_url'              => 'nullable|url|max:2048',
+            'imagen_portada_url'    => 'nullable|url|max:2048',
             'delete_logo'           => 'nullable|boolean',
             'delete_imagen_portada' => 'nullable|boolean',
             'activa'                => 'sometimes|boolean',
@@ -189,34 +214,38 @@ class TiendaController extends Controller
 
         // Eliminar logo si se solicitó
         if ($request->boolean('delete_logo') && $tienda->logo) {
-            Storage::disk('public')->delete($tienda->logo);
+            if (!str_starts_with($tienda->logo, 'http')) Storage::disk('public')->delete($tienda->logo);
             $validated['logo'] = null;
         }
 
         // Eliminar portada si se solicitó
         if ($request->boolean('delete_imagen_portada') && $tienda->imagen_portada) {
-            Storage::disk('public')->delete($tienda->imagen_portada);
+            if (!str_starts_with($tienda->imagen_portada, 'http')) Storage::disk('public')->delete($tienda->imagen_portada);
             $validated['imagen_portada'] = null;
         }
 
         // Subir nuevo logo
         if ($request->hasFile('logo')) {
-            if ($tienda->logo) {
+            if ($tienda->logo && !str_starts_with($tienda->logo, 'http')) {
                 Storage::disk('public')->delete($tienda->logo);
             }
             $validated['logo'] = $request->file('logo')->store('tiendas/logos', 'public');
+        } elseif ($request->filled('logo_url')) {
+            $validated['logo'] = $this->storeFromUrl($request->logo_url, 'tiendas/logos');
         }
 
         // Subir nueva portada
         if ($request->hasFile('imagen_portada')) {
-            if ($tienda->imagen_portada) {
+            if ($tienda->imagen_portada && !str_starts_with($tienda->imagen_portada, 'http')) {
                 Storage::disk('public')->delete($tienda->imagen_portada);
             }
             $validated['imagen_portada'] = $request->file('imagen_portada')->store('tiendas/portadas', 'public');
+        } elseif ($request->filled('imagen_portada_url')) {
+            $validated['imagen_portada'] = $this->storeFromUrl($request->imagen_portada_url, 'tiendas/portadas');
         }
 
         // Limpiar flags auxiliares antes de guardar
-        unset($validated['delete_logo'], $validated['delete_imagen_portada']);
+        unset($validated['delete_logo'], $validated['delete_imagen_portada'], $validated['logo_url'], $validated['imagen_portada_url']);
 
         $tienda->update($validated);
 

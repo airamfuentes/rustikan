@@ -1,0 +1,24 @@
+<div class="bg-blue-300">
+    <div class="text-center bg-[#11375f] p-6 text-white font-bold">
+        <h1 class="text-4xl pb-6 font-bold">WEBINARS</h1>
+        <h3>Webinars sobre gamifiación, aprendizaje basado en juegos y aplicaciones relacionadas.</h3>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 max-w-5xl mx-auto gap-4 mt-5 pb-8">
+        {{ collection:webinars }}
+        <div v-for="webinar in webinars" class="bg-white rounded-lg flex flex-col shadow-[-2px_2px_15px_] shadow-neutral-600">
+            <div class="flex justify-center">
+              <a href="{{ url }}">
+                <img src="{{ webinar_image }}" class="md:rounded-t-lg md:rounded-tr-lg">
+              </a>
+            </div>
+            <div class="flex flex-col text-blue-900 py-3 px-2 ">
+                <div class="mt-2 text-sm">
+                    {{ title }}
+                    {{ subtitle }}
+                </div>
+            </div>
+        </div>
+        {{ /collection:webinars }}
+    </div>
+</div>

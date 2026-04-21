@@ -66,6 +66,11 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
+    public function isOwner(): bool
+    {
+        return $this->role === 'owner';
+    }
+
     /**
      * Get the tiendas owned by the user
      */

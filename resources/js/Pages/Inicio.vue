@@ -51,12 +51,12 @@ const handleClickOutside = (event) => {
 
 onMounted(() => {
     window.addEventListener('scroll', handleScroll);
-    document.addEventListener('click', handleClickOutside);
+    document.addEventListener('click', handleClickOutside, true);
 });
 
 onUnmounted(() => {
     window.removeEventListener('scroll', handleScroll);
-    document.removeEventListener('click', handleClickOutside);
+    document.removeEventListener('click', handleClickOutside, true);
     if (searchTimeout) clearTimeout(searchTimeout);
     if (scrollTimeout) clearTimeout(scrollTimeout);
 });
@@ -298,16 +298,6 @@ const buscarTiendas = () => {
                                     </button>
 
                                     <Link
-                                        :href="route('profile.edit')"
-                                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
-                                        @click="showProfileMenu = false"
-                                    >
-                                        <svg class="h-4 w-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                        </svg>
-                                        Mi perfil
-                                    </Link>
-                                    <Link
                                         :href="route('carrito')"
                                         class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
                                         @click="showProfileMenu = false"
@@ -316,6 +306,26 @@ const buscarTiendas = () => {
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                         </svg>
                                         Ver carrito
+                                    </Link>
+                                    <Link
+                                        :href="route('pedidos.index')"
+                                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
+                                        @click="showProfileMenu = false"
+                                    >
+                                        <svg class="h-4 w-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                        </svg>
+                                        Mis pedidos
+                                    </Link>
+                                    <Link
+                                        :href="route('profile.edit')"
+                                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
+                                        @click="showProfileMenu = false"
+                                    >
+                                        <svg class="h-4 w-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                        Mi perfil
                                     </Link>
                                     <Link
                                         :href="route('home')"
@@ -337,6 +347,17 @@ const buscarTiendas = () => {
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                         </svg>
                                         Panel de administración
+                                    </Link>
+                                    <Link
+                                        v-if="user.role === 'owner'"
+                                        :href="route('owner.panel')"
+                                        class="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-green-600 transition-colors hover:bg-green-50 dark:hover:bg-green-900/20"
+                                        @click="showProfileMenu = false"
+                                    >
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                        </svg>
+                                        Mi tienda
                                     </Link>
                                     <div class="border-t border-gray-100 dark:border-gray-700">
                                         <Link
@@ -415,7 +436,7 @@ const buscarTiendas = () => {
         </section>
 
         <!-- Sección Mapa de Tiendas -->
-        <section id="mapa" class="py-16 bg-white dark:bg-gray-800">
+        <section id="mapa" class="relative pt-16 pb-28 bg-white dark:bg-gray-800">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="mb-8 text-center">
                     <h2 class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">
@@ -432,23 +453,17 @@ const buscarTiendas = () => {
                     height="480px"
                 />
             </div>
+
+            <!-- Curva inferior: transición a sección naranja -->
+            <div class="absolute bottom-0 left-0 right-0">
+                <svg class="block w-full h-20 text-primary-400" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true">
+                    <path d="M0,80 C480,0 960,0 1440,80 L1440,80 L0,80 Z" fill="currentColor"/>
+                </svg>
+            </div>
         </section>
 
-        <svg
-            class="block h-12 w-full text-primary-400"
-            viewBox="0 0 1200 120"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-        >
-            <path
-                d="M0 96L60 78C120 60 240 24 360 18C480 12 600 36 720 50C840 64 960 68 1080 62C1140 58 1170 54 1200 50V120H0Z"
-                fill="currentColor"
-            />
-        </svg>
-
         <!-- Sección Colabora con Rustikan -->
-        <section class="relative overflow-hidden bg-primary-400 py-16">
-            <!-- Ondas decorativas de fondo -->
+        <section class="relative overflow-hidden bg-primary-400 pt-4 pb-28">
             <div class="absolute inset-0 overflow-hidden opacity-15 pointer-events-none">
                 <svg class="absolute left-1/2 top-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 text-primary-600" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
                     <path fill="currentColor" d="M47.1,-78.5C60.9,-70.8,71.8,-57.1,78.3,-41.5C84.8,-25.9,86.9,-8.4,84.3,7.9C81.7,24.2,74.4,39.3,64.2,51.9C54,64.5,40.9,74.6,25.8,79.8C10.7,85,-6.4,85.3,-22.3,81.5C-38.2,77.7,-53,69.8,-64.5,58.3C-76,46.8,-84.2,31.7,-86.8,15.3C-89.4,-1.1,-86.4,-18.8,-78.8,-33.8C-71.2,-48.8,-59,-61.1,-44.5,-68.2C-30,-75.3,-13.2,-77.2,2.8,-81.7C18.8,-86.2,33.3,-86.2,47.1,-78.5Z" transform="translate(100 100)" />
@@ -474,7 +489,7 @@ const buscarTiendas = () => {
                     <div class="flex flex-col items-center text-center">
                         <div class="relative mb-6">
                             <!-- Onda decorativa -->
-                            <svg class="absolute -inset-8 h-64 w-64 text-white opacity-50" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="absolute -inset-8 h-64 w-64 text-white opacity-55" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
                                 <path fill="currentColor" d="M43.3,-72.8C54.5,-63.8,60.3,-47.5,65.9,-32.1C71.5,-16.7,76.9,-2.2,75.4,11.5C73.9,25.2,65.5,38.1,54.8,48.7C44.1,59.3,31.1,67.6,16.5,71.8C1.9,76,-14.3,76.1,-28.9,71.5C-43.5,66.9,-56.5,57.6,-65.8,45.2C-75.1,32.8,-80.7,17.3,-81.2,1.5C-81.7,-14.3,-77.1,-30.4,-68.3,-43.3C-59.5,-56.2,-46.5,-65.9,-32.8,-73.5C-19.1,-81.1,-4.7,-86.6,8.7,-84.3C22.1,-82,32.1,-81.8,43.3,-72.8Z" transform="translate(100 100)" />
                             </svg>
                             <div class="relative h-48 w-48 overflow-hidden rounded-full border-4 border-white shadow-xl">
@@ -497,6 +512,10 @@ const buscarTiendas = () => {
                     <!-- Hazte Productor -->
                     <div class="flex flex-col items-center text-center">
                         <div class="relative mb-6">
+                            <!-- Onda decorativa -->
+                            <svg class="absolute -inset-8 h-64 w-64 text-white opacity-50" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                                <path fill="currentColor" d="M40.9,-68.9C52.5,-60.5,60.9,-47.2,67.4,-32.7C73.9,-18.2,78.5,-2.5,77.1,13C75.7,28.5,68.3,43.8,57.7,55.5C47.1,67.2,33.3,75.3,17.8,79.8C2.3,84.3,-15,85.2,-29.5,79.6C-44,74,-55.7,62,-65.2,47.7C-74.7,33.4,-82,16.7,-82.3,-0.2C-82.6,-17.1,-75.9,-34.2,-65.6,-47.5C-55.3,-60.8,-41.4,-70.3,-27,-75.2C-12.6,-80.1,2.3,-80.4,16.3,-76.1C30.3,-71.8,29.3,-77.3,40.9,-68.9Z" transform="translate(100 100)" />
+                            </svg>
                             <div class="relative h-48 w-48 overflow-hidden rounded-full border-4 border-white shadow-xl">
                                 <img
                                     src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&h=400&fit=crop"
@@ -518,7 +537,7 @@ const buscarTiendas = () => {
                     <div class="flex flex-col items-center text-center">
                         <div class="relative mb-6">
                             <!-- Onda decorativa -->
-                            <svg class="absolute -inset-6 h-60 w-60 text-white opacity-40" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="absolute -inset-8 h-64 w-64 text-white opacity-45" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
                                 <path fill="currentColor" d="M47.1,-78.5C60.9,-70.8,71.8,-57.1,78.3,-41.5C84.8,-25.9,86.9,-8.4,84.3,7.9C81.7,24.2,74.4,39.3,64.2,51.9C54,64.5,40.9,74.6,25.8,79.8C10.7,85,-6.4,85.3,-22.3,81.5C-38.2,77.7,-53,69.8,-64.5,58.3C-76,46.8,-84.2,31.7,-86.8,15.3C-89.4,-1.1,-86.4,-18.8,-78.8,-33.8C-71.2,-48.8,-59,-61.1,-44.5,-68.2C-30,-75.3,-13.2,-77.2,2.8,-81.7C18.8,-86.2,33.3,-86.2,47.1,-78.5Z" transform="translate(100 100)" />
                             </svg>
                             <div class="relative h-48 w-48 overflow-hidden rounded-full border-4 border-white shadow-xl">
@@ -539,21 +558,17 @@ const buscarTiendas = () => {
                     </div>
                 </div>
             </div>
+
+            <!-- Curva inferior: transición al footer -->
+            <div class="absolute left-0 right-0 z-10" style="bottom:-2px">
+                <svg class="block w-full h-24 text-gray-900" viewBox="0 0 1440 96" preserveAspectRatio="none" aria-hidden="true">
+                    <path d="M0,96 L0,40 C120,70 240,90 360,72 C480,54 600,10 720,4 C840,-2 960,30 1080,52 C1200,74 1320,86 1440,60 L1440,96 Z" fill="currentColor"/>
+                </svg>
+            </div>
         </section>
 
         <!-- Footer -->
-        <footer class="relative bg-gray-900 text-gray-300">
-            <svg
-                class="pointer-events-none absolute -top-16 left-0 h-16 w-full text-gray-900"
-                viewBox="0 0 1200 120"
-                preserveAspectRatio="none"
-                aria-hidden="true"
-            >
-                <path
-                    d="M0 10L60 34C120 58 240 106 360 112C480 118 600 78 720 54C840 30 960 22 1080 32C1140 38 1170 46 1200 54V120H0Z"
-                    fill="currentColor"
-                />
-            </svg>
+        <footer class="bg-gray-900 text-gray-300">
             <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
                 <div class="grid gap-8 md:grid-cols-4">
                     <!-- Columna 1: Logo y descripción -->

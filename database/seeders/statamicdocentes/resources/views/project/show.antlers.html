@@ -1,0 +1,57 @@
+<div>
+    <div class="flex flex-col bg-[#11375f] text-white py-5">
+        <h1 class="text-3xl font-bold uppercase text-center pb-3">{{ title }}</h1>
+        <div class="flex mx-auto justify-center max-w-4xl bg-orange-400">
+            <span class="flex flex-col">
+                <h3 class="text-xl font-semibold">{{ description }}</h3>
+                {{ if encargados }}
+                    {{ encargados }}
+                        <p>{{ title }}</p>
+                    {{ /encargados }}
+                {{ /if }}
+            </span>
+            {{ if second_genially }}
+                <iframe src="{{ second_genially }}" frameborder="0"></iframe>
+            {{ /if  }}
+
+            {{ if internal_project_image }}
+                <img src="{{ internal_project_image }}" width="300" alt="">
+            {{ /if  }}
+        </div>
+    </div>
+
+    {{ if activity_images }}
+        <div class="flex flex-col items-center gap-4">
+            {{ activity_images }}
+            <img src="{{ url }}" alt="" width="800">
+            {{ /activity_images }}
+        </div>
+    {{ /if }}
+
+    {{ if video }}
+        <div class="flex gap-6 max-w-6xl mx-auto">
+
+            <div class="shrink-0">
+                <iframe width="450" height="250" class="hidden md:block" src="{{ video | embed_url }}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                <iframe width="380" height="336" class="md:hidden" src="{{ video | embed_url }}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+
+            <h3 class="text-xl font-semibold">{{ second_description }}</h3>
+
+        </div>
+    {{ /if }}
+
+    {{ if genially }}
+        <iframe src="{{ genially }}" class="mx-auto p-3" width="1200" height="675" frameborder="0"></iframe>
+    {{ /if }}
+
+    <div class="grid grid-cols-3 max-w-3xl mx-auto gap-4 mb-7 pt-10">
+        {{ collection:projects limit="3" }}
+        <div>
+            <a href="{{ url }}">
+                <img src="{{ project_image }}" class="rounded-lg">
+            </a>
+        </div>
+        {{ /collection:projects }}
+    </div>
+</div>

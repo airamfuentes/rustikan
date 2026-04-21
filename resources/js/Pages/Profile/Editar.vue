@@ -9,7 +9,7 @@ import Toast from '@/Components/Toast.vue';
 defineProps({
     mustVerifyEmail: { type: Boolean },
     status:          { type: String  },
-    pedidos:         { type: Array, default: () => [] },
+
 });
 
 const page = usePage();
@@ -452,63 +452,24 @@ const initials = computed(() => {
                     <!-- ── Pestaña: Cuenta ───────────────────────────────── -->
                     <div v-if="activeTab === 'cuenta'" class="space-y-6">
 
-                        <!-- Historial de pedidos -->
-                        <div>
-                            <h4 class="mb-3 text-sm font-semibold text-gray-700">Historial de pedidos</h4>
-
-                            <!-- Sin pedidos -->
-                            <div v-if="!pedidos.length" class="rounded-xl border border-dashed border-gray-200 py-10 text-center">
-                                <svg class="mx-auto h-10 w-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                                </svg>
-                                <p class="mt-2 text-sm text-gray-400">Aún no has realizado ningún pedido.</p>
-                                <Link href="/" class="mt-3 inline-block text-sm font-medium text-primary-500 hover:underline">
-                                    Explorar tiendas →
+                        <!-- Acceso rápido a pedidos -->
+                        <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h4 class="text-sm font-semibold text-gray-700">Mis pedidos</h4>
+                                    <p class="mt-0.5 text-xs text-gray-400">Consulta el estado de tus pedidos activos e historial</p>
+                                </div>
+                                <Link
+                                    :href="route('pedidos.index')"
+                                    class="flex items-center gap-1.5 rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-600"
+                                >
+                                    Ver pedidos
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
                                 </Link>
                             </div>
-
-                            <!-- Lista de pedidos -->
-                            <div v-else class="space-y-3">
-                                <div
-                                    v-for="pedido in pedidos"
-                                    :key="pedido.id"
-                                    class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition hover:shadow-md"
-                                >
-                                    <div class="flex items-start justify-between gap-3">
-                                        <div class="min-w-0 flex-1">
-                                            <div class="flex flex-wrap items-center gap-2">
-                                                <span class="text-sm font-semibold text-gray-800">#{{ pedido.numero_pedido }}</span>
-                                                <!-- Badge estado -->
-                                                <span :class="{
-                                                    'bg-yellow-100 text-yellow-700': pedido.estado === 'pendiente',
-                                                    'bg-blue-100 text-blue-700':    pedido.estado === 'confirmado',
-                                                    'bg-orange-100 text-orange-700':pedido.estado === 'preparando',
-                                                    'bg-indigo-100 text-indigo-700':pedido.estado === 'en_camino',
-                                                    'bg-green-100 text-green-700':  pedido.estado === 'entregado',
-                                                    'bg-red-100 text-red-700':      pedido.estado === 'cancelado',
-                                                }" class="rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize">
-                                                    {{ pedido.estado.replace('_', ' ') }}
-                                                </span>
-                                            </div>
-                                            <p class="mt-1 text-xs text-gray-400">
-                                                {{ new Date(pedido.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }) }}
-                                                <span v-if="pedido.items?.length"> · {{ pedido.items.length }} {{ pedido.items.length === 1 ? 'producto' : 'productos' }}</span>
-                                            </p>
-                                            <p v-if="pedido.direccion_envio" class="mt-0.5 truncate text-xs text-gray-400">
-                                                Envío: {{ pedido.direccion_envio }}
-                                            </p>
-                                        </div>
-                                        <div class="flex-shrink-0 text-right">
-                                            <p class="text-base font-bold text-gray-800">{{ parseFloat(pedido.total).toFixed(2) }} €</p>
-                                            <p v-if="parseFloat(pedido.gastos_envio) > 0" class="text-xs text-gray-400">+ {{ parseFloat(pedido.gastos_envio).toFixed(2) }} € envío</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
-
-                        <!-- Divider -->
-                        <hr class="border-gray-100" />
 
                         <!-- ── Eliminar cuenta (al fondo) ─── -->
                         <div class="rounded-xl border border-red-100 bg-red-50 p-5">

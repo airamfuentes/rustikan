@@ -1,0 +1,45 @@
+<div class="bg-[#1681f5]">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 px-8 py-10 items-center">
+        <div class="text-white">
+            <h1 class="text-4xl font-bold mb-4">Jueves con Genially</h1>
+            <p class="text-lg leading-relaxed">Jueves con Genially es un apartado sirve para dar visibilidad a las creaciones gamificadoras creadas con esta magnífica aplicación.</p>
+        </div>
+        <div class="flex justify-center">
+            {{ genailly_photo }}
+                <img src="{{ url }}" class="max-w-xs w-50 object-contain">
+            {{ /genailly_photo }}
+        </div>
+    </div>
+</div>
+<div class="bg-white">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 px-8 py-10 items-center">
+        <div class="grid grid-cols-2 gap-4">
+            {{ genially_team_photo }}
+                <img src="{{ url }}" class="w-full h-full object-cover aspect-square">
+            {{ /genially_team_photo }}     
+        </div>
+        <p class="text-center max-w-3xl mx-auto">Aprendiendo con genially Os animamos a aprender sobre esta magnífica herramienta de la mano de los Master de la educación. <br><br>Francisco y Francis Martínez</p>
+        <div class="flex flex-col justify-center p-4">
+            <h2 class="text-lg font-bold text-blue-600 mb-4">{{ course_title }}</h2>
+            <p class="text-gray-700 leading-relaxed">{{ course_description }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="bg-neutral-100 pb-10 pt-6">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 px-8">
+        {{ collection:genially }}
+        <div class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
+            <a href="{{ url }}">
+                {{ genially_course_photo }}
+                    <img src="{{ url }}" class="w-full object-cover">
+                {{ /genially_course_photo }}
+            </a>
+            <div class="p-3 flex flex-col flex-1">
+                <h3 class="font-bold text-blue-600 text-sm mb-2">{{ title }}</h3>
+                <p class="text-gray-600 text-sm leading-relaxed">{{ subtitle }}</p>
+            </div>
+        </div>
+        {{ /collection:genially }}
+    </div>
+</div>

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { Head, Link, usePage } from '@inertiajs/vue3';
+import { Head, Link, usePage, useForm } from '@inertiajs/vue3';
 import CarritoCompra from '@/Components/CarritoCompra.vue';
 import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
 import { useCarrito } from '@/Composables/useCarrito';
@@ -11,7 +11,11 @@ const user = computed(() => page.props.auth.user);
 const { isDark, toggleDark } = useDarkMode();
 
 const props = defineProps({
-    tienda: { type: Object, required: true },
+    tienda:       { type: Object,  required: true },
+    resenas:      { type: Array,   default: () => [] },
+    distribucion: { type: Object,  default: () => ({}) },
+    canReview:    { type: Boolean, default: false },
+    userReview:   { type: Object,  default: null },
 });
 
 // ─── Scroll navbar ────────────────────────────────────────────────────────────
@@ -100,12 +104,50 @@ const añadirDesdeModal = () => {
 const onKeydown = (e) => { if (e.key === 'Escape') cerrarModal(); };
 onMounted(() => document.addEventListener('keydown', onKeydown));
 onUnmounted(() => document.removeEventListener('keydown', onKeydown));
+
+// ─── Reseñas ──────────────────────────────────────────────────────────────────
+const showReviewForm = ref(false);
+const hoverStar      = ref(0);
+const editMode       = ref(!!props.userReview);
+
+const resenaForm = useForm({
+    puntuacion: props.userReview?.puntuacion ?? 0,
+    titulo:     props.userReview?.titulo     ?? '',
+    comentario: props.userReview?.comentario ?? '',
+});
+
+const setRating = (n) => { resenaForm.puntuacion = n; };
+
+const submitResena = () => {
+    resenaForm.post(route('resenas.store', props.tienda.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+            showReviewForm.value = false;
+            editMode.value = false;
+        },
+    });
+};
+
+const deleteResena = (id) => {
+    if (!confirm('¿Eliminar tu reseña?')) return;
+    useForm({}).delete(route('resenas.destroy', id), { preserveScroll: true });
+};
+
+// Distribución % para barras
+const totalResenas = computed(() => props.resenas.length);
+const pct = (n) => totalResenas.value > 0
+    ? Math.round(((props.distribucion[n] ?? 0) / totalResenas.value) * 100)
+    : 0;
+
+// Colores de avatar por inicial
+const avatarColors = ['bg-primary-500','bg-tierra-600','bg-blue-500','bg-purple-500','bg-green-500','bg-pink-500','bg-yellow-500','bg-red-500'];
+const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColors.length];
 </script>
 
 <template>
     <Head :title="`${tienda.nombre} – Rustikan`" />
 
-    <div :class="['min-h-screen transition-colors duration-300', isDark ? 'dark bg-gray-950' : 'bg-gray-50']">
+    <div :class="['min-h-screen flex flex-col transition-colors duration-300', isDark ? 'dark bg-gray-950' : 'bg-gray-50']">
 
         <!-- ── Navbar transformable ───────────────────────────────────────────── -->
         <nav
@@ -307,7 +349,7 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown));
         </div>
 
         <!-- ── Contenido principal ────────────────────────────────────────────── -->
-        <main class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <main class="mx-auto max-w-7xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
 
             <!-- Sin productos -->
             <div v-if="productosFiltrados.length === 0" class="flex flex-col items-center py-24 text-center">
@@ -422,7 +464,297 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown));
             </div>
         </main>
 
-        <footer :class="['mt-16 border-t py-8 text-center text-sm', isDark ? 'border-gray-800 bg-gray-900 text-gray-500' : 'border-gray-200 bg-white text-gray-400']">
+        <!-- ══════════════════ SECCIÓN RESEÑAS ══════════════════ -->
+        <section :class="['py-16 px-4 sm:px-6 lg:px-8', isDark ? 'bg-gray-900' : 'bg-gradient-to-b from-gray-50 to-white']">
+            <div class="mx-auto max-w-7xl">
+
+                <!-- Cabecera -->
+                <div class="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+                    <div>
+                        <h2 :class="['text-2xl font-extrabold tracking-tight', isDark ? 'text-white' : 'text-gray-900']">
+                            Lo que dicen nuestros clientes
+                        </h2>
+                        <p :class="['mt-1 text-sm', isDark ? 'text-gray-400' : 'text-gray-500']">
+                            {{ totalResenas }} opinión{{ totalResenas !== 1 ? 'es' : '' }} verificada{{ totalResenas !== 1 ? 's' : '' }}
+                        </p>
+                    </div>
+
+                    <!-- Botón "Escribir reseña" -->
+                    <div v-if="canReview && !showReviewForm">
+                        <button
+                            @click="showReviewForm = true"
+                            class="group flex items-center gap-2 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-600 px-5 py-3 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
+                        >
+                            <svg class="h-5 w-5 transition-transform group-hover:rotate-12" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                            Escribir una reseña
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Panel resumen + cards -->
+                <div v-if="totalResenas > 0 || canReview || userReview" class="grid gap-8 lg:grid-cols-3">
+
+                    <!-- ── Panel resumen de puntuación ──────────────────────── -->
+                    <div :class="['rounded-3xl p-7 shadow-sm', isDark ? 'bg-gray-800' : 'bg-white border border-gray-100']">
+
+                        <!-- Nota grande -->
+                        <div class="mb-6 flex items-center gap-4">
+                            <span :class="['text-7xl font-black leading-none', isDark ? 'text-white' : 'text-gray-900']">
+                                {{ Number(tienda.valoracion).toFixed(1) }}
+                            </span>
+                            <div>
+                                <div class="flex gap-0.5">
+                                    <svg v-for="i in 5" :key="i"
+                                         :class="['h-6 w-6', i <= Math.round(tienda.valoracion) ? 'text-yellow-400' : isDark ? 'text-gray-600' : 'text-gray-200']"
+                                         fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                    </svg>
+                                </div>
+                                <p :class="['mt-1 text-xs', isDark ? 'text-gray-400' : 'text-gray-500']">
+                                    {{ tienda.total_resenas }} opiniones
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Barras por estrella -->
+                        <div class="space-y-2.5">
+                            <div v-for="n in [5, 4, 3, 2, 1]" :key="n" class="flex items-center gap-2.5">
+                                <span :class="['w-2 text-right text-xs font-bold', isDark ? 'text-gray-400' : 'text-gray-600']">{{ n }}</span>
+                                <svg class="h-3.5 w-3.5 shrink-0 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                                <div :class="['flex-1 overflow-hidden rounded-full h-2.5', isDark ? 'bg-gray-700' : 'bg-gray-100']">
+                                    <div
+                                        :style="`width: ${pct(n)}%; transition: width 0.6s ease`"
+                                        :class="['h-full rounded-full', n >= 4 ? 'bg-green-400' : n === 3 ? 'bg-yellow-400' : 'bg-red-400']"
+                                    ></div>
+                                </div>
+                                <span :class="['w-7 text-xs', isDark ? 'text-gray-500' : 'text-gray-400']">{{ distribucion[n] ?? 0 }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Sello verificado -->
+                        <div :class="['mt-6 flex items-center gap-2 rounded-xl p-3', isDark ? 'bg-green-900/30' : 'bg-green-50']">
+                            <svg class="h-4 w-4 shrink-0 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p class="text-xs font-medium text-green-600 dark:text-green-400">
+                                Solo clientes con compra verificada
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- ── Lista de reseñas ──────────────────────────────────── -->
+                    <div class="lg:col-span-2 space-y-4">
+
+                        <!-- Tu reseña (ya publicada) -->
+                        <div v-if="userReview && !editMode"
+                             :class="['relative rounded-2xl p-5 ring-2 ring-primary-400 shadow-sm', isDark ? 'bg-gray-800' : 'bg-primary-50']">
+                            <div class="mb-2 flex items-center justify-between">
+                                <span class="rounded-full bg-primary-500 px-3 py-0.5 text-xs font-bold text-white">Tu reseña</span>
+                                <div class="flex gap-2">
+                                    <button @click="editMode = true; showReviewForm = true"
+                                            :class="['rounded-lg px-3 py-1 text-xs font-medium transition-colors', isDark ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-500 hover:bg-white']">
+                                        Editar
+                                    </button>
+                                    <button @click="deleteResena(userReview.id)"
+                                            class="rounded-lg px-3 py-1 text-xs font-medium text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-red-900/30">
+                                        Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex gap-0.5 mb-1">
+                                <svg v-for="i in 5" :key="i"
+                                     :class="['h-4 w-4', i <= userReview.puntuacion ? 'text-yellow-400' : 'text-gray-300']"
+                                     fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                            </div>
+                            <p v-if="userReview.titulo" :class="['font-semibold text-sm', isDark ? 'text-white' : 'text-gray-900']">{{ userReview.titulo }}</p>
+                            <p :class="['text-sm mt-1', isDark ? 'text-gray-300' : 'text-gray-700']">{{ userReview.comentario }}</p>
+                        </div>
+
+                        <!-- Formulario de reseña -->
+                        <Transition
+                            enter-active-class="transition duration-300"
+                            enter-from-class="opacity-0 -translate-y-4"
+                            enter-to-class="opacity-100 translate-y-0"
+                            leave-active-class="transition duration-200"
+                            leave-from-class="opacity-100 translate-y-0"
+                            leave-to-class="opacity-0 -translate-y-4"
+                        >
+                        <form v-if="showReviewForm"
+                              @submit.prevent="submitResena"
+                              :class="['rounded-3xl p-6 shadow-sm', isDark ? 'bg-gray-800' : 'bg-white border border-gray-100']">
+
+                            <div class="mb-4 flex items-center justify-between">
+                                <h3 :class="['text-base font-bold', isDark ? 'text-white' : 'text-gray-900']">
+                                    {{ editMode ? 'Editar tu reseña' : 'Escribe tu opinión' }}
+                                </h3>
+                                <button type="button" @click="showReviewForm = false; editMode = false"
+                                        :class="['rounded-full p-1 transition-colors', isDark ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-500']">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Selector de estrellas -->
+                            <div class="mb-5">
+                                <p :class="['mb-2 text-sm font-medium', isDark ? 'text-gray-300' : 'text-gray-700']">Puntuación <span class="text-red-500">*</span></p>
+                                <div class="flex gap-1.5">
+                                    <button
+                                        v-for="n in 5" :key="n"
+                                        type="button"
+                                        @click="setRating(n)"
+                                        @mouseenter="hoverStar = n"
+                                        @mouseleave="hoverStar = 0"
+                                        :class="['transition-transform hover:scale-110 focus:outline-none']"
+                                    >
+                                        <svg
+                                            :class="['h-9 w-9 transition-colors duration-150',
+                                                n <= (hoverStar || resenaForm.puntuacion) ? 'text-yellow-400 drop-shadow-sm' : isDark ? 'text-gray-600' : 'text-gray-200']"
+                                            fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
+                                    </button>
+                                    <span :class="['ml-2 self-center text-sm font-medium', isDark ? 'text-gray-400' : 'text-gray-500']">
+                                        {{ ['', 'Muy malo', 'Regular', 'Bueno', 'Muy bueno', '¡Excelente!'][resenaForm.puntuacion] }}
+                                    </span>
+                                </div>
+                                <p v-if="resenaForm.errors.puntuacion" class="mt-1 text-xs text-red-500">{{ resenaForm.errors.puntuacion }}</p>
+                            </div>
+
+                            <!-- Título -->
+                            <div class="mb-4">
+                                <label :class="['block mb-1 text-sm font-medium', isDark ? 'text-gray-300' : 'text-gray-700']">
+                                    Título <span class="text-gray-400 font-normal">(opcional)</span>
+                                </label>
+                                <input v-model="resenaForm.titulo" type="text" maxlength="120"
+                                       :placeholder="`Resumen en pocas palabras...`"
+                                       :class="['w-full rounded-xl px-4 py-2.5 text-sm outline-none transition border focus:ring-2',
+                                           isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500 focus:border-primary-500 focus:ring-primary-500/20' : 'bg-gray-50 border-gray-200 text-gray-900 focus:border-primary-500 focus:ring-primary-500/20']"/>
+                            </div>
+
+                            <!-- Comentario -->
+                            <div class="mb-5">
+                                <label :class="['block mb-1 text-sm font-medium', isDark ? 'text-gray-300' : 'text-gray-700']">
+                                    Tu opinión <span class="text-red-500">*</span>
+                                </label>
+                                <textarea v-model="resenaForm.comentario" rows="4" maxlength="1000" required minlength="10"
+                                          placeholder="¿Qué te pareció la tienda? ¿Recomendarías sus productos?"
+                                          :class="['w-full rounded-xl px-4 py-2.5 text-sm outline-none transition border focus:ring-2 resize-none',
+                                              isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500 focus:border-primary-500 focus:ring-primary-500/20' : 'bg-gray-50 border-gray-200 text-gray-900 focus:border-primary-500 focus:ring-primary-500/20']">
+                                </textarea>
+                                <div class="mt-1 flex justify-between">
+                                    <p v-if="resenaForm.errors.comentario" class="text-xs text-red-500">{{ resenaForm.errors.comentario }}</p>
+                                    <span :class="['ml-auto text-xs', isDark ? 'text-gray-500' : 'text-gray-400']">{{ resenaForm.comentario.length }}/1000</span>
+                                </div>
+                            </div>
+
+                            <!-- Botón enviar -->
+                            <div class="flex items-center justify-end gap-3">
+                                <button type="button" @click="showReviewForm = false; editMode = false"
+                                        :class="['rounded-xl px-4 py-2 text-sm font-medium transition-colors', isDark ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-500 hover:bg-gray-100']">
+                                    Cancelar
+                                </button>
+                                <button type="submit" :disabled="resenaForm.processing || resenaForm.puntuacion === 0"
+                                        class="flex items-center gap-2 rounded-xl bg-primary-500 px-6 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-primary-600 hover:shadow-md disabled:opacity-50">
+                                    <svg v-if="resenaForm.processing" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                    </svg>
+                                    {{ editMode ? 'Actualizar reseña' : 'Publicar reseña' }}
+                                </button>
+                            </div>
+                        </form>
+                        </Transition>
+
+                        <!-- Estado vacío (sin reseñas) -->
+                        <div v-if="totalResenas === 0 && !canReview && !userReview"
+                             :class="['rounded-3xl p-10 text-center', isDark ? 'bg-gray-800' : 'bg-white border border-gray-100 shadow-sm']">
+                            <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100">
+                                <svg class="h-8 w-8 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                            </div>
+                            <p :class="['text-base font-semibold', isDark ? 'text-white' : 'text-gray-900']">Aún no hay reseñas</p>
+                            <p :class="['mt-1 text-sm', isDark ? 'text-gray-400' : 'text-gray-500']">Sé el primero en opinar sobre esta tienda.</p>
+                        </div>
+
+                        <!-- Cards de reseñas -->
+                        <div v-if="totalResenas > 0" class="grid gap-4 sm:grid-cols-2">
+                            <div
+                                v-for="r in resenas" :key="r.id"
+                                :class="['group relative rounded-2xl p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md',
+                                    isDark ? 'bg-gray-800' : 'bg-white border border-gray-100']"
+                            >
+                                <!-- Comillas decorativas -->
+                                <svg class="absolute right-5 top-4 h-6 w-6 opacity-10" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z"/>
+                                </svg>
+
+                                <!-- Header: avatar + nombre + fecha -->
+                                <div class="mb-3 flex items-center gap-3">
+                                    <div :class="['flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white shadow-sm', avatarColor(r.inicial)]">
+                                        {{ r.inicial }}
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p :class="['truncate text-sm font-semibold', isDark ? 'text-white' : 'text-gray-900']">{{ r.nombre }}</p>
+                                        <p :class="['text-xs', isDark ? 'text-gray-500' : 'text-gray-400']">{{ r.created_at }}</p>
+                                    </div>
+                                    <!-- Estrellas -->
+                                    <div class="flex gap-0.5 shrink-0">
+                                        <svg v-for="i in 5" :key="i"
+                                             :class="['h-4 w-4', i <= r.puntuacion ? 'text-yellow-400' : isDark ? 'text-gray-600' : 'text-gray-200']"
+                                             fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <!-- Título + comentario -->
+                                <p v-if="r.titulo" :class="['mb-1 text-sm font-semibold', isDark ? 'text-white' : 'text-gray-900']">{{ r.titulo }}</p>
+                                <p :class="['text-sm leading-relaxed line-clamp-4', isDark ? 'text-gray-300' : 'text-gray-600']">{{ r.comentario }}</p>
+
+                                <!-- Badge puntuación -->
+                                <div class="mt-3 flex items-center justify-end">
+                                    <span :class="['rounded-full px-2.5 py-0.5 text-xs font-bold',
+                                        r.puntuacion >= 4 ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' :
+                                        r.puntuacion === 3 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400' :
+                                        'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400']">
+                                        {{ ['', '😞', '😐', '🙂', '😊', '🤩'][r.puntuacion] }} {{ r.puntuacion }}/5
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CTA para usuarios sin acceso a reseñar -->
+                        <div v-if="!canReview && !userReview && user && user.role === 'user' && totalResenas >= 0"
+                             :class="['mt-2 rounded-2xl p-4 flex items-center gap-3', isDark ? 'bg-gray-700/50' : 'bg-gray-50 border border-dashed border-gray-200']">
+                            <svg class="h-5 w-5 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p :class="['text-sm', isDark ? 'text-gray-400' : 'text-gray-500']">
+                                Para dejar una reseña necesitas haber completado un pedido en esta tienda.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Panel vacío para usuarios no auth -->
+                <div v-if="!user && totalResenas === 0"
+                     :class="['rounded-3xl p-12 text-center', isDark ? 'bg-gray-800' : 'bg-white border border-gray-100 shadow-sm']">
+                    <p :class="['text-sm', isDark ? 'text-gray-400' : 'text-gray-500']">Inicia sesión para ver y escribir reseñas.</p>
+                </div>
+
+            </div>
+        </section>
+
+        <footer :class="['border-t py-8 text-center text-sm', isDark ? 'border-gray-800 bg-gray-900 text-gray-500' : 'border-gray-200 bg-white text-gray-400']">
             <p>&copy; {{ new Date().getFullYear() }} Rustikan · Productos locales de Lanzarote</p>
         </footer>
     </div>

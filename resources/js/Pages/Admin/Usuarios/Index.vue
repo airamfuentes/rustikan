@@ -13,7 +13,7 @@
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 
                 <!-- Estadísticas -->
-                <div class="mb-6 grid gap-4 sm:grid-cols-5">
+                <div class="mb-6 grid gap-4 sm:grid-cols-6">
                     <div class="rounded-lg bg-white p-4 shadow">
                         <p class="text-sm text-gray-600">Total Usuarios</p>
                         <p class="text-2xl font-bold text-gray-900">{{ stats.total }}</p>
@@ -21,6 +21,10 @@
                     <div class="rounded-lg bg-purple-100 p-4 shadow">
                         <p class="text-sm text-purple-800">Administradores</p>
                         <p class="text-2xl font-bold text-purple-900">{{ stats.admins }}</p>
+                    </div>
+                    <div class="rounded-lg bg-green-100 p-4 shadow">
+                        <p class="text-sm text-green-800">Propietarios</p>
+                        <p class="text-2xl font-bold text-green-900">{{ stats.owners ?? 0 }}</p>
                     </div>
                     <div class="rounded-lg bg-blue-100 p-4 shadow">
                         <p class="text-sm text-blue-800">Usuarios</p>
@@ -58,6 +62,7 @@
                             >
                                 <option value="">Todos</option>
                                 <option value="admin">Admin</option>
+                                <option value="owner">Propietario</option>
                                 <option value="user">Usuario</option>
                             </select>
                         </div>
@@ -121,9 +126,10 @@
                                 <td class="whitespace-nowrap px-6 py-4">
                                     <span :class="{
                                         'bg-purple-100 text-purple-800': usuario.role === 'admin',
+                                        'bg-green-100 text-green-800': usuario.role === 'owner',
                                         'bg-blue-100 text-blue-800': usuario.role === 'user'
                                     }" class="inline-flex rounded-full px-2 py-1 text-xs font-semibold">
-                                        {{ usuario.role }}
+                                        {{ usuario.role === 'owner' ? 'Propietario' : usuario.role }}
                                     </span>
                                 </td>
                                 <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{{ usuario.pedidos_count || 0 }}</td>

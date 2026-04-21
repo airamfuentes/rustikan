@@ -1,0 +1,101 @@
+title: Genially
+tabs:
+  main:
+    display: Main
+    sections:
+      -
+        fields:
+          -
+            handle: title
+            field:
+              type: text
+              required: true
+              validate:
+                - required
+          -
+            handle: subtitle
+            field:
+              type: text
+              display: Subtitle
+          -
+            handle: genially_photo
+            field:
+              max_files: 1
+              container: assets
+              type: assets
+              display: 'Genially Photo'
+          -
+            handle: genially_team_photo
+            field:
+              max_files: 2
+              container: assets
+              type: assets
+              display: 'Genially Team Photo'
+          -
+            handle: genially_course_photo
+            field:
+              max_files: 1
+              container: assets
+              type: assets
+              display: 'Genially Course Photo'
+          -
+            handle: content
+            field:
+              type: markdown
+              display: Content
+              localizable: true
+          -
+            handle: author
+            field:
+              type: users
+              display: Author
+              default: current
+              localizable: true
+              max_items: 1
+          -
+            handle: template
+            field:
+              type: template
+              display: Template
+              localizable: true
+          -
+            handle: button
+            field:
+              type: text
+              display: Button
+          -
+            handle: button_link
+            field:
+              type: link
+              display: 'Button Link'
+          -
+            handle: genially_1
+            field:
+              type: link
+              display: 'Genially 1'
+          -
+            handle: genially_2
+            field:
+              type: link
+              display: 'Genially 2'
+          -
+            handle: youtube_video
+            field:
+              type: link
+              display: 'Youtube Video'
+  sidebar:
+    display: Sidebar
+    sections:
+      -
+        fields:
+          -
+            handle: slug
+            field:
+              type: slug
+              localizable: true
+              validate: 'max:200'
+  new_tab:
+    display: 'New Tab'
+    sections:
+      -
+        display: 'New Section'

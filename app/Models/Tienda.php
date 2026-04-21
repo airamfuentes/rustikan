@@ -61,6 +61,26 @@ class Tienda extends Model
     }
 
     /**
+     * Get the resenas for this tienda
+     */
+    public function resenas()
+    {
+        return $this->hasMany(Resena::class);
+    }
+
+    /**
+     * Recalculate valoracion + total_resenas from the resenas table
+     */
+    public function recalcularValoracion(): void
+    {
+        $stats = $this->resenas()->selectRaw('COUNT(*) as total, AVG(puntuacion) as promedio')->first();
+        $this->update([
+            'valoracion'    => round((float) $stats->promedio, 2),
+            'total_resenas' => (int) $stats->total,
+        ]);
+    }
+
+    /**
      * Scope a query to only include active tiendas
      */
     public function scopeActiva($query)

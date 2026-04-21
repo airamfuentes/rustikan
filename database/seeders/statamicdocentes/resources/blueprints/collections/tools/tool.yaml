@@ -1,0 +1,100 @@
+title: Tool
+tabs:
+  main:
+    display: Main
+    sections:
+      -
+        fields:
+          -
+            handle: title
+            field:
+              type: text
+              required: true
+              validate:
+                - required
+          -
+            handle: subtitle
+            field:
+              type: text
+              display: Subtitle
+          -
+            handle: description
+            field:
+              type: textarea
+              display: Description
+          -
+            handle: tool_image
+            field:
+              container: assets
+              type: assets
+              display: 'Tool Image'
+              max_files: 1
+          -
+            handle: tool_video
+            field:
+              type: video
+              display: 'Tool Video'
+          -
+            handle: button_text
+            field:
+              type: text
+              display: 'Button Text'
+          -
+            handle: button_link
+            field:
+              type: link
+              display: 'Button Link'
+          -
+            handle: second_button
+            field:
+              type: text
+              display: 'Second Button'
+          -
+            handle: second_button_link
+            field:
+              type: link
+              display: 'Second Button Link'
+          -
+            handle: document
+            field:
+              type: link
+              display: Document
+          -
+            handle: content
+            field:
+              type: markdown
+              display: Content
+              localizable: true
+          -
+            handle: author
+            field:
+              type: users
+              display: Author
+              default: current
+              localizable: true
+              max_items: 1
+          -
+            handle: template
+            field:
+              type: template
+              display: Template
+              localizable: true
+  sidebar:
+    display: Sidebar
+    sections:
+      -
+        fields:
+          -
+            handle: slug
+            field:
+              type: slug
+              localizable: true
+              validate: 'max:200'
+          -
+            handle: tags
+            field:
+              max_items: 4
+              taxonomies:
+                - tags
+              type: terms
+              display: Tags

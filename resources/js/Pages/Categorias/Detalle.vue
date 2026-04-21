@@ -107,7 +107,7 @@ onUnmounted(() => {
 <template>
     <Head :title="`${categoria.nombre} – Rustikan`" />
 
-    <div class="min-h-screen bg-gray-50">
+    <div class="min-h-screen flex flex-col bg-gray-50">
 
         <!-- Navbar transformable -->
         <nav
@@ -328,7 +328,7 @@ onUnmounted(() => {
         </Transition>
 
         <!-- Contenido principal -->
-        <main class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <main class="mx-auto max-w-7xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
 
             <!-- Sin resultados -->
             <div v-if="tiendasOrdenadas.length === 0" class="flex flex-col items-center py-24 text-center">

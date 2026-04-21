@@ -29,8 +29,60 @@ Route::get('/tienda/{tienda:slug}', function (\App\Models\Tienda $tienda) {
         $query->with('categoria')->where('disponible', true)->orderBy('destacado', 'desc');
     }]);
 
+    // Cargar reseñas con datos parciales del usuario
+    $resenas = $tienda->resenas()
+        ->with('user:id,name')
+        ->orderByDesc('created_at')
+        ->get()
+        ->map(function ($r) {
+            $nombre = $r->user?->name ?? 'Cliente';
+            // Privacy: show only first name + first letter of last name
+            $partes = explode(' ', $nombre);
+            $nombreMostrado = $partes[0] . (count($partes) > 1 ? ' ' . strtoupper(substr($partes[1], 0, 1)) . '.' : '');
+            return [
+                'id'          => $r->id,
+                'puntuacion'  => $r->puntuacion,
+                'titulo'      => $r->titulo,
+                'comentario'  => $r->comentario,
+                'nombre'      => $nombreMostrado,
+                'inicial'     => strtoupper(substr($partes[0], 0, 1)),
+                'user_id'     => $r->user_id,
+                'created_at'  => $r->created_at->diffForHumans(),
+            ];
+        });
+
+    // Distribución de estrellas
+    $distribucion = [];
+    for ($i = 5; $i >= 1; $i--) {
+        $count = $tienda->resenas()->where('puntuacion', $i)->count();
+        $distribucion[$i] = $count;
+    }
+
+    // Determinar si el usuario autenticado puede reseñar
+    $canReview  = false;
+    $userReview = null;
+    $user = auth()->user();
+    if ($user && $user->role === 'user') {
+        $userReview = $tienda->resenas()->where('user_id', $user->id)->first();
+        if (!$userReview) {
+            $canReview = \App\Models\PedidoItem::where('tienda_id', $tienda->id)
+                ->whereHas('pedido', fn($q) => $q->where('user_id', $user->id)
+                    ->whereIn('estado', ['entregado', 'completado']))
+                ->exists();
+        }
+    }
+
     return Inertia::render('TiendaDetalle', [
-        'tienda' => $tienda,
+        'tienda'       => $tienda,
+        'resenas'      => $resenas,
+        'distribucion' => $distribucion,
+        'canReview'    => $canReview,
+        'userReview'   => $userReview ? [
+            'id'         => $userReview->id,
+            'puntuacion' => $userReview->puntuacion,
+            'titulo'     => $userReview->titulo,
+            'comentario' => $userReview->comentario,
+        ] : null,
     ]);
 })->name('tienda.detalle');
 
@@ -43,12 +95,20 @@ Route::middleware('auth')->group(function () {
     Route::post('/pedidos', [\App\Http\Controllers\PedidoController::class, 'store'])->name('pedidos.store');
     Route::get('/pedidos/{pedido}/confirmacion', [\App\Http\Controllers\PedidoController::class, 'show'])->name('pedidos.confirmacion');
     Route::get('/mis-pedidos', [\App\Http\Controllers\PedidoController::class, 'index'])->name('pedidos.index');
+
+    // Reseñas
+    Route::post('/tienda/{tienda}/resenas', [\App\Http\Controllers\ResenaController::class, 'store'])->name('resenas.store');
+    Route::delete('/resenas/{resena}', [\App\Http\Controllers\ResenaController::class, 'destroy'])->name('resenas.destroy');
 });
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function (\Illuminate\Http\Request $request) {
-        if ($request->user()->isAdmin()) {
+        $user = $request->user();
+        if ($user->isAdmin()) {
             return redirect()->route('admin.dashboard');
+        }
+        if ($user->isOwner()) {
+            return redirect()->route('owner.panel');
         }
         return redirect()->route('profile.edit');
     })->name('dashboard');
@@ -57,6 +117,16 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Owner Routes
+Route::middleware(['auth', 'owner'])->prefix('mi-tienda')->name('owner.')->group(function () {
+    Route::get('/panel', [\App\Http\Controllers\Owner\PanelController::class, 'index'])->name('panel');
+    Route::get('/editar', [\App\Http\Controllers\Owner\TiendaController::class, 'edit'])->name('tienda.edit');
+    Route::post('/editar', [\App\Http\Controllers\Owner\TiendaController::class, 'update'])->name('tienda.update');
+    // Productos
+    Route::get('/productos/{producto}/editar', [\App\Http\Controllers\Owner\ProductoController::class, 'edit'])->name('producto.edit');
+    Route::post('/productos/{producto}', [\App\Http\Controllers\Owner\ProductoController::class, 'update'])->name('producto.update');
 });
 
 // Admin Routes
