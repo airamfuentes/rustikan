@@ -31,6 +31,14 @@ onMounted(() => {
 onBeforeUnmount(() => {
     clearInterval(pollTimer);
 });
+
+const reset = () => {
+    if (window.grecaptcha && widgetId !== null) {
+        window.grecaptcha.reset(widgetId);
+    }
+};
+
+defineExpose({ reset });
 </script>
 
 <template>

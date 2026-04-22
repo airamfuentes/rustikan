@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Tienda extends Model
 {
@@ -66,6 +67,14 @@ class Tienda extends Model
     public function resenas()
     {
         return $this->hasMany(Resena::class);
+    }
+
+    /**
+     * Get the solicitudes de cambio for this tienda
+     */
+    public function solicitudesCambio()
+    {
+        return $this->hasMany(SolicitudCambio::class);
     }
 
     /**

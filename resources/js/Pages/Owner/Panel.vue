@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, usePage, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import Toast from '@/Components/Toast.vue';
 import { watch } from 'vue';
@@ -12,6 +12,8 @@ const props = defineProps({
     topProductos:     { type: Array,   default: () => [] },
     pedidosRecientes: { type: Array,   default: () => [] },
     productos:        { type: Array,   default: () => [] },
+    categorias:       { type: Array,   default: () => [] },
+    solicitudes:      { type: Array,   default: () => [] },
 });
 
 const page = usePage();
@@ -57,6 +59,150 @@ const estadoConfig = {
     entregado:   { label: 'Entregado',   cls: 'bg-green-100 text-green-800' },
 };
 const getEstado = (e) => estadoConfig[e] ?? { label: e, cls: 'bg-gray-100 text-gray-700' };
+
+// ── Solicitudes ───────────────────────────────────────────────────────────────
+const solicitudEstadoCls = (estado) => ({
+    pendiente:  'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
+    aprobado:   'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
+    rechazado:  'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+})[estado] ?? 'bg-gray-100 text-gray-700';
+
+const solicitudEstadoLabel = (estado) => ({
+    pendiente: 'Pendiente',
+    aprobado:  'Aprobado',
+    rechazado: 'Rechazado',
+})[estado] ?? estado;
+
+const pendientesCount = computed(() => props.solicitudes.filter(s => s.estado === 'pendiente').length);
+
+// ── Producto: añadir form ─────────────────────────────────────────────────────
+const showAddForm = ref(false);
+const addForm = useForm({
+    nombre:        '',
+    categoria_id:  '',
+    descripcion:   '',
+    precio:        '',
+    precio_oferta: '',
+    unidad:        'unidad',
+    stock:         0,
+    imagen:        null,
+    imagen_url:    '',
+});
+const addImagePreview = ref(null);
+
+const onAddImagen = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    addForm.imagen = file;
+    addForm.imagen_url = '';
+    addImagePreview.value = URL.createObjectURL(file);
+};
+
+const submitAddProducto = () => {
+    addForm.post(route('owner.solicitar.producto.crear'), {
+        forceFormData: true,
+        onSuccess: () => {
+            showAddForm.value = false;
+            addForm.reset();
+            addImagePreview.value = null;
+        },
+    });
+};
+
+// ── Producto: editar form ─────────────────────────────────────────────────────
+const editProducto = ref(null);
+const editOriginal = ref({});
+const editForm = useForm({
+    nombre:        '',
+    categoria_id:  '',
+    descripcion:   '',
+    precio:        '',
+    precio_oferta: '',
+    unidad:        '',
+    stock:         0,
+    imagen:        null,
+    imagen_url:    '',
+    _method:       'POST',
+});
+const editImagePreview = ref(null);
+
+const openEdit = (p) => {
+    editProducto.value = p;
+    editOriginal.value = {
+        nombre:        p.nombre,
+        categoria_id:  String(p.categoria_id),
+        descripcion:   p.descripcion ?? '',
+        precio:        String(p.precio),
+        precio_oferta: String(p.precio_oferta ?? ''),
+        unidad:        p.unidad ?? 'unidad',
+        stock:         String(p.stock),
+    };
+    editForm.nombre        = p.nombre;
+    editForm.categoria_id  = p.categoria_id;
+    editForm.descripcion   = p.descripcion ?? '';
+    editForm.precio        = p.precio;
+    editForm.precio_oferta = p.precio_oferta ?? '';
+    editForm.unidad        = p.unidad ?? 'unidad';
+    editForm.stock         = p.stock;
+    editForm.imagen        = null;
+    editForm.imagen_url    = '';
+    editImagePreview.value = null;
+};
+
+const editPriceChanged = computed(() => {
+    if (!editProducto.value) return false;
+    return String(editForm.precio) !== editOriginal.value.precio ||
+           String(editForm.precio_oferta ?? '') !== editOriginal.value.precio_oferta;
+});
+
+const editOtherChanged = computed(() => {
+    if (!editProducto.value) return false;
+    return editForm.nombre !== editOriginal.value.nombre ||
+           String(editForm.categoria_id) !== editOriginal.value.categoria_id ||
+           editForm.descripcion !== editOriginal.value.descripcion ||
+           editForm.unidad !== editOriginal.value.unidad ||
+           String(editForm.stock) !== editOriginal.value.stock ||
+           editForm.imagen !== null ||
+           editForm.imagen_url !== '';
+});
+
+const editHasAnyChange = computed(() => editPriceChanged.value || editOtherChanged.value);
+
+const editBtnLabel = computed(() => {
+    if (editForm.processing) return 'Guardando...';
+    if (!editPriceChanged.value && !editOtherChanged.value) return 'Sin cambios';
+    if (editPriceChanged.value && !editOtherChanged.value) return 'Guardar precios';
+    if (!editPriceChanged.value && editOtherChanged.value) return 'Enviar solicitud';
+    return 'Guardar precios + Enviar solicitud';
+});
+
+const onEditImagen = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    editForm.imagen = file;
+    editForm.imagen_url = '';
+    editImagePreview.value = URL.createObjectURL(file);
+};
+
+const submitEditProducto = () => {
+    editForm.post(route('owner.solicitar.producto.editar', editProducto.value.id), {
+        forceFormData: true,
+        onSuccess: () => {
+            editProducto.value = null;
+            editForm.reset();
+            editImagePreview.value = null;
+        },
+    });
+};
+
+// ── Producto: eliminar ────────────────────────────────────────────────────────
+const confirmDelete = ref(null);
+
+const submitDeleteProducto = (producto) => {
+    router.delete(route('owner.solicitar.producto.eliminar', producto.id), {
+        onSuccess: () => { confirmDelete.value = null; },
+    });
+};
 </script>
 
 <template>
@@ -94,14 +240,19 @@ const getEstado = (e) => estadoConfig[e] ?? { label: e, cls: 'bg-gray-100 text-g
                 <!-- ── Tabs ──────────────────────────────────────────────────── -->
                 <div class="flex gap-1 rounded-xl bg-white dark:bg-gray-800 p-1 shadow-sm border border-gray-100 dark:border-gray-700 w-fit">
                     <button v-for="t in [
-                        { key:'resumen',  label:'Resumen' },
-                        { key:'pedidos',  label:'Pedidos' },
-                        { key:'productos',label:'Productos' },
+                        { key:'resumen',     label:'Resumen' },
+                        { key:'pedidos',     label:'Pedidos' },
+                        { key:'productos',   label:'Productos' },
+                        { key:'solicitudes', label:'Mis solicitudes' },
                     ]" :key="t.key"
                         @click="tab = t.key"
-                        :class="['px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                        :class="['relative px-4 py-2 rounded-lg text-sm font-medium transition-colors',
                             tab === t.key ? 'bg-primary-500 text-white shadow' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700']">
                         {{ t.label }}
+                        <span v-if="t.key === 'solicitudes' && pendientesCount > 0"
+                              class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-yellow-400 text-[9px] font-bold text-yellow-900">
+                            {{ pendientesCount }}
+                        </span>
                     </button>
                 </div>
 
@@ -365,14 +516,90 @@ const getEstado = (e) => estadoConfig[e] ?? { label: e, cls: 'bg-gray-100 text-g
 
                 <!-- ════════════════ TAB PRODUCTOS ════════════════ -->
                 <template v-if="tab === 'productos'">
+
+                    <!-- Añadir producto -->
                     <div class="rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
                         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-700">
                             <div>
                                 <h3 class="text-base font-semibold text-gray-900 dark:text-white">Productos de tu tienda</h3>
-                                <p class="text-xs text-gray-400 mt-0.5">{{ stats.totalProductos }} total · {{ stats.productosDisponibles }} disponibles</p>
+                                <p class="text-xs text-gray-400 mt-0.5">{{ stats.totalProductos }} total · {{ stats.productosDisponibles }} disponibles · Los cambios se envían para aprobación</p>
                             </div>
-
+                            <button @click="showAddForm = !showAddForm"
+                                    class="flex items-center gap-2 rounded-xl bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-600 transition-colors">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                Añadir producto
+                            </button>
                         </div>
+
+                        <!-- Formulario añadir -->
+                        <div v-if="showAddForm" class="border-b border-gray-100 dark:border-gray-700 bg-primary-50 dark:bg-primary-900/10 px-6 py-6">
+                            <h4 class="mb-4 text-sm font-semibold text-gray-800 dark:text-gray-200">Solicitar creación de nuevo producto</h4>
+                            <form @submit.prevent="submitAddProducto" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Nombre *</label>
+                                    <input v-model="addForm.nombre" type="text" required
+                                           class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400" />
+                                    <p v-if="addForm.errors.nombre" class="mt-1 text-xs text-red-500">{{ addForm.errors.nombre }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Categoría *</label>
+                                    <select v-model="addForm.categoria_id" required
+                                            class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400">
+                                        <option value="">Seleccionar...</option>
+                                        <option v-for="c in categorias" :key="c.id" :value="c.id">{{ c.nombre }}</option>
+                                    </select>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Descripción</label>
+                                    <textarea v-model="addForm.descripcion" rows="2"
+                                              class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Precio (€) *</label>
+                                    <input v-model="addForm.precio" type="number" step="0.01" min="0" required
+                                           class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Precio oferta (€)</label>
+                                    <input v-model="addForm.precio_oferta" type="number" step="0.01" min="0"
+                                           class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Unidad *</label>
+                                    <input v-model="addForm.unidad" type="text" required placeholder="kg, unidad, litro..."
+                                           class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Stock *</label>
+                                    <input v-model="addForm.stock" type="number" min="0" required
+                                           class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400" />
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Imagen</label>
+                                    <div class="flex items-center gap-3">
+                                        <img v-if="addImagePreview" :src="addImagePreview" class="h-14 w-14 rounded-lg object-cover border border-gray-200" alt="" />
+                                        <input type="file" accept="image/*" @change="onAddImagen" class="text-sm text-gray-600 dark:text-gray-400" />
+                                    </div>
+                                    <p class="mt-1 text-xs text-gray-400">O pega una URL:</p>
+                                    <input v-model="addForm.imagen_url" type="url" placeholder="https://..."
+                                           class="mt-1 w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400" />
+                                </div>
+                                <div class="sm:col-span-2 flex justify-end gap-3">
+                                    <button type="button" @click="showAddForm = false; addForm.reset();"
+                                            class="rounded-xl border border-gray-200 dark:border-gray-600 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" :disabled="addForm.processing"
+                                            class="rounded-xl bg-primary-500 px-5 py-2 text-sm font-semibold text-white hover:bg-primary-600 disabled:opacity-50 transition-colors">
+                                        {{ addForm.processing ? 'Enviando...' : 'Enviar solicitud' }}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Lista de productos -->
                         <div v-if="productos.length === 0" class="py-16 text-center text-gray-400">
                             Sin productos registrados
                         </div>
@@ -384,56 +611,290 @@ const getEstado = (e) => estadoConfig[e] ?? { label: e, cls: 'bg-gray-100 text-g
                                         <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Precio</th>
                                         <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Stock</th>
                                         <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Estado</th>
-                                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Destacado</th>
                                         <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
-                                    <tr v-for="p in productos" :key="p.id"
-                                        class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                                        <td class="px-6 py-3">
-                                            <div class="flex items-center gap-3">
-                                                <img v-if="imgUrl(p.imagen)" :src="imgUrl(p.imagen)"
-                                                     class="h-9 w-9 rounded-lg object-cover" alt="" />
-                                                <div v-else class="h-9 w-9 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                                                    <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                                    </svg>
+                                    <template v-for="p in productos" :key="p.id">
+                                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                            <td class="px-6 py-3">
+                                                <div class="flex items-center gap-3">
+                                                    <img v-if="imgUrl(p.imagen)" :src="imgUrl(p.imagen)"
+                                                         class="h-9 w-9 rounded-lg object-cover" alt="" />
+                                                    <div v-else class="h-9 w-9 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                                        <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                        </svg>
+                                                    </div>
+                                                    <span class="text-sm font-medium text-gray-900 dark:text-white">{{ p.nombre }}</span>
                                                 </div>
-                                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ p.nombre }}</span>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-3">
-                                            <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ Number(p.precio).toFixed(2) }}€</span>
-                                            <span v-if="p.precio_oferta" class="ml-2 text-xs text-red-500 line-through">{{ Number(p.precio_oferta).toFixed(2) }}€</span>
-                                        </td>
-                                        <td class="px-6 py-3 text-sm text-gray-600 dark:text-gray-400">{{ p.stock }}</td>
-                                        <td class="px-6 py-3">
-                                            <span :class="['inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-                                                p.disponible ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500']">
-                                                {{ p.disponible ? 'Disponible' : 'No disponible' }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-3">
-                                            <span v-if="p.destacado" class="inline-flex items-center gap-1 text-xs text-yellow-600 font-medium">
-                                                <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                                </svg>
-                                                Destacado
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-3 text-right">
-                                            <Link :href="route('owner.producto.edit', p.id)"
-                                                  class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-gray-600 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-primary-50 hover:border-primary-300 hover:text-primary-700 dark:hover:bg-primary-900/20 transition-colors">
-                                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                                </svg>
-                                                Editar
-                                            </Link>
-                                        </td>
-                                    </tr>
+                                            </td>
+                                            <td class="px-6 py-3">
+                                                <div class="flex flex-col gap-0.5">
+                                                    <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ Number(p.precio).toFixed(2) }}€</span>
+                                                    <span v-if="p.precio_oferta" class="flex items-center gap-1">
+                                                        <span :class="['text-xs font-medium', p.oferta_activa ? 'text-green-600 dark:text-green-400' : 'text-gray-400 line-through']">
+                                                            {{ Number(p.precio_oferta).toFixed(2) }}€
+                                                        </span>
+                                                        <span v-if="p.oferta_activa" class="rounded-full bg-green-100 dark:bg-green-900/40 px-1.5 py-0.5 text-xs font-bold text-green-700 dark:text-green-400">OFERTA</span>
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-3 text-sm text-gray-600 dark:text-gray-400">{{ p.stock }}</td>
+                                            <td class="px-6 py-3">
+                                                <span :class="['inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                                                    p.disponible ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500']">
+                                                    {{ p.disponible ? 'Disponible' : 'No disponible' }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-3 text-right">
+                                                <div class="flex flex-col items-end gap-1.5">
+                                                    <!-- Aviso: oferta pendiente de activar -->
+                                                    <span
+                                                        v-if="p.precio_oferta && !p.oferta_activa"
+                                                        class="inline-flex animate-pulse items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-900/40 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:text-amber-400"
+                                                    >
+                                                        <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M14.615 1.595a.75.75 0 01.359.852L12.982 9.75h7.268a.75.75 0 01.548 1.262l-10.5 11.25a.75.75 0 01-1.272-.71l1.992-7.302H3.718a.75.75 0 01-.548-1.262l10.5-11.25a.75.75 0 01.945-.143z" clip-rule="evenodd" /></svg>
+                                                        Activa tu oferta
+                                                    </span>
+                                                    <div class="flex items-center gap-2">
+                                                    <!-- Toggle oferta -->
+                                                    <button
+                                                        v-if="p.precio_oferta"
+                                                        @click="router.post(route('owner.producto.oferta', p.id))"
+                                                        :title="p.oferta_activa ? 'Desactivar oferta' : 'Activar oferta'"
+                                                        :class="['inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-bold transition-all',
+                                                            p.oferta_activa
+                                                                ? 'border-green-500 bg-green-500 text-white shadow-sm shadow-green-200 dark:shadow-green-900/40 hover:bg-green-600 hover:border-green-600'
+                                                                : 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-600 dark:bg-amber-900/20 dark:text-amber-400']"
+                                                    >
+                                                        <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path v-if="p.oferta_activa" fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" />
+                                                            <path v-else fill-rule="evenodd" d="M5.25 2.25a3 3 0 00-3 3v4.318a3 3 0 00.879 2.121l9.58 9.581c.92.92 2.39 1.186 3.548.428a18.849 18.849 0 005.441-5.44c.758-1.16.492-2.629-.428-3.548l-9.58-9.581a3 3 0 00-2.121-.879H5.25zM6.375 7.5a1.125 1.125 0 100-2.25 1.125 1.125 0 000 2.25z" clip-rule="evenodd" />
+                                                        </svg>
+                                                        {{ p.oferta_activa ? 'Oferta ON' : 'Oferta OFF' }}
+                                                    </button>
+                                                    <button @click="openEdit(p)"
+                                                            class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-gray-600 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-primary-50 hover:border-primary-300 hover:text-primary-700 dark:hover:bg-primary-900/20 transition-colors">
+                                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                        </svg>
+                                                        Editar
+                                                    </button>
+                                                    <button @click="confirmDelete = p"
+                                                            class="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                        </svg>
+                                                        Eliminar
+                                                    </button>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <!-- Inline edit form -->
+                                        <tr v-if="editProducto?.id === p.id" class="bg-blue-50 dark:bg-blue-900/10">
+                                            <td colspan="5" class="px-6 py-5">
+                                                <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                                    <h4 class="text-sm font-semibold text-gray-800 dark:text-gray-200">Editar "{{ p.nombre }}"</h4>
+                                    <div class="flex flex-wrap items-center gap-1.5">
+                                        <span v-if="editPriceChanged" class="inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                                            <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M5.25 2.25a3 3 0 00-3 3v4.318a3 3 0 00.879 2.121l9.58 9.581c.92.92 2.39 1.186 3.548.428a18.849 18.849 0 005.441-5.44c.758-1.16.492-2.629-.428-3.548l-9.58-9.581a3 3 0 00-2.121-.879H5.25zM6.375 7.5a1.125 1.125 0 100-2.25 1.125 1.125 0 000 2.25z" clip-rule="evenodd" /></svg>
+                                            Precio → guardado directo
+                                        </span>
+                                        <span v-if="editOtherChanged" class="inline-flex items-center gap-1 rounded-full bg-blue-100 dark:bg-blue-900/40 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-400">
+                                            <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 24 24"><path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0016.5 9h-1.875a1.875 1.875 0 01-1.875-1.875V5.25A3.75 3.75 0 009 1.5H5.625z" /><path d="M12.971 1.816A5.23 5.23 0 0114.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 013.434 1.279 9.768 9.768 0 00-6.963-6.963z" /></svg>
+                                            Otros cambios → solicitud
+                                        </span>
+                                    </div>
+                                </div>
+                                                <form @submit.prevent="submitEditProducto" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                                    <div>
+                                                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Nombre *</label>
+                                                        <input v-model="editForm.nombre" type="text" required
+                                                               class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 text-gray-900 dark:text-white" />
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Categoría *</label>
+                                                        <select v-model="editForm.categoria_id" required
+                                                                class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 text-gray-900 dark:text-white">
+                                                            <option v-for="c in categorias" :key="c.id" :value="c.id">{{ c.nombre }}</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="sm:col-span-2">
+                                                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Descripción</label>
+                                                        <textarea v-model="editForm.descripcion" rows="2"
+                                                                  class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 text-gray-900 dark:text-white"></textarea>
+                                                    </div>
+                                                    <!-- Sección precios: guardado directo sin aprobación -->
+                                                    <div class="sm:col-span-2 rounded-xl border-2 border-emerald-200 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 p-4">
+                                                        <div class="mb-3 flex items-center gap-2">
+                                                            <svg class="h-4 w-4 flex-shrink-0 text-emerald-600 dark:text-emerald-400" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M5.25 2.25a3 3 0 00-3 3v4.318a3 3 0 00.879 2.121l9.58 9.581c.92.92 2.39 1.186 3.548.428a18.849 18.849 0 005.441-5.44c.758-1.16.492-2.629-.428-3.548l-9.58-9.581a3 3 0 00-2.121-.879H5.25zM6.375 7.5a1.125 1.125 0 100-2.25 1.125 1.125 0 000 2.25z" clip-rule="evenodd" /></svg>
+                                                            <span class="text-xs font-semibold text-emerald-700 dark:text-emerald-400">Precios</span>
+                                                            <span class="ml-auto rounded-full bg-emerald-100 dark:bg-emerald-800 px-2 py-0.5 text-xs text-emerald-600 dark:text-emerald-300">Se guardan directamente · sin aprobación</span>
+                                                        </div>
+                                                        <div class="grid grid-cols-2 gap-3">
+                                                            <div>
+                                                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Precio base (€) *</label>
+                                                                <input v-model="editForm.precio" type="number" step="0.01" min="0" required
+                                                                       class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 text-gray-900 dark:text-white" />
+                                                            </div>
+                                                            <div>
+                                                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Precio oferta (€) <span class="font-normal text-gray-400">(opcional)</span></label>
+                                                                <input v-model="editForm.precio_oferta" type="number" step="0.01" min="0"
+                                                                       :class="['w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 text-gray-900 dark:text-white',
+                                                                           editForm.precio_oferta && +editForm.precio_oferta >= +editForm.precio
+                                                                               ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20 focus:ring-red-400'
+                                                                               : editForm.precio_oferta && +editForm.precio_oferta < +editForm.precio
+                                                                                   ? 'border-emerald-300 dark:border-emerald-600 bg-white dark:bg-gray-700 focus:ring-emerald-400'
+                                                                                   : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-emerald-400']" />
+                                                            </div>
+                                                        </div>
+                                                        <!-- Feedback oferta -->
+                                                        <div v-if="editForm.precio_oferta && +editForm.precio_oferta > 0 && +editForm.precio > 0" class="mt-3">
+                                                            <div v-if="+editForm.precio_oferta < +editForm.precio" class="flex flex-wrap items-center gap-2 text-sm">
+                                                                <span class="text-gray-500 dark:text-gray-400">Vista previa:</span>
+                                                                <span class="line-through text-gray-400">{{ editForm.precio }}€</span>
+                                                                <svg class="h-3.5 w-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                                                <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ editForm.precio_oferta }}€</span>
+                                                                <span class="rounded-full bg-emerald-500 px-2 py-0.5 text-xs font-bold text-white">-{{ Math.round((1 - editForm.precio_oferta / editForm.precio) * 100) }}%</span>
+                                                            </div>
+                                                            <p v-else class="text-xs text-red-600 dark:text-red-400">El precio de oferta debe ser menor que el precio base.</p>
+                                                        </div>
+                                                        <p v-else-if="!editForm.precio_oferta" class="mt-2 text-xs text-gray-400">Deja vacío si no hay oferta. Puedes activar/desactivar la oferta con el botón de la tabla.</p>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Unidad *</label>
+                                                        <input v-model="editForm.unidad" type="text" required
+                                                               class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 text-gray-900 dark:text-white" />
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Stock *</label>
+                                                        <input v-model="editForm.stock" type="number" min="0" required
+                                                               class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 text-gray-900 dark:text-white" />
+                                                    </div>
+                                                    <div class="sm:col-span-2">
+                                                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Imagen (opcional, solo si quieres cambiarla)</label>
+                                                        <div class="flex items-center gap-3">
+                                                            <img v-if="editImagePreview" :src="editImagePreview" class="h-14 w-14 rounded-lg object-cover border" alt="" />
+                                                            <img v-else-if="imgUrl(p.imagen)" :src="imgUrl(p.imagen)" class="h-14 w-14 rounded-lg object-cover border opacity-60" alt="" />
+                                                            <input type="file" accept="image/*" @change="onEditImagen" class="text-sm text-gray-600 dark:text-gray-400" />
+                                                        </div>
+                                                        <input v-model="editForm.imagen_url" type="url" placeholder="O pega una URL de imagen..."
+                                                               class="mt-2 w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 text-gray-900 dark:text-white" />
+                                                    </div>
+                                                    <div class="sm:col-span-2 flex justify-end gap-3">
+                                                        <button type="button" @click="editProducto = null"
+                                                                class="rounded-xl border border-gray-200 dark:border-gray-600 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                                            Cancelar
+                                                        </button>
+                                                        <button type="submit"
+                                                                :disabled="editForm.processing || !editHasAnyChange"
+                                                                :class="[
+                                                                    'inline-flex items-center gap-2 rounded-xl px-5 py-2 text-sm font-semibold text-white transition-colors disabled:opacity-50',
+                                                                    editPriceChanged && !editOtherChanged ? 'bg-emerald-500 hover:bg-emerald-600' :
+                                                                    editOtherChanged ? 'bg-primary-500 hover:bg-primary-600' :
+                                                                    'bg-gray-400 cursor-not-allowed'
+                                                                ]"
+                                                        >
+                                                            <svg v-if="editPriceChanged && !editOtherChanged" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M5.25 2.25a3 3 0 00-3 3v4.318a3 3 0 00.879 2.121l9.58 9.581c.92.92 2.39 1.186 3.548.428a18.849 18.849 0 005.441-5.44c.758-1.16.492-2.629-.428-3.548l-9.58-9.581a3 3 0 00-2.121-.879H5.25zM6.375 7.5a1.125 1.125 0 100-2.25 1.125 1.125 0 000 2.25z" clip-rule="evenodd" /></svg>
+                                                            <svg v-else-if="editOtherChanged" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" /></svg>
+                                                            {{ editBtnLabel }}
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    </template>
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+
+                    <!-- Modal confirmar eliminación -->
+                    <div v-if="confirmDelete"
+                         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+                         @click.self="confirmDelete = null">
+                        <div class="w-full max-w-sm rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-2xl">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">¿Solicitar eliminación?</h3>
+                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                Se enviará una solicitud para eliminar <strong>{{ confirmDelete.nombre }}</strong>.
+                                El administrador deberá aprobarla.
+                            </p>
+                            <div class="mt-5 flex justify-end gap-3">
+                                <button @click="confirmDelete = null"
+                                        class="rounded-xl border border-gray-200 dark:border-gray-600 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                    Cancelar
+                                </button>
+                                <button @click="submitDeleteProducto(confirmDelete)"
+                                        class="rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 transition-colors">
+                                    Solicitar eliminación
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </template>
+
+                <!-- ════════════════ TAB SOLICITUDES ════════════════ -->
+                <template v-if="tab === 'solicitudes'">
+                    <div class="rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+                            <h3 class="text-base font-semibold text-gray-900 dark:text-white">Mis solicitudes de cambio</h3>
+                            <p class="text-xs text-gray-400 mt-0.5">Cada solicitud es revisada individualmente por el administrador</p>
+                        </div>
+                        <div v-if="solicitudes.length === 0" class="py-16 text-center text-gray-400">
+                            <svg class="mx-auto mb-3 h-12 w-12 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                            No hay solicitudes todavía
+                        </div>
+                        <div v-else class="divide-y divide-gray-50 dark:divide-gray-700">
+                            <div v-for="s in solicitudes" :key="s.id" class="px-6 py-4">
+                                <div class="flex items-start justify-between gap-4">
+                                    <div class="flex-1 min-w-0">
+                                        <!-- Badge tipo -->
+                                        <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                            <span :class="[solicitudEstadoCls(s.estado), 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold']">
+                                                {{ solicitudEstadoLabel(s.estado) }}
+                                            </span>
+                                            <span class="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-700 px-2.5 py-0.5 text-xs text-gray-600 dark:text-gray-400 font-medium">
+                                                {{ s.tipo === 'create_producto' ? '+ Crear producto' :
+                                                   s.tipo === 'delete_producto' ? '× Eliminar producto' :
+                                                   s.tipo === 'update_tienda'   ? '✎ Tienda' :
+                                                   '✎ Producto' }}
+                                            </span>
+                                            <span class="text-xs text-gray-400">{{ s.created_at }}</span>
+                                        </div>
+                                        <!-- Campo modificado -->
+                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
+                                            <template v-if="s.producto">{{ s.producto.nombre }} — </template>
+                                            {{ s.label_campo }}
+                                        </p>
+                                        <!-- Antes / Después -->
+                                        <div v-if="s.tipo !== 'create_producto' && s.tipo !== 'delete_producto'" class="mt-2 flex flex-wrap gap-3 text-xs">
+                                            <div class="rounded-lg bg-red-50 dark:bg-red-900/20 px-3 py-1.5 text-red-700 dark:text-red-300 max-w-xs truncate">
+                                                <span class="font-semibold">Antes: </span>{{ s.valor_anterior?.value ?? '—' }}
+                                            </div>
+                                            <div class="rounded-lg bg-green-50 dark:bg-green-900/20 px-3 py-1.5 text-green-700 dark:text-green-300 max-w-xs truncate">
+                                                <span class="font-semibold">Nuevo: </span>{{ s.valor_nuevo?.value ?? '—' }}
+                                            </div>
+                                        </div>
+                                        <!-- Crear producto: mostrar resumen -->
+                                        <div v-if="s.tipo === 'create_producto' && s.valor_nuevo" class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                            Nombre: {{ s.valor_nuevo.nombre }} · Precio: {{ s.valor_nuevo.precio }}€ · Stock: {{ s.valor_nuevo.stock }}
+                                        </div>
+                                        <!-- Motivo rechazo -->
+                                        <p v-if="s.motivo_rechazo" class="mt-2 text-xs text-red-600 dark:text-red-400 italic">
+                                            Motivo: {{ s.motivo_rechazo }}
+                                        </p>
+                                        <!-- Revisor -->
+                                        <p v-if="s.revisor" class="mt-1 text-xs text-gray-400">
+                                            Revisado por {{ s.revisor }} · {{ s.revisado_at }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </template>

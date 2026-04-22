@@ -33,7 +33,21 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $user  = $request->user();
+        $nombre = $user->name;
+
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.dashboard')
+                ->with('success', "¡Hola de nuevo, {$nombre}! Bienvenido al panel de administración.");
+        }
+
+        if ($user->isOwner()) {
+            return redirect()->route('owner.panel')
+                ->with('success', "¡Hola de nuevo, {$nombre}! Bienvenido a tu panel de tienda.");
+        }
+
+        return redirect()->route('home')
+            ->with('success', "¡Hola de nuevo, {$nombre}! Nos alegra verte por aquí 🌿");
     }
 
     /**

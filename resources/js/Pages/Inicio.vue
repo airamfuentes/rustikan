@@ -1,13 +1,36 @@
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
 import CarritoCompra from '@/Components/CarritoCompra.vue';
 import MapaTiendas from '@/Components/MapaTiendas.vue';
+import DarkModeToggle from '@/Components/DarkModeToggle.vue';
+import Toast from '@/Components/Toast.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
+
+// ── Toast system ─────────────────────────────────────────────────────────────
+const toasts = ref([]);
+const addToast = (type, title, message = '') => {
+    const id = Date.now() + Math.random();
+    toasts.value.push({ id, type, title, message });
+};
+const removeToast = (id) => {
+    toasts.value = toasts.value.filter(t => t.id !== id);
+};
+watch(
+    () => page.props.flash,
+    (flash) => {
+        if (!flash) return;
+        if (flash.success) addToast('success', '¡Éxito!', flash.success);
+        if (flash.error)   addToast('error',   'Error',   flash.error);
+        if (flash.info)    addToast('info',     'Info',    flash.info);
+        if (flash.warning) addToast('warning',  'Aviso',   flash.warning);
+    },
+    { deep: true, immediate: true },
+);
 
 const props = defineProps({
     tiendas: {
@@ -52,6 +75,14 @@ const handleClickOutside = (event) => {
 onMounted(() => {
     window.addEventListener('scroll', handleScroll);
     document.addEventListener('click', handleClickOutside, true);
+    // Mostrar toast si viene de ?verified=1 (por si se llega sin flash de sesión)
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('verified') === '1' && !page.props.flash?.success) {
+        const nombre = user.value?.name ?? '';
+        addToast('success',
+            '🌿 ¡Cuenta verificada!',
+            nombre ? `Bienvenido/a a Rustikan, ${nombre}. Ya puedes empezar a comprar.` : 'Tu correo ha sido verificado. ¡Bienvenido/a!');
+    }
 });
 
 onUnmounted(() => {
@@ -87,6 +118,18 @@ const buscarTiendas = () => {
 
 <template>
     <Head title="Tiendas - Rustikan" />
+
+    <!-- Toast container -->
+    <div class="pointer-events-none fixed inset-0 z-[9999] flex flex-col items-end justify-start gap-3 p-6">
+        <Toast
+            v-for="toast in toasts"
+            :key="toast.id"
+            :type="toast.type"
+            :title="toast.title"
+            :message="toast.message"
+            @close="removeToast(toast.id)"
+        />
+    </div>
 
     <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
         <!-- Navbar Transformable -->
@@ -201,26 +244,8 @@ const buscarTiendas = () => {
                         <!-- Selector de idioma -->
                         <LanguageSwitcher />
 
-                        <!-- Dark mode toggle (no autenticado) -->
-                        <button
-                            v-if="!user"
-                            @click="toggleDark"
-                            class="relative flex h-9 w-9 items-center justify-center rounded-full text-gray-500 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none"
-                            :aria-label="isDark ? 'Activar modo claro' : 'Activar modo oscuro'"
-                        >
-                            <!-- Sol -->
-                            <svg class="absolute h-5 w-5 text-yellow-500 transition-all duration-300"
-                                 :class="isDark ? 'opacity-0 scale-50 rotate-90' : 'opacity-100 scale-100 rotate-0'"
-                                 fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.166 17.834a.75.75 0 00-1.06 1.06l1.59 1.591a.75.75 0 101.061-1.06l-1.591-1.591zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.166 6.166a.75.75 0 001.061 1.06l1.59-1.59a.75.75 0 10-1.06-1.061l-1.591 1.59z" />
-                            </svg>
-                            <!-- Luna -->
-                            <svg class="absolute h-5 w-5 text-blue-400 transition-all duration-300"
-                                 :class="isDark ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 -rotate-90'"
-                                 fill="currentColor" viewBox="0 0 24 24">
-                                <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clip-rule="evenodd" />
-                            </svg>
-                        </button>
+                        <!-- Dark mode toggle (siempre visible) -->
+                        <DarkModeToggle />
 
                         <!-- Botón Acceder (no autenticado) -->
                         <Link
@@ -231,9 +256,23 @@ const buscarTiendas = () => {
                             Acceder
                         </Link>
 
+                        <!-- Acceso rápido Admin -->
+                        <Link
+                            v-if="user && user.role === 'admin'"
+                            :href="route('admin.dashboard')"
+                            class="rounded-lg bg-gradient-to-r from-orange-500 to-red-500 px-3 py-2 text-sm font-bold text-white shadow-lg transition-all hover:shadow-xl"
+                        >🛡️ Admin</Link>
+
+                        <!-- Acceso rápido Owner -->
+                        <Link
+                            v-if="user && user.role === 'owner'"
+                            :href="route('owner.panel')"
+                            class="rounded-lg bg-green-500 px-3 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-green-600"
+                        >🏪 {{ $page.props.auth.tienda?.nombre || 'Mi Tienda' }}</Link>
+
                         <!-- Avatar + Dropdown (autenticado) -->
                         <div
-                            v-else-if="user"
+                            v-if="user"
                             ref="profileMenuRef"
                             class="relative"
                         >

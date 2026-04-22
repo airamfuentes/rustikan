@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\PedidoConfirmado;
 use App\Models\Pedido;
 use App\Models\Producto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 
 class PedidoController extends Controller
@@ -91,6 +93,10 @@ class PedidoController extends Controller
 
                 return $pedido;
             });
+
+            // Enviar email de confirmación al comprador
+            $pedido->load(['items', 'user']);
+            Mail::to($pedido->user->email)->send(new PedidoConfirmado($pedido));
 
             return redirect()
                 ->route('pedidos.confirmacion', $pedido)

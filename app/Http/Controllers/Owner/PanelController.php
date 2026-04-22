@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
+use App\Models\Categoria;
 use App\Models\PedidoItem;
 use App\Models\Pedido;
+use App\Models\SolicitudCambio;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Carbon\Carbon;
@@ -93,7 +95,31 @@ class PanelController extends Controller
             ->with('categoria')
             ->orderByDesc('destacado')
             ->orderBy('nombre')
-            ->get(['id', 'nombre', 'precio', 'precio_oferta', 'stock', 'disponible', 'destacado', 'imagen', 'categoria_id']);
+            ->get(['id', 'nombre', 'precio', 'precio_oferta', 'oferta_activa', 'stock', 'disponible', 'destacado', 'imagen', 'categoria_id', 'descripcion', 'unidad']);
+
+        // ── Categorías para el formulario de producto ─────────────────────────────
+        $categorias = Categoria::orderBy('nombre')->get(['id', 'nombre']);
+
+        // ── Solicitudes pendientes + recientes ────────────────────────────────────
+        $solicitudes = SolicitudCambio::where('tienda_id', $tienda->id)
+            ->with(['producto:id,nombre,imagen', 'revisor:id,name'])
+            ->orderByRaw("FIELD(estado, 'pendiente', 'aprobado', 'rechazado')")
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(fn($s) => [
+                'id'             => $s->id,
+                'tipo'           => $s->tipo,
+                'campo'          => $s->campo,
+                'label_campo'    => $s->labelCampo(),
+                'valor_anterior' => $s->valor_anterior,
+                'valor_nuevo'    => $s->valor_nuevo,
+                'estado'         => $s->estado,
+                'motivo_rechazo' => $s->motivo_rechazo,
+                'revisor'        => $s->revisor?->name,
+                'revisado_at'    => $s->revisado_at?->format('d/m/Y H:i'),
+                'created_at'     => $s->created_at->format('d/m/Y H:i'),
+                'producto'       => $s->producto ? ['id' => $s->producto->id, 'nombre' => $s->producto->nombre] : null,
+            ]);
 
         // ── Ingresos este mes vs mes anterior ─────────────────────────────────────
         $ingresosMesActual = PedidoItem::where('tienda_id', $tienda->id)
@@ -126,6 +152,8 @@ class PanelController extends Controller
             'topProductos'         => $topProductos,
             'pedidosRecientes'     => $pedidosRecientes,
             'productos'            => $productos,
+            'categorias'           => $categorias,
+            'solicitudes'          => $solicitudes,
         ]);
     }
 }

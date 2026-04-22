@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { Head, Link, usePage, useForm } from '@inertiajs/vue3';
 import CarritoCompra from '@/Components/CarritoCompra.vue';
 import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
+import DarkModeToggle from '@/Components/DarkModeToggle.vue';
 import { useCarrito } from '@/Composables/useCarrito';
 import { useDarkMode } from '@/Composables/useDarkMode';
 
@@ -51,11 +52,21 @@ const tabs = computed(() => {
     ];
 });
 
-const productosFiltrados = computed(() =>
-    tabActiva.value === 'Todos'
+const busquedaProducto = ref('');
+
+const productosFiltrados = computed(() => {
+    let lista = tabActiva.value === 'Todos'
         ? props.tienda.productos
-        : props.tienda.productos.filter(p => p.categoria.nombre === tabActiva.value)
-);
+        : props.tienda.productos.filter(p => p.categoria.nombre === tabActiva.value);
+    const q = busquedaProducto.value.trim().toLowerCase();
+    if (q) {
+        lista = lista.filter(p =>
+            p.nombre.toLowerCase().includes(q) ||
+            (p.descripcion && p.descripcion.toLowerCase().includes(q))
+        );
+    }
+    return lista;
+});
 
 const productosDestacados = computed(() =>
     props.tienda.productos.filter(p => p.destacado).length
@@ -165,6 +176,26 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                         <img src="/images/logo.png" alt="Rustikan" class="h-10 w-auto" />
                     </Link>
 
+                    <!-- Barra de búsqueda -->
+                    <div class="flex flex-1 max-w-sm items-center gap-2 mx-2">
+                        <div class="relative w-full">
+                            <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
+                            </svg>
+                            <input
+                                v-model="busquedaProducto"
+                                type="search"
+                                placeholder="Buscar productos…"
+                                :class="['w-full rounded-xl border py-2 pl-9 pr-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400',
+                                    isDark
+                                        ? 'bg-gray-800 border-gray-600 text-gray-100 placeholder-gray-400'
+                                        : 'bg-gray-100 border-gray-200 text-gray-800 placeholder-gray-400']"
+                            />
+                        </div>
+                    </div>
+
                     <div class="flex shrink-0 items-center gap-2">
                         <CarritoCompra />
                         <LanguageSwitcher />
@@ -183,31 +214,27 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                         </Link>
 
                         <!-- Toggle dark/light -->
-                        <button
-                            @click="toggleDark"
-                            :class="['flex h-9 w-9 items-center justify-center rounded-full transition-colors',
-                                isDark ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' : 'bg-gray-100 text-gray-500 hover:bg-gray-200']"
-                            :aria-label="isDark ? 'Modo claro' : 'Modo oscuro'"
-                        >
-                            <Transition
-                                enter-active-class="transition duration-200" enter-from-class="scale-0 rotate-90 opacity-0" enter-to-class="scale-100 rotate-0 opacity-100"
-                                leave-active-class="transition duration-200" leave-from-class="scale-100 rotate-0 opacity-100" leave-to-class="scale-0 rotate-90 opacity-0"
-                                mode="out-in"
-                            >
-                                <svg v-if="isDark" key="sun" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 7a5 5 0 100 10A5 5 0 0012 7z" />
-                                </svg>
-                                <svg v-else key="moon" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                                </svg>
-                            </Transition>
-                        </button>
+                        <DarkModeToggle />
 
                         <Link v-if="!user" :href="route('login')"
                             class="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600"
                         >Acceder</Link>
                         <Link
-                            v-else-if="user.role !== 'admin'"
+                            v-if="user && user.role === 'owner'"
+                            :href="route('owner.panel')"
+                            class="inline-flex items-center gap-1.5 rounded-lg bg-green-500 px-3 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-green-600"
+                        >
+                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M5.223 2.25c-.497 0-.974.198-1.325.55l-1.3 1.298A3.75 3.75 0 007.5 9.75c.627.47 1.406.75 2.25.75.844 0 1.624-.28 2.25-.75.626.47 1.406.75 2.25.75.844 0 1.623-.28 2.25-.75a3.75 3.75 0 004.902-5.652l-1.3-1.299a1.875 1.875 0 00-1.325-.549H5.223z" /><path fill-rule="evenodd" d="M3 20.25v-8.7c1.188.037 2.36-.219 3.4-.737A6.743 6.743 0 0012 12.75a6.743 6.743 0 005.6-1.187 6.743 6.743 0 003.4.737v8.7a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75v4.5a.75.75 0 01-.75.75H3.75a.75.75 0 01-.75-.75z" clip-rule="evenodd" /></svg>
+                            Mi Tienda
+                        </Link>
+                        <Link v-if="user && user.role === 'admin'" :href="route('admin.dashboard')"
+                            class="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 text-sm font-bold text-white shadow-lg transition-all hover:shadow-xl"
+                        >
+                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12.516 2.17a.75.75 0 00-1.032 0 11.209 11.209 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 00.374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 00-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08zm3.094 8.016a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" /></svg>
+                            Admin
+                        </Link>
+                        <Link
+                            v-if="user && user.role === 'user'"
                             :href="route('dashboard')"
                             class="flex h-10 w-10 items-center justify-center rounded-full bg-primary-500 text-white transition-colors hover:bg-primary-600"
                         >
@@ -215,9 +242,6 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                                 <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                             </svg>
                         </Link>
-                        <Link v-if="user && user.role === 'admin'" :href="route('admin.dashboard')"
-                            class="rounded-lg bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 text-sm font-bold text-white shadow-lg transition-all hover:shadow-xl"
-                        >🛡️ Admin</Link>
                     </div>
                 </div>
             </div>
@@ -416,10 +440,10 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
 
                         <div :class="['mt-4 flex items-end justify-between border-t pt-3', isDark ? 'border-gray-700' : 'border-gray-100']">
                             <div>
-                                <div v-if="producto.precio_oferta" :class="['text-xs line-through', isDark ? 'text-gray-500' : 'text-gray-400']">
+                                <div v-if="producto.precio_oferta && producto.oferta_activa" :class="['text-xs line-through', isDark ? 'text-gray-500' : 'text-gray-400']">
                                     {{ Number(producto.precio).toFixed(2) }}€
                                 </div>
-                                <span class="text-xl font-extrabold text-primary-500">{{ Number(producto.precio_oferta || producto.precio).toFixed(2) }}€</span>
+                                <span class="text-xl font-extrabold text-primary-500">{{ Number((producto.oferta_activa && producto.precio_oferta) ? producto.precio_oferta : producto.precio).toFixed(2) }}€</span>
                                 <span :class="['text-xs', isDark ? 'text-gray-500' : 'text-gray-400']">/{{ producto.unidad }}</span>
                             </div>
 
@@ -786,7 +810,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                         <div class="absolute left-4 top-4 flex flex-wrap gap-2">
                             <span class="rounded-full bg-primary-500 px-3 py-1 text-xs font-bold text-white shadow">Km 0</span>
                             <span v-if="productoModal.destacado" class="rounded-full bg-yellow-500 px-3 py-1 text-xs font-bold text-white shadow">⭐ Destacado</span>
-                            <span v-if="productoModal.precio_oferta" class="rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white shadow">
+                            <span v-if="productoModal.precio_oferta && productoModal.oferta_activa" class="rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white shadow">
                                 -{{ Math.round((1 - productoModal.precio_oferta / productoModal.precio) * 100) }}%
                             </span>
                         </div>
@@ -813,9 +837,9 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                         <!-- Precio -->
                         <div class="mt-4 flex items-baseline gap-3">
                             <span class="text-3xl font-extrabold text-primary-500">
-                                {{ Number(productoModal.precio_oferta || productoModal.precio).toFixed(2) }}€
+                                {{ Number((productoModal.oferta_activa && productoModal.precio_oferta) ? productoModal.precio_oferta : productoModal.precio).toFixed(2) }}€
                             </span>
-                            <span v-if="productoModal.precio_oferta" :class="['text-lg line-through', isDark ? 'text-gray-500' : 'text-gray-400']">
+                            <span v-if="productoModal.precio_oferta && productoModal.oferta_activa" :class="['text-lg line-through', isDark ? 'text-gray-500' : 'text-gray-400']">
                                 {{ Number(productoModal.precio).toFixed(2) }}€
                             </span>
                             <span :class="['text-sm', isDark ? 'text-gray-400' : 'text-gray-500']">/ {{ productoModal.unidad }}</span>
@@ -858,7 +882,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                             </div>
                             <!-- Total selección -->
                             <span class="ml-auto text-xl font-extrabold text-primary-500">
-                                {{ (Number(productoModal.precio_oferta || productoModal.precio) * cantidadModal).toFixed(2) }}€
+                                {{ (Number((productoModal.oferta_activa && productoModal.precio_oferta) ? productoModal.precio_oferta : productoModal.precio) * cantidadModal).toFixed(2) }}€
                             </span>
                         </div>
                     </div>
@@ -874,7 +898,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                                     d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
                             </svg>
                             Añadir {{ cantidadModal > 1 ? cantidadModal + ' al' : 'al' }} carrito ·
-                            {{ (Number(productoModal.precio_oferta || productoModal.precio) * cantidadModal).toFixed(2) }}€
+                            {{ (Number((productoModal.oferta_activa && productoModal.precio_oferta) ? productoModal.precio_oferta : productoModal.precio) * cantidadModal).toFixed(2) }}€
                         </button>
                     </div>
                 </div>

@@ -49,6 +49,17 @@
                         <p class="mt-2 text-sm text-gray-600">Gestionar pedidos</p>
                     </Link>
 
+                    <!-- Solicitudes de cambio -->
+                    <Link :href="route('admin.solicitudes.index')" class="group relative rounded-xl bg-white border-2 border-gray-200 p-6 shadow-sm transition-all hover:shadow-md hover:border-yellow-400 hover:-translate-y-1">
+                        <div class="mb-4 inline-flex rounded-lg bg-yellow-100 p-3">
+                            <svg class="h-8 w-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Solicitudes</h3>
+                        <p class="mt-2 text-sm text-gray-600">Aprobar cambios de tiendas</p>
+                    </Link>
+
                     <!-- Gestionar Ingresos -->
                     <Link :href="route('admin.ingresos.index')" class="group rounded-xl bg-white border-2 border-gray-200 p-6 shadow-sm transition-all hover:shadow-md hover:border-emerald-400 hover:-translate-y-1">
                         <div class="mb-4 inline-flex rounded-lg bg-emerald-100 p-3">

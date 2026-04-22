@@ -44,6 +44,18 @@ class TiendaSeeder extends Seeder
             'name' => 'Elena Vega', 'password' => bcrypt('password'),
             'role' => 'user', 'telefono' => '928901234', 'direccion' => 'Playa Blanca, Lanzarote',
         ]);
+        $rosa   = User::firstOrCreate(['email' => 'rosa@example.com'], [
+            'name' => 'Rosa Medina', 'password' => bcrypt('password'),
+            'role' => 'user', 'telefono' => '928902345', 'direccion' => 'Costa Teguise, Lanzarote',
+        ]);
+        $miguel = User::firstOrCreate(['email' => 'miguel@example.com'], [
+            'name' => 'Miguel Torres', 'password' => bcrypt('password'),
+            'role' => 'user', 'telefono' => '928903456', 'direccion' => 'Arrecife, Lanzarote',
+        ]);
+        $isabel = User::firstOrCreate(['email' => 'isabel@example.com'], [
+            'name' => 'Isabel Romero', 'password' => bcrypt('password'),
+            'role' => 'user', 'telefono' => '928904567', 'direccion' => 'Tías, Lanzarote',
+        ]);
 
         // ── IDs reales de categorías (lookup por slug) ───────────────────────
         $cats = \App\Models\Categoria::pluck('id', 'slug');
@@ -302,6 +314,170 @@ class TiendaSeeder extends Seeder
                 'telefono' => '928736015', 'email' => 'info@saljanubio.com',
                 'direccion' => 'Las Salinas, Lanzarote', 'valoracion' => 4.7, 'total_resenas' => 143,
                 'latitud' => 28.9130, 'longitud' => -13.7900,
+                'activa' => true, 'visible' => true,
+            ],
+
+            // ── Frutas y Verduras (extra) ────────────────────────────────────
+            [
+                'user_id' => $rosa->id, 'categoria_id' => $cats['frutas-y-verduras'],
+                'nombre' => 'Cultivos La Tegala', 'slug' => 'cultivos-la-tegala',
+                'descripcion' => 'Hortalizas de temporada cultivadas bajo el volcán. Pimientos, tomates y berenjenas de sabor intenso.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1560493676-04071c5f467b?w=800',
+                'telefono' => '928845820', 'email' => 'info@cultivoslatgala.com',
+                'direccion' => 'Guatiza, Lanzarote', 'valoracion' => 4.4, 'total_resenas' => 38,
+                'latitud' => 29.1100, 'longitud' => -13.4850,
+                'activa' => true, 'visible' => true,
+            ],
+            [
+                'user_id' => $miguel->id, 'categoria_id' => $cats['frutas-y-verduras'],
+                'nombre' => 'Agrojardin Masdache', 'slug' => 'agrojardin-masdache',
+                'descripcion' => 'Frutas tropicales y subtropicales cultivadas en Masdache. Aguacates, mangos y papayas de Lanzarote.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=800',
+                'telefono' => '928524710', 'email' => 'pedidos@agrojardinmasdache.es',
+                'direccion' => 'Masdache, Lanzarote', 'valoracion' => 4.6, 'total_resenas' => 52,
+                'latitud' => 29.0210, 'longitud' => -13.6650,
+                'activa' => true, 'visible' => true,
+            ],
+
+            // ── Carnes (extra) ───────────────────────────────────────────────
+            [
+                'user_id' => $isabel->id, 'categoria_id' => $cats['carnes'],
+                'nombre' => 'La Cabaña de Tías', 'slug' => 'la-cabana-de-tias',
+                'descripcion' => 'Embutidos artesanales: chorizo, morcilla y salchichón elaborados con recetas tradicionales canarias.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800',
+                'telefono' => '928834562', 'email' => 'embutidos@cabanatias.com',
+                'direccion' => 'Tías, Lanzarote', 'valoracion' => 4.5, 'total_resenas' => 67,
+                'latitud' => 28.9620, 'longitud' => -13.6370,
+                'activa' => true, 'visible' => true,
+            ],
+            [
+                'user_id' => $rosa->id, 'categoria_id' => $cats['carnes'],
+                'nombre' => 'Carnicería Costa Teguise', 'slug' => 'carniceria-costa-teguise',
+                'descripcion' => 'Carne fresca y de calidad para todos los bolsillos. Especialidad en cabra en salmorejo y costillas al mojo.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800',
+                'telefono' => '928592310', 'email' => 'carniceria@cosatateguise.com',
+                'direccion' => 'Costa Teguise, Lanzarote', 'valoracion' => 4.3, 'total_resenas' => 44,
+                'latitud' => 29.0041, 'longitud' => -13.4970,
+                'activa' => true, 'visible' => true,
+            ],
+
+            // ── Pescados y Mariscos (extra) ──────────────────────────────────
+            [
+                'user_id' => $miguel->id, 'categoria_id' => $cats['pescados-y-mariscos'],
+                'nombre' => 'El Barco de Playa Blanca', 'slug' => 'el-barco-de-playa-blanca',
+                'descripcion' => 'Pesca artesanal del sur de Lanzarote. Salemas, abades y bocinegros recién sacados del agua.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1580476262798-bddd9f4b7369?w=800',
+                'telefono' => '928518990', 'email' => 'pesca@barcoplayablanca.com',
+                'direccion' => 'Playa Blanca, Lanzarote', 'valoracion' => 4.7, 'total_resenas' => 81,
+                'latitud' => 28.8680, 'longitud' => -13.8260,
+                'activa' => true, 'visible' => true,
+            ],
+            [
+                'user_id' => $isabel->id, 'categoria_id' => $cats['pescados-y-mariscos'],
+                'nombre' => 'Pulpería La Graciosa', 'slug' => 'pulperia-la-graciosa',
+                'descripcion' => 'Pulpo y chipirones frescos de La Graciosa. También mejillones, berberechos y navajas del Atlántico norte.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1498654200943-1088dd4438ae?w=800',
+                'telefono' => '928841225', 'email' => 'pedidos@pulperiagraciosa.es',
+                'direccion' => 'Órzola, Lanzarote', 'valoracion' => 4.8, 'total_resenas' => 109,
+                'latitud' => 29.2080, 'longitud' => -13.4520,
+                'activa' => true, 'visible' => true,
+            ],
+
+            // ── Panadería (extra) ────────────────────────────────────────────
+            [
+                'user_id' => $miguel->id, 'categoria_id' => $cats['panaderia'],
+                'nombre' => 'Dulcería La Palma', 'slug' => 'dulceria-la-palma',
+                'descripcion' => 'Repostería fina y tartas personalizadas para bodas y eventos. Pastelería con ingredientes km0.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=800',
+                'telefono' => '928812045', 'email' => 'tartas@dulceriapalma.com',
+                'direccion' => 'Arrecife, Lanzarote', 'valoracion' => 4.9, 'total_resenas' => 187,
+                'latitud' => 28.9580, 'longitud' => -13.5510,
+                'activa' => true, 'visible' => true,
+            ],
+            [
+                'user_id' => $rosa->id, 'categoria_id' => $cats['panaderia'],
+                'nombre' => 'Pan del Volcán', 'slug' => 'pan-del-volcan',
+                'descripcion' => 'Panes de escaldón, gofio y centeno. Recetas ancestrales que mantienen viva la tradición panadera canaria.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=800',
+                'telefono' => '928841799', 'email' => 'pan@pandelvolcan.es',
+                'direccion' => 'Haría, Lanzarote', 'valoracion' => 4.6, 'total_resenas' => 73,
+                'latitud' => 29.1420, 'longitud' => -13.5200,
+                'activa' => true, 'visible' => true,
+            ],
+
+            // ── Lácteos y Quesos (extra) ─────────────────────────────────────
+            [
+                'user_id' => $miguel->id, 'categoria_id' => $cats['lacteos-y-quesos'],
+                'nombre' => 'Granja Los Picos', 'slug' => 'granja-los-picos',
+                'descripcion' => 'Mantequillas, natas y quesos de autor elaborados con leche cruda de vaca de raza canaria.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800',
+                'telefono' => '928846320', 'email' => 'lacteos@granjalospicos.com',
+                'direccion' => 'San Bartolomé, Lanzarote', 'valoracion' => 4.5, 'total_resenas' => 59,
+                'latitud' => 29.0090, 'longitud' => -13.6100,
+                'activa' => true, 'visible' => true,
+            ],
+            [
+                'user_id' => $isabel->id, 'categoria_id' => $cats['lacteos-y-quesos'],
+                'nombre' => 'La Vaquería de Tías', 'slug' => 'la-vaqueria-de-tias',
+                'descripcion' => 'Leche pasteurizada y ultrafresh, batidos naturales y helados artesanales de temporada.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=800',
+                'telefono' => '928834005', 'email' => 'pedidos@vaqueriatias.com',
+                'direccion' => 'Tías, Lanzarote', 'valoracion' => 4.4, 'total_resenas' => 48,
+                'latitud' => 28.9580, 'longitud' => -13.6420,
+                'activa' => true, 'visible' => true,
+            ],
+
+            // ── Vinoteca (extra) ─────────────────────────────────────────────
+            [
+                'user_id' => $rosa->id, 'categoria_id' => $cats['vinoteca'],
+                'nombre' => 'Ron y Mojo Costa Teguise', 'slug' => 'ron-y-mojo-costa-teguise',
+                'descripcion' => 'Rones artesanales de caña y mojos en todas sus variedades: rojo, verde, cilantro y almendra.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=800',
+                'telefono' => '928592780', 'email' => 'info@ronymojoct.com',
+                'direccion' => 'Costa Teguise, Lanzarote', 'valoracion' => 4.6, 'total_resenas' => 112,
+                'latitud' => 28.9980, 'longitud' => -13.5010,
+                'activa' => true, 'visible' => true,
+            ],
+            [
+                'user_id' => $isabel->id, 'categoria_id' => $cats['vinoteca'],
+                'nombre' => 'Bodega Rubicón', 'slug' => 'bodega-rubicon',
+                'descripcion' => 'Viñedo del sur de Lanzarote con vistas al Timanfaya. Tintos y rosados de listán negro y syrah volcánico.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1553361371-9b22f78e8b1d?w=800',
+                'telefono' => '928173812', 'email' => 'visitas@bodegarubicon.com',
+                'direccion' => 'La Geria, Lanzarote', 'valoracion' => 4.8, 'total_resenas' => 165,
+                'latitud' => 28.9820, 'longitud' => -13.7010,
+                'activa' => true, 'visible' => true,
+            ],
+
+            // ── Artesanía (extra) ────────────────────────────────────────────
+            [
+                'user_id' => $rosa->id, 'categoria_id' => $cats['artesania'],
+                'nombre' => 'Joyería Volcánica', 'slug' => 'joyeria-volcanica',
+                'descripcion' => 'Joyas únicas fabricadas con basalto, lava y vidrio volcánico de Lanzarote. Collares, pendientes y pulseras.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=800',
+                'telefono' => '928592445', 'email' => 'joyas@joyeriavolcanica.com',
+                'direccion' => 'Costa Teguise, Lanzarote', 'valoracion' => 4.8, 'total_resenas' => 134,
+                'latitud' => 28.9990, 'longitud' => -13.4980,
+                'activa' => true, 'visible' => true,
+            ],
+            [
+                'user_id' => $miguel->id, 'categoria_id' => $cats['artesania'],
+                'nombre' => 'Casa de los Telares', 'slug' => 'casa-de-los-telares',
+                'descripcion' => 'Mantelería, alfombras y tapices tejidos a mano con técnicas transmitidas de generación en generación.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=800',
+                'telefono' => '928845990', 'email' => 'telares@casadelastelares.com',
+                'direccion' => 'Teguise, Lanzarote', 'valoracion' => 4.7, 'total_resenas' => 89,
+                'latitud' => 29.0580, 'longitud' => -13.5580,
+                'activa' => true, 'visible' => true,
+            ],
+            [
+                'user_id' => $isabel->id, 'categoria_id' => $cats['artesania'],
+                'nombre' => 'Taller Mojo Picón', 'slug' => 'taller-mojo-picon',
+                'descripcion' => 'Salsas y condimentos artesanales: mojo rojo, verde, cilantro y escabeche. Envasados sin conservantes.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1582169296194-e4d644c48063?w=800',
+                'telefono' => '928834780', 'email' => 'pedidos@tallermojopicon.com',
+                'direccion' => 'Puerto del Carmen, Lanzarote', 'valoracion' => 4.9, 'total_resenas' => 221,
+                'latitud' => 28.9230, 'longitud' => -13.6610,
                 'activa' => true, 'visible' => true,
             ],
         ];

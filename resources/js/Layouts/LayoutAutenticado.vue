@@ -5,6 +5,9 @@ import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import Toast from '@/Components/Toast.vue';
+import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
+import CarritoCompra from '@/Components/CarritoCompra.vue';
+import DarkModeToggle from '@/Components/DarkModeToggle.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { useDarkMode } from '@/Composables/useDarkMode';
 
@@ -131,24 +134,18 @@ watch(
                             </div>
                         </div>
 
-                        <div class="hidden sm:ms-6 sm:flex sm:items-center">
-                            <!-- Badge Admin -->
-                            <div v-if="$page.props.auth.user.role === 'admin'" class="mr-4 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
-                                ADMIN
-                            </div>
-                            
+                        <div class="hidden sm:ms-6 sm:flex sm:items-center gap-3">
+                            <!-- Selector de idioma -->
+                            <LanguageSwitcher />
+
+                            <!-- Dark mode toggle -->
+                            <DarkModeToggle />
+
                             <!-- Carrito -->
-                            <button class="relative mr-4">
-                                <svg class="h-6 w-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                </svg>
-                                <span class="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary-500 text-xs font-bold text-white">
-                                    0
-                                </span>
-                            </button>
+                            <CarritoCompra />
 
                             <!-- Avatar + Dropdown -->
-                            <div ref="profileMenuRef" class="relative ms-3">
+                            <div ref="profileMenuRef" class="relative">
                                 <button
                                     @click="showProfileMenu = !showProfileMenu"
                                     class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-primary-500 text-white transition-colors hover:bg-primary-600 focus:outline-none"

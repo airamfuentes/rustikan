@@ -15,11 +15,12 @@ class DatabaseSeeder extends Seeder
         \App\Models\User::firstOrCreate(
             ['email' => 'admin@rustikan.com'],
             [
-                'name' => 'Admin Rustikan',
-                'password' => bcrypt('password'),
-                'role' => 'admin',
-                'telefono' => '928123456',
-                'direccion' => 'Arrecife, Lanzarote',
+                'name'              => 'Admin Rustikan',
+                'password'          => bcrypt('password'),
+                'role'              => 'admin',
+                'telefono'          => '928123456',
+                'direccion'         => 'Arrecife, Lanzarote',
+                'email_verified_at' => now(),
             ]
         );
 
@@ -27,22 +28,24 @@ class DatabaseSeeder extends Seeder
         \App\Models\User::firstOrCreate(
             ['email' => 'juan@example.com'],
             [
-                'name' => 'Juan García',
-                'password' => bcrypt('password'),
-                'role' => 'user',
-                'telefono' => '928234567',
-                'direccion' => 'Teguise, Lanzarote',
+                'name'              => 'Juan García',
+                'password'          => bcrypt('password'),
+                'role'              => 'user',
+                'telefono'          => '928234567',
+                'direccion'         => 'Teguise, Lanzarote',
+                'email_verified_at' => now(),
             ]
         );
 
         \App\Models\User::firstOrCreate(
             ['email' => 'maria@example.com'],
             [
-                'name' => 'María López',
-                'password' => bcrypt('password'),
-                'role' => 'user',
-                'telefono' => '928345678',
-                'direccion' => 'Puerto del Carmen, Lanzarote',
+                'name'              => 'María López',
+                'password'          => bcrypt('password'),
+                'role'              => 'user',
+                'telefono'          => '928345678',
+                'direccion'         => 'Puerto del Carmen, Lanzarote',
+                'email_verified_at' => now(),
             ]
         );
 

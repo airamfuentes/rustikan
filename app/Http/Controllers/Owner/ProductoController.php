@@ -87,6 +87,21 @@ class ProductoController extends Controller
             ->with('success', "«{$producto->nombre}» actualizado correctamente.");
     }
 
+    public function toggleOferta(Producto $producto)
+    {
+        $tienda = auth()->user()->tiendas()->firstOrFail();
+
+        if ($producto->tienda_id !== $tienda->id) {
+            abort(403);
+        }
+
+        $producto->update(['oferta_activa' => !$producto->oferta_activa]);
+
+        return back()->with('success', $producto->oferta_activa
+            ? "Oferta activada para «{$producto->nombre}»."
+            : "Oferta desactivada para «{$producto->nombre}».");
+    }
+
     private function storeFromUrl(string $url): ?string
     {
         try {

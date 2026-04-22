@@ -15,13 +15,17 @@ class VerifyEmailController extends Controller
     public function __invoke(EmailVerificationRequest $request): RedirectResponse
     {
         if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
+            return redirect()->route('home')
+                ->with('success', '¡Tu correo ya estaba verificado! Bienvenido/a de nuevo a Rustikan 🌿');
         }
 
         if ($request->user()->markEmailAsVerified()) {
             event(new Verified($request->user()));
         }
 
-        return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
+        $nombre = $request->user()->name;
+
+        return redirect()->route('home')
+            ->with('success', "¡Cuenta verificada, {$nombre}! Bienvenido/a a Rustikan 🌿 Ya puedes explorar y comprar productos locales.");
     }
 }

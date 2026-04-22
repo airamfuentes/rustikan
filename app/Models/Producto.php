@@ -17,6 +17,7 @@ class Producto extends Model
         'descripcion',
         'precio',
         'precio_oferta',
+        'oferta_activa',
         'unidad',
         'imagen',
         'stock',
@@ -28,6 +29,7 @@ class Producto extends Model
     protected $casts = [
         'precio' => 'decimal:2',
         'precio_oferta' => 'decimal:2',
+        'oferta_activa' => 'boolean',
         'disponible' => 'boolean',
         'destacado' => 'boolean',
     ];
@@ -77,7 +79,7 @@ class Producto extends Model
      */
     public function getPriceAttribute()
     {
-        return $this->precio_oferta ?? $this->precio;
+        return ($this->oferta_activa && $this->precio_oferta) ? $this->precio_oferta : $this->precio;
     }
 
     /**

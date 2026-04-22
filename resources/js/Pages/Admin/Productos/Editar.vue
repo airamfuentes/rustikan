@@ -142,7 +142,7 @@
                             </div>
 
                             <!-- Estado y Destacado -->
-                            <div class="grid gap-4 md:grid-cols-2">
+                            <div class="grid gap-4 md:grid-cols-3">
                                 <!-- Disponible -->
                                 <div class="rounded-lg border p-4">
                                     <div class="flex items-center justify-between">
@@ -190,6 +190,32 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Oferta activa -->
+                                <div class="rounded-lg border p-4" :class="producto.oferta_activa ? 'border-green-300 bg-green-50' : ''">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700">
+                                                Oferta activa
+                                                <span v-if="producto.oferta_activa" class="ml-1 text-green-600">✓</span>
+                                            </label>
+                                            <p class="text-xs text-gray-500">
+                                                <span v-if="producto.precio_oferta">Precio: {{ Number(producto.precio_oferta).toFixed(2) }}€</span>
+                                                <span v-else class="text-amber-600">Introduce un precio de oferta</span>
+                                            </p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            :disabled="!producto.precio_oferta"
+                                            @click="router.post(route('admin.productos.toggle-oferta', producto.id))"
+                                            :class="['flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed',
+                                                producto.oferta_activa ? 'bg-green-500' : 'bg-gray-300']"
+                                        >
+                                            <span :class="['ml-1 h-4 w-4 rounded-full bg-white transition-transform',
+                                                producto.oferta_activa ? 'translate-x-5' : '']"></span>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -218,7 +244,7 @@
 
 <script setup>
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
-import { Link, useForm } from '@inertiajs/vue3';
+import { Link, useForm, router } from '@inertiajs/vue3';
 
 const props = defineProps({
     producto: Object,

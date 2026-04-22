@@ -6,6 +6,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import Recaptcha from '@/Components/Recaptcha.vue';
+import { ref } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
 defineProps({
@@ -18,6 +19,7 @@ defineProps({
 });
 
 const RECAPTCHA_SITE_KEY = '6LceSbUsAAAAAA9bdOLoaga8Mzy3lZ7uBuQjSK9_';
+const recaptchaRef = ref(null);
 
 const form = useForm({
     email: '',
@@ -33,6 +35,10 @@ const onError   = ()      => { form.recaptcha_token = ''; };
 const submit = () => {
     form.post(route('login'), {
         onFinish: () => form.reset('password'),
+        onError: () => {
+            recaptchaRef.value?.reset();
+            form.recaptcha_token = '';
+        },
     });
 };
 </script>
@@ -89,6 +95,7 @@ const submit = () => {
             <!-- reCAPTCHA -->
             <div class="mt-4">
                 <Recaptcha
+                    ref="recaptchaRef"
                     :sitekey="RECAPTCHA_SITE_KEY"
                     @verify="onVerify"
                     @expire="onExpire"

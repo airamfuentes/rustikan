@@ -17,8 +17,11 @@ const emit = defineEmits(['tienda-click']);
 
 const mapContainer = ref(null);
 const activePopupId = ref(null);
+const isSatellite = ref(false);
 let map = null;
 let clusterGroup = null;
+let tileNormal = null;
+let tileSatellite = null;
 
 // Tiendas que tienen coordenadas
 const tiendasConCoords = () =>
@@ -97,10 +100,19 @@ const cargarMarcadores = () => {
 const initMap = () => {
     if (!mapContainer.value) return;
 
+    // Límites geográficos de la isla de Lanzarote (con pequeño margen)
+    const lanzaroteBounds = L.latLngBounds(
+        [28.72, -14.12],  // SW — un poco al suroeste de Punta de Papagayo
+        [29.38, -13.28],  // NE — un poco al noreste de Punta Fariones
+    );
+
     // Centro por defecto: Lanzarote
     map = L.map(mapContainer.value, {
-        center: [29.0469, -13.6328],
+        center: [29.0469, -13.5800],
         zoom: 11,
+        minZoom: 10,                      // no se puede alejar más de la isla
+        maxBounds: lanzaroteBounds,       // no se puede panear fuera de Lanzarote
+        maxBoundsViscosity: 1.0,          // rebote duro al llegar al borde
         zoomControl: false,
         scrollWheelZoom: false,
         attributionControl: false,
@@ -109,11 +121,15 @@ const initMap = () => {
     // Control de zoom en la esquina derecha
     L.control.zoom({ position: 'topright' }).addTo(map);
 
-    // Tile layer CartoDB Positron (limpio, moderno, usado por apps de entrega)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    // Tile layers: normal + satélite
+    tileNormal = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         subdomains: 'abcd',
         maxZoom: 19,
-    }).addTo(map);
+    });
+    tileSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+    });
+    tileNormal.addTo(map);
 
     // Habilitar scroll zoom con Ctrl
     map.on('focus', () => { map.scrollWheelZoom.enable(); });
@@ -157,6 +173,18 @@ onUnmounted(() => {
     }
     delete window.__mapaNavegar;
 });
+
+const toggleSatellite = () => {
+    if (!map) return;
+    if (isSatellite.value) {
+        map.removeLayer(tileSatellite);
+        tileNormal.addTo(map);
+    } else {
+        map.removeLayer(tileNormal);
+        tileSatellite.addTo(map);
+    }
+    isSatellite.value = !isSatellite.value;
+};
 </script>
 
 <template>
@@ -167,6 +195,22 @@ onUnmounted(() => {
             class="mapa-container"
             :style="{ height }"
         />
+
+        <!-- Botón satélite -->
+        <button
+            @click="toggleSatellite"
+            class="mapa-satellite-btn"
+            :title="isSatellite ? 'Vista normal' : 'Vista satélite'"
+        >
+            <!-- Globe (satélite) -->
+            <svg v-if="!isSatellite" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M21.721 12.752a9.711 9.711 0 00-.945-5.003 12.754 12.754 0 01-4.339 2.708 18.991 18.991 0 01-.214 4.772 17.165 17.165 0 005.498-2.477zM14.634 15.55a17.324 17.324 0 00.332-4.647c-.952.227-1.945.347-2.966.347-1.021 0-2.014-.12-2.966-.347a17.515 17.515 0 00.332 4.647 17.385 17.385 0 005.268 0zM9.772 17.119a18.963 18.963 0 004.456 0A17.182 17.182 0 0112 21.724a17.18 17.18 0 01-2.228-4.605zM7.777 15.23a18.87 18.87 0 01-.214-4.774 12.753 12.753 0 01-4.34-2.708 9.711 9.711 0 00-.944 5.004 17.165 17.165 0 005.498 2.477zM21.356 14.752a9.765 9.765 0 01-7.478 6.817 18.64 18.64 0 001.988-4.718 18.627 18.627 0 005.49-2.098zM2.644 14.752c1.682.971 3.53 1.688 5.49 2.099a18.64 18.64 0 001.988 4.718 9.765 9.765 0 01-7.478-6.816zM13.878 2.43a9.755 9.755 0 016.116 3.986 11.267 11.267 0 01-3.746 2.504 18.63 18.63 0 00-2.37-6.49zM12 2.276a17.152 17.152 0 012.805 7.121c-.897.23-1.837.353-2.805.353-.968 0-1.908-.122-2.805-.353A17.151 17.151 0 0112 2.276zM10.122 2.43a18.629 18.629 0 00-2.37 6.49 11.266 11.266 0 01-3.746-2.504 9.754 9.754 0 016.116-3.985z" />
+            </svg>
+            <!-- Map (normal) -->
+            <svg v-else class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                <path fill-rule="evenodd" d="M8.161 2.58a1.875 1.875 0 011.678 0l4.993 2.498c.106.052.23.052.336 0l3.869-1.935A1.875 1.875 0 0121.75 4.82v12.485c0 .71-.401 1.36-1.037 1.677l-4.875 2.437a1.875 1.875 0 01-1.676 0l-4.994-2.497a.375.375 0 00-.336 0l-3.868 1.935A1.875 1.875 0 012.25 19.18V6.695c0-.71.401-1.36 1.036-1.677l4.875-2.437zM9 6a.75.75 0 01.75.75V15a.75.75 0 01-1.5 0V6.75A.75.75 0 019 6zm6.75 3a.75.75 0 00-1.5 0v8.25a.75.75 0 001.5 0V9z" clip-rule="evenodd" />
+            </svg>
+        </button>
 
         <!-- Indicador si no hay tiendas con coords -->
         <div
@@ -202,6 +246,31 @@ onUnmounted(() => {
     background: rgb(243 244 246 / 0.85);
     z-index: 500;
     pointer-events: none;
+}
+
+.mapa-satellite-btn {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.85);
+    background: rgba(20, 20, 20, 0.7);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    transition: background 0.2s, transform 0.15s;
+}
+.mapa-satellite-btn:hover {
+    background: rgba(20, 20, 20, 0.9);
+    transform: scale(1.04);
 }
 </style>
 

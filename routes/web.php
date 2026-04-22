@@ -110,7 +110,7 @@ Route::middleware('auth')->group(function () {
         if ($user->isOwner()) {
             return redirect()->route('owner.panel');
         }
-        return redirect()->route('profile.edit');
+        return redirect()->route('home');
     })->name('dashboard');
     
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -120,13 +120,20 @@ Route::middleware('auth')->group(function () {
 });
 
 // Owner Routes
-Route::middleware(['auth', 'owner'])->prefix('mi-tienda')->name('owner.')->group(function () {
+Route::middleware(['auth', 'verified', 'owner'])->prefix('mi-tienda')->name('owner.')->group(function () {
     Route::get('/panel', [\App\Http\Controllers\Owner\PanelController::class, 'index'])->name('panel');
     Route::get('/editar', [\App\Http\Controllers\Owner\TiendaController::class, 'edit'])->name('tienda.edit');
     Route::post('/editar', [\App\Http\Controllers\Owner\TiendaController::class, 'update'])->name('tienda.update');
-    // Productos
+    // Productos (solo edición directa vía owner, sin aprobación — toggles rápidos)
     Route::get('/productos/{producto}/editar', [\App\Http\Controllers\Owner\ProductoController::class, 'edit'])->name('producto.edit');
     Route::post('/productos/{producto}', [\App\Http\Controllers\Owner\ProductoController::class, 'update'])->name('producto.update');
+    Route::post('/productos/{producto}/oferta', [\App\Http\Controllers\Owner\ProductoController::class, 'toggleOferta'])->name('producto.oferta');
+    // Solicitudes de cambio
+    Route::post('/solicitar/tienda',                    [\App\Http\Controllers\Owner\SolicitudController::class, 'solicitarCambioTienda'])->name('solicitar.tienda');
+    Route::post('/solicitar/productos',                 [\App\Http\Controllers\Owner\SolicitudController::class, 'solicitarCrearProducto'])->name('solicitar.producto.crear');
+    Route::post('/solicitar/productos/{producto}',      [\App\Http\Controllers\Owner\SolicitudController::class, 'solicitarEditarProducto'])->name('solicitar.producto.editar');
+    Route::delete('/solicitar/productos/{producto}',    [\App\Http\Controllers\Owner\SolicitudController::class, 'solicitarEliminarProducto'])->name('solicitar.producto.eliminar');
+    Route::get('/mis-solicitudes',                      [\App\Http\Controllers\Owner\SolicitudController::class, 'misSolicitudes'])->name('mis.solicitudes');
 });
 
 // Admin Routes
@@ -145,6 +152,7 @@ Route::middleware(['auth', 'admin', 'throttle:60,1'])->prefix('admin')->name('ad
     // Productos resource (edit/update/destroy/store reutilizados)
     Route::resource('productos', \App\Http\Controllers\Admin\ProductoController::class);
     Route::post('/productos/{producto}/update-stock', [\App\Http\Controllers\Admin\ProductoController::class, 'updateStock'])->name('productos.update-stock');
+    Route::post('/productos/{producto}/toggle-oferta', [\App\Http\Controllers\Admin\ProductoController::class, 'toggleOferta'])->name('productos.toggle-oferta');
     
     // Pedidos
     Route::resource('pedidos', \App\Http\Controllers\Admin\PedidoController::class);
@@ -157,6 +165,13 @@ Route::middleware(['auth', 'admin', 'throttle:60,1'])->prefix('admin')->name('ad
     
     // Categorías
     Route::resource('categorias', \App\Http\Controllers\Admin\CategoriaController::class);
+
+    // Solicitudes de cambio de tiendas
+    Route::get('/solicitudes', [\App\Http\Controllers\Admin\SolicitudController::class, 'index'])->name('solicitudes.index');
+    Route::post('/solicitudes/{solicitud}/aprobar', [\App\Http\Controllers\Admin\SolicitudController::class, 'aprobar'])->name('solicitudes.aprobar');
+    Route::post('/solicitudes/{solicitud}/rechazar', [\App\Http\Controllers\Admin\SolicitudController::class, 'rechazar'])->name('solicitudes.rechazar');
+    Route::post('/solicitudes/tienda/{tienda}/aprobar-todas', [\App\Http\Controllers\Admin\SolicitudController::class, 'aprobarTodas'])->name('solicitudes.aprobar-todas');
+    Route::post('/solicitudes/tienda/{tienda}/rechazar-todas', [\App\Http\Controllers\Admin\SolicitudController::class, 'rechazarTodas'])->name('solicitudes.rechazar-todas');
 });
 
 require __DIR__.'/auth.php';

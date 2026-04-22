@@ -222,4 +222,26 @@ class ProductoController extends Controller
 
         return back()->with('success', 'Stock actualizado exitosamente');
     }
+
+    /**
+     * Toggle offer price activation
+     */
+    public function toggleOferta(Producto $producto)
+    {
+        $producto->update(['oferta_activa' => !$producto->oferta_activa]);
+
+        ActivityLog::log(
+            'toggle_oferta',
+            $producto->oferta_activa
+                ? "Oferta activada: {$producto->nombre} ({$producto->precio_oferta}€)"
+                : "Oferta desactivada: {$producto->nombre}",
+            '🏷️',
+            'amber',
+            $producto
+        );
+
+        return back()->with('success', $producto->oferta_activa
+            ? 'Oferta activada correctamente.'
+            : 'Oferta desactivada.');
+    }
 }

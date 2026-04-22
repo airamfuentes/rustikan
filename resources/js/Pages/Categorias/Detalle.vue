@@ -4,9 +4,12 @@ import { Head, Link, usePage } from '@inertiajs/vue3';
 import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
 import CarritoCompra from '@/Components/CarritoCompra.vue';
 import MapaTiendas from '@/Components/MapaTiendas.vue';
+import DarkModeToggle from '@/Components/DarkModeToggle.vue';
+import { useDarkMode } from '@/Composables/useDarkMode';
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
+const { isDark, toggleDark } = useDarkMode();
 
 const props = defineProps({
     categoria: { type: Object, required: true },
@@ -144,13 +147,33 @@ onUnmounted(() => {
                     <div class="flex shrink-0 items-center gap-4">
                         <CarritoCompra />
                         <LanguageSwitcher />
+
+                        <!-- Dark mode toggle -->
+                        <DarkModeToggle />
+
                         <Link
                             v-if="!user"
                             :href="route('login')"
                             class="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600"
                         >Acceder</Link>
                         <Link
-                            v-else-if="user && user.role !== 'admin'"
+                            v-if="user && user.role === 'owner'"
+                            :href="route('owner.panel')"
+                            class="inline-flex items-center gap-1.5 rounded-lg bg-green-500 px-3 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-green-600"
+                        >
+                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M5.223 2.25c-.497 0-.974.198-1.325.55l-1.3 1.298A3.75 3.75 0 007.5 9.75c.627.47 1.406.75 2.25.75.844 0 1.624-.28 2.25-.75.626.47 1.406.75 2.25.75.844 0 1.623-.28 2.25-.75a3.75 3.75 0 004.902-5.652l-1.3-1.299a1.875 1.875 0 00-1.325-.549H5.223z" /><path fill-rule="evenodd" d="M3 20.25v-8.7c1.188.037 2.36-.219 3.4-.737A6.743 6.743 0 0012 12.75a6.743 6.743 0 005.6-1.187 6.743 6.743 0 003.4.737v8.7a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75v4.5a.75.75 0 01-.75.75H3.75a.75.75 0 01-.75-.75z" clip-rule="evenodd" /></svg>
+                            Mi Tienda
+                        </Link>
+                        <Link
+                            v-if="user && user.role === 'admin'"
+                            :href="route('admin.dashboard')"
+                            class="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 text-sm font-bold text-white shadow-lg transition-all hover:shadow-xl"
+                        >
+                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12.516 2.17a.75.75 0 00-1.032 0 11.209 11.209 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 00.374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 00-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08zm3.094 8.016a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" /></svg>
+                            Admin
+                        </Link>
+                        <Link
+                            v-if="user && user.role === 'user'"
                             :href="route('dashboard')"
                             class="flex h-10 w-10 items-center justify-center rounded-full bg-primary-500 text-white hover:bg-primary-600 transition-colors"
                         >
@@ -158,11 +181,6 @@ onUnmounted(() => {
                                 <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                             </svg>
                         </Link>
-                        <Link
-                            v-if="user && user.role === 'admin'"
-                            :href="route('admin.dashboard')"
-                            class="rounded-lg bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 text-sm font-bold text-white shadow-lg transition-all hover:shadow-xl"
-                        >🛡️ Admin</Link>
                     </div>
                 </div>
             </div>
@@ -251,20 +269,23 @@ onUnmounted(() => {
                     <span class="hidden text-xs font-medium text-gray-400 sm:block">Ordenar:</span>
                     <button
                         v-for="op in [
-                            { key: 'valoracion', label: '⭐ Valoración' },
-                            { key: 'resenas',    label: '💬 Reseñas' },
-                            { key: 'productos',  label: '📦 Productos' },
-                            { key: 'nombre',     label: '🔤 Nombre' },
+                            { key: 'valoracion', label: 'Valoración',  icon: 'M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z' },
+                            { key: 'resenas',    label: 'Reseñas',     icon: 'M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97z' },
+                            { key: 'productos',  label: 'Productos',   icon: 'M12.378 1.602a.75.75 0 00-.756 0L3 6.632l9 5.25 9-5.25-8.622-5.03zM21.75 7.93l-9 5.25v9l8.628-5.032a.75.75 0 00.372-.648V7.93zM11.25 22.18v-9l-9-5.25v8.57a.75.75 0 00.372.648l8.628 5.033z' },
+                            { key: 'nombre',     label: 'Nombre',      icon: 'M3.75 6.75h16.5M3.75 12h16.5M12 17.25h8.25' },
                         ]"
                         :key="op.key"
                         @click="ordenActivo = op.key; observeCards()"
                         :class="[
-                            'whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
+                            'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
                             ordenActivo === op.key
                                 ? 'bg-primary-500 text-white shadow-sm'
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
                         ]"
-                    >{{ op.label }}</button>
+                    >
+                        <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path :d="op.icon" /></svg>
+                        {{ op.label }}
+                    </button>
                 </div>
 
                 <div class="flex items-center gap-2">
@@ -278,7 +299,10 @@ onUnmounted(() => {
                                 ? 'bg-primary-500 text-white'
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
                         ]"
-                    >🗺️ Mapa</button>
+                    >
+                        <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M8.161 2.58a1.875 1.875 0 011.678 0l4.993 2.498c.106.052.23.052.336 0l3.869-1.935A1.875 1.875 0 0121.75 4.82v12.485c0 .71-.401 1.36-1.037 1.677l-4.875 2.437a1.875 1.875 0 01-1.676 0l-4.994-2.497a.375.375 0 00-.336 0l-3.868 1.935A1.875 1.875 0 012.25 19.18V6.695c0-.71.401-1.36 1.036-1.677l4.875-2.437zM9 6a.75.75 0 01.75.75V15a.75.75 0 01-1.5 0V6.75A.75.75 0 019 6zm6.75 3a.75.75 0 00-1.5 0v8.25a.75.75 0 001.5 0V9z" clip-rule="evenodd" /></svg>
+                        Mapa
+                    </button>
 
                     <!-- Toggle vista -->
                     <div class="hidden items-center gap-1 rounded-lg border border-gray-200 bg-white p-0.5 sm:flex">
@@ -378,8 +402,9 @@ onUnmounted(() => {
                                         {{ Number(tiendaDestacada.valoracion).toFixed(1) }}
                                         <span class="font-normal text-yellow-600">({{ tiendaDestacada.total_resenas }})</span>
                                     </span>
-                                    <span v-if="tiendaDestacada.productos_count" class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">
-                                        📦 {{ tiendaDestacada.productos_count }} productos
+                                    <span v-if="tiendaDestacada.productos_count" class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">
+                                        <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.378 1.602a.75.75 0 00-.756 0L3 6.632l9 5.25 9-5.25-8.622-5.03zM21.75 7.93l-9 5.25v9l8.628-5.032a.75.75 0 00.372-.648V7.93zM11.25 22.18v-9l-9-5.25v8.57a.75.75 0 00.372.648l8.628 5.033z" /></svg>
+                                        {{ tiendaDestacada.productos_count }} productos
                                     </span>
                                 </div>
                                 <h2 class="text-2xl font-extrabold text-gray-900 sm:text-3xl">{{ tiendaDestacada.nombre }}</h2>
@@ -508,10 +533,12 @@ onUnmounted(() => {
                                         {{ tienda.direccion }}
                                     </span>
                                     <span v-if="tienda.productos_count" class="flex items-center gap-1">
-                                        📦 {{ tienda.productos_count }} productos
+                                        <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.378 1.602a.75.75 0 00-.756 0L3 6.632l9 5.25 9-5.25-8.622-5.03zM21.75 7.93l-9 5.25v9l8.628-5.032a.75.75 0 00.372-.648V7.93zM11.25 22.18v-9l-9-5.25v8.57a.75.75 0 00.372.648l8.628 5.033z" /></svg>
+                                        {{ tienda.productos_count }} productos
                                     </span>
                                     <span class="flex items-center gap-1">
-                                        💬 {{ tienda.total_resenas }} reseñas
+                                        <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97z" clip-rule="evenodd" /></svg>
+                                        {{ tienda.total_resenas }} reseñas
                                     </span>
                                 </div>
                             </div>
