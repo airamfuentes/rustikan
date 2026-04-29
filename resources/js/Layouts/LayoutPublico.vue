@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import Toast from '@/Components/Toast.vue';
+import { ArrowLeft } from 'lucide-vue-next';
 
 const page   = usePage();
 const toasts = ref([]);
@@ -40,7 +41,7 @@ watch(
         />
     </div>
 
-    <div class="flex min-h-screen flex-col items-center bg-gray-50 pt-6 sm:justify-center sm:pt-0">
+    <div class="flex min-h-screen flex-col items-center bg-gray-50 dark:bg-gray-950 pt-6 sm:justify-center sm:pt-0 transition-colors duration-300">
         <!-- Logo -->
         <div>
             <Link href="/" class="flex items-center">
@@ -49,14 +50,14 @@ watch(
         </div>
 
         <!-- Formulario -->
-        <div class="mt-8 w-full rounded-xl bg-white px-8 py-8 shadow-md sm:max-w-md">
+        <div class="mt-8 w-full rounded-xl bg-white dark:bg-gray-800 px-8 py-8 shadow-md sm:max-w-md dark:shadow-gray-900/50">
             <slot />
         </div>
 
         <!-- Volver al inicio -->
         <div class="mt-6">
-            <Link href="/" class="text-sm text-gray-600 hover:text-gray-900">
-                ← Volver al inicio
+            <Link href="/" class="inline-flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">
+                <ArrowLeft class="h-3.5 w-3.5" /> Volver al inicio
             </Link>
         </div>
     </div>

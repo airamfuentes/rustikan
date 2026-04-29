@@ -6,6 +6,7 @@ import CarritoCompra from '@/Components/CarritoCompra.vue';
 import MapaTiendas from '@/Components/MapaTiendas.vue';
 import DarkModeToggle from '@/Components/DarkModeToggle.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
+import NavbarPublico from '@/Components/NavbarPublico.vue';
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
@@ -16,23 +17,19 @@ const props = defineProps({
     tiendas:   { type: Array,  default: () => [] },
 });
 
-const scrolled    = ref(false);
-const searchRef   = ref(null);
-let scrollTimeout = null;
-
-const handleScroll = () => {
-    if (scrollTimeout) return;
-    scrollTimeout = setTimeout(() => {
-        scrolled.value = window.scrollY > 20;
-        scrollTimeout  = null;
-    }, 100);
-};
-
 const busqueda    = ref('');
 const ordenActivo = ref('valoracion');
-const vistaActiva = ref('grid');
-const showMap     = ref(false);
+const showMap     = ref(true);
+const showSortMenu = ref(false);
+const sortMenuRef  = ref(null);
 const cardRefs    = ref([]);
+
+const sortOpciones = [
+    { key: 'valoracion', label: 'Valoración',  icon: 'M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z' },
+    { key: 'resenas',    label: 'Reseñas',     icon: 'M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97z' },
+    { key: 'productos',  label: 'Productos',   icon: 'M12.378 1.602a.75.75 0 00-.756 0L3 6.632l9 5.25 9-5.25-8.622-5.03zM21.75 7.93l-9 5.25v9l8.628-5.032a.75.75 0 00.372-.648V7.93zM11.25 22.18v-9l-9-5.25v8.57a.75.75 0 00.372.648l8.628 5.033z' },
+    { key: 'nombre',     label: 'Nombre',      icon: 'M3.75 6.75h16.5M3.75 12h16.5M12 17.25h8.25' },
+];
 
 const normalizar = (str) =>
     (str ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -69,6 +66,12 @@ const tiendasConMapa = computed(() =>
     props.tiendas.filter(t => t.latitud && t.longitud).length > 0
 );
 
+const handleClickOutsideSort = (e) => {
+    if (sortMenuRef.value && !sortMenuRef.value.contains(e.target)) {
+        showSortMenu.value = false;
+    }
+};
+
 // Intersection Observer para animaciones de entrada
 let observer = null;
 
@@ -95,15 +98,14 @@ const observeCards = () => {
 };
 
 onMounted(() => {
-    window.addEventListener('scroll', handleScroll);
     setupObserver();
     observeCards();
+    document.addEventListener('click', handleClickOutsideSort);
 });
 
 onUnmounted(() => {
-    window.removeEventListener('scroll', handleScroll);
-    if (scrollTimeout) clearTimeout(scrollTimeout);
     if (observer) observer.disconnect();
+    document.removeEventListener('click', handleClickOutsideSort);
 });
 </script>
 
@@ -112,81 +114,7 @@ onUnmounted(() => {
 
     <div class="min-h-screen flex flex-col bg-gray-50">
 
-        <!-- Navbar transformable -->
-        <nav
-            :class="[
-                'fixed z-50 bg-white transition-all duration-300',
-                scrolled
-                    ? 'top-0 left-0 right-0 border-b border-gray-200 shadow-md'
-                    : 'top-4 left-12 right-12 rounded-2xl border border-gray-200 shadow-sm',
-            ]"
-        >
-            <div class="mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex h-16 items-center justify-between gap-4">
-                    <Link href="/" class="flex shrink-0 items-center">
-                        <img src="/images/logo.png" alt="Rustikan" class="h-10 w-auto" />
-                    </Link>
-
-                    <div ref="searchRef" class="hidden flex-1 max-w-2xl md:block">
-                        <div class="relative w-full">
-                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </div>
-                            <input
-                                v-model="busqueda"
-                                @input="observeCards"
-                                type="text"
-                                :placeholder="`Buscar en ${categoria.nombre}...`"
-                                class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-12 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-                            />
-                        </div>
-                    </div>
-
-                    <div class="flex shrink-0 items-center gap-4">
-                        <CarritoCompra />
-                        <LanguageSwitcher />
-
-                        <!-- Dark mode toggle -->
-                        <DarkModeToggle />
-
-                        <Link
-                            v-if="!user"
-                            :href="route('login')"
-                            class="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600"
-                        >Acceder</Link>
-                        <Link
-                            v-if="user && user.role === 'owner'"
-                            :href="route('owner.panel')"
-                            class="inline-flex items-center gap-1.5 rounded-lg bg-green-500 px-3 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-green-600"
-                        >
-                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M5.223 2.25c-.497 0-.974.198-1.325.55l-1.3 1.298A3.75 3.75 0 007.5 9.75c.627.47 1.406.75 2.25.75.844 0 1.624-.28 2.25-.75.626.47 1.406.75 2.25.75.844 0 1.623-.28 2.25-.75a3.75 3.75 0 004.902-5.652l-1.3-1.299a1.875 1.875 0 00-1.325-.549H5.223z" /><path fill-rule="evenodd" d="M3 20.25v-8.7c1.188.037 2.36-.219 3.4-.737A6.743 6.743 0 0012 12.75a6.743 6.743 0 005.6-1.187 6.743 6.743 0 003.4.737v8.7a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75v4.5a.75.75 0 01-.75.75H3.75a.75.75 0 01-.75-.75z" clip-rule="evenodd" /></svg>
-                            Mi Tienda
-                        </Link>
-                        <Link
-                            v-if="user && user.role === 'admin'"
-                            :href="route('admin.dashboard')"
-                            class="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 text-sm font-bold text-white shadow-lg transition-all hover:shadow-xl"
-                        >
-                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12.516 2.17a.75.75 0 00-1.032 0 11.209 11.209 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 00.374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 00-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08zm3.094 8.016a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" /></svg>
-                            Admin
-                        </Link>
-                        <Link
-                            v-if="user && user.role === 'user'"
-                            :href="route('dashboard')"
-                            class="flex h-10 w-10 items-center justify-center rounded-full bg-primary-500 text-white hover:bg-primary-600 transition-colors"
-                        >
-                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                            </svg>
-                        </Link>
-                    </div>
-                </div>
-            </div>
-        </nav>
-
-        <!-- Hero de categoría -->
+        <NavbarPublico :tiendas="tiendas" />
         <div class="relative overflow-hidden bg-gray-900 pt-24 pb-0">
             <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(249,115,22,0.18)_0%,_rgba(17,24,39,1)_70%)]"></div>
 
@@ -247,86 +175,90 @@ onUnmounted(() => {
         </div>
 
         <!-- Barra de controles -->
-        <div class="sticky top-0 z-40 border-b border-gray-200 bg-white/95 backdrop-blur-sm">
-            <div class="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-                <!-- Buscador móvil -->
-                <div class="relative md:hidden">
-                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
-                    <input
-                        v-model="busqueda"
-                        @input="observeCards"
-                        type="text"
-                        :placeholder="`Buscar en ${categoria.nombre}...`"
-                        class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-                    />
-                </div>
+        <div :class="['sticky top-0 z-40 border-b backdrop-blur-sm', isDark ? 'border-gray-700 bg-gray-900/95' : 'border-gray-200 bg-white/95']">
+            <div class="mx-auto flex max-w-7xl items-center gap-2 px-4 py-3 sm:px-6 lg:px-8">
 
-                <div class="flex items-center gap-2 overflow-x-auto">
-                    <span class="hidden text-xs font-medium text-gray-400 sm:block">Ordenar:</span>
-                    <button
-                        v-for="op in [
-                            { key: 'valoracion', label: 'Valoración',  icon: 'M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z' },
-                            { key: 'resenas',    label: 'Reseñas',     icon: 'M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97z' },
-                            { key: 'productos',  label: 'Productos',   icon: 'M12.378 1.602a.75.75 0 00-.756 0L3 6.632l9 5.25 9-5.25-8.622-5.03zM21.75 7.93l-9 5.25v9l8.628-5.032a.75.75 0 00.372-.648V7.93zM11.25 22.18v-9l-9-5.25v8.57a.75.75 0 00.372.648l8.628 5.033z' },
-                            { key: 'nombre',     label: 'Nombre',      icon: 'M3.75 6.75h16.5M3.75 12h16.5M12 17.25h8.25' },
-                        ]"
-                        :key="op.key"
-                        @click="ordenActivo = op.key; observeCards()"
-                        :class="[
-                            'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
-                            ordenActivo === op.key
-                                ? 'bg-primary-500 text-white shadow-sm'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
-                        ]"
-                    >
-                        <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path :d="op.icon" /></svg>
-                        {{ op.label }}
-                    </button>
-                </div>
-
+                <!-- Izquierda: Sort dropdown + Mapa toggle -->
                 <div class="flex items-center gap-2">
-                    <!-- Botón mapa -->
+                    <!-- Sort dropdown -->
+                    <div class="relative" ref="sortMenuRef">
+                        <button
+                            @click.stop="showSortMenu = !showSortMenu"
+                            :class="['inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition-all',
+                                isDark ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200']"
+                        >
+                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                            </svg>
+                            <span class="hidden sm:inline">Ordenar: </span>{{ sortOpciones.find(o => o.key === ordenActivo)?.label }}
+                            <svg class="h-3 w-3 transition-transform" :class="showSortMenu ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <Transition
+                            enter-active-class="transition-all duration-150 ease-out"
+                            enter-from-class="opacity-0 scale-95 -translate-y-1"
+                            enter-to-class="opacity-100 scale-100 translate-y-0"
+                            leave-active-class="transition-all duration-100 ease-in"
+                            leave-from-class="opacity-100 scale-100"
+                            leave-to-class="opacity-0 scale-95 -translate-y-1"
+                        >
+                            <div v-if="showSortMenu" :class="['absolute left-0 top-full mt-1.5 w-44 rounded-xl border py-1 shadow-xl z-50', isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200']">
+                                <button
+                                    v-for="op in sortOpciones"
+                                    :key="op.key"
+                                    @click="ordenActivo = op.key; showSortMenu = false; observeCards()"
+                                    :class="['flex w-full items-center gap-2 px-3.5 py-2 text-xs font-medium transition-colors',
+                                        ordenActivo === op.key
+                                            ? isDark ? 'text-primary-400 bg-primary-900/30' : 'text-primary-600 bg-primary-50'
+                                            : isDark ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-50']"
+                                >
+                                    <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path :d="op.icon" /></svg>
+                                    {{ op.label }}
+                                    <svg v-if="ordenActivo === op.key" class="ml-auto h-3.5 w-3.5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </Transition>
+                    </div>
+
+                    <!-- Mapa toggle -->
                     <button
                         v-if="tiendasConMapa"
                         @click="showMap = !showMap"
-                        :class="[
-                            'rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
+                        :class="['inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition-all',
                             showMap
-                                ? 'bg-primary-500 text-white'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
-                        ]"
+                                ? 'bg-primary-500 text-white shadow-sm'
+                                : isDark ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200']"
                     >
-                        <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M8.161 2.58a1.875 1.875 0 011.678 0l4.993 2.498c.106.052.23.052.336 0l3.869-1.935A1.875 1.875 0 0121.75 4.82v12.485c0 .71-.401 1.36-1.037 1.677l-4.875 2.437a1.875 1.875 0 01-1.676 0l-4.994-2.497a.375.375 0 00-.336 0l-3.868 1.935A1.875 1.875 0 012.25 19.18V6.695c0-.71.401-1.36 1.036-1.677l4.875-2.437zM9 6a.75.75 0 01.75.75V15a.75.75 0 01-1.5 0V6.75A.75.75 0 019 6zm6.75 3a.75.75 0 00-1.5 0v8.25a.75.75 0 001.5 0V9z" clip-rule="evenodd" /></svg>
-                        Mapa
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                        </svg>
+                        <span class="hidden sm:inline">{{ showMap ? 'Ocultar mapa' : 'Mapa' }}</span>
                     </button>
+                </div>
 
-                    <!-- Toggle vista -->
-                    <div class="hidden items-center gap-1 rounded-lg border border-gray-200 bg-white p-0.5 sm:flex">
-                        <button
-                            @click="vistaActiva = 'grid'"
-                            :class="['rounded-md p-1.5 transition-colors', vistaActiva === 'grid' ? 'bg-primary-500 text-white' : 'text-gray-400 hover:text-gray-600']"
-                        >
-                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M1 2.5A1.5 1.5 0 012.5 1h3A1.5 1.5 0 017 2.5v3A1.5 1.5 0 015.5 7h-3A1.5 1.5 0 011 5.5v-3zm8 0A1.5 1.5 0 0110.5 1h3A1.5 1.5 0 0115 2.5v3A1.5 1.5 0 0113.5 7h-3A1.5 1.5 0 019 5.5v-3zm-8 8A1.5 1.5 0 012.5 9h3A1.5 1.5 0 017 10.5v3A1.5 1.5 0 015.5 15h-3A1.5 1.5 0 011 13.5v-3zm8 0A1.5 1.5 0 0110.5 9h3a1.5 1.5 0 011.5 1.5v3a1.5 1.5 0 01-1.5 1.5h-3A1.5 1.5 0 019 13.5v-3z"/>
-                            </svg>
-                        </button>
-                        <button
-                            @click="vistaActiva = 'list'"
-                            :class="['rounded-md p-1.5 transition-colors', vistaActiva === 'list' ? 'bg-primary-500 text-white' : 'text-gray-400 hover:text-gray-600']"
-                        >
-                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 16 16">
-                                <path fill-rule="evenodd" d="M2.5 12a.5.5 0 01.5-.5h10a.5.5 0 010 1H3a.5.5 0 01-.5-.5zm0-4a.5.5 0 01.5-.5h10a.5.5 0 010 1H3a.5.5 0 01-.5-.5zm0-4a.5.5 0 01.5-.5h10a.5.5 0 010 1H3a.5.5 0 01-.5-.5z"/>
-                            </svg>
-                        </button>
-                    </div>
-
-                    <span class="hidden text-xs text-gray-400 sm:block">
+                <!-- Derecha: búsqueda compacta + contador -->
+                <div class="ml-auto flex items-center gap-3">
+                    <span :class="['hidden text-xs sm:block', isDark ? 'text-gray-500' : 'text-gray-400']">
                         {{ tiendasOrdenadas.length }} resultado{{ tiendasOrdenadas.length !== 1 ? 's' : '' }}
                     </span>
+                    <div class="relative flex shrink-0 items-center">
+                        <div class="pointer-events-none absolute left-0 flex items-center pl-3">
+                            <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <input
+                            v-model="busqueda"
+                            @input="observeCards"
+                            type="search"
+                            :placeholder="`Buscar en ${categoria.nombre}...`"
+                            :class="['w-44 rounded-full border py-2 pl-9 pr-3 text-xs transition-all focus:w-60 focus:outline-none focus:ring-1 focus:ring-primary-400',
+                                isDark ? 'bg-gray-800 border-gray-600 text-gray-100 placeholder-gray-500 focus:border-primary-400' : 'bg-gray-100 border-transparent text-gray-800 placeholder-gray-400 focus:border-gray-300 focus:bg-white']"
+                        />
+                    </div>
                 </div>
             </div>
         </div>
@@ -438,7 +370,7 @@ onUnmounted(() => {
                     </div>
 
                     <!-- Vista Cuadrícula -->
-                    <div v-if="vistaActiva === 'grid'" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         <Link
                             v-for="(tienda, idx) in restoTiendas"
                             :key="tienda.id"
@@ -487,66 +419,6 @@ onUnmounted(() => {
                                         {{ tienda.total_resenas }}
                                     </span>
                                 </div>
-                            </div>
-
-                            <div class="absolute bottom-0 left-0 right-0 h-0.5 origin-left scale-x-0 rounded-b-2xl bg-primary-500 transition-transform duration-300 group-hover:scale-x-100"></div>
-                        </Link>
-                    </div>
-
-                    <!-- Vista Lista -->
-                    <div v-else class="space-y-4">
-                        <Link
-                            v-for="(tienda, idx) in restoTiendas"
-                            :key="tienda.id"
-                            :href="`/tienda/${tienda.slug}`"
-                            class="card-animate group relative flex overflow-hidden rounded-2xl bg-white shadow-sm transition-all duration-300 hover:shadow-lg"
-                            :style="{ '--delay': `${(idx + 1) * 60}ms` }"
-                        >
-                            <div class="relative h-auto w-28 flex-shrink-0 overflow-hidden sm:w-40">
-                                <img
-                                    :src="tienda.imagen_portada ? `/storage/${tienda.imagen_portada}` : tienda.logo ? `/storage/${tienda.logo}` : '/images/logo.png'"
-                                    :alt="tienda.nombre"
-                                    loading="lazy"
-                                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                />
-                            </div>
-
-                            <div class="flex flex-1 flex-col justify-between p-4 sm:p-5">
-                                <div>
-                                    <div class="flex flex-wrap items-center gap-2 mb-1">
-                                        <h3 class="font-bold text-gray-900 group-hover:text-primary-600 transition-colors">{{ tienda.nombre }}</h3>
-                                        <div class="flex items-center gap-1 rounded-full bg-yellow-50 px-2 py-0.5 text-xs font-bold text-yellow-700">
-                                            <svg class="h-3 w-3 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                            </svg>
-                                            {{ Number(tienda.valoracion).toFixed(1) }}
-                                        </div>
-                                    </div>
-                                    <p class="text-sm text-gray-500 line-clamp-2">{{ tienda.descripcion }}</p>
-                                </div>
-                                <div class="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-400">
-                                    <span class="flex items-center gap-1">
-                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                        {{ tienda.direccion }}
-                                    </span>
-                                    <span v-if="tienda.productos_count" class="flex items-center gap-1">
-                                        <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.378 1.602a.75.75 0 00-.756 0L3 6.632l9 5.25 9-5.25-8.622-5.03zM21.75 7.93l-9 5.25v9l8.628-5.032a.75.75 0 00.372-.648V7.93zM11.25 22.18v-9l-9-5.25v8.57a.75.75 0 00.372.648l8.628 5.033z" /></svg>
-                                        {{ tienda.productos_count }} productos
-                                    </span>
-                                    <span class="flex items-center gap-1">
-                                        <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97z" clip-rule="evenodd" /></svg>
-                                        {{ tienda.total_resenas }} reseñas
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="hidden items-center pr-5 sm:flex">
-                                <svg class="h-5 w-5 text-gray-300 transition-colors group-hover:text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
                             </div>
 
                             <div class="absolute bottom-0 left-0 right-0 h-0.5 origin-left scale-x-0 rounded-b-2xl bg-primary-500 transition-transform duration-300 group-hover:scale-x-100"></div>

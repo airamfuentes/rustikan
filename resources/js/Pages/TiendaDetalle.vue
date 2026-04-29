@@ -6,6 +6,8 @@ import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
 import DarkModeToggle from '@/Components/DarkModeToggle.vue';
 import { useCarrito } from '@/Composables/useCarrito';
 import { useDarkMode } from '@/Composables/useDarkMode';
+import { Store, Package, Star, AlertTriangle, Check } from 'lucide-vue-next';
+import NavbarPublico from '@/Components/NavbarPublico.vue';
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
@@ -17,24 +19,6 @@ const props = defineProps({
     distribucion: { type: Object,  default: () => ({}) },
     canReview:    { type: Boolean, default: false },
     userReview:   { type: Object,  default: null },
-});
-
-// ─── Scroll navbar ────────────────────────────────────────────────────────────
-const scrolled      = ref(false);
-let   scrollTimeout = null;
-
-const handleScroll = () => {
-    if (scrollTimeout) return;
-    scrollTimeout = setTimeout(() => {
-        scrolled.value = window.scrollY > 20;
-        scrollTimeout  = null;
-    }, 100);
-};
-
-onMounted(() => window.addEventListener('scroll', handleScroll));
-onUnmounted(() => {
-    window.removeEventListener('scroll', handleScroll);
-    if (scrollTimeout) clearTimeout(scrollTimeout);
 });
 
 // ─── Filtro de categorías ─────────────────────────────────────────────────────
@@ -160,94 +144,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
 
     <div :class="['min-h-screen flex flex-col transition-colors duration-300', isDark ? 'dark bg-gray-950' : 'bg-gray-50']">
 
-        <!-- ── Navbar transformable ───────────────────────────────────────────── -->
-        <nav
-            :class="[
-                'fixed z-50 transition-all duration-300',
-                isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200',
-                scrolled
-                    ? 'top-0 left-0 right-0 border-b shadow-md'
-                    : 'top-4 left-4 right-4 sm:left-12 sm:right-12 rounded-2xl border shadow-sm',
-            ]"
-        >
-            <div class="mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex h-16 items-center justify-between gap-4">
-                    <Link href="/" class="flex shrink-0 items-center">
-                        <img src="/images/logo.png" alt="Rustikan" class="h-10 w-auto" />
-                    </Link>
-
-                    <!-- Barra de búsqueda -->
-                    <div class="flex flex-1 max-w-sm items-center gap-2 mx-2">
-                        <div class="relative w-full">
-                            <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
-                            </svg>
-                            <input
-                                v-model="busquedaProducto"
-                                type="search"
-                                placeholder="Buscar productos…"
-                                :class="['w-full rounded-xl border py-2 pl-9 pr-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400',
-                                    isDark
-                                        ? 'bg-gray-800 border-gray-600 text-gray-100 placeholder-gray-400'
-                                        : 'bg-gray-100 border-gray-200 text-gray-800 placeholder-gray-400']"
-                            />
-                        </div>
-                    </div>
-
-                    <div class="flex shrink-0 items-center gap-2">
-                        <CarritoCompra />
-                        <LanguageSwitcher />
-
-                        <!-- Mis pedidos -->
-                        <Link
-                            v-if="user && user.role !== 'admin'"
-                            :href="route('pedidos.index')"
-                            :class="['hidden sm:flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors',
-                                isDark ? 'text-gray-300 hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-100']"
-                        >
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                            </svg>
-                            Mis pedidos
-                        </Link>
-
-                        <!-- Toggle dark/light -->
-                        <DarkModeToggle />
-
-                        <Link v-if="!user" :href="route('login')"
-                            class="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600"
-                        >Acceder</Link>
-                        <Link
-                            v-if="user && user.role === 'owner'"
-                            :href="route('owner.panel')"
-                            class="inline-flex items-center gap-1.5 rounded-lg bg-green-500 px-3 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-green-600"
-                        >
-                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M5.223 2.25c-.497 0-.974.198-1.325.55l-1.3 1.298A3.75 3.75 0 007.5 9.75c.627.47 1.406.75 2.25.75.844 0 1.624-.28 2.25-.75.626.47 1.406.75 2.25.75.844 0 1.623-.28 2.25-.75a3.75 3.75 0 004.902-5.652l-1.3-1.299a1.875 1.875 0 00-1.325-.549H5.223z" /><path fill-rule="evenodd" d="M3 20.25v-8.7c1.188.037 2.36-.219 3.4-.737A6.743 6.743 0 0012 12.75a6.743 6.743 0 005.6-1.187 6.743 6.743 0 003.4.737v8.7a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75v4.5a.75.75 0 01-.75.75H3.75a.75.75 0 01-.75-.75z" clip-rule="evenodd" /></svg>
-                            Mi Tienda
-                        </Link>
-                        <Link v-if="user && user.role === 'admin'" :href="route('admin.dashboard')"
-                            class="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 text-sm font-bold text-white shadow-lg transition-all hover:shadow-xl"
-                        >
-                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12.516 2.17a.75.75 0 00-1.032 0 11.209 11.209 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 00.374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 00-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08zm3.094 8.016a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" /></svg>
-                            Admin
-                        </Link>
-                        <Link
-                            v-if="user && user.role === 'user'"
-                            :href="route('dashboard')"
-                            class="flex h-10 w-10 items-center justify-center rounded-full bg-primary-500 text-white transition-colors hover:bg-primary-600"
-                        >
-                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                            </svg>
-                        </Link>
-                    </div>
-                </div>
-            </div>
-        </nav>
-
-        <!-- ── Hero de la tienda ──────────────────────────────────────────────── -->
+        <NavbarPublico />
         <div class="relative overflow-hidden bg-gray-900 pt-24 pb-0">
             <img
                 :src="tienda.imagen_portada ? `/storage/${tienda.imagen_portada}` : tienda.logo ? `/storage/${tienda.logo}` : '/images/logo.png'"
@@ -278,13 +175,13 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                         <div v-if="tienda.logo" class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-full bg-white/10 shadow-2xl ring-2 ring-white/20">
                             <img :src="`/storage/${tienda.logo}`" :alt="tienda.nombre" class="h-full w-full object-cover" />
                         </div>
-                        <div v-else class="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-full bg-white/10 text-3xl shadow-2xl ring-2 ring-white/20">
-                            {{ tienda.categoria?.icono || '🏪' }}
+                        <div v-else class="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-full bg-white/10 shadow-2xl ring-2 ring-white/20">
+                            <Store class="h-9 w-9 text-white/70" />
                         </div>
                         <div>
                             <div class="mb-2 flex flex-wrap items-center gap-2">
                                 <span v-if="tienda.categoria" class="rounded-full bg-primary-500/20 px-3 py-1 text-xs font-bold text-primary-300">
-                                    {{ tienda.categoria.icono }} {{ tienda.categoria.nombre }}
+                                    {{ tienda.categoria.nombre }}
                                 </span>
                                 <span class="flex items-center gap-1 rounded-full bg-yellow-500/20 px-3 py-1 text-xs font-bold text-yellow-300">
                                     <svg class="h-3.5 w-3.5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
@@ -366,9 +263,26 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                 >
                     {{ tab.nombre }} ({{ tab.count }})
                 </button>
-                <span :class="['ml-auto hidden text-xs sm:block', isDark ? 'text-gray-500' : 'text-gray-400']">
-                    {{ productosFiltrados.length }} producto{{ productosFiltrados.length !== 1 ? 's' : '' }}
-                </span>
+                <!-- Buscador de productos + contador -->
+                <div class="ml-auto flex shrink-0 items-center gap-3">
+                    <span :class="['hidden text-xs sm:block', isDark ? 'text-gray-500' : 'text-gray-400']">
+                        {{ productosFiltrados.length }} producto{{ productosFiltrados.length !== 1 ? 's' : '' }}
+                    </span>
+                    <div class="relative flex shrink-0 items-center">
+                        <div class="pointer-events-none absolute left-0 flex items-center pl-3">
+                            <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <input
+                            v-model="busquedaProducto"
+                            type="search"
+                            placeholder="Buscar productos..."
+                            :class="['w-44 rounded-full border py-2 pl-9 pr-3 text-xs transition-all focus:w-60 focus:outline-none focus:ring-1 focus:ring-primary-400',
+                                isDark ? 'bg-gray-800 border-gray-600 text-gray-100 placeholder-gray-500 focus:border-primary-400' : 'bg-gray-100 border-transparent text-gray-800 placeholder-gray-400 focus:border-gray-300 focus:bg-white']"
+                        />
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -377,7 +291,9 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
 
             <!-- Sin productos -->
             <div v-if="productosFiltrados.length === 0" class="flex flex-col items-center py-24 text-center">
-                <div class="mb-4 text-6xl">{{ tienda.categoria?.icono || '📦' }}</div>
+                <div class="mb-4">
+                    <Package class="h-16 w-16 text-gray-300" />
+                </div>
                 <h2 :class="['text-xl font-semibold', isDark ? 'text-gray-300' : 'text-gray-700']">No hay productos en esta categoría</h2>
                 <p :class="['mt-2 text-sm', isDark ? 'text-gray-500' : 'text-gray-400']">Prueba con otra categoría o vuelve más tarde.</p>
             </div>
@@ -749,7 +665,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                                         r.puntuacion >= 4 ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' :
                                         r.puntuacion === 3 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400' :
                                         'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400']">
-                                        {{ ['', '😞', '😐', '🙂', '😊', '🤩'][r.puntuacion] }} {{ r.puntuacion }}/5
+                                        {{ r.puntuacion }}/5
                                     </span>
                                 </div>
                             </div>
@@ -809,7 +725,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                         <!-- Badges -->
                         <div class="absolute left-4 top-4 flex flex-wrap gap-2">
                             <span class="rounded-full bg-primary-500 px-3 py-1 text-xs font-bold text-white shadow">Km 0</span>
-                            <span v-if="productoModal.destacado" class="rounded-full bg-yellow-500 px-3 py-1 text-xs font-bold text-white shadow">⭐ Destacado</span>
+                            <span v-if="productoModal.destacado" class="inline-flex items-center gap-1 rounded-full bg-yellow-500 px-3 py-1 text-xs font-bold text-white shadow"><Star class="h-3 w-3 fill-current" /> Destacado</span>
                             <span v-if="productoModal.precio_oferta && productoModal.oferta_activa" class="rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white shadow">
                                 -{{ Math.round((1 - productoModal.precio_oferta / productoModal.precio) * 100) }}%
                             </span>
@@ -847,11 +763,11 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
 
                         <!-- Stock -->
                         <p v-if="productoModal.stock > 0 && productoModal.stock <= productoModal.stock_minimo"
-                            class="mt-2 text-xs font-medium text-orange-500">
-                            ⚠️ Solo quedan {{ productoModal.stock }} unidades
+                            class="mt-2 flex items-center gap-1 text-xs font-medium text-orange-500">
+                            <AlertTriangle class="h-3.5 w-3.5" /> Solo quedan {{ productoModal.stock }} unidades
                         </p>
-                        <p v-else class="mt-2 text-xs font-medium text-green-500">
-                            ✓ En stock ({{ productoModal.stock }} disponibles)
+                        <p v-else class="mt-2 flex items-center gap-1 text-xs font-medium text-green-500">
+                            <Check class="h-3.5 w-3.5" /> En stock ({{ productoModal.stock }} disponibles)
                         </p>
 
                         <!-- Selector de cantidad -->

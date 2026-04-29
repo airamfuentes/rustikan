@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
@@ -7,6 +7,7 @@ import MapaTiendas from '@/Components/MapaTiendas.vue';
 import DarkModeToggle from '@/Components/DarkModeToggle.vue';
 import Toast from '@/Components/Toast.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
+import { ShieldCheck, Store } from 'lucide-vue-next';
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
@@ -80,7 +81,7 @@ onMounted(() => {
     if (params.get('verified') === '1' && !page.props.flash?.success) {
         const nombre = user.value?.name ?? '';
         addToast('success',
-            '🌿 ¡Cuenta verificada!',
+            '¡Cuenta verificada!',
             nombre ? `Bienvenido/a a Rustikan, ${nombre}. Ya puedes empezar a comprar.` : 'Tu correo ha sido verificado. ¡Bienvenido/a!');
     }
 });
@@ -260,15 +261,15 @@ const buscarTiendas = () => {
                         <Link
                             v-if="user && user.role === 'admin'"
                             :href="route('admin.dashboard')"
-                            class="rounded-lg bg-gradient-to-r from-orange-500 to-red-500 px-3 py-2 text-sm font-bold text-white shadow-lg transition-all hover:shadow-xl"
-                        >🛡️ Admin</Link>
+                            class="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 px-3 py-2 text-sm font-bold text-white shadow-lg transition-all hover:shadow-xl"
+                        ><ShieldCheck class="h-4 w-4" /> Admin</Link>
 
                         <!-- Acceso rápido Owner -->
                         <Link
                             v-if="user && user.role === 'owner'"
                             :href="route('owner.panel')"
-                            class="rounded-lg bg-green-500 px-3 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-green-600"
-                        >🏪 {{ $page.props.auth.tienda?.nombre || 'Mi Tienda' }}</Link>
+                            class="inline-flex items-center gap-1.5 rounded-lg bg-green-500 px-3 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-green-600"
+                        ><Store class="h-4 w-4" /> {{ $page.props.auth.tienda?.nombre || 'Mi Tienda' }}</Link>
 
                         <!-- Avatar + Dropdown (autenticado) -->
                         <div

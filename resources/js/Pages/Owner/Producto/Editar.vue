@@ -4,6 +4,7 @@ import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import Toast from '@/Components/Toast.vue';
 import { watch } from 'vue';
+import { Star } from 'lucide-vue-next';
 
 const props = defineProps({
     producto:   { type: Object, required: true },
@@ -216,7 +217,7 @@ const submit = () => {
                                     <div :class="['h-6 w-11 rounded-full transition-colors', form.destacado ? 'bg-yellow-500' : 'bg-gray-300 dark:bg-gray-600']"></div>
                                     <div :class="['absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform', form.destacado ? 'translate-x-5' : 'translate-x-0.5']"></div>
                                 </div>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">⭐ Destacar producto</span>
+                                <span class="flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-300"><Star class="h-4 w-4 text-yellow-500" /> Destacar producto</span>
                             </label>
                         </div>
                     </div>

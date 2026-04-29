@@ -1,10 +1,11 @@
-﻿<script setup>
+<script setup>
 import { ref, computed, watch } from 'vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
 import Toast from '@/Components/Toast.vue';
+import NavbarPublico from '@/Components/NavbarPublico.vue';
 
 defineProps({
     mustVerifyEmail: { type: Boolean },
@@ -15,7 +16,7 @@ defineProps({
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 
-// ── Toast system ──────────────────────────────────────────────────────────────
+// -- Toast system --------------------------------------------------------------
 const toasts = ref([]);
 
 const addToast = (type, title, message = '') => {
@@ -46,7 +47,7 @@ const tabs = [
 ];
 const activeTab = ref('perfil');
 
-// ── Avatar ────────────────────────────────────────────────────────────────────
+// -- Avatar --------------------------------------------------------------------
 const avatarPreview = ref(null);
 const avatarInput   = ref(null);
 const avatarForm    = useForm({ avatar: null });
@@ -69,7 +70,7 @@ const uploadAvatar = () => {
     });
 };
 
-// ── Información personal (─────────────────────────────────────────────────────
+// -- Información personal (-----------------------------------------------------
 const profileForm = useForm({
     name:      user.value?.name      ?? '',
     apellidos: user.value?.apellidos ?? '',
@@ -84,7 +85,7 @@ const saveProfile = () => {
     });
 };
 
-// ── Contraseña ────────────────────────────────────────────────────────────────
+// -- Contraseña ----------------------------------------------------------------
 const passwordForm = useForm({
     current_password:      '',
     password:              '',
@@ -102,14 +103,14 @@ const updatePassword = () => {
     });
 };
 
-// ── Eliminar cuenta ───────────────────────────────────────────────────────────
+// -- Eliminar cuenta -----------------------------------------------------------
 const FRASE_BORRAR       = 'Me voy de rustikan';
 const deleteStep        = ref(0); // 0=oculto 1=frase 2=contraseña
 const deletePhraseInput = ref('');
 const deleteForm        = useForm({ password: '' });
 const deletePhraseOk    = computed(() => deletePhraseInput.value === FRASE_BORRAR);
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// -- Helpers -------------------------------------------------------------------
 const memberSince = computed(() => {
     if (!user.value?.created_at) return '';
     return new Date(user.value.created_at).toLocaleDateString('es-ES', {
@@ -140,28 +141,13 @@ const initials = computed(() => {
         />
     </div>
 
-    <div class="min-h-screen bg-gray-50">
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
 
-        <!-- Navbar mínimo -->
-        <header class="sticky top-0 z-40 border-b border-gray-200 bg-white/90 backdrop-blur">
-            <div class="mx-auto flex max-w-3xl items-center justify-between px-4 py-3 sm:px-6">
-                <Link href="/" class="flex items-center">
-                    <img src="/images/logo.png" alt="Rustikan" class="h-8 w-auto" />
-                </Link>
-                <Link
-                    :href="route('logout')"
-                    method="post"
-                    as="button"
-                    class="text-sm text-gray-500 transition hover:text-red-500"
-                >
-                    Cerrar sesión
-                </Link>
-            </div>
-        </header>
+        <NavbarPublico />
 
         <!-- Hero con gradiente de marca -->
         <div class="bg-gradient-to-br from-primary-500 to-tierra-600">
-            <div class="mx-auto max-w-3xl px-4 pb-16 pt-10 sm:px-6">
+            <div class="mx-auto max-w-3xl px-4 pb-16 pt-24 sm:px-6">
                 <div class="flex flex-col items-center text-center">
 
                     <!-- Avatar: zona de subida visual -->
@@ -253,10 +239,10 @@ const initials = computed(() => {
 
         <!-- Panel de contenido -->
         <div class="mx-auto max-w-3xl px-4 sm:px-6">
-            <div class="-mt-6 rounded-2xl bg-white shadow-md">
+            <div class="-mt-6 rounded-2xl bg-white dark:bg-gray-800 shadow-md">
 
                 <!-- Tabs -->
-                <div class="flex border-b border-gray-100">
+                <div class="flex border-b border-gray-100 dark:border-gray-700">
                     <button
                         v-for="tab in tabs"
                         :key="tab.id"
@@ -265,7 +251,7 @@ const initials = computed(() => {
                             'flex-1 py-4 text-sm font-medium transition-colors',
                             activeTab === tab.id
                                 ? 'border-b-2 border-primary-500 text-primary-600'
-                                : 'text-gray-400 hover:text-gray-600',
+                                : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400',
                         ]"
                     >
                         {{ tab.label }}
@@ -274,7 +260,7 @@ const initials = computed(() => {
 
                 <div class="p-6 sm:p-8">
 
-                    <!-- ── Pestaña: Mi perfil ─────────────────────────────── -->
+                    <!-- -- Pestaña: Mi perfil ------------------------------- -->
                     <form
                         v-if="activeTab === 'perfil'"
                         @submit.prevent="saveProfile"
@@ -297,8 +283,8 @@ const initials = computed(() => {
                         <div>
                             <InputLabel for="p-email" value="Correo electrónico" />
                             <div class="mt-1 flex items-center gap-2">
-                                <div class="flex flex-1 items-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
-                                    <span class="flex-1 truncate text-sm text-gray-700">{{ user.email }}</span>
+                                <div class="flex flex-1 items-center rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-3 py-2">
+                                    <span class="flex-1 truncate text-sm text-gray-700 dark:text-gray-300">{{ user.email }}</span>
                                     <span v-if="user.email_verified_at" class="ml-2 flex items-center gap-1 text-xs font-medium text-green-600">
                                         <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
@@ -313,15 +299,15 @@ const initials = computed(() => {
                                     </span>
                                 </div>
                             </div>
-                            <p class="mt-1 text-xs text-gray-400">Para cambiar el correo contacta con soporte.</p>
+                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Para cambiar el correo contacta con soporte.</p>
                         </div>
 
                         <!-- Teléfono bloqueado -->
                         <div>
                             <InputLabel for="p-telefono" value="Teléfono" />
                             <div class="mt-1 flex items-center gap-2">
-                                <div class="flex flex-1 items-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
-                                    <span class="flex-1 truncate text-sm text-gray-500">{{ user.telefono ?? '—' }}</span>
+                                <div class="flex flex-1 items-center rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-3 py-2">
+                                    <span class="flex-1 truncate text-sm text-gray-500 dark:text-gray-400">{{ user.telefono ?? '—' }}</span>
                                     <span v-if="user.telefono_verificado_at" class="ml-2 flex items-center gap-1 text-xs font-medium text-green-600">
                                         <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
@@ -336,7 +322,7 @@ const initials = computed(() => {
                                     </span>
                                 </div>
                             </div>
-                            <p class="mt-1 text-xs text-gray-400">El teléfono queda fijo una vez verificado. Contacta con soporte para modificarlo.</p>
+                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">El teléfono queda fijo una vez verificado. Contacta con soporte para modificarlo.</p>
                         </div>
 
                         <div class="grid gap-4 sm:grid-cols-2">
@@ -367,20 +353,20 @@ const initials = computed(() => {
                         </div>
                     </form>
 
-                    <!-- ── Pestaña: Seguridad ─────────────────────────────── -->
+                    <!-- -- Pestaña: Seguridad ------------------------------- -->
                     <div v-if="activeTab === 'seguridad'" class="space-y-6">
 
                         <!-- Tarjeta de consejos -->
-                        <div class="rounded-xl border border-blue-100 bg-blue-50 p-4">
+                        <div class="rounded-xl border border-blue-100 dark:border-blue-900/40 bg-blue-50 dark:bg-blue-900/20 p-4">
                             <div class="flex items-start gap-3">
-                                <div class="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-blue-100">
+                                <div class="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/40">
                                     <svg class="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="text-sm font-semibold text-blue-800">Consejos para una contraseña segura</h4>
-                                    <ul class="mt-2 space-y-1 text-xs text-blue-700">
+                                    <h4 class="text-sm font-semibold text-blue-800 dark:text-blue-300">Consejos para una contraseña segura</h4>
+                                    <ul class="mt-2 space-y-1 text-xs text-blue-700 dark:text-blue-400">
                                         <li class="flex items-center gap-1.5">
                                             <svg class="h-3 w-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
                                             Mínimo 8 caracteres, mejor 12 o más
@@ -404,9 +390,9 @@ const initials = computed(() => {
 
                         <!-- Tarjeta de acceso reciente -->
                         <div class="grid gap-3 sm:grid-cols-2">
-                            <div class="rounded-xl border border-gray-100 bg-gray-50 p-4">
-                                <p class="text-xs font-medium uppercase tracking-wide text-gray-400">Correo vinculado</p>
-                                <p class="mt-1 truncate text-sm font-semibold text-gray-700">{{ user.email }}</p>
+                            <div class="rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 p-4">
+                                <p class="text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">Correo vinculado</p>
+                                <p class="mt-1 truncate text-sm font-semibold text-gray-700 dark:text-gray-300">{{ user.email }}</p>
                             </div>
                             <div class="rounded-xl border border-green-100 bg-green-50 p-4">
                                 <p class="text-xs font-medium uppercase tracking-wide text-green-500">Estado de la cuenta</p>
@@ -420,8 +406,8 @@ const initials = computed(() => {
                         </div>
 
                         <!-- Formulario cambio contraseña -->
-                        <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-                            <h4 class="mb-4 text-sm font-semibold text-gray-700">Cambiar contraseña</h4>
+                        <div class="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-700/30 p-5 shadow-sm">
+                            <h4 class="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Cambiar contraseña</h4>
                             <form @submit.prevent="updatePassword" class="space-y-4">
                                 <div>
                                     <InputLabel for="s-current" value="Contraseña actual" />
@@ -455,15 +441,15 @@ const initials = computed(() => {
                         </div>
                     </div>
 
-                    <!-- ── Pestaña: Cuenta ───────────────────────────────── -->
+                    <!-- -- Pestaña: Cuenta --------------------------------- -->
                     <div v-if="activeTab === 'cuenta'" class="space-y-6">
 
                         <!-- Acceso rápido a pedidos -->
-                        <div class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+                        <div class="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-700/30 p-5 shadow-sm">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <h4 class="text-sm font-semibold text-gray-700">Mis pedidos</h4>
-                                    <p class="mt-0.5 text-xs text-gray-400">Consulta el estado de tus pedidos activos e historial</p>
+                                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Mis pedidos</h4>
+                                    <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Consulta el estado de tus pedidos activos e historial</p>
                                 </div>
                                 <Link
                                     :href="route('pedidos.index')"
@@ -477,8 +463,8 @@ const initials = computed(() => {
                             </div>
                         </div>
 
-                        <!-- ── Eliminar cuenta (al fondo) ─── -->
-                        <div class="rounded-xl border border-red-100 bg-red-50 p-5">
+                        <!-- -- Eliminar cuenta (al fondo) --- -->
+                        <div class="rounded-xl border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-900/20 p-5">
                             <div class="flex items-start gap-3">
                                 <div class="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-red-100">
                                     <svg class="h-4 w-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -512,7 +498,7 @@ const initials = computed(() => {
                                             v-model="deletePhraseInput"
                                             type="text"
                                             placeholder="Escribe la frase aquí…"
-                                            class="block w-full rounded-lg border border-red-200 bg-white px-3 py-2 text-sm focus:border-red-400 focus:outline-none focus:ring-1 focus:ring-red-400"
+                                            class="block w-full rounded-lg border border-red-200 dark:border-red-800 bg-white dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-red-400 focus:outline-none focus:ring-1 focus:ring-red-400"
                                             :class="deletePhraseInput && !deletePhraseOk ? 'border-red-400 bg-red-50' : ''"
                                         />
                                         <p v-if="deletePhraseInput && !deletePhraseOk" class="text-xs text-red-500">
@@ -522,7 +508,7 @@ const initials = computed(() => {
                                             <button
                                                 type="button"
                                                 @click="deleteStep = 0; deletePhraseInput = ''"
-                                                class="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-100"
+                                                class="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 transition hover:bg-gray-100 dark:hover:bg-gray-700"
                                             >
                                                 Cancelar
                                             </button>
@@ -552,7 +538,7 @@ const initials = computed(() => {
                                             <button
                                                 type="button"
                                                 @click="deleteStep = 0; deletePhraseInput = ''; deleteForm.reset()"
-                                                class="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-100"
+                                                class="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 transition hover:bg-gray-100 dark:hover:bg-gray-700"
                                             >
                                                 Cancelar
                                             </button>
@@ -579,7 +565,7 @@ const initials = computed(() => {
             </div>
 
             <div class="py-8 text-center">
-                <Link href="/" class="text-sm text-gray-400 transition hover:text-gray-600">← Volver al inicio</Link>
+                <Link href="/" class="text-sm text-gray-400 transition hover:text-gray-600">? Volver al inicio</Link>
             </div>
         </div>
 

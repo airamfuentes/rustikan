@@ -25,7 +25,7 @@ const submit = () => {
     <GuestLayout>
         <Head title="Recuperar contraseña" />
 
-        <div class="mb-4 text-sm text-gray-600">
+        <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
             ¿Olvidaste tu contraseña? Sin problema. Indícanos tu correo
             electrónico y te enviaremos un enlace para que puedas establecer
             una nueva contraseña.

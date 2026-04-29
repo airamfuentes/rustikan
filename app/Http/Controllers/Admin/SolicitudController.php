@@ -307,6 +307,7 @@ class SolicitudController extends Controller
             'estado'         => $s->estado,
             'motivo_rechazo' => $s->motivo_rechazo,
             'created_at'     => $s->created_at->format('d/m/Y H:i'),
+            'created_at_iso' => $s->created_at->toIso8601String(),
             'solicitante'    => $s->user?->name,
             'producto'       => $s->producto
                 ? ['id' => $s->producto->id, 'nombre' => $s->producto->nombre, 'imagen' => $s->producto->imagen]

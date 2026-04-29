@@ -10,6 +10,7 @@ import CarritoCompra from '@/Components/CarritoCompra.vue';
 import DarkModeToggle from '@/Components/DarkModeToggle.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { useDarkMode } from '@/Composables/useDarkMode';
+import { ShieldCheck, Store } from 'lucide-vue-next';
 
 const showingNavigationDropdown = ref(false);
 const scrolled = ref(false);
@@ -86,12 +87,12 @@ watch(
         </div>
 
         <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-            <nav 
+            <nav
                 :class="[
                     'sticky top-0 z-50 bg-white dark:bg-gray-900 transition-all duration-300',
-                    scrolled 
-                        ? 'border-b border-gray-200 dark:border-gray-700 shadow-md' 
-                        : 'mx-12 mt-4 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm'
+                    scrolled
+                        ? 'border-b border-gray-200 dark:border-gray-700 shadow-md'
+                        : 'border-b border-gray-200 dark:border-gray-700 shadow-sm'
                 ]"
             >
                 <!-- Primary Navigation Menu -->
@@ -120,7 +121,7 @@ watch(
                                     :active="route().current('admin.*')"
                                     class="!text-orange-600 font-bold"
                                 >
-                                    🛡️ Panel Admin
+                                    <ShieldCheck class="mr-1 inline h-4 w-4" /> Panel Admin
                                 </NavLink>
                                 <!-- Owner Panel Link -->
                                 <NavLink
@@ -129,7 +130,7 @@ watch(
                                     :active="route().current('owner.*')"
                                     class="!text-green-600 font-bold"
                                 >
-                                    🏪 {{ $page.props.auth.tienda?.nombre || 'Mi Tienda' }}
+                                    <Store class="mr-1 inline h-4 w-4" /> {{ $page.props.auth.tienda?.nombre || 'Mi Tienda' }}
                                 </NavLink>
                             </div>
                         </div>
@@ -332,7 +333,7 @@ watch(
                             :active="route().current('admin.*')"
                             class="!text-orange-600 !font-bold"
                         >
-                            🛡️ Panel Admin
+                            <ShieldCheck class="mr-1 inline h-4 w-4" /> Panel Admin
                         </ResponsiveNavLink>
                     </div>
 
@@ -361,7 +362,7 @@ watch(
                                 @click="toggleDark"
                                 class="flex w-full items-center gap-3 border-l-4 border-transparent py-2 pl-4 pr-4 text-sm font-medium text-gray-600 dark:text-gray-300 transition hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                             >
-                                <span>{{ isDark ? '☀️ Modo claro' : '🌙 Modo oscuro' }}</span>
+                                <span>{{ isDark ? 'Modo claro' : 'Modo oscuro' }}</span>
                             </button>
                             <ResponsiveNavLink
                                 :href="route('logout')"

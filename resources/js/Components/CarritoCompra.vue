@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { useCarrito } from '@/Composables/useCarrito';
+import { ArrowRight } from 'lucide-vue-next';
 
 const {
     totalItems,
@@ -34,7 +35,7 @@ onUnmounted(() => document.removeEventListener('mousedown', cerrarSiClickFuera))
         <button
             @click="toggle"
             aria-label="Abrir carrito"
-            class="relative rounded-full p-2 text-gray-700 transition-colors hover:bg-gray-100"
+            class="relative rounded-full p-2 text-gray-700 dark:text-gray-100 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
         >
             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -52,7 +53,7 @@ onUnmounted(() => document.removeEventListener('mousedown', cerrarSiClickFuera))
             >
                 <span
                     v-if="totalItems > 0"
-                    class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-500 text-[10px] font-bold text-white ring-2 ring-white"
+                    class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-500 text-[10px] font-bold text-white ring-2 ring-white dark:ring-gray-900"
                 >
                     {{ totalItems > 99 ? '99+' : totalItems }}
                 </span>
@@ -70,26 +71,26 @@ onUnmounted(() => document.removeEventListener('mousedown', cerrarSiClickFuera))
         >
             <div
                 v-if="abierto"
-                class="absolute right-0 top-12 z-50 w-96 origin-top-right overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl"
+                class="absolute right-0 top-12 z-50 w-96 origin-top-right overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-2xl"
             >
                 <!-- Cabecera del dropdown -->
-                <div class="flex items-center justify-between border-b border-gray-100 bg-gray-50 px-5 py-4">
+                <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 px-5 py-4">
                     <div class="flex items-center gap-2">
                         <svg class="h-5 w-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                         </svg>
-                        <h3 class="text-sm font-bold text-gray-900">Mi carrito</h3>
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">Mi carrito</h3>
                         <span
                             v-if="totalItems > 0"
-                            class="rounded-full bg-primary-100 px-2 py-0.5 text-xs font-semibold text-primary-700"
+                            class="rounded-full bg-primary-100 dark:bg-primary-900/40 px-2 py-0.5 text-xs font-semibold text-primary-700 dark:text-primary-300"
                         >
                             {{ totalItems }} {{ totalItems === 1 ? 'producto' : 'productos' }}
                         </span>
                     </div>
                     <button
                         @click="abierto = false"
-                        class="rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-600"
+                        class="rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-600 dark:hover:text-gray-200"
                         aria-label="Cerrar carrito"
                     >
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,18 +104,18 @@ onUnmounted(() => document.removeEventListener('mousedown', cerrarSiClickFuera))
 
                     <!-- Estado vacío -->
                     <div v-if="totalItems === 0" class="flex flex-col items-center py-12 text-center">
-                        <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+                        <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
                             <svg class="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                     d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                            </svg>
+                        </svg>
                         </div>
-                        <p class="text-sm font-medium text-gray-700">Tu carrito está vacío</p>
-                        <p class="mt-1 text-xs text-gray-400">¡Explora las tiendas y añade productos!</p>
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-200">Tu carrito está vacío</p>
+                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">¡Explora las tiendas y añade productos!</p>
                     </div>
 
                     <!-- Items agrupados por tienda -->
-                    <div v-else class="divide-y divide-gray-100">
+                    <div v-else class="divide-y divide-gray-100 dark:divide-gray-700">
                         <div
                             v-for="grupo in itemsAgrupadosPorTienda"
                             :key="grupo.tienda_id"
@@ -205,17 +206,20 @@ onUnmounted(() => document.removeEventListener('mousedown', cerrarSiClickFuera))
                 </div>
 
                 <!-- Pie: total + acciones -->
-                <div v-if="totalItems > 0" class="border-t border-gray-100 bg-gray-50 p-4">
+                <div v-if="totalItems > 0" class="border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 p-4">
                     <div class="mb-3 flex items-baseline justify-between">
-                        <span class="text-sm font-medium text-gray-600">Total estimado</span>
-                        <span class="text-xl font-extrabold text-gray-900">{{ totalPrecio.toFixed(2) }}€</span>
+                        <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Total estimado</span>
+                        <span class="text-xl font-extrabold text-gray-900 dark:text-white">{{ totalPrecio.toFixed(2) }}€</span>
                     </div>
                     <Link
                         href="/carrito"
                         @click="abierto = false"
                         class="block w-full rounded-xl bg-primary-500 py-3 text-center text-sm font-bold text-white shadow-sm transition-all hover:bg-primary-600 hover:shadow-md"
                     >
-                        Realizar pedido →
+                        <span class="inline-flex items-center gap-1.5">
+                            Realizar pedido
+                            <ArrowRight class="h-4 w-4" />
+                        </span>
                     </Link>
                 </div>
             </div>

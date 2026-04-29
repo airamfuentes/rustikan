@@ -74,6 +74,19 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Owners and admins are verified implicitly: their role is assigned by an admin,
+     * so email verification is not required for them.
+     */
+    public function hasVerifiedEmail(): bool
+    {
+        if ($this->role === 'owner' || $this->role === 'admin') {
+            return true;
+        }
+
+        return parent::hasVerifiedEmail();
+    }
+
+    /**
      * Get the tiendas owned by the user
      */
     public function tiendas()

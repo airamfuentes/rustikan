@@ -1,11 +1,11 @@
-﻿<template>
+<template>
     <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center justify-between">
-                <h2 class="text-xl font-semibold leading-tight text-gray-800">Gestión de Tiendas</h2>
+                <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Gestión de Tiendas</h2>
                 <div class="flex items-center gap-3">
-                    <Link :href="route('admin.dashboard')" class="rounded-lg bg-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300">
-                        ← Volver
+                    <Link :href="route('admin.dashboard')" class="inline-flex items-center gap-1.5 rounded-lg bg-gray-200 dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600">
+                        <ArrowLeft class="h-4 w-4" /> Volver
                     </Link>
                     <Link :href="route('admin.tiendas.create')" class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700">
                         Nueva Tienda
@@ -18,43 +18,43 @@
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <!-- Estadísticas -->
                 <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <div class="rounded-lg bg-white p-6 shadow">
-                        <div class="text-sm font-medium text-gray-500">Total Tiendas</div>
+                    <div class="rounded-lg bg-white dark:bg-gray-800 p-6 shadow">
+                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Tiendas</div>
                         <div class="mt-2 text-3xl font-bold text-gray-900">{{ stats.total }}</div>
                     </div>
-                    <div class="rounded-lg bg-white p-6 shadow">
-                        <div class="text-sm font-medium text-gray-500">Activas</div>
+                    <div class="rounded-lg bg-white dark:bg-gray-800 p-6 shadow">
+                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Activas</div>
                         <div class="mt-2 text-3xl font-bold text-green-600">{{ stats.activas }}</div>
                     </div>
-                    <div class="rounded-lg bg-white p-6 shadow">
-                        <div class="text-sm font-medium text-gray-500">Inactivas</div>
+                    <div class="rounded-lg bg-white dark:bg-gray-800 p-6 shadow">
+                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Inactivas</div>
                         <div class="mt-2 text-3xl font-bold text-red-600">{{ stats.inactivas }}</div>
                     </div>
-                    <div class="rounded-lg bg-white p-6 shadow">
-                        <div class="text-sm font-medium text-gray-500">Visibles</div>
+                    <div class="rounded-lg bg-white dark:bg-gray-800 p-6 shadow">
+                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Visibles</div>
                         <div class="mt-2 text-3xl font-bold text-blue-600">{{ stats.visibles }}</div>
                     </div>
                 </div>
 
                 <!-- Búsqueda y Filtros -->
-                <div class="mb-6 rounded-lg bg-white p-6 shadow">
+                <div class="mb-6 rounded-lg bg-white dark:bg-gray-800 p-6 shadow">
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
                         <div class="lg:col-span-2">
-                            <label class="mb-1 block text-sm font-medium text-gray-700">Buscar</label>
+                            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Buscar</label>
                             <input
                                 v-model="form.search"
                                 @input="buscar"
                                 type="text"
                                 placeholder="Nombre, dirección o propietario..."
-                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                             />
                         </div>
                         <div>
-                            <label class="mb-1 block text-sm font-medium text-gray-700">Categoría</label>
+                            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Categoría</label>
                             <select
                                 v-model="form.categoria_id"
                                 @change="buscar"
-                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                             >
                                 <option value="">Todas</option>
                                 <option v-for="categoria in categorias" :key="categoria.id" :value="categoria.id">
@@ -63,11 +63,11 @@
                             </select>
                         </div>
                         <div>
-                            <label class="mb-1 block text-sm font-medium text-gray-700">Estado</label>
+                            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
                             <select
                                 v-model="form.activa"
                                 @change="buscar"
-                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                             >
                                 <option value="">Todas</option>
                                 <option value="1">Activas</option>
@@ -75,11 +75,11 @@
                             </select>
                         </div>
                         <div>
-                            <label class="mb-1 block text-sm font-medium text-gray-700">Visibilidad</label>
+                            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Visibilidad</label>
                             <select
                                 v-model="form.visible"
                                 @change="buscar"
-                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                             >
                                 <option value="">Todas</option>
                                 <option value="1">Visibles</option>
@@ -90,30 +90,30 @@
                     <div class="mt-4 flex justify-end">
                         <button
                             @click="limpiarFiltros"
-                            class="rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300"
+                            class="rounded-lg bg-gray-200 dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
                         >
                             Limpiar Filtros
                         </button>
                     </div>
                 </div>
 
-                <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
+                <div class="overflow-hidden bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <!-- Tabla de tiendas -->
                         <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead class="bg-gray-50 dark:bg-gray-700/50">
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Tienda</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Categoría</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Propietario</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Productos</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Estado</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Valoración</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Acciones</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Tienda</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Categoría</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Propietario</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Productos</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Estado</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Valoración</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Acciones</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-200 bg-white">
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
                                     <tr v-for="tienda in tiendas.data" :key="tienda.id">
                                         <td class="whitespace-nowrap px-6 py-4">
                                             <div class="flex items-center">
@@ -124,8 +124,8 @@
                                                     </div>
                                                 </div>
                                                 <div class="ml-4">
-                                                    <div class="text-sm font-medium text-gray-900">{{ tienda.nombre }}</div>
-                                                    <div class="text-sm text-gray-500">{{ tienda.direccion }}</div>
+                                                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ tienda.nombre }}</div>
+                                                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ tienda.direccion }}</div>
                                                 </div>
                                             </div>
                                         </td>
@@ -134,10 +134,10 @@
                                                 {{ tienda.categoria.icono }} {{ tienda.categoria.nombre }}
                                             </span>
                                         </td>
-                                        <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                                        <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                                             {{ tienda.user.name }}
                                         </td>
-                                        <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                                        <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                                             {{ tienda.productos_count }}
                                         </td>
                                         <td class="whitespace-nowrap px-6 py-4">
@@ -147,19 +147,20 @@
                                                     class="inline-flex rounded-full px-2 text-xs font-semibold leading-5"
                                                     :class="tienda.activa ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-red-100 text-red-800 hover:bg-red-200'"
                                                 >
-                                                    {{ tienda.activa ? '✓ Activa' : '✗ Inactiva' }}
+                                                    {{ tienda.activa ? 'Activa' : 'Inactiva' }}
                                                 </button>
                                                 <button 
                                                     @click="toggleVisible(tienda)"
                                                     class="inline-flex rounded-full px-2 text-xs font-semibold leading-5"
                                                     :class="tienda.visible ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'"
                                                 >
-                                                    {{ tienda.visible ? '👁 Visible' : '🚫 Oculta' }}
+                                                    <Eye v-if="tienda.visible" class="inline h-3.5 w-3.5" /> <EyeOff v-else class="inline h-3.5 w-3.5" />
+                                                    {{ tienda.visible ? 'Visible' : 'Oculta' }}
                                                 </button>
                                             </div>
                                         </td>
-                                        <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                                            ⭐ {{ tienda.valoracion }} ({{ tienda.total_resenas }})
+                                        <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                            <Star class="inline h-3.5 w-3.5 fill-yellow-400 text-yellow-400" /> {{ tienda.valoracion }} ({{ tienda.total_resenas }})
                                         </td>
                                         <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                                             <div class="flex justify-end gap-2">
@@ -213,7 +214,7 @@
                             </div>
                             <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
                                 <div>
-                                    <p class="text-sm text-gray-700">
+                                    <p class="text-sm text-gray-700 dark:text-gray-300">
                                         Mostrando
                                         <span class="font-medium">{{ tiendas.from }}</span>
                                         a
@@ -256,6 +257,7 @@
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { reactive } from 'vue';
+import { ArrowLeft, Eye, EyeOff, Star } from 'lucide-vue-next';
 
 const props = defineProps({
     tiendas: Object,

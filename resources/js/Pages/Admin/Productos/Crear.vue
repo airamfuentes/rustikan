@@ -1,8 +1,8 @@
-﻿<template>
+<template>
     <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2 text-xl font-semibold text-gray-800">
+                <div class="flex items-center gap-2 text-xl font-semibold text-gray-800 dark:text-gray-200">
                     <Link :href="route('admin.tiendas.index')" class="text-gray-400 hover:text-gray-700">Tiendas</Link>
                     <span class="text-gray-300">/</span>
                     <Link :href="route('admin.tiendas.productos.index', tienda.id)" class="text-gray-400 hover:text-gray-700">{{ tienda.nombre }}</Link>
@@ -10,46 +10,46 @@
                     <span>Nuevo Producto</span>
                 </div>
                 <Link :href="route('admin.tiendas.productos.index', tienda.id)" class="rounded-lg bg-gray-600 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-700">
-                    ← Volver
+                    ? Volver
                 </Link>
             </div>
         </template>
 
         <div class="py-12">
             <div class="mx-auto max-w-3xl sm:px-6 lg:px-8">
-                <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
+                <div class="overflow-hidden bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
                     <form @submit.prevent="submit" class="p-6">
                         <div class="space-y-6">
                             <!-- Nombre -->
                             <div>
-                                <label class="mb-2 block text-sm font-medium text-gray-700">Nombre del Producto *</label>
+                                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre del Producto *</label>
                                 <input
                                     v-model="form.nombre"
                                     type="text"
                                     required
-                                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                 />
                                 <p v-if="form.errors.nombre" class="mt-1 text-sm text-red-600">{{ form.errors.nombre }}</p>
                             </div>
 
                             <!-- Tienda (bloqueada) -->
                             <div>
-                                <label class="mb-2 block text-sm font-medium text-gray-700">Tienda</label>
+                                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Tienda</label>
                                 <div class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
                                     <img v-if="tienda.logo" :src="`/storage/${tienda.logo}`" class="h-8 w-8 rounded-full object-cover" />
                                     <div v-else class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-sm font-semibold text-primary-600">{{ tienda.nombre.charAt(0) }}</div>
-                                    <span class="font-medium text-gray-900">{{ tienda.nombre }}</span>
-                                    <span class="text-sm text-gray-500">· {{ tienda.categoria?.nombre }}</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">{{ tienda.nombre }}</span>
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">· {{ tienda.categoria?.nombre }}</span>
                                 </div>
                             </div>
 
                             <!-- Descripción -->
                             <div>
-                                <label class="mb-2 block text-sm font-medium text-gray-700">Descripción</label>
+                                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Descripción</label>
                                 <textarea
                                     v-model="form.descripcion"
                                     rows="4"
-                                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                 ></textarea>
                                 <p v-if="form.errors.descripcion" class="mt-1 text-sm text-red-600">{{ form.errors.descripcion }}</p>
                             </div>
@@ -58,40 +58,40 @@
                             <div class="grid gap-4 md:grid-cols-3">
                                 <!-- Precio -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Precio (€) *</label>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Precio (€) *</label>
                                     <input
                                         v-model.number="form.precio"
                                         type="number"
                                         step="0.01"
                                         min="0"
                                         required
-                                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     />
                                     <p v-if="form.errors.precio" class="mt-1 text-sm text-red-600">{{ form.errors.precio }}</p>
                                 </div>
 
                                 <!-- Precio Oferta -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Precio Oferta (€)</label>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Precio Oferta (€)</label>
                                     <input
                                         v-model.number="form.precio_oferta"
                                         type="number"
                                         step="0.01"
                                         min="0"
-                                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     />
                                     <p v-if="form.errors.precio_oferta" class="mt-1 text-sm text-red-600">{{ form.errors.precio_oferta }}</p>
                                 </div>
 
                                 <!-- Unidad -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Unidad *</label>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Unidad *</label>
                                     <input
                                         v-model="form.unidad"
                                         type="text"
                                         placeholder="kg, unidad, litro..."
                                         required
-                                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     />
                                     <p v-if="form.errors.unidad" class="mt-1 text-sm text-red-600">{{ form.errors.unidad }}</p>
                                 </div>
@@ -101,26 +101,26 @@
                             <div class="grid gap-4 md:grid-cols-2">
                                 <!-- Stock -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Stock Inicial *</label>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Stock Inicial *</label>
                                     <input
                                         v-model.number="form.stock"
                                         type="number"
                                         min="0"
                                         required
-                                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     />
                                     <p v-if="form.errors.stock" class="mt-1 text-sm text-red-600">{{ form.errors.stock }}</p>
                                 </div>
 
                                 <!-- Stock Mínimo -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Stock Mínimo *</label>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Stock Mínimo *</label>
                                     <input
                                         v-model.number="form.stock_minimo"
                                         type="number"
                                         min="0"
                                         required
-                                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     />
                                     <p v-if="form.errors.stock_minimo" class="mt-1 text-sm text-red-600">{{ form.errors.stock_minimo }}</p>
                                 </div>
@@ -128,12 +128,12 @@
 
                             <!-- Imagen URL -->
                             <div>
-                                <label class="mb-2 block text-sm font-medium text-gray-700">URL de Imagen</label>
+                                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">URL de Imagen</label>
                                 <input
                                     v-model="form.imagen"
                                     type="text"
                                     placeholder="https://..."
-                                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                 />
                                 <p v-if="form.errors.imagen" class="mt-1 text-sm text-red-600">{{ form.errors.imagen }}</p>
                                 <div v-if="form.imagen" class="mt-2">
@@ -144,11 +144,11 @@
                             <!-- Estado y Destacado -->
                             <div class="grid gap-4 md:grid-cols-2">
                                 <!-- Disponible -->
-                                <div class="rounded-lg border p-4">
+                                <div class="rounded-lg border dark:border-gray-700 p-4">
                                     <div class="flex items-center justify-between">
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700">Disponible</label>
-                                            <p class="text-xs text-gray-500">El producto está disponible para la venta</p>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Disponible</label>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">El producto está disponible para la venta</p>
                                         </div>
                                         <div class="relative">
                                             <input
@@ -159,7 +159,7 @@
                                             />
                                             <label
                                                 for="disponible"
-                                                class="flex h-6 w-11 cursor-pointer items-center rounded-full bg-gray-300 transition-colors peer-checked:bg-green-500"
+                                                class="flex h-6 w-11 cursor-pointer items-center rounded-full bg-gray-300 dark:bg-gray-600 transition-colors peer-checked:bg-green-500"
                                             >
                                                 <span class="ml-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5"></span>
                                             </label>
@@ -168,11 +168,11 @@
                                 </div>
 
                                 <!-- Destacado -->
-                                <div class="rounded-lg border p-4">
+                                <div class="rounded-lg border dark:border-gray-700 p-4">
                                     <div class="flex items-center justify-between">
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700">Destacado</label>
-                                            <p class="text-xs text-gray-500">Aparecerá en la sección de destacados</p>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Destacado</label>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">Aparecerá en la sección de destacados</p>
                                         </div>
                                         <div class="relative">
                                             <input
@@ -183,7 +183,7 @@
                                             />
                                             <label
                                                 for="destacado"
-                                                class="flex h-6 w-11 cursor-pointer items-center rounded-full bg-gray-300 transition-colors peer-checked:bg-yellow-500"
+                                                class="flex h-6 w-11 cursor-pointer items-center rounded-full bg-gray-300 dark:bg-gray-600 transition-colors peer-checked:bg-yellow-500"
                                             >
                                                 <span class="ml-1 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-5"></span>
                                             </label>
@@ -197,7 +197,7 @@
                         <div class="mt-8 flex items-center justify-end gap-3 border-t pt-6">
                             <Link
                                 :href="route('admin.tiendas.productos.index', tienda.id)"
-                                class="rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                                class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-6 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
                             >
                                 Cancelar
                             </Link>

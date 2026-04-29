@@ -1,8 +1,8 @@
-﻿<template>
+<template>
     <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center justify-between">
-                <h2 class="text-xl font-semibold leading-tight text-gray-800">Editar Usuario</h2>
+                <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Editar Usuario</h2>
                 <Link :href="route('admin.usuarios.index')" class="rounded-lg bg-gray-600 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-700">
                     Volver
                 </Link>
@@ -11,12 +11,12 @@
 
         <div class="py-12">
             <div class="mx-auto max-w-3xl sm:px-6 lg:px-8">
-                <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
+                <div class="overflow-hidden bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
                     <form @submit.prevent="submit" class="p-6">
                         <div class="space-y-6">
                             <!-- Foto de perfil -->
-                            <div class="rounded-lg bg-gray-50 p-4">
-                                <h3 class="mb-3 text-sm font-semibold text-gray-700">Foto de perfil</h3>
+                            <div class="rounded-lg bg-gray-50 dark:bg-gray-700/50 p-4">
+                                <h3 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Foto de perfil</h3>
                                 <div class="flex items-center gap-5">
                                     <div class="relative shrink-0">
                                         <img
@@ -47,46 +47,46 @@
                                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                             Eliminar foto
                                         </button>
-                                        <p class="text-xs text-gray-400">JPG, PNG o GIF · Máx. 2MB</p>
+                                        <p class="text-xs text-gray-400 dark:text-gray-500">JPG, PNG o GIF · Máx. 2MB</p>
                                     </div>
                                 </div>
                                 <p v-if="form.errors.avatar" class="mt-2 text-sm text-red-600">{{ form.errors.avatar }}</p>
-                                <div class="mt-3 border-t border-gray-200 pt-3">
-                                    <p class="text-xs text-gray-500">Usuario desde <span class="font-medium text-gray-700">{{ new Date(usuario.created_at).toLocaleDateString('es-ES') }}</span></p>
+                                <div class="mt-3 border-t border-gray-200 dark:border-gray-700 pt-3">
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Usuario desde <span class="font-medium text-gray-700 dark:text-gray-300">{{ new Date(usuario.created_at).toLocaleDateString('es-ES') }}</span></p>
                                 </div>
                             </div>
 
                             <!-- Nombre -->
                             <div>
-                                <label class="mb-2 block text-sm font-medium text-gray-700">Nombre Completo *</label>
+                                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre Completo *</label>
                                 <input
                                     v-model="form.name"
                                     type="text"
                                     required
-                                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                 />
                                 <p v-if="form.errors.name" class="mt-1 text-sm text-red-600">{{ form.errors.name }}</p>
                             </div>
 
                             <!-- Email -->
                             <div>
-                                <label class="mb-2 block text-sm font-medium text-gray-700">Email *</label>
+                                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Email *</label>
                                 <input
                                     v-model="form.email"
                                     type="email"
                                     required
-                                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                 />
                                 <p v-if="form.errors.email" class="mt-1 text-sm text-red-600">{{ form.errors.email }}</p>
                             </div>
 
                             <!-- Rol -->
                             <div>
-                                <label class="mb-2 block text-sm font-medium text-gray-700">Rol *</label>
+                                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Rol *</label>
                                 <select
                                     v-model="form.role"
                                     required
-                                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                 >
                                     <option value="user">Usuario</option>
                                     <option value="owner">Propietario de Tienda</option>
@@ -98,36 +98,36 @@
 
                             <!-- Cambiar Contraseña (Opcional) -->
                             <div class="rounded-lg border-2 border-dashed border-gray-300 p-4">
-                                <h3 class="mb-3 text-sm font-semibold text-gray-700">Cambiar Contraseña (Opcional)</h3>
+                                <h3 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Cambiar Contraseña (Opcional)</h3>
                                 <p class="mb-4 text-xs text-gray-500">Deja estos campos vacíos si no deseas cambiar la contraseña.</p>
                                 
                                 <div class="space-y-4">
                                     <div>
-                                        <label class="mb-2 block text-sm font-medium text-gray-700">Nueva Contraseña</label>
+                                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Nueva Contraseña</label>
                                         <input
                                             v-model="form.password"
                                             type="password"
                                             autocomplete="new-password"
-                                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                         />
                                         <p v-if="form.errors.password" class="mt-1 text-sm text-red-600">{{ form.errors.password }}</p>
                                     </div>
 
                                     <div>
-                                        <label class="mb-2 block text-sm font-medium text-gray-700">Confirmar Contraseña</label>
+                                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Confirmar Contraseña</label>
                                         <input
                                             v-model="form.password_confirmation"
                                             type="password"
                                             autocomplete="new-password"
-                                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                         />
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Estadísticas del Usuario -->
-                            <div class="rounded-lg bg-blue-50 p-4">
-                                <h3 class="mb-2 text-sm font-semibold text-blue-900">Estadísticas</h3>
+                            <div class="rounded-lg bg-blue-50 dark:bg-blue-900/10 p-4">
+                                <h3 class="mb-2 text-sm font-semibold text-blue-900 dark:text-blue-300">Estadísticas</h3>
                                 <div class="grid grid-cols-2 gap-4 text-sm">
                                     <div>
                                         <p class="text-blue-600">Total de Pedidos</p>
@@ -145,7 +145,7 @@
                         <div class="mt-8 flex items-center justify-end gap-3 border-t pt-6">
                             <Link
                                 :href="route('admin.usuarios.index')"
-                                class="rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                                class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-6 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
                             >
                                 Cancelar
                             </Link>

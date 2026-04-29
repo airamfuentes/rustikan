@@ -1,9 +1,8 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Head, Link, router, usePage, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import Toast from '@/Components/Toast.vue';
-import { watch } from 'vue';
 
 const props = defineProps({
     tienda:           { type: Object,  required: true },
@@ -49,14 +48,14 @@ const tab = ref('resumen');
 
 // ── Estado label ─────────────────────────────────────────────────────────────
 const estadoConfig = {
-    pendiente:   { label: 'Pendiente',   cls: 'bg-yellow-100 text-yellow-800' },
-    en_proceso:  { label: 'En proceso',  cls: 'bg-blue-100 text-blue-800' },
-    completado:  { label: 'Completado',  cls: 'bg-green-100 text-green-800' },
-    cancelado:   { label: 'Cancelado',   cls: 'bg-red-100 text-red-800' },
-    confirmado:  { label: 'Confirmado',  cls: 'bg-blue-100 text-blue-800' },
-    preparando:  { label: 'Preparando',  cls: 'bg-orange-100 text-orange-800' },
-    en_camino:   { label: 'En camino',   cls: 'bg-purple-100 text-purple-800' },
-    entregado:   { label: 'Entregado',   cls: 'bg-green-100 text-green-800' },
+    pendiente:   { label: 'Pendiente',   cls: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300' },
+    en_proceso:  { label: 'En proceso',  cls: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300' },
+    completado:  { label: 'Completado',  cls: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' },
+    cancelado:   { label: 'Cancelado',   cls: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300' },
+    confirmado:  { label: 'Confirmado',  cls: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300' },
+    preparando:  { label: 'Preparando',  cls: 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300' },
+    en_camino:   { label: 'En camino',   cls: 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300' },
+    entregado:   { label: 'Entregado',   cls: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' },
 };
 const getEstado = (e) => estadoConfig[e] ?? { label: e, cls: 'bg-gray-100 text-gray-700' };
 
@@ -74,6 +73,149 @@ const solicitudEstadoLabel = (estado) => ({
 })[estado] ?? estado;
 
 const pendientesCount = computed(() => props.solicitudes.filter(s => s.estado === 'pendiente').length);
+
+// ════════════════════════════════════════════════════════════════════════════
+// FILTROS Y PAGINACIÓN
+// ════════════════════════════════════════════════════════════════════════════
+
+const PER_PAGE = 8;
+
+// ── Pedidos: filtros ─────────────────────────────────────────────────────────
+const pedidosFiltros = ref({
+    busqueda: '',
+    estado:   'todos',
+    rango:    'todos',   // todos · hoy · semana · mes
+    orden:    'fecha_desc',
+});
+const pedidosPagina = ref(1);
+
+const pedidosFiltrados = computed(() => {
+    let arr = [...props.pedidosRecientes];
+    const f  = pedidosFiltros.value;
+    const q  = f.busqueda.trim().toLowerCase();
+
+    if (q) {
+        arr = arr.filter(p =>
+            (p.numero_pedido ?? '').toLowerCase().includes(q) ||
+            (p.cliente ?? '').toLowerCase().includes(q)
+        );
+    }
+    if (f.estado !== 'todos') arr = arr.filter(p => p.estado === f.estado);
+
+    if (f.rango !== 'todos') {
+        const ahora = new Date();
+        const limite = new Date();
+        if (f.rango === 'hoy')    limite.setHours(0, 0, 0, 0);
+        if (f.rango === 'semana') limite.setDate(ahora.getDate() - 7);
+        if (f.rango === 'mes')    limite.setMonth(ahora.getMonth() - 1);
+        arr = arr.filter(p => p.created_at_iso && new Date(p.created_at_iso) >= limite);
+    }
+
+    arr.sort((a, b) => {
+        switch (f.orden) {
+            case 'fecha_asc':    return new Date(a.created_at_iso) - new Date(b.created_at_iso);
+            case 'importe_desc': return Number(b.total_tienda) - Number(a.total_tienda);
+            case 'importe_asc':  return Number(a.total_tienda) - Number(b.total_tienda);
+            default:             return new Date(b.created_at_iso) - new Date(a.created_at_iso);
+        }
+    });
+    return arr;
+});
+
+const pedidosTotalPaginas = computed(() => Math.max(1, Math.ceil(pedidosFiltrados.value.length / PER_PAGE)));
+const pedidosPaginados = computed(() => {
+    const start = (pedidosPagina.value - 1) * PER_PAGE;
+    return pedidosFiltrados.value.slice(start, start + PER_PAGE);
+});
+const pedidosResetFiltros = () => {
+    pedidosFiltros.value = { busqueda: '', estado: 'todos', rango: 'todos', orden: 'fecha_desc' };
+};
+watch(pedidosFiltros, () => { pedidosPagina.value = 1; }, { deep: true });
+
+// ── Productos: filtros ───────────────────────────────────────────────────────
+const productosFiltros = ref({
+    busqueda:       '',
+    categoria:      'todas',
+    disponibilidad: 'todos',  // todos · disponible · no_disponible
+    oferta:         'todos',  // todos · activa · inactiva · sin_oferta
+    stock:          'todos',  // todos · agotado · bajo · normal
+    orden:          'nombre_asc',
+});
+const productosPagina = ref(1);
+
+const productosFiltrados = computed(() => {
+    let arr = [...props.productos];
+    const f = productosFiltros.value;
+    const q = f.busqueda.trim().toLowerCase();
+
+    if (q) arr = arr.filter(p => (p.nombre ?? '').toLowerCase().includes(q));
+    if (f.categoria !== 'todas') arr = arr.filter(p => String(p.categoria_id) === String(f.categoria));
+    if (f.disponibilidad === 'disponible')     arr = arr.filter(p => p.disponible);
+    if (f.disponibilidad === 'no_disponible')  arr = arr.filter(p => !p.disponible);
+    if (f.oferta === 'activa')      arr = arr.filter(p => p.precio_oferta && p.oferta_activa);
+    if (f.oferta === 'inactiva')    arr = arr.filter(p => p.precio_oferta && !p.oferta_activa);
+    if (f.oferta === 'sin_oferta')  arr = arr.filter(p => !p.precio_oferta);
+    if (f.stock === 'agotado') arr = arr.filter(p => Number(p.stock) === 0);
+    if (f.stock === 'bajo')    arr = arr.filter(p => Number(p.stock) > 0 && Number(p.stock) <= 5);
+    if (f.stock === 'normal')  arr = arr.filter(p => Number(p.stock) > 5);
+
+    arr.sort((a, b) => {
+        switch (f.orden) {
+            case 'nombre_desc': return (b.nombre ?? '').localeCompare(a.nombre ?? '');
+            case 'precio_asc':  return Number(a.precio) - Number(b.precio);
+            case 'precio_desc': return Number(b.precio) - Number(a.precio);
+            case 'stock_asc':   return Number(a.stock)  - Number(b.stock);
+            case 'stock_desc':  return Number(b.stock)  - Number(a.stock);
+            default:            return (a.nombre ?? '').localeCompare(b.nombre ?? '');
+        }
+    });
+    return arr;
+});
+
+const productosTotalPaginas = computed(() => Math.max(1, Math.ceil(productosFiltrados.value.length / PER_PAGE)));
+const productosPaginados = computed(() => {
+    const start = (productosPagina.value - 1) * PER_PAGE;
+    return productosFiltrados.value.slice(start, start + PER_PAGE);
+});
+const productosResetFiltros = () => {
+    productosFiltros.value = { busqueda: '', categoria: 'todas', disponibilidad: 'todos', oferta: 'todos', stock: 'todos', orden: 'nombre_asc' };
+};
+watch(productosFiltros, () => { productosPagina.value = 1; }, { deep: true });
+
+// ── Solicitudes: filtros ─────────────────────────────────────────────────────
+const solicitudesFiltros = ref({
+    busqueda: '',
+    tipo:     'todos',  // todos · create_producto · update_producto · delete_producto · update_tienda
+    estado:   'todos',  // todos · pendiente · aprobado · rechazado
+});
+const solicitudesPagina = ref(1);
+const SOL_PER_PAGE = 6;
+
+const solicitudesFiltradas = computed(() => {
+    let arr = [...props.solicitudes];
+    const f = solicitudesFiltros.value;
+    const q = f.busqueda.trim().toLowerCase();
+
+    if (q) {
+        arr = arr.filter(s =>
+            (s.producto?.nombre ?? '').toLowerCase().includes(q) ||
+            (s.label_campo ?? '').toLowerCase().includes(q)
+        );
+    }
+    if (f.tipo !== 'todos')   arr = arr.filter(s => s.tipo === f.tipo);
+    if (f.estado !== 'todos') arr = arr.filter(s => s.estado === f.estado);
+    return arr;
+});
+
+const solicitudesTotalPaginas = computed(() => Math.max(1, Math.ceil(solicitudesFiltradas.value.length / SOL_PER_PAGE)));
+const solicitudesPaginadas = computed(() => {
+    const start = (solicitudesPagina.value - 1) * SOL_PER_PAGE;
+    return solicitudesFiltradas.value.slice(start, start + SOL_PER_PAGE);
+});
+const solicitudesResetFiltros = () => {
+    solicitudesFiltros.value = { busqueda: '', tipo: 'todos', estado: 'todos' };
+};
+watch(solicitudesFiltros, () => { solicitudesPagina.value = 1; }, { deep: true });
 
 // ── Producto: añadir form ─────────────────────────────────────────────────────
 const showAddForm = ref(false);
@@ -209,26 +351,6 @@ const submitDeleteProducto = (producto) => {
     <Head :title="`Panel – ${tienda.nombre}`" />
 
     <AuthenticatedLayout>
-        <template #header>
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <img v-if="imgUrl(tienda.logo)" :src="imgUrl(tienda.logo)"
-                         class="h-10 w-10 rounded-full object-cover ring-2 ring-primary-200" alt="Logo" />
-                    <div>
-                        <h2 class="text-xl font-bold text-gray-800 dark:text-white">{{ tienda.nombre }}</h2>
-                        <p class="text-xs text-gray-500">Panel del propietario</p>
-                    </div>
-                </div>
-                <Link :href="route('owner.tienda.edit')"
-                      class="flex items-center gap-2 rounded-xl bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-600 transition-colors">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                    </svg>
-                    Editar tienda
-                </Link>
-            </div>
-        </template>
-
         <!-- Toasts -->
         <div class="pointer-events-none fixed inset-0 z-[60] flex flex-col items-end justify-start space-y-4 p-6">
             <Toast v-for="t in toasts" :key="t.id" :type="t.type" :title="t.title" :message="t.message" @close="toasts = toasts.filter(x => x.id !== t.id)" />
@@ -236,6 +358,25 @@ const submitDeleteProducto = (producto) => {
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+
+                <!-- ── Header del panel (sin borde blanco) ────────────────── -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <img v-if="imgUrl(tienda.logo)" :src="imgUrl(tienda.logo)"
+                             class="h-10 w-10 rounded-full object-cover ring-2 ring-primary-200" alt="Logo" />
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-800 dark:text-white">{{ tienda.nombre }}</h2>
+                            <p class="text-xs text-gray-500">Panel del propietario</p>
+                        </div>
+                    </div>
+                    <Link :href="route('owner.tienda.edit')"
+                          class="flex items-center gap-2 rounded-xl bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-600 transition-colors">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Editar tienda
+                    </Link>
+                </div>
 
                 <!-- ── Tabs ──────────────────────────────────────────────────── -->
                 <div class="flex gap-1 rounded-xl bg-white dark:bg-gray-800 p-1 shadow-sm border border-gray-100 dark:border-gray-700 w-fit">
@@ -472,16 +613,81 @@ const submitDeleteProducto = (producto) => {
                 <!-- ════════════════ TAB PEDIDOS ════════════════ -->
                 <template v-if="tab === 'pedidos'">
                     <div class="rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
-                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-                            <h3 class="text-base font-semibold text-gray-900 dark:text-white">Pedidos recientes de tu tienda</h3>
-                            <p class="text-xs text-gray-400 mt-0.5">Mostrando los últimos 8 pedidos que incluyen productos de {{ tienda.nombre }}</p>
+                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <h3 class="text-base font-semibold text-gray-900 dark:text-white">Pedidos de tu tienda</h3>
+                                <p class="text-xs text-gray-400 mt-0.5">
+                                    {{ pedidosFiltrados.length }} de {{ pedidosRecientes.length }} pedidos · Mostrando {{ pedidosPaginados.length }} en esta página
+                                </p>
+                            </div>
                         </div>
+
+                        <!-- ── Barra de filtros ─────────────────────────────────── -->
+                        <div class="border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-800/40 px-6 py-4">
+                            <div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-5">
+                                <!-- Búsqueda -->
+                                <div class="relative lg:col-span-2">
+                                    <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/>
+                                    </svg>
+                                    <input v-model="pedidosFiltros.busqueda" type="text" placeholder="Buscar nº pedido o cliente..."
+                                           class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 pl-9 pr-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400" />
+                                </div>
+                                <select v-model="pedidosFiltros.estado"
+                                        class="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400">
+                                    <option value="todos">Todos los estados</option>
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="confirmado">Confirmado</option>
+                                    <option value="preparando">Preparando</option>
+                                    <option value="en_camino">En camino</option>
+                                    <option value="entregado">Entregado</option>
+                                    <option value="cancelado">Cancelado</option>
+                                </select>
+                                <select v-model="pedidosFiltros.rango"
+                                        class="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400">
+                                    <option value="todos">Cualquier fecha</option>
+                                    <option value="hoy">Hoy</option>
+                                    <option value="semana">Última semana</option>
+                                    <option value="mes">Último mes</option>
+                                </select>
+                                <select v-model="pedidosFiltros.orden"
+                                        class="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400">
+                                    <option value="fecha_desc">Más recientes</option>
+                                    <option value="fecha_asc">Más antiguos</option>
+                                    <option value="importe_desc">Mayor importe</option>
+                                    <option value="importe_asc">Menor importe</option>
+                                </select>
+                            </div>
+                            <div class="mt-3 flex justify-end">
+                                <button type="button" @click="pedidosResetFiltros"
+                                        class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                    </svg>
+                                    Limpiar filtros
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ── Sin pedidos en absoluto ─────────────────────────── -->
                         <div v-if="pedidosRecientes.length === 0" class="py-16 text-center text-gray-400">
                             <svg class="mx-auto mb-3 h-12 w-12 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                             </svg>
                             Aún no hay pedidos
                         </div>
+                        <!-- ── Sin resultados tras filtros ─────────────────────── -->
+                        <div v-else-if="pedidosFiltrados.length === 0" class="py-16 text-center text-gray-400">
+                            <svg class="mx-auto mb-3 h-12 w-12 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p class="text-sm">Ningún pedido coincide con los filtros aplicados</p>
+                            <button type="button" @click="pedidosResetFiltros"
+                                    class="mt-2 text-xs font-medium text-primary-500 hover:text-primary-600">
+                                Limpiar filtros
+                            </button>
+                        </div>
+                        <!-- ── Tabla pedidos ────────────────────────────────────── -->
                         <div v-else class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
                                 <thead>
@@ -495,7 +701,7 @@ const submitDeleteProducto = (producto) => {
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
-                                    <tr v-for="p in pedidosRecientes" :key="p.id"
+                                    <tr v-for="p in pedidosPaginados" :key="p.id"
                                         class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                                         <td class="px-6 py-4 text-sm font-mono font-medium text-primary-600 dark:text-primary-400">{{ p.numero_pedido }}</td>
                                         <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{{ p.cliente }}</td>
@@ -511,6 +717,29 @@ const submitDeleteProducto = (producto) => {
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- ── Paginación ───────────────────────────────────────── -->
+                        <div v-if="pedidosFiltrados.length > 0 && pedidosTotalPaginas > 1"
+                             class="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 dark:border-gray-700 px-6 py-3">
+                            <p class="text-xs text-gray-500">
+                                Página {{ pedidosPagina }} de {{ pedidosTotalPaginas }}
+                            </p>
+                            <div class="flex items-center gap-1">
+                                <button @click="pedidosPagina = Math.max(1, pedidosPagina - 1)"
+                                        :disabled="pedidosPagina === 1"
+                                        class="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                                    ← Anterior
+                                </button>
+                                <span class="rounded-lg bg-primary-50 dark:bg-primary-900/30 px-3 py-1.5 text-xs font-bold text-primary-600 dark:text-primary-300">
+                                    {{ pedidosPagina }}
+                                </span>
+                                <button @click="pedidosPagina = Math.min(pedidosTotalPaginas, pedidosPagina + 1)"
+                                        :disabled="pedidosPagina === pedidosTotalPaginas"
+                                        class="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                                    Siguiente →
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </template>
 
@@ -522,7 +751,10 @@ const submitDeleteProducto = (producto) => {
                         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-700">
                             <div>
                                 <h3 class="text-base font-semibold text-gray-900 dark:text-white">Productos de tu tienda</h3>
-                                <p class="text-xs text-gray-400 mt-0.5">{{ stats.totalProductos }} total · {{ stats.productosDisponibles }} disponibles · Los cambios se envían para aprobación</p>
+                                <p class="text-xs text-gray-400 mt-0.5">
+                                    {{ stats.totalProductos }} total · {{ stats.productosDisponibles }} disponibles ·
+                                    {{ productosFiltrados.length }} coinciden con los filtros
+                                </p>
                             </div>
                             <button @click="showAddForm = !showAddForm"
                                     class="flex items-center gap-2 rounded-xl bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-600 transition-colors">
@@ -599,9 +831,80 @@ const submitDeleteProducto = (producto) => {
                             </form>
                         </div>
 
+                        <!-- ── Barra de filtros productos ──────────────────────── -->
+                        <div v-if="productos.length > 0"
+                             class="border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-800/40 px-6 py-4">
+                            <div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-6">
+                                <!-- Búsqueda -->
+                                <div class="relative lg:col-span-2">
+                                    <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/>
+                                    </svg>
+                                    <input v-model="productosFiltros.busqueda" type="text" placeholder="Buscar producto..."
+                                           class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 pl-9 pr-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400" />
+                                </div>
+                                <select v-model="productosFiltros.categoria"
+                                        class="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400">
+                                    <option value="todas">Todas las categorías</option>
+                                    <option v-for="c in categorias" :key="c.id" :value="c.id">{{ c.nombre }}</option>
+                                </select>
+                                <select v-model="productosFiltros.disponibilidad"
+                                        class="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400">
+                                    <option value="todos">Disponibilidad</option>
+                                    <option value="disponible">Disponibles</option>
+                                    <option value="no_disponible">No disponibles</option>
+                                </select>
+                                <select v-model="productosFiltros.oferta"
+                                        class="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400">
+                                    <option value="todos">Ofertas</option>
+                                    <option value="activa">Oferta activa</option>
+                                    <option value="inactiva">Oferta sin activar</option>
+                                    <option value="sin_oferta">Sin oferta</option>
+                                </select>
+                                <select v-model="productosFiltros.stock"
+                                        class="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400">
+                                    <option value="todos">Stock</option>
+                                    <option value="agotado">Agotado (0)</option>
+                                    <option value="bajo">Bajo (1-5)</option>
+                                    <option value="normal">Normal (>5)</option>
+                                </select>
+                            </div>
+                            <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+                                <div class="flex items-center gap-2">
+                                    <label class="text-xs font-medium text-gray-500">Ordenar:</label>
+                                    <select v-model="productosFiltros.orden"
+                                            class="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-1.5 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400">
+                                        <option value="nombre_asc">Nombre A-Z</option>
+                                        <option value="nombre_desc">Nombre Z-A</option>
+                                        <option value="precio_asc">Precio ↑</option>
+                                        <option value="precio_desc">Precio ↓</option>
+                                        <option value="stock_asc">Stock ↑</option>
+                                        <option value="stock_desc">Stock ↓</option>
+                                    </select>
+                                </div>
+                                <button type="button" @click="productosResetFiltros"
+                                        class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                    </svg>
+                                    Limpiar filtros
+                                </button>
+                            </div>
+                        </div>
+
                         <!-- Lista de productos -->
                         <div v-if="productos.length === 0" class="py-16 text-center text-gray-400">
                             Sin productos registrados
+                        </div>
+                        <div v-else-if="productosFiltrados.length === 0" class="py-16 text-center text-gray-400">
+                            <svg class="mx-auto mb-3 h-12 w-12 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p class="text-sm">Ningún producto coincide con los filtros</p>
+                            <button type="button" @click="productosResetFiltros"
+                                    class="mt-2 text-xs font-medium text-primary-500 hover:text-primary-600">
+                                Limpiar filtros
+                            </button>
                         </div>
                         <div v-else class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
@@ -615,7 +918,7 @@ const submitDeleteProducto = (producto) => {
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
-                                    <template v-for="p in productos" :key="p.id">
+                                    <template v-for="p in productosPaginados" :key="p.id">
                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                                             <td class="px-6 py-3">
                                                 <div class="flex items-center gap-3">
@@ -809,6 +1112,29 @@ const submitDeleteProducto = (producto) => {
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- ── Paginación productos ─────────────────────────────── -->
+                        <div v-if="productosFiltrados.length > 0 && productosTotalPaginas > 1"
+                             class="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 dark:border-gray-700 px-6 py-3">
+                            <p class="text-xs text-gray-500">
+                                Página {{ productosPagina }} de {{ productosTotalPaginas }}
+                            </p>
+                            <div class="flex items-center gap-1">
+                                <button @click="productosPagina = Math.max(1, productosPagina - 1)"
+                                        :disabled="productosPagina === 1"
+                                        class="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                                    ← Anterior
+                                </button>
+                                <span class="rounded-lg bg-primary-50 dark:bg-primary-900/30 px-3 py-1.5 text-xs font-bold text-primary-600 dark:text-primary-300">
+                                    {{ productosPagina }}
+                                </span>
+                                <button @click="productosPagina = Math.min(productosTotalPaginas, productosPagina + 1)"
+                                        :disabled="productosPagina === productosTotalPaginas"
+                                        class="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                                    Siguiente →
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Modal confirmar eliminación -->
@@ -841,16 +1167,68 @@ const submitDeleteProducto = (producto) => {
                     <div class="rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
                         <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
                             <h3 class="text-base font-semibold text-gray-900 dark:text-white">Mis solicitudes de cambio</h3>
-                            <p class="text-xs text-gray-400 mt-0.5">Cada solicitud es revisada individualmente por el administrador</p>
+                            <p class="text-xs text-gray-400 mt-0.5">
+                                {{ solicitudesFiltradas.length }} de {{ solicitudes.length }} solicitudes ·
+                                Cada solicitud es revisada individualmente por el administrador
+                            </p>
                         </div>
+
+                        <!-- ── Barra filtros solicitudes ────────────────────────── -->
+                        <div v-if="solicitudes.length > 0"
+                             class="border-b border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-800/40 px-6 py-4">
+                            <div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+                                <div class="relative lg:col-span-2">
+                                    <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/>
+                                    </svg>
+                                    <input v-model="solicitudesFiltros.busqueda" type="text" placeholder="Buscar producto o campo..."
+                                           class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 pl-9 pr-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400" />
+                                </div>
+                                <select v-model="solicitudesFiltros.tipo"
+                                        class="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400">
+                                    <option value="todos">Todos los tipos</option>
+                                    <option value="create_producto">Crear producto</option>
+                                    <option value="update_producto">Editar producto</option>
+                                    <option value="delete_producto">Eliminar producto</option>
+                                    <option value="update_tienda">Cambio tienda</option>
+                                </select>
+                                <select v-model="solicitudesFiltros.estado"
+                                        class="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400">
+                                    <option value="todos">Todos los estados</option>
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="aprobado">Aprobado</option>
+                                    <option value="rechazado">Rechazado</option>
+                                </select>
+                            </div>
+                            <div class="mt-3 flex justify-end">
+                                <button type="button" @click="solicitudesResetFiltros"
+                                        class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                    </svg>
+                                    Limpiar filtros
+                                </button>
+                            </div>
+                        </div>
+
                         <div v-if="solicitudes.length === 0" class="py-16 text-center text-gray-400">
                             <svg class="mx-auto mb-3 h-12 w-12 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                             </svg>
                             No hay solicitudes todavía
                         </div>
+                        <div v-else-if="solicitudesFiltradas.length === 0" class="py-16 text-center text-gray-400">
+                            <svg class="mx-auto mb-3 h-12 w-12 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p class="text-sm">Ninguna solicitud coincide con los filtros</p>
+                            <button type="button" @click="solicitudesResetFiltros"
+                                    class="mt-2 text-xs font-medium text-primary-500 hover:text-primary-600">
+                                Limpiar filtros
+                            </button>
+                        </div>
                         <div v-else class="divide-y divide-gray-50 dark:divide-gray-700">
-                            <div v-for="s in solicitudes" :key="s.id" class="px-6 py-4">
+                            <div v-for="s in solicitudesPaginadas" :key="s.id" class="px-6 py-4">
                                 <div class="flex items-start justify-between gap-4">
                                     <div class="flex-1 min-w-0">
                                         <!-- Badge tipo -->
@@ -859,10 +1237,10 @@ const submitDeleteProducto = (producto) => {
                                                 {{ solicitudEstadoLabel(s.estado) }}
                                             </span>
                                             <span class="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-700 px-2.5 py-0.5 text-xs text-gray-600 dark:text-gray-400 font-medium">
-                                                {{ s.tipo === 'create_producto' ? '+ Crear producto' :
-                                                   s.tipo === 'delete_producto' ? '× Eliminar producto' :
-                                                   s.tipo === 'update_tienda'   ? '✎ Tienda' :
-                                                   '✎ Producto' }}
+                                                {{ s.tipo === 'create_producto' ? 'Crear producto' :
+                                                   s.tipo === 'delete_producto' ? 'Eliminar producto' :
+                                                   s.tipo === 'update_tienda'   ? 'Tienda' :
+                                                   'Producto' }}
                                             </span>
                                             <span class="text-xs text-gray-400">{{ s.created_at }}</span>
                                         </div>
@@ -894,6 +1272,29 @@ const submitDeleteProducto = (producto) => {
                                         </p>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- ── Paginación solicitudes ───────────────────────────── -->
+                        <div v-if="solicitudesFiltradas.length > 0 && solicitudesTotalPaginas > 1"
+                             class="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 dark:border-gray-700 px-6 py-3">
+                            <p class="text-xs text-gray-500">
+                                Página {{ solicitudesPagina }} de {{ solicitudesTotalPaginas }}
+                            </p>
+                            <div class="flex items-center gap-1">
+                                <button @click="solicitudesPagina = Math.max(1, solicitudesPagina - 1)"
+                                        :disabled="solicitudesPagina === 1"
+                                        class="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                                    ← Anterior
+                                </button>
+                                <span class="rounded-lg bg-primary-50 dark:bg-primary-900/30 px-3 py-1.5 text-xs font-bold text-primary-600 dark:text-primary-300">
+                                    {{ solicitudesPagina }}
+                                </span>
+                                <button @click="solicitudesPagina = Math.min(solicitudesTotalPaginas, solicitudesPagina + 1)"
+                                        :disabled="solicitudesPagina === solicitudesTotalPaginas"
+                                        class="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                                    Siguiente →
+                                </button>
                             </div>
                         </div>
                     </div>

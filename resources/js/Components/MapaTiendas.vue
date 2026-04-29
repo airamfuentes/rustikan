@@ -17,25 +17,35 @@ const emit = defineEmits(['tienda-click']);
 
 const mapContainer = ref(null);
 const activePopupId = ref(null);
-const isSatellite = ref(false);
 let map = null;
 let clusterGroup = null;
-let tileNormal = null;
-let tileSatellite = null;
 
 // Tiendas que tienen coordenadas
 const tiendasConCoords = () =>
     props.tiendas.filter(t => t.latitud && t.longitud);
 
+// Mapa de iconos SVG (paths internos Lucide) por slug de categoría
+const CATEGORIA_ICONOS = {
+    'frutas-y-verduras':   '<path d="M12 6.528V3a1 1 0 0 1 1-1h0"/><path d="M18.237 21A15 15 0 0 0 22 11a6 6 0 0 0-10-4.472A6 6 0 0 0 2 11a15.1 15.1 0 0 0 3.763 10 3 3 0 0 0 3.648.648 5.5 5.5 0 0 1 5.178 0A3 3 0 0 0 18.237 21"/>',
+    'carnes':              '<path d="M16.4 13.7A6.5 6.5 0 1 0 6.28 6.6c-1.1 3.13-.78 3.9-3.18 6.08A3 3 0 0 0 5 18c4 0 8.4-1.8 11.4-4.3"/><path d="m18.5 6 2.19 4.5a6.48 6.48 0 0 1-2.29 7.2C15.4 20.2 11 22 7 22a3 3 0 0 1-2.68-1.66L2.4 16.5"/><circle cx="12.5" cy="8.5" r="2.5"/>',
+    'pescados-y-mariscos': '<path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.47-3.44 6-7 6s-7.56-2.53-8.5-6Z"/><path d="M18 12v.5"/><path d="M16 17.93a9.77 9.77 0 0 1 0-11.86"/><path d="M7 10.67C7 8 5.58 5.97 2.73 5.5c-1 1.5-1 5 .23 6.5-1.24 1.5-1.24 5-.23 6.5C5.58 18.03 7 16 7 13.33"/><path d="M10.46 7.26C10.2 5.88 9.17 4.24 8 3h5.8a2 2 0 0 1 1.98 1.67l.23 1.4"/><path d="m16.01 17.93-.23 1.4A2 2 0 0 1 13.8 21H9.5a5.96 5.96 0 0 0 1.49-3.98"/>',
+    'panaderia':           '<path d="M2 22 16 8"/><path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M7.47 8.53 9 7l1.53 1.53a3.5 3.5 0 0 1 0 4.94L9 15l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z"/><path d="M11.47 17.47 13 19l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L5 19l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/><path d="M15.47 13.47 17 15l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L9 15l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/><path d="M19.47 9.47 21 11l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L13 11l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/>',
+    'lacteos-y-quesos':    '<path d="M8 2h8"/><path d="M9 2v2.789a4 4 0 0 1-.672 2.219l-.656.984A4 4 0 0 0 7 10.212V20a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-9.789a4 4 0 0 0-.672-2.219l-.656-.984A4 4 0 0 1 15 4.788V2"/><path d="M7 15a6.472 6.472 0 0 1 5 0 6.47 6.47 0 0 0 5 0"/>',
+    'vinoteca':            '<path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"/>',
+    'artesania':           '<path d="m14.622 17.897-10.68-2.913"/><path d="M18.376 2.622a1 1 0 1 1 3.002 3.002L17.36 9.643a.5.5 0 0 0 0 .707l.944.944a2.41 2.41 0 0 1 0 3.408l-.944.944a.5.5 0 0 1-.707 0L8.354 7.348a.5.5 0 0 1 0-.707l.944-.944a2.41 2.41 0 0 1 3.408 0l.944.944a.5.5 0 0 0 .707 0z"/><path d="M9 8c-1.804 2.71-3.97 3.46-6.583 3.948a.507.507 0 0 0-.302.819l7.32 8.883a1 1 0 0 0 1.185.204C12.735 20.405 16 16.792 16 15"/>',
+};
+const ICONO_CASA = '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>';
+
 const crearIcono = (tienda) => {
-    const emoji = tienda.categoria?.icono || '📍';
+    const color = tienda.categoria?.color || '#f97316';
+    const iconInner = CATEGORIA_ICONOS[tienda.categoria?.slug] ?? ICONO_CASA;
     return L.divIcon({
         html: `
             <div class="mapa-pin">
-                <div class="mapa-pin-bubble">
-                    <span class="mapa-pin-emoji">${emoji}</span>
+                <div class="mapa-pin-bubble" style="border-color:${color}">
+                    <svg class="mapa-pin-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${iconInner}</svg>
                 </div>
-                <div class="mapa-pin-tail"></div>
+                <div class="mapa-pin-tail" style="border-top-color:${color}"></div>
             </div>
         `,
         className: 'mapa-pin-container',
@@ -49,7 +59,10 @@ const escapeHtml = (str) =>
     (str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 const crearPopup = (tienda) => {
-    const estrellas = '★'.repeat(Math.round(tienda.valoracion)) + '☆'.repeat(5 - Math.round(tienda.valoracion));
+    const rating = Number(tienda.valoracion).toFixed(1);
+    const starsHtml = Array.from({ length: 5 }, (_, i) =>
+        `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="${i < Math.round(tienda.valoracion) ? '#f59e0b' : 'none'}" stroke="#f59e0b" stroke-width="2" class="mapa-star"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`
+    ).join('');
     const img = tienda.imagen_portada ? `/storage/${tienda.imagen_portada}` : tienda.logo ? `/storage/${tienda.logo}` : '/images/logo.png';
     const nombre = escapeHtml(tienda.nombre);
     const direccion = escapeHtml(tienda.direccion);
@@ -58,10 +71,10 @@ const crearPopup = (tienda) => {
             <img src="${escapeHtml(img)}" alt="" class="mapa-popup-img" loading="lazy" />
             <div class="mapa-popup-body">
                 <h3 class="mapa-popup-title">${nombre}</h3>
-                <div class="mapa-popup-stars">${estrellas} <span>${Number(tienda.valoracion).toFixed(1)}</span></div>
+                <div class="mapa-popup-stars">${starsHtml} <span>${rating}</span></div>
                 <p class="mapa-popup-addr">${direccion}</p>
                 <button class="mapa-popup-btn" onclick="window.__mapaNavegar('${escapeHtml(tienda.slug)}')">
-                    Ver tienda →
+                    Ver tienda &rarr;
                 </button>
             </div>
         </div>
@@ -121,15 +134,10 @@ const initMap = () => {
     // Control de zoom en la esquina derecha
     L.control.zoom({ position: 'topright' }).addTo(map);
 
-    // Tile layers: normal + satélite
-    tileNormal = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        subdomains: 'abcd',
+    // Tile: satélite fijo
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 19,
-    });
-    tileSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        maxZoom: 19,
-    });
-    tileNormal.addTo(map);
+    }).addTo(map);
 
     // Habilitar scroll zoom con Ctrl
     map.on('focus', () => { map.scrollWheelZoom.enable(); });
@@ -174,17 +182,7 @@ onUnmounted(() => {
     delete window.__mapaNavegar;
 });
 
-const toggleSatellite = () => {
-    if (!map) return;
-    if (isSatellite.value) {
-        map.removeLayer(tileSatellite);
-        tileNormal.addTo(map);
-    } else {
-        map.removeLayer(tileNormal);
-        tileSatellite.addTo(map);
-    }
-    isSatellite.value = !isSatellite.value;
-};
+
 </script>
 
 <template>
@@ -196,28 +194,14 @@ const toggleSatellite = () => {
             :style="{ height }"
         />
 
-        <!-- Botón satélite -->
-        <button
-            @click="toggleSatellite"
-            class="mapa-satellite-btn"
-            :title="isSatellite ? 'Vista normal' : 'Vista satélite'"
-        >
-            <!-- Globe (satélite) -->
-            <svg v-if="!isSatellite" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M21.721 12.752a9.711 9.711 0 00-.945-5.003 12.754 12.754 0 01-4.339 2.708 18.991 18.991 0 01-.214 4.772 17.165 17.165 0 005.498-2.477zM14.634 15.55a17.324 17.324 0 00.332-4.647c-.952.227-1.945.347-2.966.347-1.021 0-2.014-.12-2.966-.347a17.515 17.515 0 00.332 4.647 17.385 17.385 0 005.268 0zM9.772 17.119a18.963 18.963 0 004.456 0A17.182 17.182 0 0112 21.724a17.18 17.18 0 01-2.228-4.605zM7.777 15.23a18.87 18.87 0 01-.214-4.774 12.753 12.753 0 01-4.34-2.708 9.711 9.711 0 00-.944 5.004 17.165 17.165 0 005.498 2.477zM21.356 14.752a9.765 9.765 0 01-7.478 6.817 18.64 18.64 0 001.988-4.718 18.627 18.627 0 005.49-2.098zM2.644 14.752c1.682.971 3.53 1.688 5.49 2.099a18.64 18.64 0 001.988 4.718 9.765 9.765 0 01-7.478-6.816zM13.878 2.43a9.755 9.755 0 016.116 3.986 11.267 11.267 0 01-3.746 2.504 18.63 18.63 0 00-2.37-6.49zM12 2.276a17.152 17.152 0 012.805 7.121c-.897.23-1.837.353-2.805.353-.968 0-1.908-.122-2.805-.353A17.151 17.151 0 0112 2.276zM10.122 2.43a18.629 18.629 0 00-2.37 6.49 11.266 11.266 0 01-3.746-2.504 9.754 9.754 0 016.116-3.985z" />
-            </svg>
-            <!-- Map (normal) -->
-            <svg v-else class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                <path fill-rule="evenodd" d="M8.161 2.58a1.875 1.875 0 011.678 0l4.993 2.498c.106.052.23.052.336 0l3.869-1.935A1.875 1.875 0 0121.75 4.82v12.485c0 .71-.401 1.36-1.037 1.677l-4.875 2.437a1.875 1.875 0 01-1.676 0l-4.994-2.497a.375.375 0 00-.336 0l-3.868 1.935A1.875 1.875 0 012.25 19.18V6.695c0-.71.401-1.36 1.036-1.677l4.875-2.437zM9 6a.75.75 0 01.75.75V15a.75.75 0 01-1.5 0V6.75A.75.75 0 019 6zm6.75 3a.75.75 0 00-1.5 0v8.25a.75.75 0 001.5 0V9z" clip-rule="evenodd" />
-            </svg>
-        </button>
-
         <!-- Indicador si no hay tiendas con coords -->
         <div
             v-if="tiendas.filter(t => t.latitud && t.longitud).length === 0"
             class="mapa-empty"
         >
-            <div class="text-4xl mb-2">🗺️</div>
+            <svg class="mb-2 h-10 w-10 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+            </svg>
             <p class="text-gray-500 text-sm">Las ubicaciones de las tiendas se están configurando</p>
         </div>
     </div>
@@ -248,30 +232,7 @@ const toggleSatellite = () => {
     pointer-events: none;
 }
 
-.mapa-satellite-btn {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    z-index: 500;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.5rem;
-    border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.85);
-    background: rgba(20, 20, 20, 0.7);
-    color: #fff;
-    font-size: 0.78rem;
-    font-weight: 600;
-    cursor: pointer;
-    backdrop-filter: blur(6px);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    transition: background 0.2s, transform 0.15s;
-}
-.mapa-satellite-btn:hover {
-    background: rgba(20, 20, 20, 0.9);
-    transform: scale(1.04);
-}
+
 </style>
 
 <style>
@@ -306,10 +267,10 @@ const toggleSatellite = () => {
     justify-content: center;
 }
 
-.mapa-pin-emoji {
-    font-size: 1.35rem;
-    line-height: 1;
-    display: block;
+.mapa-pin-svg {
+    width: 20px;
+    height: 20px;
+    color: #f97316;
 }
 
 /* Cola triangular del pin */
@@ -391,9 +352,16 @@ const toggleSatellite = () => {
 }
 
 .mapa-popup-stars {
-    color: #f59e0b;
+    display: flex;
+    align-items: center;
+    gap: 0.125rem;
     font-size: 0.75rem;
     margin-bottom: 0.25rem;
+}
+
+.mapa-star {
+    display: inline-block;
+    vertical-align: middle;
 }
 
 .mapa-popup-stars span {

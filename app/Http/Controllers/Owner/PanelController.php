@@ -69,14 +69,14 @@ class PanelController extends Controller
                 return $item;
             });
 
-        // ── Pedidos recientes ─────────────────────────────────────────────────────
+        // ── Pedidos recientes (últimos 200, paginación + filtros en cliente) ─────
         $pedidosRecientes = Pedido::whereHas('items', fn($q) => $q->where('tienda_id', $tienda->id))
             ->with([
                 'user:id,name,email',
                 'items' => fn($q) => $q->where('tienda_id', $tienda->id),
             ])
             ->latest()
-            ->limit(8)
+            ->limit(200)
             ->get()
             ->map(function ($pedido) {
                 return [
@@ -87,6 +87,7 @@ class PanelController extends Controller
                     'items_count'     => $pedido->items->count(),
                     'cliente'         => $pedido->user?->name ?? 'Cliente',
                     'created_at'      => $pedido->created_at->format('d/m/Y H:i'),
+                    'created_at_iso'  => $pedido->created_at->toIso8601String(),
                 ];
             });
 
@@ -118,6 +119,7 @@ class PanelController extends Controller
                 'revisor'        => $s->revisor?->name,
                 'revisado_at'    => $s->revisado_at?->format('d/m/Y H:i'),
                 'created_at'     => $s->created_at->format('d/m/Y H:i'),
+                'created_at_iso' => $s->created_at->toIso8601String(),
                 'producto'       => $s->producto ? ['id' => $s->producto->id, 'nombre' => $s->producto->nombre] : null,
             ]);
 

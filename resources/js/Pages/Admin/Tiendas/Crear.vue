@@ -1,8 +1,8 @@
-﻿<template>
+<template>
     <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center justify-between">
-                <h2 class="text-xl font-semibold leading-tight text-gray-800">Nueva Tienda</h2>
+                <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Nueva Tienda</h2>
                 <Link :href="route('admin.tiendas.index')" class="rounded-lg bg-gray-600 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-700">
                     Volver
                 </Link>
@@ -11,24 +11,24 @@
 
         <div class="py-12">
             <div class="mx-auto max-w-4xl sm:px-6 lg:px-8">
-                <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
+                <div class="overflow-hidden bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
                     <form @submit.prevent="submit" class="p-6">
                         <div class="grid gap-6 lg:grid-cols-2">
                             <!-- Columna Izquierda: Datos Básicos -->
                             <div class="space-y-6">
-                                <h3 class="text-lg font-semibold text-gray-900">Datos Básicos</h3>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Datos Básicos</h3>
 
                                 <!-- Nombre -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Nombre de la Tienda *</label>
-                                    <input v-model="form.nombre" type="text" required class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" />
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre de la Tienda *</label>
+                                    <input v-model="form.nombre" type="text" required class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500" />
                                     <p v-if="form.errors.nombre" class="mt-1 text-sm text-red-600">{{ form.errors.nombre }}</p>
                                 </div>
 
                                 <!-- Categoría -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Categoría *</label>
-                                    <select v-model="form.categoria_id" required class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Categoría *</label>
+                                    <select v-model="form.categoria_id" required class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500">
                                         <option value="">Selecciona una categoría</option>
                                         <option v-for="categoria in categorias" :key="categoria.id" :value="categoria.id">
                                             {{ categoria.icono }} {{ categoria.nombre }}
@@ -39,8 +39,8 @@
 
                                 <!-- Propietario -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Propietario *</label>
-                                    <select v-model="form.user_id" required class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Propietario *</label>
+                                    <select v-model="form.user_id" required class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500">
                                         <option value="">Selecciona un usuario</option>
                                         <option v-for="usuario in usuarios" :key="usuario.id" :value="usuario.id">
                                             {{ usuario.name }} ({{ usuario.email }})
@@ -51,56 +51,56 @@
 
                                 <!-- Descripción -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Descripción</label>
-                                    <textarea v-model="form.descripcion" rows="4" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"></textarea>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Descripción</label>
+                                    <textarea v-model="form.descripcion" rows="4" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"></textarea>
                                     <p v-if="form.errors.descripcion" class="mt-1 text-sm text-red-600">{{ form.errors.descripcion }}</p>
                                 </div>
 
                                 <!-- Teléfono -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Teléfono</label>
-                                    <input v-model="form.telefono" type="tel" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" />
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Teléfono</label>
+                                    <input v-model="form.telefono" type="tel" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500" />
                                     <p v-if="form.errors.telefono" class="mt-1 text-sm text-red-600">{{ form.errors.telefono }}</p>
                                 </div>
 
                                 <!-- Email -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Email</label>
-                                    <input v-model="form.email" type="email" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" />
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                                    <input v-model="form.email" type="email" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500" />
                                     <p v-if="form.errors.email" class="mt-1 text-sm text-red-600">{{ form.errors.email }}</p>
                                 </div>
 
                                 <!-- Dirección -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Dirección</label>
-                                    <textarea v-model="form.direccion" rows="2" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"></textarea>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Dirección</label>
+                                    <textarea v-model="form.direccion" rows="2" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"></textarea>
                                     <p v-if="form.errors.direccion" class="mt-1 text-sm text-red-600">{{ form.errors.direccion }}</p>
                                 </div>
 
                                 <!-- Coordenadas -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Coordenadas (para el mapa)</label>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Coordenadas (para el mapa)</label>
                                     <div class="grid grid-cols-2 gap-3">
                                         <div>
-                                            <input v-model="form.latitud" type="number" step="0.0000001" placeholder="Latitud (ej. 29.0469)" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" />
+                                            <input v-model="form.latitud" type="number" step="0.0000001" placeholder="Latitud (ej. 29.0469)" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500" />
                                             <p v-if="form.errors.latitud" class="mt-1 text-sm text-red-600">{{ form.errors.latitud }}</p>
                                         </div>
                                         <div>
-                                            <input v-model="form.longitud" type="number" step="0.0000001" placeholder="Longitud (ej. -13.6328)" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" />
+                                            <input v-model="form.longitud" type="number" step="0.0000001" placeholder="Longitud (ej. -13.6328)" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500" />
                                             <p v-if="form.errors.longitud" class="mt-1 text-sm text-red-600">{{ form.errors.longitud }}</p>
                                         </div>
                                     </div>
-                                    <p class="mt-1 text-xs text-gray-400">Puedes obtenerlas desde Google Maps (clic derecho → coordenadas)</p>
+                                    <p class="mt-1 text-xs text-gray-400">Puedes obtenerlas desde Google Maps (clic derecho ? coordenadas)</p>
                                 </div>
                             </div>
 
                             <!-- Columna Derecha: Imágenes -->
                             <div class="space-y-6">
-                                <h3 class="text-lg font-semibold text-gray-900">Imágenes</h3>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Imágenes</h3>
 
                                 <!-- Logo -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Logo <span class="text-xs text-gray-400">(400×400px)</span></label>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Logo <span class="text-xs text-gray-400 dark:text-gray-500">(400×400px)</span></label>
 
                                     <div v-if="logoPreview" class="mb-3">
                                         <p class="mb-1 text-xs text-gray-500">Imagen recortada:</p>
@@ -119,7 +119,7 @@
 
                                 <!-- Imagen de Portada -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Imagen de Portada <span class="text-xs text-gray-400">(1200×400px)</span></label>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Imagen de Portada <span class="text-xs text-gray-400 dark:text-gray-500">(1200×400px)</span></label>
 
                                     <div v-if="portadaPreview" class="mb-3">
                                         <p class="mb-1 text-xs text-gray-500">Imagen recortada:</p>
@@ -137,9 +137,9 @@
                                 </div>
 
                                 <!-- Información adicional -->
-                                <div class="rounded-lg bg-blue-50 p-4">
-                                    <h4 class="mb-2 text-sm font-semibold text-blue-900">Información</h4>
-                                    <ul class="space-y-1 text-xs text-blue-700">
+                                <div class="rounded-lg bg-blue-50 dark:bg-blue-900/10 p-4">
+                                    <h4 class="mb-2 text-sm font-semibold text-blue-900 dark:text-blue-300">Información</h4>
+                                    <ul class="space-y-1 text-xs text-blue-700 dark:text-blue-300">
                                         <li>• El logo aparecerá en las tarjetas de tienda</li>
                                         <li>• La portada se mostrará en la página de detalle</li>
                                         <li>• Formatos aceptados: JPG, PNG, WebP</li>
@@ -151,7 +151,7 @@
 
                         <!-- Botones -->
                         <div class="mt-8 flex items-center justify-end gap-3 border-t pt-6">
-                            <Link :href="route('admin.tiendas.index')" class="rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+                            <Link :href="route('admin.tiendas.index')" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-6 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600">
                                 Cancelar
                             </Link>
                             <button type="submit" :disabled="form.processing" class="rounded-lg bg-primary-600 px-6 py-2 text-sm font-semibold text-white hover:bg-primary-700 disabled:opacity-50">
@@ -224,7 +224,7 @@ const showLogoCropper    = ref(false);
 const showPortadaCropper = ref(false);
 const cropperSrc         = ref(null);
 
-// ── Logo handlers ────────────────────────────────────────────────────────
+// -- Logo handlers --------------------------------------------------------
 const onLogoSelected = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -251,7 +251,7 @@ const quitarLogo = () => {
     if (logoInput.value) logoInput.value.value = '';
 };
 
-// ── Portada handlers ─────────────────────────────────────────────────────
+// -- Portada handlers -----------------------------------------------------
 const onPortadaSelected = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -278,7 +278,7 @@ const quitarPortada = () => {
     if (portadaInput.value) portadaInput.value.value = '';
 };
 
-// ── Submit ───────────────────────────────────────────────────────────────
+// -- Submit ---------------------------------------------------------------
 const submit = () => {
     form.post(route('admin.tiendas.store'), {
         forceFormData: true,

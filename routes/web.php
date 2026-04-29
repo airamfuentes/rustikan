@@ -120,7 +120,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // Owner Routes
-Route::middleware(['auth', 'verified', 'owner'])->prefix('mi-tienda')->name('owner.')->group(function () {
+Route::middleware(['auth', 'owner'])->prefix('mi-tienda')->name('owner.')->group(function () {
     Route::get('/panel', [\App\Http\Controllers\Owner\PanelController::class, 'index'])->name('panel');
     Route::get('/editar', [\App\Http\Controllers\Owner\TiendaController::class, 'edit'])->name('tienda.edit');
     Route::post('/editar', [\App\Http\Controllers\Owner\TiendaController::class, 'update'])->name('tienda.update');

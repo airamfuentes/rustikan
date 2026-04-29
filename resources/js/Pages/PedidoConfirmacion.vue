@@ -1,17 +1,18 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
+import NavbarPublico from '@/Components/NavbarPublico.vue';
 
 const props = defineProps({
     pedido: { type: Object, required: true },
 });
 
 const estadoLabels = {
-    pendiente:   { label: 'Pendiente',    bg: 'bg-yellow-100', text: 'text-yellow-700' },
-    confirmado:  { label: 'Confirmado',   bg: 'bg-blue-100',   text: 'text-blue-700'   },
-    preparando:  { label: 'Preparando',   bg: 'bg-indigo-100', text: 'text-indigo-700' },
-    en_camino:   { label: 'En camino',    bg: 'bg-purple-100', text: 'text-purple-700' },
-    entregado:   { label: 'Entregado',    bg: 'bg-green-100',  text: 'text-green-700'  },
-    cancelado:   { label: 'Cancelado',    bg: 'bg-red-100',    text: 'text-red-700'    },
+    pendiente:   { label: 'Pendiente',    bg: 'bg-yellow-100 dark:bg-yellow-900/40', text: 'text-yellow-700 dark:text-yellow-300' },
+    confirmado:  { label: 'Confirmado',   bg: 'bg-blue-100 dark:bg-blue-900/40',   text: 'text-blue-700 dark:text-blue-300'   },
+    preparando:  { label: 'Preparando',   bg: 'bg-indigo-100 dark:bg-indigo-900/40', text: 'text-indigo-700 dark:text-indigo-300' },
+    en_camino:   { label: 'En camino',    bg: 'bg-purple-100 dark:bg-purple-900/40', text: 'text-purple-700 dark:text-purple-300' },
+    entregado:   { label: 'Entregado',    bg: 'bg-green-100 dark:bg-green-900/40',  text: 'text-green-700 dark:text-green-300'  },
+    cancelado:   { label: 'Cancelado',    bg: 'bg-red-100 dark:bg-red-900/40',    text: 'text-red-700 dark:text-red-300'    },
 };
 
 const estadoInfo = estadoLabels[props.pedido.estado] ?? estadoLabels.pendiente;
@@ -20,52 +21,31 @@ const estadoInfo = estadoLabels[props.pedido.estado] ?? estadoLabels.pendiente;
 <template>
     <Head :title="`Pedido ${pedido.numero_pedido} – Rustikan`" />
 
-    <div class="min-h-screen bg-gray-50">
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
 
-        <!-- Navbar mínimo -->
-        <nav class="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm">
-            <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-                <Link href="/" class="flex items-center">
-                    <img src="/images/logo.png" alt="Rustikan" class="h-10 w-auto" />
-                </Link>
-                <div class="flex items-center gap-3">
-                    <Link
-                        :href="route('pedidos.index')"
-                        class="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
-                    >
-                        Mis pedidos
-                    </Link>
-                    <Link
-                        href="/"
-                        class="flex items-center gap-1.5 rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-600"
-                    >
-                        Seguir comprando
-                    </Link>
-                </div>
-            </div>
-        </nav>
+        <NavbarPublico />
 
-        <main class="mx-auto max-w-2xl px-4 py-12 sm:px-6 lg:px-8">
+        <main class="mx-auto max-w-2xl px-4 pt-24 pb-12 sm:px-6 lg:px-8">
 
             <!-- Icono de éxito animado -->
             <div class="flex flex-col items-center text-center">
-                <div class="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-green-100">
+                <div class="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
                     <svg class="h-12 w-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
-                <h1 class="text-3xl font-extrabold text-gray-900">¡Pedido realizado!</h1>
-                <p class="mt-2 text-gray-500">Hemos recibido tu pedido y lo estamos procesando.</p>
+                <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">¡Pedido realizado!</h1>
+                <p class="mt-2 text-gray-500 dark:text-gray-400">Hemos recibido tu pedido y lo estamos procesando.</p>
             </div>
 
             <!-- Tarjeta de resumen -->
-            <div class="mt-10 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+            <div class="mt-10 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
 
                 <!-- Header -->
-                <div class="flex items-center justify-between border-b border-gray-100 bg-gray-50 px-6 py-5">
+                <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 px-6 py-5">
                     <div>
-                        <p class="text-xs font-medium uppercase tracking-widest text-gray-400">Número de pedido</p>
-                        <p class="mt-1 text-xl font-extrabold tracking-tight text-gray-900">{{ pedido.numero_pedido }}</p>
+                        <p class="text-xs font-medium uppercase tracking-widest text-gray-400 dark:text-gray-500">Número de pedido</p>
+                        <p class="mt-1 text-xl font-extrabold tracking-tight text-gray-900 dark:text-white">{{ pedido.numero_pedido }}</p>
                     </div>
                     <span :class="['rounded-full px-3 py-1.5 text-xs font-bold', estadoInfo.bg, estadoInfo.text]">
                         {{ estadoInfo.label }}
@@ -73,7 +53,7 @@ const estadoInfo = estadoLabels[props.pedido.estado] ?? estadoLabels.pendiente;
                 </div>
 
                 <!-- Productos -->
-                <div class="divide-y divide-gray-100">
+                <div class="divide-y divide-gray-100 dark:divide-gray-700">
                     <div
                         v-for="item in pedido.items"
                         :key="item.id"
@@ -85,36 +65,36 @@ const estadoInfo = estadoLabels[props.pedido.estado] ?? estadoLabels.pendiente;
                             class="h-16 w-16 flex-shrink-0 rounded-xl object-cover"
                         />
                         <div class="min-w-0 flex-1">
-                            <p class="font-semibold text-gray-900">{{ item.producto_nombre }}</p>
-                            <p class="text-sm text-gray-500">{{ item.tienda_nombre }}</p>
-                            <p class="mt-0.5 text-sm text-gray-400">{{ item.cantidad }} × {{ Number(item.precio_unitario).toFixed(2) }}€</p>
+                            <p class="font-semibold text-gray-900 dark:text-white">{{ item.producto_nombre }}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ item.tienda_nombre }}</p>
+                            <p class="mt-0.5 text-sm text-gray-400 dark:text-gray-500">{{ item.cantidad }} × {{ Number(item.precio_unitario).toFixed(2) }}€</p>
                         </div>
-                        <p class="font-bold text-gray-900">{{ Number(item.subtotal).toFixed(2) }}€</p>
+                        <p class="font-bold text-gray-900 dark:text-white">{{ Number(item.subtotal).toFixed(2) }}€</p>
                     </div>
                 </div>
 
                 <!-- Totales -->
-                <div class="space-y-3 border-t border-gray-100 px-6 py-5 text-sm">
-                    <div class="flex justify-between text-gray-600">
+                <div class="space-y-3 border-t border-gray-100 dark:border-gray-700 px-6 py-5 text-sm">
+                    <div class="flex justify-between text-gray-600 dark:text-gray-400">
                         <span>Subtotal</span>
                         <span>{{ Number(pedido.subtotal).toFixed(2) }}€</span>
                     </div>
-                    <div class="flex justify-between text-gray-600">
+                    <div class="flex justify-between text-gray-600 dark:text-gray-400">
                         <span>Gastos de envío</span>
                         <span :class="pedido.gastos_envio == 0 ? 'text-green-600 font-medium' : ''">
                             {{ pedido.gastos_envio == 0 ? 'GRATIS' : Number(pedido.gastos_envio).toFixed(2) + '€' }}
                         </span>
                     </div>
-                    <div class="flex justify-between border-t border-gray-200 pt-3">
-                        <span class="font-bold text-gray-900">Total</span>
+                    <div class="flex justify-between border-t border-gray-200 dark:border-gray-700 pt-3">
+                        <span class="font-bold text-gray-900 dark:text-white">Total</span>
                         <span class="text-xl font-extrabold text-primary-600">{{ Number(pedido.total).toFixed(2) }}€</span>
                     </div>
                 </div>
 
                 <!-- Datos de entrega -->
-                <div class="border-t border-gray-100 px-6 py-5">
-                    <h3 class="mb-3 text-sm font-semibold text-gray-700">Datos de entrega</h3>
-                    <div class="space-y-2 text-sm text-gray-600">
+                <div class="border-t border-gray-100 dark:border-gray-700 px-6 py-5">
+                    <h3 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Datos de entrega</h3>
+                    <div class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                         <div class="flex items-start gap-2">
                             <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -142,7 +122,7 @@ const estadoInfo = estadoLabels[props.pedido.estado] ?? estadoLabels.pendiente;
             <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
                 <Link
                     :href="route('pedidos.index')"
-                    class="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-6 py-3 text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
+                    class="flex items-center justify-center gap-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-6 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 shadow-sm transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />

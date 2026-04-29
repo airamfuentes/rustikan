@@ -1,10 +1,10 @@
-﻿<template>
+<template>
     <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center justify-between">
-                <h2 class="text-xl font-semibold leading-tight text-gray-800">Gestionar Usuarios</h2>
-                <Link :href="route('admin.dashboard')" class="rounded-lg bg-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300">
-                    ← Volver
+                <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Gestionar Usuarios</h2>
+                <Link :href="route('admin.dashboard')" class="rounded-lg bg-gray-200 dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600">
+                    ? Volver
                 </Link>
             </div>
         </template>
@@ -14,9 +14,9 @@
                 
                 <!-- Estadísticas -->
                 <div class="mb-6 grid gap-4 sm:grid-cols-6">
-                    <div class="rounded-lg bg-white p-4 shadow">
-                        <p class="text-sm text-gray-600">Total Usuarios</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ stats.total }}</p>
+                    <div class="rounded-lg bg-white dark:bg-gray-800 p-4 shadow">
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Total Usuarios</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total }}</p>
                     </div>
                     <div class="rounded-lg bg-purple-100 p-4 shadow">
                         <p class="text-sm text-purple-800">Administradores</p>
@@ -36,29 +36,29 @@
                     </div>
                     <div class="rounded-lg bg-gray-100 p-4 shadow">
                         <p class="text-sm text-gray-800">Sin Pedidos</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ stats.sin_pedidos }}</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.sin_pedidos }}</p>
                     </div>
                 </div>
 
                 <!-- Búsqueda y Filtros -->
-                <div class="mb-6 rounded-lg bg-white p-6 shadow">
+                <div class="mb-6 rounded-lg bg-white dark:bg-gray-800 p-6 shadow">
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                         <div>
-                            <label class="mb-1 block text-sm font-medium text-gray-700">Buscar</label>
+                            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Buscar</label>
                             <input
                                 v-model="form.search"
                                 @input="buscarConDebounce"
                                 type="text"
                                 placeholder="Nombre o email..."
-                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                             />
                         </div>
                         <div>
-                            <label class="mb-1 block text-sm font-medium text-gray-700">Rol</label>
+                            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Rol</label>
                             <select
                                 v-model="form.role"
                                 @change="buscar"
-                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                             >
                                 <option value="">Todos</option>
                                 <option value="admin">Admin</option>
@@ -67,28 +67,28 @@
                             </select>
                         </div>
                         <div>
-                            <label class="mb-1 block text-sm font-medium text-gray-700">Fecha Desde</label>
+                            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha Desde</label>
                             <input
                                 v-model="form.fecha_desde"
                                 @change="buscar"
                                 type="date"
-                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                             />
                         </div>
                         <div>
-                            <label class="mb-1 block text-sm font-medium text-gray-700">Fecha Hasta</label>
+                            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha Hasta</label>
                             <input
                                 v-model="form.fecha_hasta"
                                 @change="buscar"
                                 type="date"
-                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                             />
                         </div>
                     </div>
                     <div class="mt-4 flex justify-end">
                         <button
                             @click="limpiarFiltros"
-                            class="rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300"
+                            class="rounded-lg bg-gray-200 dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
                         >
                             Limpiar Filtros
                         </button>
@@ -96,21 +96,21 @@
                 </div>
 
                 <!-- Tabla de Usuarios -->
-                <div class="overflow-hidden rounded-lg bg-white shadow">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
+                <div class="overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Usuario</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Email</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Rol</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Pedidos</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Total Gastado</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Registro</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Acciones</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Usuario</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Email</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Rol</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Pedidos</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Total Gastado</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Registro</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200 bg-white">
-                            <tr v-for="usuario in usuarios.data" :key="usuario.id" class="hover:bg-gray-50">
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
+                            <tr v-for="usuario in usuarios.data" :key="usuario.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
                                 <td class="whitespace-nowrap px-6 py-4">
                                     <div class="flex items-center">
                                         <img v-if="usuario.avatar" :src="`/storage/${usuario.avatar}`" class="h-10 w-10 flex-shrink-0 rounded-full object-cover" :alt="usuario.name" />
@@ -118,11 +118,11 @@
                                             {{ usuario.name.charAt(0).toUpperCase() }}
                                         </div>
                                         <div class="ml-4">
-                                            <div class="text-sm font-medium text-gray-900">{{ usuario.name }}</div>
+                                            <div class="text-sm font-medium text-gray-900 dark:text-white">{{ usuario.name }}</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{{ usuario.email }}</td>
+                                <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-white">{{ usuario.email }}</td>
                                 <td class="whitespace-nowrap px-6 py-4">
                                     <span :class="{
                                         'bg-purple-100 text-purple-800': usuario.role === 'admin',
@@ -132,9 +132,9 @@
                                         {{ usuario.role === 'owner' ? 'Propietario' : usuario.role }}
                                     </span>
                                 </td>
-                                <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{{ usuario.pedidos_count || 0 }}</td>
+                                <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-white">{{ usuario.pedidos_count || 0 }}</td>
                                 <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">{{ Number(usuario.pedidos_sum || 0).toFixed(2) }}€</td>
-                                <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{{ new Date(usuario.created_at).toLocaleDateString('es-ES') }}</td>
+                                <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ new Date(usuario.created_at).toLocaleDateString('es-ES') }}</td>
                                 <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                                     <div class="flex justify-end gap-3">
                                         <Link :href="route('admin.usuarios.edit', usuario.id)" class="text-blue-600 hover:text-blue-900">
@@ -157,9 +157,9 @@
                     </table>
 
                     <!-- Paginación -->
-                    <div class="border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+                    <div class="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 sm:px-6">
                         <div class="flex items-center justify-between">
-                            <div class="text-sm text-gray-700">
+                            <div class="text-sm text-gray-700 dark:text-gray-300">
                                 Mostrando <span class="font-medium">{{ usuarios.from }}</span> a <span class="font-medium">{{ usuarios.to }}</span> de <span class="font-medium">{{ usuarios.total }}</span> resultados
                             </div>
                             <div class="flex gap-2">
@@ -170,7 +170,7 @@
                                     :href="link.url" 
                                     :class="{
                                         'bg-primary-600 text-white': link.active,
-                                        'bg-white text-gray-700 hover:bg-gray-50': !link.active && link.url,
+                                        'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700': !link.active && link.url,
                                         'cursor-not-allowed opacity-50': !link.url
                                     }"
                                     class="rounded-md border px-3 py-2 text-sm font-medium shadow-sm"

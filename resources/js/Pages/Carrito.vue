@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { useCarrito } from '@/Composables/useCarrito';
+import NavbarPublico from '@/Components/NavbarPublico.vue';
 
 const page  = usePage();
 const user  = computed(() => page.props.auth?.user);
@@ -97,33 +98,17 @@ const confirmarPedido = () => {
 <template>
     <Head title="Mi carrito – Rustikan" />
 
-    <div class="min-h-screen bg-gray-50">
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
 
-        <!-- ── Navbar mínimo ────────────────────────────────────────────────── -->
-        <nav class="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm">
-            <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-                <Link href="/" class="flex items-center">
-                    <img src="/images/logo.png" alt="Rustikan" class="h-10 w-auto" />
-                </Link>
-                <Link
-                    href="/"
-                    class="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
-                >
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
-                    Seguir comprando
-                </Link>
-            </div>
-        </nav>
+        <NavbarPublico />
 
         <!-- ── Contenido principal ─────────────────────────────────────────── -->
-        <main class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <main class="mx-auto max-w-7xl px-4 pt-24 pb-10 sm:px-6 lg:px-8">
 
             <!-- Título de página -->
             <div class="mb-8">
-                <h1 class="text-3xl font-extrabold tracking-tight text-gray-900">Mi carrito</h1>
-                <p v-if="totalItems > 0" class="mt-1 text-sm text-gray-500">
+                <h1 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">Mi carrito</h1>
+                <p v-if="totalItems > 0" class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                     {{ totalItems }} {{ totalItems === 1 ? 'producto' : 'productos' }} de
                     {{ itemsAgrupadosPorTienda.length }} {{ itemsAgrupadosPorTienda.length === 1 ? 'tienda' : 'tiendas' }}
                 </p>
@@ -131,14 +116,14 @@ const confirmarPedido = () => {
 
             <!-- ── Carrito vacío ─────────────────────────────────────────── -->
             <div v-if="totalItems === 0" class="flex flex-col items-center py-24 text-center">
-                <div class="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gray-100">
-                    <svg class="h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+                    <svg class="h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                             d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                     </svg>
                 </div>
-                <h2 class="text-xl font-bold text-gray-800">Tu carrito está vacío</h2>
-                <p class="mt-2 text-sm text-gray-500">Explora las tiendas y añade los productos que más te gusten.</p>
+                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200">Tu carrito está vacío</h2>
+                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Explora las tiendas y añade los productos que más te gusten.</p>
                 <Link
                     href="/"
                     class="mt-6 rounded-xl bg-primary-500 px-8 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-primary-600"
@@ -157,13 +142,13 @@ const confirmarPedido = () => {
                     <div
                         v-for="grupo in itemsAgrupadosPorTienda"
                         :key="grupo.tienda_id"
-                        class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
+                        class="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm"
                     >
                         <!-- Cabecera de la tienda -->
-                        <div class="flex items-center justify-between border-b border-gray-100 bg-gray-50 px-5 py-4">
+                        <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 px-5 py-4">
                             <Link
                                 :href="`/tienda/${grupo.tienda_slug}`"
-                                class="flex items-center gap-2 text-sm font-bold text-gray-800 hover:text-primary-600"
+                                class="flex items-center gap-2 text-sm font-bold text-gray-800 dark:text-gray-200 hover:text-primary-600"
                             >
                                 <svg class="h-4 w-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -171,17 +156,17 @@ const confirmarPedido = () => {
                                 </svg>
                                 {{ grupo.tienda_nombre }}
                             </Link>
-                            <span class="text-sm font-semibold text-gray-500">
-                                Subtotal: <span class="text-gray-800">{{ grupo.subtotal.toFixed(2) }}€</span>
+                            <span class="text-sm font-semibold text-gray-500 dark:text-gray-400">
+                                Subtotal: <span class="text-gray-800 dark:text-gray-200">{{ grupo.subtotal.toFixed(2) }}€</span>
                             </span>
                         </div>
 
                         <!-- Filas de producto -->
-                        <div class="divide-y divide-gray-100">
+                        <div class="divide-y divide-gray-100 dark:divide-gray-700">
                             <div
                                 v-for="item in grupo.items"
                                 :key="item.id"
-                                class="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-gray-50"
+                                class="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
                             >
                                 <!-- Imagen -->
                                 <img
@@ -192,22 +177,22 @@ const confirmarPedido = () => {
 
                                 <!-- Info -->
                                 <div class="min-w-0 flex-1">
-                                    <h3 class="font-semibold text-gray-900">{{ item.nombre }}</h3>
-                                    <p class="mt-0.5 text-sm text-gray-500">{{ item.precio.toFixed(2) }}€ / {{ item.unidad }}</p>
+                                    <h3 class="font-semibold text-gray-900 dark:text-white">{{ item.nombre }}</h3>
+                                    <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{{ item.precio.toFixed(2) }}€ / {{ item.unidad }}</p>
                                 </div>
 
                                 <!-- Controles de cantidad -->
-                                <div class="flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-1.5">
+                                <div class="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-600 px-3 py-1.5">
                                     <button
                                         @click="actualizarCantidad(item.id, -1)"
-                                        class="flex h-7 w-7 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800"
+                                        class="flex h-7 w-7 items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200"
                                         aria-label="Reducir cantidad"
                                     >
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
                                         </svg>
                                     </button>
-                                    <span class="w-8 text-center text-sm font-bold text-gray-800">{{ item.cantidad }}</span>
+                                    <span class="w-8 text-center text-sm font-bold text-gray-800 dark:text-gray-200">{{ item.cantidad }}</span>
                                     <button
                                         @click="actualizarCantidad(item.id, 1)"
                                         class="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-500 text-white transition-colors hover:bg-primary-600"
@@ -221,7 +206,7 @@ const confirmarPedido = () => {
 
                                 <!-- Precio de línea -->
                                 <div class="w-20 text-right">
-                                    <span class="font-bold text-gray-900">{{ (item.precio * item.cantidad).toFixed(2) }}€</span>
+                                    <span class="font-bold text-gray-900 dark:text-white">{{ (item.precio * item.cantidad).toFixed(2) }}€</span>
                                 </div>
 
                                 <!-- Eliminar -->
@@ -256,29 +241,29 @@ const confirmarPedido = () => {
 
                 <!-- Columna derecha: resumen del pedido -->
                 <div class="lg:col-span-1">
-                    <div class="sticky top-24 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+                    <div class="sticky top-24 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
 
-                        <div class="border-b border-gray-100 px-6 py-5">
-                            <h2 class="text-lg font-bold text-gray-900">Resumen del pedido</h2>
+                        <div class="border-b border-gray-100 dark:border-gray-700 px-6 py-5">
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Resumen del pedido</h2>
                         </div>
 
                         <div class="space-y-4 px-6 py-5">
                             <!-- Línea de subtotal -->
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Subtotal</span>
-                                <span class="font-medium text-gray-800">{{ totalPrecio.toFixed(2) }}€</span>
+                                <span class="text-gray-600 dark:text-gray-400">Subtotal</span>
+                                <span class="font-medium text-gray-800 dark:text-gray-200">{{ totalPrecio.toFixed(2) }}€</span>
                             </div>
 
                             <!-- Gastos de envío -->
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">Gastos de envío</span>
-                                <span class="font-medium text-gray-800">{{ gastosEnvio.toFixed(2) }}€</span>
+                                <span class="text-gray-600 dark:text-gray-400">Gastos de envío</span>
+                                <span class="font-medium text-gray-800 dark:text-gray-200">{{ gastosEnvio.toFixed(2) }}€</span>
                             </div>
 
                             <!-- Separador -->
-                            <div class="border-t border-gray-200 pt-4">
+                            <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
                                 <div class="flex items-baseline justify-between">
-                                    <span class="font-bold text-gray-900">Total</span>
+                                    <span class="font-bold text-gray-900 dark:text-white">Total</span>
                                     <span class="text-2xl font-extrabold text-primary-600">{{ totalFinal.toFixed(2) }}€</span>
                                 </div>
                                 <p class="mt-1 text-xs text-gray-400">IVA incluido</p>
@@ -350,17 +335,17 @@ const confirmarPedido = () => {
                 leave-to-class="translate-y-full sm:translate-y-0 sm:scale-95 sm:opacity-0"
                 appear
             >
-                <div class="w-full max-w-lg overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl">
+                <div class="w-full max-w-lg overflow-hidden rounded-t-3xl bg-white dark:bg-gray-800 shadow-2xl sm:rounded-3xl">
 
                     <!-- Header del modal -->
-                    <div class="flex items-center justify-between border-b border-gray-100 px-6 py-5">
+                    <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 px-6 py-5">
                         <div>
-                            <h2 class="text-xl font-extrabold text-gray-900">Confirmar pedido</h2>
-                            <p class="mt-0.5 text-sm text-gray-500">{{ totalItems }} producto{{ totalItems !== 1 ? 's' : '' }} · <span class="font-semibold text-primary-600">{{ totalFinal.toFixed(2) }}€</span></p>
+                            <h2 class="text-xl font-extrabold text-gray-900 dark:text-white">Confirmar pedido</h2>
+                            <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{{ totalItems }} producto{{ totalItems !== 1 ? 's' : '' }} · <span class="font-semibold text-primary-600">{{ totalFinal.toFixed(2) }}€</span></p>
                         </div>
                         <button
                             @click="cerrarCheckout"
-                            class="flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                            class="flex h-9 w-9 items-center justify-center rounded-full text-gray-400 dark:text-gray-500 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300"
                         >
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -381,7 +366,7 @@ const confirmarPedido = () => {
 
                         <!-- Dirección de envío -->
                         <div>
-                            <label class="mb-1.5 block text-sm font-semibold text-gray-700">
+                            <label class="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-300">
                                 Dirección de envío <span class="text-red-500">*</span>
                             </label>
                             <textarea
@@ -391,8 +376,9 @@ const confirmarPedido = () => {
                                 :class="[
                                     'w-full resize-none rounded-xl border px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:ring-2',
                                     errores.direccion_envio
-                                        ? 'border-red-400 focus:ring-red-300'
-                                        : 'border-gray-200 focus:border-primary-400 focus:ring-primary-200',
+                                        ? 'border-red-400 focus:ring-red-300 dark:border-red-500'
+                                        : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
+                                    'dark:bg-gray-700 dark:text-white dark:placeholder-gray-500',
                                 ]"
                             />
                             <p v-if="errores.direccion_envio" class="mt-1 text-xs text-red-500">{{ errores.direccion_envio }}</p>
@@ -400,7 +386,7 @@ const confirmarPedido = () => {
 
                         <!-- Teléfono -->
                         <div>
-                            <label class="mb-1.5 block text-sm font-semibold text-gray-700">
+                            <label class="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-300">
                                 Teléfono de contacto <span class="text-red-500">*</span>
                             </label>
                             <input
@@ -410,8 +396,9 @@ const confirmarPedido = () => {
                                 :class="[
                                     'w-full rounded-xl border px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:ring-2',
                                     errores.telefono_contacto
-                                        ? 'border-red-400 focus:ring-red-300'
-                                        : 'border-gray-200 focus:border-primary-400 focus:ring-primary-200',
+                                        ? 'border-red-400 focus:ring-red-300 dark:border-red-500'
+                                        : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
+                                    'dark:bg-gray-700 dark:text-white dark:placeholder-gray-500',
                                 ]"
                             />
                             <p v-if="errores.telefono_contacto" class="mt-1 text-xs text-red-500">{{ errores.telefono_contacto }}</p>
@@ -419,41 +406,41 @@ const confirmarPedido = () => {
 
                         <!-- Notas -->
                         <div>
-                            <label class="mb-1.5 block text-sm font-semibold text-gray-700">
+                            <label class="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-300">
                                 Notas del pedido <span class="text-xs font-normal text-gray-400">(opcional)</span>
                             </label>
                             <textarea
                                 v-model="form.notas"
                                 rows="2"
                                 placeholder="Instrucciones de entrega, alergias, preferencias…"
-                                class="w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-primary-400 focus:ring-2 focus:ring-primary-200"
+                                class="w-full resize-none rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-primary-400 focus:ring-2 focus:ring-primary-200"
                             />
                         </div>
 
                         <!-- Resumen rápido -->
-                        <div class="rounded-xl bg-gray-50 px-4 py-4 text-sm">
-                            <div class="flex justify-between text-gray-600">
+                        <div class="rounded-xl bg-gray-50 dark:bg-gray-700/50 px-4 py-4 text-sm">
+                            <div class="flex justify-between text-gray-600 dark:text-gray-400">
                                 <span>Subtotal</span>
-                                <span class="font-medium text-gray-800">{{ totalPrecio.toFixed(2) }}€</span>
+                                <span class="font-medium text-gray-800 dark:text-gray-200">{{ totalPrecio.toFixed(2) }}€</span>
                             </div>
-                            <div class="mt-1 flex justify-between text-gray-600">
+                            <div class="mt-1 flex justify-between text-gray-600 dark:text-gray-400">
                                 <span>Envío</span>
                                 <span :class="gastosEnvio === 0 ? 'font-medium text-green-600' : 'font-medium text-gray-800'">
                                     {{ gastosEnvio === 0 ? 'GRATIS' : gastosEnvio.toFixed(2) + '€' }}
                                 </span>
                             </div>
-                            <div v-if="gastosEnvio > 0" class="mt-1 text-xs text-gray-400">
+                            <div v-if="gastosEnvio > 0" class="mt-1 text-xs text-gray-400 dark:text-gray-500">
                                 Envío gratis a partir de 50€
                             </div>
-                            <div class="mt-3 flex justify-between border-t border-gray-200 pt-3">
-                                <span class="font-bold text-gray-900">Total</span>
+                            <div class="mt-3 flex justify-between border-t border-gray-200 dark:border-gray-600 pt-3">
+                                <span class="font-bold text-gray-900 dark:text-white">Total</span>
                                 <span class="text-lg font-extrabold text-primary-600">{{ totalFinal.toFixed(2) }}€</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Footer con botón -->
-                    <div class="border-t border-gray-100 px-6 py-4">
+                    <div class="border-t border-gray-100 dark:border-gray-700 px-6 py-4">
                         <button
                             @click="confirmarPedido"
                             :disabled="enviando"

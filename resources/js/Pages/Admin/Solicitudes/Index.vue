@@ -1,9 +1,9 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Head, Link, router, usePage, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import Toast from '@/Components/Toast.vue';
-import { watch } from 'vue';
+import { ArrowLeft } from 'lucide-vue-next';
 
 const props = defineProps({
     tiendas: { type: Array, default: () => [] },
@@ -81,10 +81,10 @@ const aprobarTodas = (tienda) => {
 
 // ── Helpers display ───────────────────────────────────────────────────────
 const tipoLabel = (tipo) => ({
-    update_tienda:   '✎ Cambio tienda',
-    create_producto: '+ Nuevo producto',
-    update_producto: '✎ Cambio producto',
-    delete_producto: '× Eliminar producto',
+    update_tienda:   'Cambio tienda',
+    create_producto: 'Nuevo producto',
+    update_producto: 'Cambio producto',
+    delete_producto: 'Eliminar producto',
 })[tipo] ?? tipo;
 
 const tipoCls = (tipo) => ({
@@ -92,9 +92,77 @@ const tipoCls = (tipo) => ({
     create_producto: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
     update_producto: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
     delete_producto: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-})[tipo] ?? 'bg-gray-100 text-gray-700';
+})[tipo] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
 
 const isImage = (campo) => ['logo', 'imagen_portada', 'imagen'].includes(campo);
+
+// ── Filtros y paginación ─────────────────────────────────────────────────
+const filtros = ref({
+    busqueda: '',
+    tipo:     'todos',  // todos · update_tienda · create_producto · update_producto · delete_producto
+    rango:    'todos',  // todos · hoy · semana · mes
+});
+const tiendaPagina = ref(1);
+const TIENDAS_PER_PAGE = 5;
+
+const tiendasFiltradas = computed(() => {
+    const f = filtros.value;
+    const q = f.busqueda.trim().toLowerCase();
+
+    return props.tiendas
+        .map(t => {
+            let sols = [...t.solicitudes];
+
+            if (f.tipo !== 'todos') sols = sols.filter(s => s.tipo === f.tipo);
+
+            if (f.rango !== 'todos') {
+                const limite = new Date();
+                if (f.rango === 'hoy')    limite.setHours(0, 0, 0, 0);
+                if (f.rango === 'semana') limite.setDate(limite.getDate() - 7);
+                if (f.rango === 'mes')    limite.setMonth(limite.getMonth() - 1);
+                sols = sols.filter(s => s.created_at_iso && new Date(s.created_at_iso) >= limite);
+            }
+
+            if (q) {
+                const tiendaMatch =
+                    (t.nombre ?? '').toLowerCase().includes(q) ||
+                    (t.owner ?? '').toLowerCase().includes(q);
+
+                if (!tiendaMatch) {
+                    sols = sols.filter(s =>
+                        (s.label_campo ?? '').toLowerCase().includes(q) ||
+                        (s.producto?.nombre ?? '').toLowerCase().includes(q) ||
+                        (s.solicitante ?? '').toLowerCase().includes(q)
+                    );
+                }
+            }
+
+            return { ...t, solicitudes: sols, total: sols.length };
+        })
+        .filter(t => t.solicitudes.length > 0);
+});
+
+const tiendasTotalPaginas = computed(() =>
+    Math.max(1, Math.ceil(tiendasFiltradas.value.length / TIENDAS_PER_PAGE))
+);
+const tiendasPaginadas = computed(() => {
+    const start = (tiendaPagina.value - 1) * TIENDAS_PER_PAGE;
+    return tiendasFiltradas.value.slice(start, start + TIENDAS_PER_PAGE);
+});
+
+const totalSolicitudesFiltradas = computed(() =>
+    tiendasFiltradas.value.reduce((sum, t) => sum + t.solicitudes.length, 0)
+);
+const totalSolicitudesOriginales = computed(() =>
+    props.tiendas.reduce((sum, t) => sum + t.solicitudes.length, 0)
+);
+
+const resetFiltros = () => {
+    filtros.value = { busqueda: '', tipo: 'todos', rango: 'todos' };
+};
+
+watch(filtros, () => { tiendaPagina.value = 1; }, { deep: true });
+watch(() => props.estado, () => { tiendaPagina.value = 1; });
 </script>
 
 <template>
@@ -104,8 +172,8 @@ const isImage = (campo) => ['logo', 'imagen_portada', 'imagen'].includes(campo);
         <template #header>
             <div class="flex items-center justify-between">
                 <h2 class="text-xl font-bold text-gray-800 dark:text-white">Solicitudes de cambio</h2>
-                <Link :href="route('admin.dashboard')" class="text-sm text-primary-600 hover:underline dark:text-primary-400">
-                    ← Volver al panel
+                <Link :href="route('admin.dashboard')" class="inline-flex items-center gap-1.5 text-sm text-primary-600 hover:underline dark:text-primary-400">
+                    <ArrowLeft class="h-3.5 w-3.5" /> Volver al panel
                 </Link>
             </div>
         </template>
@@ -120,21 +188,65 @@ const isImage = (campo) => ['logo', 'imagen_portada', 'imagen'].includes(campo);
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
 
                 <!-- ── Tabs de estado ─────────────────────────────────────── -->
-                <div class="flex gap-1 rounded-xl bg-white dark:bg-gray-800 p-1 shadow-sm border border-gray-100 dark:border-gray-700 w-fit">
-                    <button v-for="tab in [
-                        { key: 'pendiente', label: 'Pendientes' },
-                        { key: 'aprobado',  label: 'Aprobadas' },
-                        { key: 'rechazado', label: 'Rechazadas' },
-                    ]" :key="tab.key"
-                        @click="setEstado(tab.key)"
-                        :class="['relative px-4 py-2 rounded-lg text-sm font-medium transition-colors', estadoTabCls(tab.key)]">
-                        {{ tab.label }}
-                        <span v-if="counts[tab.key] > 0"
-                              :class="['ml-1.5 inline-flex items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold',
-                                  tab.key === estado ? 'bg-white/30 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300']">
-                            {{ counts[tab.key] }}
-                        </span>
-                    </button>
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex gap-1 rounded-xl bg-white dark:bg-gray-800 p-1 shadow-sm border border-gray-100 dark:border-gray-700 w-fit">
+                        <button v-for="tab in [
+                            { key: 'pendiente', label: 'Pendientes' },
+                            { key: 'aprobado',  label: 'Aprobadas' },
+                            { key: 'rechazado', label: 'Rechazadas' },
+                        ]" :key="tab.key"
+                            @click="setEstado(tab.key)"
+                            :class="['relative px-4 py-2 rounded-lg text-sm font-medium transition-colors', estadoTabCls(tab.key)]">
+                            {{ tab.label }}
+                            <span v-if="counts[tab.key] > 0"
+                                  :class="['ml-1.5 inline-flex items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold',
+                                      tab.key === estado ? 'bg-white/30 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300']">
+                                {{ counts[tab.key] }}
+                            </span>
+                        </button>
+                    </div>
+                    <p v-if="tiendas.length > 0" class="text-xs text-gray-500 dark:text-gray-400">
+                        {{ totalSolicitudesFiltradas }} de {{ totalSolicitudesOriginales }} solicitudes ·
+                        {{ tiendasFiltradas.length }} tienda{{ tiendasFiltradas.length !== 1 ? 's' : '' }}
+                    </p>
+                </div>
+
+                <!-- ── Barra de filtros ──────────────────────────────────── -->
+                <div v-if="tiendas.length > 0"
+                     class="rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 shadow-sm">
+                    <div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+                        <div class="relative lg:col-span-2">
+                            <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/>
+                            </svg>
+                            <input v-model="filtros.busqueda" type="text" placeholder="Buscar por tienda, owner, producto, campo..."
+                                   class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 pl-9 pr-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400" />
+                        </div>
+                        <select v-model="filtros.tipo"
+                                class="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400">
+                            <option value="todos">Todos los tipos</option>
+                            <option value="update_tienda">Cambio tienda</option>
+                            <option value="create_producto">Crear producto</option>
+                            <option value="update_producto">Cambio producto</option>
+                            <option value="delete_producto">Eliminar producto</option>
+                        </select>
+                        <select v-model="filtros.rango"
+                                class="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400">
+                            <option value="todos">Cualquier fecha</option>
+                            <option value="hoy">Hoy</option>
+                            <option value="semana">Última semana</option>
+                            <option value="mes">Último mes</option>
+                        </select>
+                    </div>
+                    <div class="mt-3 flex justify-end">
+                        <button type="button" @click="resetFiltros"
+                                class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            Limpiar filtros
+                        </button>
+                    </div>
                 </div>
 
                 <!-- ── Sin resultados ─────────────────────────────────────── -->
@@ -146,8 +258,21 @@ const isImage = (campo) => ['logo', 'imagen_portada', 'imagen'].includes(campo);
                     <p class="text-lg font-medium">No hay solicitudes {{ estado === 'pendiente' ? 'pendientes' : estado === 'aprobado' ? 'aprobadas' : 'rechazadas' }}</p>
                 </div>
 
+                <!-- ── Sin coincidencias en filtros ───────────────────────── -->
+                <div v-else-if="tiendasFiltradas.length === 0"
+                     class="rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 py-16 text-center text-gray-400 shadow-sm">
+                    <svg class="mx-auto mb-3 h-12 w-12 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <p class="text-sm">Ninguna solicitud coincide con los filtros aplicados</p>
+                    <button type="button" @click="resetFiltros"
+                            class="mt-3 text-xs font-medium text-primary-500 hover:text-primary-600">
+                        Limpiar filtros
+                    </button>
+                </div>
+
                 <!-- ── Tiendas con solicitudes ────────────────────────────── -->
-                <div v-for="tienda in tiendas" :key="tienda.id"
+                <div v-for="tienda in tiendasPaginadas" :key="tienda.id"
                      class="rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
 
                     <!-- Cabecera tienda -->
@@ -160,7 +285,7 @@ const isImage = (campo) => ['logo', 'imagen_portada', 'imagen'].includes(campo);
                             </div>
                             <div>
                                 <p class="font-semibold text-gray-900 dark:text-white">{{ tienda.nombre }}</p>
-                                <p class="text-xs text-gray-400">{{ tienda.owner }} · {{ tienda.total }} solicitud{{ tienda.total !== 1 ? 'es' : '' }}</p>
+                                <p class="text-xs text-gray-400 dark:text-gray-500">{{ tienda.owner }} · {{ tienda.total }} solicitud{{ tienda.total !== 1 ? 'es' : '' }}</p>
                             </div>
                         </div>
                         <div v-if="estado === 'pendiente'" class="flex items-center gap-2">
@@ -195,7 +320,7 @@ const isImage = (campo) => ['logo', 'imagen_portada', 'imagen'].includes(campo);
                                         <span v-if="s.producto" class="text-xs text-gray-500 dark:text-gray-400">
                                             Producto: {{ s.producto.nombre }}
                                         </span>
-                                        <span class="text-xs text-gray-400">{{ s.created_at }} · {{ s.solicitante }}</span>
+                                        <span class="text-xs text-gray-400 dark:text-gray-500">{{ s.created_at }} · {{ s.solicitante }}</span>
                                     </div>
 
                                     <!-- Campo -->
@@ -281,6 +406,29 @@ const isImage = (campo) => ['logo', 'imagen_portada', 'imagen'].includes(campo);
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- ── Paginación tiendas ─────────────────────────────────── -->
+                <div v-if="tiendasFiltradas.length > 0 && tiendasTotalPaginas > 1"
+                     class="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 px-6 py-3 shadow-sm">
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        Página {{ tiendaPagina }} de {{ tiendasTotalPaginas }}
+                    </p>
+                    <div class="flex items-center gap-1">
+                        <button @click="tiendaPagina = Math.max(1, tiendaPagina - 1)"
+                                :disabled="tiendaPagina === 1"
+                                class="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                            ← Anterior
+                        </button>
+                        <span class="rounded-lg bg-primary-50 dark:bg-primary-900/30 px-3 py-1.5 text-xs font-bold text-primary-600 dark:text-primary-300">
+                            {{ tiendaPagina }}
+                        </span>
+                        <button @click="tiendaPagina = Math.min(tiendasTotalPaginas, tiendaPagina + 1)"
+                                :disabled="tiendaPagina === tiendasTotalPaginas"
+                                class="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                            Siguiente →
+                        </button>
                     </div>
                 </div>
 

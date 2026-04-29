@@ -1,8 +1,8 @@
-﻿<template>
+<template>
     <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center justify-between">
-                <h2 class="text-xl font-semibold leading-tight text-gray-800">Editar Tienda</h2>
+                <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Editar Tienda</h2>
                 <Link :href="route('admin.tiendas.index')" class="rounded-lg bg-gray-600 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-700">
                     Volver
                 </Link>
@@ -11,25 +11,25 @@
 
         <div class="py-12">
             <div class="mx-auto max-w-4xl sm:px-6 lg:px-8">
-                <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
+                <div class="overflow-hidden bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
                     <form @submit.prevent="submit" class="p-6">
                         <div class="grid gap-8 lg:grid-cols-2">
 
                             <!-- Columna Izquierda: Datos -->
                             <div class="space-y-6">
-                                <h3 class="text-lg font-semibold text-gray-900">Datos de la Tienda</h3>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Datos de la Tienda</h3>
 
                                 <!-- Nombre -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Nombre *</label>
-                                    <input v-model="form.nombre" type="text" required class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" />
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre *</label>
+                                    <input v-model="form.nombre" type="text" required class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500" />
                                     <p v-if="form.errors.nombre" class="mt-1 text-sm text-red-600">{{ form.errors.nombre }}</p>
                                 </div>
 
                                 <!-- Categoría -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Categoría *</label>
-                                    <select v-model="form.categoria_id" required class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Categoría *</label>
+                                    <select v-model="form.categoria_id" required class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500">
                                         <option value="">Selecciona una categoría</option>
                                         <option v-for="categoria in categorias" :key="categoria.id" :value="categoria.id">
                                             {{ categoria.icono }} {{ categoria.nombre }}
@@ -40,35 +40,35 @@
 
                                 <!-- Descripción -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Descripción</label>
-                                    <textarea v-model="form.descripcion" rows="4" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"></textarea>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Descripción</label>
+                                    <textarea v-model="form.descripcion" rows="4" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"></textarea>
                                     <p v-if="form.errors.descripcion" class="mt-1 text-sm text-red-600">{{ form.errors.descripcion }}</p>
                                 </div>
 
                                 <!-- Teléfono -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Teléfono</label>
-                                    <input v-model="form.telefono" type="tel" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" />
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Teléfono</label>
+                                    <input v-model="form.telefono" type="tel" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500" />
                                     <p v-if="form.errors.telefono" class="mt-1 text-sm text-red-600">{{ form.errors.telefono }}</p>
                                 </div>
 
                                 <!-- Email -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Email</label>
-                                    <input v-model="form.email" type="email" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" />
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                                    <input v-model="form.email" type="email" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500" />
                                     <p v-if="form.errors.email" class="mt-1 text-sm text-red-600">{{ form.errors.email }}</p>
                                 </div>
 
                                 <!-- Dirección -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Dirección</label>
-                                    <input v-model="form.direccion" type="text" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" />
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Dirección</label>
+                                    <input v-model="form.direccion" type="text" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500" />
                                     <p v-if="form.errors.direccion" class="mt-1 text-sm text-red-600">{{ form.errors.direccion }}</p>
                                 </div>
 
                                 <!-- Coordenadas -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Coordenadas (para el mapa)</label>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Coordenadas (para el mapa)</label>
                                     <div class="grid grid-cols-2 gap-3">
                                         <div>
                                             <input
@@ -76,7 +76,7 @@
                                                 type="number"
                                                 step="0.0000001"
                                                 placeholder="Latitud"
-                                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                             />
                                             <p v-if="form.errors.latitud" class="mt-1 text-sm text-red-600">{{ form.errors.latitud }}</p>
                                         </div>
@@ -86,34 +86,34 @@
                                                 type="number"
                                                 step="0.0000001"
                                                 placeholder="Longitud"
-                                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                             />
                                             <p v-if="form.errors.longitud" class="mt-1 text-sm text-red-600">{{ form.errors.longitud }}</p>
                                         </div>
                                     </div>
-                                    <p class="mt-1 text-xs text-gray-400">Puedes obtenerlas desde Google Maps (clic derecho → coordenadas)</p>
+                                    <p class="mt-1 text-xs text-gray-400">Puedes obtenerlas desde Google Maps (clic derecho ? coordenadas)</p>
                                 </div>
 
                                 <!-- Estados -->
                                 <div class="grid grid-cols-2 gap-4">
                                     <label class="flex items-center gap-2">
                                         <input v-model="form.activa" type="checkbox" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
-                                        <span class="text-sm font-medium text-gray-700">Tienda Activa</span>
+                                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Tienda Activa</span>
                                     </label>
                                     <label class="flex items-center gap-2">
                                         <input v-model="form.visible" type="checkbox" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
-                                        <span class="text-sm font-medium text-gray-700">Visible al Público</span>
+                                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Visible al Público</span>
                                     </label>
                                 </div>
                             </div>
 
                             <!-- Columna Derecha: Imágenes -->
                             <div class="space-y-6">
-                                <h3 class="text-lg font-semibold text-gray-900">Imágenes</h3>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Imágenes</h3>
 
                                 <!-- Logo -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Logo <span class="text-xs text-gray-400">(400×400px)</span></label>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Logo <span class="text-xs text-gray-400 dark:text-gray-500">(400×400px)</span></label>
 
                                     <!-- Imagen actual -->
                                     <div v-if="logoActual && !form.delete_logo && !logoPreview" class="mb-3">
@@ -148,7 +148,7 @@
 
                                 <!-- Imagen de Portada -->
                                 <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700">Imagen de Portada <span class="text-xs text-gray-400">(1200×400px)</span></label>
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Imagen de Portada <span class="text-xs text-gray-400 dark:text-gray-500">(1200×400px)</span></label>
 
                                     <!-- Imagen actual -->
                                     <div v-if="portadaActual && !form.delete_imagen_portada && !portadaPreview" class="mb-3">
@@ -185,7 +185,7 @@
 
                         <!-- Botones -->
                         <div class="mt-8 flex items-center justify-end gap-3 border-t pt-6">
-                            <Link :href="route('admin.tiendas.index')" class="rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+                            <Link :href="route('admin.tiendas.index')" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-6 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600">
                                 Cancelar
                             </Link>
                             <button type="submit" :disabled="form.processing" class="rounded-lg bg-primary-600 px-6 py-2 text-sm font-semibold text-white hover:bg-primary-700 disabled:opacity-50">
@@ -269,7 +269,7 @@ const showLogoCropper    = ref(false);
 const showPortadaCropper = ref(false);
 const cropperSrc         = ref(null);
 
-// ── Logo handlers ────────────────────────────────────────────────────────
+// -- Logo handlers --------------------------------------------------------
 const onLogoSelected = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -305,7 +305,7 @@ const eliminarLogo = () => {
 
 const restaurarLogo = () => { form.delete_logo = false; };
 
-// ── Portada handlers ─────────────────────────────────────────────────────
+// -- Portada handlers -----------------------------------------------------
 const onPortadaSelected = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -341,7 +341,7 @@ const eliminarPortada = () => {
 
 const restaurarPortada = () => { form.delete_imagen_portada = false; };
 
-// ── Submit ───────────────────────────────────────────────────────────────
+// -- Submit ---------------------------------------------------------------
 const submit = () => {
     form
         .transform((data) => ({ ...data, _method: 'put' }))

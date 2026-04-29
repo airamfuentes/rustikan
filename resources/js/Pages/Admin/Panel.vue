@@ -1,10 +1,9 @@
-﻿<template>
+<template>
     <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center justify-between">
-                <h2 class="text-xl font-semibold leading-tight text-gray-800">Panel de Administración</h2>
-                <div class="text-sm text-gray-600">
-                    {{ new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) }}
+                <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Panel de Administración</h2>
+                <div class="text-sm text-gray-600 dark:text-gray-400">{{ new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) }}
                 </div>
             </div>
         </template>
@@ -16,67 +15,67 @@
                 <!-- BOTONES DE GESTIÓN -->
                 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <!-- Gestionar Usuarios -->
-                    <Link :href="route('admin.usuarios.index')" class="group rounded-xl bg-white border-2 border-gray-200 p-6 shadow-sm transition-all hover:shadow-md hover:border-purple-400 hover:-translate-y-1">
+                    <Link :href="route('admin.usuarios.index')" class="group rounded-xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 p-6 shadow-sm transition-all hover:shadow-md hover:border-purple-400 hover:-translate-y-1">
                         <div class="mb-4 inline-flex rounded-lg bg-purple-100 p-3">
                             <svg class="h-8 w-8 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900">Usuarios</h3>
-                        <p class="mt-2 text-sm text-gray-600">Gestionar usuarios</p>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Usuarios</h3>
+                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Gestionar usuarios</p>
                     </Link>
 
                     <!-- Gestionar Tiendas -->
-                    <Link :href="route('admin.tiendas.index')" class="group rounded-xl bg-white border-2 border-gray-200 p-6 shadow-sm transition-all hover:shadow-md hover:border-blue-400 hover:-translate-y-1">
+                    <Link :href="route('admin.tiendas.index')" class="group rounded-xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 p-6 shadow-sm transition-all hover:shadow-md hover:border-blue-400 hover:-translate-y-1">
                         <div class="mb-4 inline-flex rounded-lg bg-blue-100 p-3">
                             <svg class="h-8 w-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900">Tiendas</h3>
-                        <p class="mt-2 text-sm text-gray-600">Gestionar tiendas</p>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Tiendas</h3>
+                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Gestionar tiendas</p>
                     </Link>
 
                     <!-- Gestionar Pedidos -->
-                    <Link :href="route('admin.pedidos.index')" class="group rounded-xl bg-white border-2 border-gray-200 p-6 shadow-sm transition-all hover:shadow-md hover:border-orange-400 hover:-translate-y-1">
+                    <Link :href="route('admin.pedidos.index')" class="group rounded-xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 p-6 shadow-sm transition-all hover:shadow-md hover:border-orange-400 hover:-translate-y-1">
                         <div class="mb-4 inline-flex rounded-lg bg-orange-100 p-3">
                             <svg class="h-8 w-8 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
                                 <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd" />
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900">Pedidos</h3>
-                        <p class="mt-2 text-sm text-gray-600">Gestionar pedidos</p>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Pedidos</h3>
+                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Gestionar pedidos</p>
                     </Link>
 
                     <!-- Solicitudes de cambio -->
-                    <Link :href="route('admin.solicitudes.index')" class="group relative rounded-xl bg-white border-2 border-gray-200 p-6 shadow-sm transition-all hover:shadow-md hover:border-yellow-400 hover:-translate-y-1">
+                    <Link :href="route('admin.solicitudes.index')" class="group relative rounded-xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 p-6 shadow-sm transition-all hover:shadow-md hover:border-yellow-400 hover:-translate-y-1">
                         <div class="mb-4 inline-flex rounded-lg bg-yellow-100 p-3">
                             <svg class="h-8 w-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900">Solicitudes</h3>
-                        <p class="mt-2 text-sm text-gray-600">Aprobar cambios de tiendas</p>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Solicitudes</h3>
+                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Aprobar cambios de tiendas</p>
                     </Link>
 
                     <!-- Gestionar Ingresos -->
-                    <Link :href="route('admin.ingresos.index')" class="group rounded-xl bg-white border-2 border-gray-200 p-6 shadow-sm transition-all hover:shadow-md hover:border-emerald-400 hover:-translate-y-1">
+                    <Link :href="route('admin.ingresos.index')" class="group rounded-xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 p-6 shadow-sm transition-all hover:shadow-md hover:border-emerald-400 hover:-translate-y-1">
                         <div class="mb-4 inline-flex rounded-lg bg-emerald-100 p-3">
                             <svg class="h-8 w-8 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900">Ingresos</h3>
-                        <p class="mt-2 text-sm text-gray-600">Ver estadísticas</p>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Ingresos</h3>
+                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Ver estadísticas</p>
                     </Link>
                 </div>
 
                 <!-- ACTIVIDAD RECIENTE -->
-                <div class="rounded-xl bg-white p-6 shadow-lg">
+                <div class="rounded-xl bg-white dark:bg-gray-800 p-6 shadow-lg">
                     <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-2xl font-bold text-gray-900">🕒 Actividad Reciente</h2>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2"><Clock class="h-5 w-5 text-gray-500" /> Actividad Reciente</h2>
                         <div class="flex gap-2">
                             <button @click="refrescarActividad" :disabled="cargandoActividad" class="rounded-lg bg-primary-600 px-4 py-2 text-white font-medium hover:bg-primary-700 transition-colors shadow disabled:opacity-50 disabled:cursor-not-allowed">
                                 <svg v-if="!cargandoActividad" class="h-5 w-5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -88,7 +87,7 @@
                                 </svg>
                                 Refrescar
                             </button>
-                            <button @click="mostrarActividad = !mostrarActividad" class="rounded-lg bg-gray-600 px-4 py-2 text-white font-medium hover:bg-gray-700 transition-colors shadow">
+                            <button @click="mostrarActividad = !mostrarActividad" class="rounded-lg bg-gray-600 dark:bg-gray-700 px-4 py-2 text-white font-medium hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors shadow">
                                 {{ mostrarActividad ? 'Ocultar' : 'Desplegar' }}
                             </button>
                         </div>
@@ -96,23 +95,23 @@
                     
                     <div v-if="mostrarActividad" class="space-y-4">
                         <!-- Filtros de fecha -->
-                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                            <h3 class="text-sm font-semibold text-gray-700 mb-3">Filtrar por Fecha</h3>
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Filtrar por Fecha</h3>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                                 <div>
-                                    <label class="block text-xs font-medium text-gray-600 mb-1">Desde</label>
+                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Desde</label>
                                     <input
                                         v-model="filtros.fecha_desde"
                                         type="date"
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm"
+                                        class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm"
                                     />
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-medium text-gray-600 mb-1">Hasta</label>
+                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Hasta</label>
                                     <input
                                         v-model="filtros.fecha_hasta"
                                         type="date"
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm"
+                                        class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm"
                                     />
                                 </div>
                                 <div class="flex items-end gap-2">
@@ -124,7 +123,7 @@
                                     </button>
                                     <button
                                         @click="limpiarFiltros"
-                                        class="flex-1 rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300 transition-colors"
+                                        class="flex-1 rounded-md bg-gray-200 dark:bg-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
                                     >
                                         Limpiar
                                     </button>
@@ -139,20 +138,20 @@
                                     <span class="text-2xl">{{ actividad.icono }}</span>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-gray-900">{{ actividad.descripcion }}</p>
+                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ actividad.descripcion }}</p>
                                     <div class="flex items-center gap-2 mt-1">
-                                        <p class="text-xs text-gray-600">{{ new Date(actividad.fecha).toLocaleString('es-ES') }}</p>
+                                        <p class="text-xs text-gray-600 dark:text-gray-400">{{ new Date(actividad.fecha).toLocaleString('es-ES') }}</p>
                                         <span v-if="actividad.usuario" class="text-xs text-gray-500">•</span>
-                                        <p v-if="actividad.usuario" class="text-xs text-gray-500">Por: {{ actividad.usuario }}</p>
+                                        <p v-if="actividad.usuario" class="text-xs text-gray-500 dark:text-gray-400">Por: {{ actividad.usuario }}</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div v-else class="text-center text-gray-500 py-8">
+                        <div v-else class="text-center text-gray-500 dark:text-gray-400 py-8">
                             No se encontraron actividades en el rango de fechas seleccionado
                         </div>
                     </div>
-                    <div v-else class="text-center text-gray-500 py-4">
+                    <div v-else class="text-center text-gray-500 dark:text-gray-400 py-4">
                         Haz clic en "Desplegar" para ver la actividad reciente
                     </div>
                 </div>
@@ -167,6 +166,7 @@
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref, reactive } from 'vue';
+import { Clock } from 'lucide-vue-next';
 
 const props = defineProps({
     usuarios_recientes: Array,

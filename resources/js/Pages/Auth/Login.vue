@@ -86,7 +86,7 @@ const submit = () => {
             <div class="mt-4 block">
                 <label class="flex items-center">
                     <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-tierra-700"
+                    <span class="ms-2 text-sm text-tierra-700 dark:text-tierra-300"
                         >Recuérdame</span
                     >
                 </label>
@@ -108,7 +108,7 @@ const submit = () => {
                 <Link
                     v-if="canResetPassword"
                     :href="route('password.request')"
-                    class="rounded-md text-sm text-tierra-600 underline hover:text-tierra-900 focus:outline-none focus:ring-2 focus:ring-tierra-500 focus:ring-offset-2"
+                    class="rounded-md text-sm text-tierra-600 dark:text-tierra-400 underline hover:text-tierra-900 dark:hover:text-tierra-200 focus:outline-none focus:ring-2 focus:ring-tierra-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
                 >
                     ¿Olvidaste tu contraseña?
                 </Link>
@@ -122,11 +122,11 @@ const submit = () => {
                 </PrimaryButton>
             </div>
 
-            <div class="mt-6 rounded-lg border border-tierra-200 bg-tierra-50 p-4 text-center">
-                <p class="text-sm text-tierra-700">¿Aún no tienes cuenta?</p>
+            <div class="mt-6 rounded-lg border border-tierra-200 dark:border-tierra-800 bg-tierra-50 dark:bg-tierra-900/10 p-4 text-center">
+                <p class="text-sm text-tierra-700 dark:text-tierra-300">¿Aún no tienes cuenta?</p>
                 <Link
                     :href="route('register')"
-                    class="mt-2 inline-flex items-center justify-center rounded-md border border-primary-500 px-4 py-2 text-sm font-medium text-primary-600 transition hover:bg-primary-50"
+                    class="mt-2 inline-flex items-center justify-center rounded-md border border-primary-500 dark:border-primary-600 px-4 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 transition hover:bg-primary-50 dark:hover:bg-primary-900/20"
                 >
                     Crear cuenta nueva
                 </Link>

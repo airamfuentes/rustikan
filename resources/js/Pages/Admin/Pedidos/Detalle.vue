@@ -3,10 +3,10 @@
         <template #header>
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <Link :href="route('admin.pedidos.index')" class="rounded-lg bg-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300">
-                        ← Volver
+                    <Link :href="route('admin.pedidos.index')" class="inline-flex items-center gap-1.5 rounded-lg bg-gray-200 dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600">
+                        <ArrowLeft class="h-4 w-4" /> Volver
                     </Link>
-                    <h2 class="text-xl font-semibold leading-tight text-gray-800">
+                    <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
                         Pedido #{{ pedido.id }}
                     </h2>
                 </div>
@@ -45,8 +45,8 @@
                                 </svg>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-semibold text-gray-900">{{ toast.title }}</p>
-                                <p v-if="toast.message" class="mt-0.5 text-sm text-gray-500">{{ toast.message }}</p>
+                                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ toast.title }}</p>
+                                <p v-if="toast.message" class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{{ toast.message }}</p>
                             </div>
                             <button @click="removeToast(toast.id)" class="ml-2 shrink-0 text-gray-400 hover:text-gray-600">
                                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -67,12 +67,12 @@
                     <div class="lg:col-span-2 space-y-6">
 
                         <!-- Productos -->
-                        <div class="overflow-hidden rounded-2xl bg-white shadow">
-                            <div class="border-b border-gray-100 px-6 py-4">
-                                <h3 class="font-semibold text-gray-900">Productos del pedido</h3>
+                        <div class="overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow">
+                            <div class="border-b border-gray-100 dark:border-gray-700 px-6 py-4">
+                                <h3 class="font-semibold text-gray-900 dark:text-white">Productos del pedido</h3>
                                 <p class="text-sm text-gray-500">{{ pedido.items.length }} artículo{{ pedido.items.length !== 1 ? 's' : '' }}</p>
                             </div>
-                            <div class="divide-y divide-gray-50">
+                            <div class="divide-y divide-gray-50 dark:divide-gray-700">
                                 <div
                                     v-for="item in pedido.items"
                                     :key="item.id"
@@ -84,28 +84,28 @@
                                         class="h-14 w-14 flex-shrink-0 rounded-xl object-cover border border-gray-100"
                                     />
                                     <div class="min-w-0 flex-1">
-                                        <p class="font-medium text-gray-900 truncate">{{ item.producto_nombre }}</p>
-                                        <p class="text-sm text-gray-500">{{ item.tienda_nombre }}</p>
+                                        <p class="font-medium text-gray-900 dark:text-white truncate">{{ item.producto_nombre }}</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ item.tienda_nombre }}</p>
                                         <p class="text-xs text-gray-400">{{ Number(item.precio_unitario).toFixed(2) }}€ × {{ item.cantidad }}</p>
                                     </div>
                                     <div class="shrink-0 text-right">
-                                        <p class="font-bold text-gray-900">{{ Number(item.subtotal).toFixed(2) }}€</p>
+                                        <p class="font-bold text-gray-900 dark:text-white">{{ Number(item.subtotal).toFixed(2) }}€</p>
                                     </div>
                                 </div>
                             </div>
                             <!-- Totales -->
-                            <div class="border-t border-gray-100 bg-gray-50 px-6 py-4 space-y-1.5">
-                                <div class="flex justify-between text-sm text-gray-600">
+                            <div class="border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 px-6 py-4 space-y-1.5">
+                                <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                                     <span>Subtotal</span>
                                     <span>{{ Number(pedido.subtotal).toFixed(2) }}€</span>
                                 </div>
-                                <div class="flex justify-between text-sm text-gray-600">
+                                <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                                     <span>Gastos de envío</span>
                                     <span :class="pedido.gastos_envio == 0 ? 'text-green-600 font-medium' : ''">
                                         {{ pedido.gastos_envio == 0 ? 'GRATIS' : Number(pedido.gastos_envio).toFixed(2) + '€' }}
                                     </span>
                                 </div>
-                                <div class="flex justify-between text-base font-bold text-gray-900 border-t border-gray-200 pt-2 mt-2">
+                                <div class="flex justify-between text-base font-bold text-gray-900 dark:text-white border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
                                     <span>Total</span>
                                     <span>{{ Number(pedido.total).toFixed(2) }}€</span>
                                 </div>
@@ -123,9 +123,9 @@
                     <div class="space-y-6">
 
                         <!-- Info del cliente -->
-                        <div class="rounded-2xl bg-white shadow overflow-hidden">
-                            <div class="border-b border-gray-100 px-6 py-4">
-                                <h3 class="font-semibold text-gray-900">Cliente</h3>
+                        <div class="rounded-2xl bg-white dark:bg-gray-800 shadow overflow-hidden">
+                            <div class="border-b border-gray-100 dark:border-gray-700 px-6 py-4">
+                                <h3 class="font-semibold text-gray-900 dark:text-white">Cliente</h3>
                             </div>
                             <div class="px-6 py-4 space-y-3">
                                 <div class="flex items-center gap-3">
@@ -133,17 +133,17 @@
                                         {{ pedido.user.name?.charAt(0)?.toUpperCase() }}
                                     </div>
                                     <div class="min-w-0">
-                                        <p class="font-medium text-gray-900 truncate">{{ pedido.user.name }}</p>
-                                        <p class="text-sm text-gray-500 truncate">{{ pedido.user.email }}</p>
+                                        <p class="font-medium text-gray-900 dark:text-white truncate">{{ pedido.user.name }}</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ pedido.user.email }}</p>
                                     </div>
                                 </div>
-                                <div v-if="pedido.telefono_contacto" class="flex items-center gap-2 text-sm text-gray-600">
+                                <div v-if="pedido.telefono_contacto" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                                     <svg class="h-4 w-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                                     </svg>
                                     {{ pedido.telefono_contacto }}
                                 </div>
-                                <div class="flex items-start gap-2 text-sm text-gray-600">
+                                <div class="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
                                     <svg class="h-4 w-4 text-gray-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -154,25 +154,25 @@
                         </div>
 
                         <!-- Info del pedido -->
-                        <div class="rounded-2xl bg-white shadow overflow-hidden">
-                            <div class="border-b border-gray-100 px-6 py-4">
-                                <h3 class="font-semibold text-gray-900">Detalles del pedido</h3>
+                        <div class="rounded-2xl bg-white dark:bg-gray-800 shadow overflow-hidden">
+                            <div class="border-b border-gray-100 dark:border-gray-700 px-6 py-4">
+                                <h3 class="font-semibold text-gray-900 dark:text-white">Detalles del pedido</h3>
                             </div>
                             <div class="px-6 py-4 space-y-2.5 text-sm">
                                 <div class="flex justify-between">
                                     <span class="text-gray-500">Nº pedido</span>
-                                    <span class="font-medium text-gray-900">{{ pedido.numero_pedido }}</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">{{ pedido.numero_pedido }}</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-gray-500">Fecha</span>
+                                    <span class="text-gray-500 dark:text-gray-400">Fecha</span>
                                     <span class="text-gray-900">{{ formatFecha(pedido.created_at) }}</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-gray-500">Hora</span>
+                                    <span class="text-gray-500 dark:text-gray-400">Hora</span>
                                     <span class="text-gray-900">{{ formatHora(pedido.created_at) }}</span>
                                 </div>
                                 <div class="flex justify-between items-center">
-                                    <span class="text-gray-500">Estado actual</span>
+                                    <span class="text-gray-500 dark:text-gray-400">Estado actual</span>
                                     <span :class="estadoBadgeClass(pedido.estado)" class="rounded-full px-2 py-0.5 text-xs font-semibold">
                                         {{ estadoLabel(pedido.estado) }}
                                     </span>
@@ -181,12 +181,12 @@
                         </div>
 
                         <!-- Cambiar estado -->
-                        <div class="rounded-2xl bg-white shadow overflow-hidden">
-                            <div class="border-b border-gray-100 px-6 py-4">
-                                <h3 class="font-semibold text-gray-900">Cambiar estado</h3>
+                        <div class="rounded-2xl bg-white dark:bg-gray-800 shadow overflow-hidden">
+                            <div class="border-b border-gray-100 dark:border-gray-700 px-6 py-4">
+                                <h3 class="font-semibold text-gray-900 dark:text-white">Cambiar estado</h3>
                             </div>
                             <div class="px-6 py-4 space-y-3">
-                                <p class="text-xs text-gray-500">Selecciona el nuevo estado del pedido</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Selecciona el nuevo estado del pedido</p>
                                 <div class="grid grid-cols-2 gap-2">
                                     <button
                                         v-for="estado in estadosDisponibles"
@@ -197,17 +197,19 @@
                                             'flex flex-col items-center gap-1 rounded-xl border-2 px-3 py-2.5 text-xs font-semibold transition-all',
                                             pedido.estado === estado.value
                                                 ? estado.activeClass + ' border-transparent cursor-default'
-                                                : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50 cursor-pointer',
+                                                : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer',
                                             procesando ? 'opacity-50 cursor-not-allowed' : ''
                                         ]"
                                     >
-                                        <span class="text-base">{{ estado.icon }}</span>
+                                        <Clock v-if="estado.value === 'pendiente'" class="h-4 w-4" />
+                                        <RefreshCw v-else-if="estado.value === 'en_proceso'" class="h-4 w-4" />
+                                        <CheckCircle v-else-if="estado.value === 'completado'" class="h-4 w-4" />
+                                        <XCircle v-else-if="estado.value === 'cancelado'" class="h-4 w-4" />
                                         <span>{{ estado.label }}</span>
-                                        <span v-if="pedido.estado === estado.value" class="text-[10px] opacity-70">← Actual</span>
+                                        <span v-if="pedido.estado === estado.value" class="text-[10px] opacity-70">Actual</span>
                                     </button>
                                 </div>
-                                <div v-if="procesando" class="flex items-center gap-2 text-sm text-gray-500">
-                                    <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <div v-if="procesando" class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400"><svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
                                     </svg>
@@ -227,6 +229,7 @@
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
+import { ArrowLeft, Clock, RefreshCw, CheckCircle, XCircle } from 'lucide-vue-next';
 
 const props = defineProps({
     pedido: { type: Object, required: true },
@@ -261,10 +264,10 @@ watch(
 const procesando = ref(false);
 
 const estadosDisponibles = [
-    { value: 'pendiente',   label: 'Pendiente',   icon: '⏳', activeClass: 'bg-yellow-100 text-yellow-800 border-yellow-300' },
-    { value: 'en_proceso',  label: 'En proceso',  icon: '🔄', activeClass: 'bg-blue-100 text-blue-800 border-blue-300' },
-    { value: 'completado',  label: 'Completado',  icon: '✅', activeClass: 'bg-green-100 text-green-800 border-green-300' },
-    { value: 'cancelado',   label: 'Cancelado',   icon: '❌', activeClass: 'bg-red-100 text-red-800 border-red-300' },
+    { value: 'pendiente',   label: 'Pendiente',   activeClass: 'bg-yellow-100 text-yellow-800 border-yellow-300' },
+    { value: 'en_proceso',  label: 'En proceso',  activeClass: 'bg-blue-100 text-blue-800 border-blue-300' },
+    { value: 'completado',  label: 'Completado',  activeClass: 'bg-green-100 text-green-800 border-green-300' },
+    { value: 'cancelado',   label: 'Cancelado',   activeClass: 'bg-red-100 text-red-800 border-red-300' },
 ];
 
 const estadoBadgeClass = (estado) => {

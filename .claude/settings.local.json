@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(file c:/laragon/www/rustikan/resources/js/Pages/Profile/Editar.vue c:/laragon/www/rustikan/resources/js/Pages/Profile/Partials/*.vue)"
+    ]
+  }
+}
