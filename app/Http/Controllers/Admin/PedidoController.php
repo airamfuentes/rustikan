@@ -29,7 +29,11 @@ class PedidoController extends Controller
 
         // Filtro por estado
         if ($request->filled('estado')) {
-            $query->where('estado', $request->estado);
+            if ($request->estado === 'en_proceso') {
+                $query->whereIn('estado', ['confirmado', 'preparando', 'en_camino']);
+            } else {
+                $query->where('estado', $request->estado);
+            }
         }
 
         // Filtro por rango de fecha
@@ -52,12 +56,12 @@ class PedidoController extends Controller
 
         // Estadísticas
         $stats = [
-            'total' => Pedido::count(),
-            'pendientes' => Pedido::where('estado', 'pendiente')->count(),
-            'en_proceso' => Pedido::where('estado', 'en_proceso')->count(),
-            'completados' => Pedido::where('estado', 'completado')->count(),
-            'cancelados' => Pedido::where('estado', 'cancelado')->count(),
-            'ingresos_totales' => Pedido::where('estado', 'completado')->sum('total'),
+            'total'          => Pedido::count(),
+            'pendientes'     => Pedido::where('estado', 'pendiente')->count(),
+            'en_proceso'     => Pedido::whereIn('estado', ['confirmado', 'preparando', 'en_camino'])->count(),
+            'completados'    => Pedido::where('estado', 'entregado')->count(),
+            'cancelados'     => Pedido::where('estado', 'cancelado')->count(),
+            'ingresos_totales' => Pedido::where('estado', 'entregado')->sum('total'),
         ];
 
         return Inertia::render('Admin/Pedidos/Index', [
@@ -79,7 +83,7 @@ class PedidoController extends Controller
     public function update(Request $request, Pedido $pedido)
     {
         $validated = $request->validate([
-            'estado' => 'required|in:pendiente,en_proceso,completado,cancelado',
+            'estado' => 'required|in:pendiente,confirmado,preparando,en_camino,entregado,cancelado',
         ]);
 
         $estadoAnterior = $pedido->estado;
@@ -87,23 +91,27 @@ class PedidoController extends Controller
 
         // Registrar actividad
         $iconos = [
-            'pendiente' => '⌛',
-            'en_proceso' => '🚚',
-            'completado' => '✅',
-            'cancelado' => '❌',
+            'pendiente'  => 'pendiente',
+            'confirmado' => 'confirmado',
+            'preparando' => 'preparando',
+            'en_camino'  => 'en_camino',
+            'entregado'  => 'entregado',
+            'cancelado'  => 'cancelado',
         ];
-        
+
         $colores = [
-            'pendiente' => 'yellow',
-            'en_proceso' => 'blue',
-            'completado' => 'green',
-            'cancelado' => 'red',
+            'pendiente'  => 'yellow',
+            'confirmado' => 'blue',
+            'preparando' => 'orange',
+            'en_camino'  => 'purple',
+            'entregado'  => 'green',
+            'cancelado'  => 'red',
         ];
         
         ActivityLog::log(
             'cambiar_estado_pedido',
             "Pedido #{$pedido->id} cambió de {$estadoAnterior} a {$validated['estado']}",
-            $iconos[$validated['estado']] ?? '📋',
+            $iconos[$validated['estado']] ?? 'editar',
             $colores[$validated['estado']] ?? 'gray',
             $pedido,
             ['estado_anterior' => $estadoAnterior, 'estado_nuevo' => $validated['estado']]

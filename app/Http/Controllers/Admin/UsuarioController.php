@@ -86,11 +86,11 @@ class UsuarioController extends Controller
     public function update(Request $request, User $usuario)
     {
         $validated = $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email,' . $usuario->id,
-            'role'     => 'required|in:user,admin,owner',
-            'password' => 'nullable|confirmed|min:8',
-            'avatar'   => 'nullable|image|max:2048',
+            'name'      => 'required|string|max:255',
+            'email'     => 'required|email|unique:users,email,' . $usuario->id,
+            'role'      => 'required|in:user,admin,owner',
+            'password'  => 'nullable|confirmed|min:8',
+            'avatar'    => 'nullable|image|max:2048',
         ]);
 
         // Guardar valores anteriores antes de actualizar
@@ -127,13 +127,13 @@ class UsuarioController extends Controller
         if ($request->filled('password')) {
             $cambios[] = "contraseña actualizada";
         }
-        
+
         $descripcionCambios = !empty($cambios) ? ' (' . implode(', ', $cambios) . ')' : '';
-        
+
         ActivityLog::log(
             'actualizar_usuario',
             "Usuario actualizado: {$usuario->name}{$descripcionCambios}",
-            '✏️',
+            'editar',
             'yellow',
             $usuario
         );
@@ -150,7 +150,7 @@ class UsuarioController extends Controller
         ActivityLog::log(
             'eliminar_usuario',
             "Usuario eliminado: {$nombre}",
-            '🗑️',
+            'eliminar',
             'red'
         );
 

@@ -97,10 +97,10 @@
                             </div>
 
                             <!-- Cambiar Contraseña (Opcional) -->
-                            <div class="rounded-lg border-2 border-dashed border-gray-300 p-4">
+                            <div class="rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 p-4">
                                 <h3 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Cambiar Contraseña (Opcional)</h3>
                                 <p class="mb-4 text-xs text-gray-500">Deja estos campos vacíos si no deseas cambiar la contraseña.</p>
-                                
+
                                 <div class="space-y-4">
                                     <div>
                                         <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Nueva Contraseña</label>
@@ -130,12 +130,12 @@
                                 <h3 class="mb-2 text-sm font-semibold text-blue-900 dark:text-blue-300">Estadísticas</h3>
                                 <div class="grid grid-cols-2 gap-4 text-sm">
                                     <div>
-                                        <p class="text-blue-600">Total de Pedidos</p>
-                                        <p class="text-lg font-bold text-blue-900">{{ usuario.pedidos_count || 0 }}</p>
+                                        <p class="text-blue-600 dark:text-blue-400">Total de Pedidos</p>
+                                        <p class="text-lg font-bold text-blue-900 dark:text-blue-200">{{ usuario.pedidos_count || 0 }}</p>
                                     </div>
                                     <div>
-                                        <p class="text-blue-600">Total Gastado</p>
-                                        <p class="text-lg font-bold text-blue-900">{{ Number(usuario.pedidos_sum || 0).toFixed(2) }}€</p>
+                                        <p class="text-blue-600 dark:text-blue-400">Total Gastado</p>
+                                        <p class="text-lg font-bold text-blue-900 dark:text-blue-200">{{ Number(usuario.pedidos_sum || 0).toFixed(2) }}€</p>
                                     </div>
                                 </div>
                             </div>
@@ -185,6 +185,7 @@ const form = useForm({
     delete_avatar: false,
 });
 
+// ── Avatar ────────────────────────────────────────────────────────────────
 const onAvatarChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;

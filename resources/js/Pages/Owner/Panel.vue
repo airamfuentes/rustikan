@@ -353,7 +353,7 @@ const submitDeleteProducto = (producto) => {
     <AuthenticatedLayout>
         <!-- Toasts -->
         <div class="pointer-events-none fixed inset-0 z-[60] flex flex-col items-end justify-start space-y-4 p-6">
-            <Toast v-for="t in toasts" :key="t.id" :type="t.type" :title="t.title" :message="t.message" @close="toasts = toasts.filter(x => x.id !== t.id)" />
+            <Toast v-for="(t, index) in toasts" :key="t.id" :type="t.type" :title="t.title" :message="t.message" :active="index === 0" @close="toasts = toasts.filter(x => x.id !== t.id)" />
         </div>
 
         <div class="py-8">
@@ -698,6 +698,7 @@ const submitDeleteProducto = (producto) => {
                                         <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Importe</th>
                                         <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Artículos</th>
                                         <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Fecha</th>
+                                        <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500"></th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
@@ -713,6 +714,11 @@ const submitDeleteProducto = (producto) => {
                                         <td class="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white">{{ Number(p.total_tienda).toFixed(2) }}€</td>
                                         <td class="px-6 py-4 text-sm text-gray-500">{{ p.items_count }} art.</td>
                                         <td class="px-6 py-4 text-xs text-gray-400">{{ p.created_at }}</td>
+                                        <td class="px-6 py-4 text-right">
+                                            <Link :href="route('owner.pedido.show', p.id)" class="text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300">
+                                                Ver detalle →
+                                            </Link>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>

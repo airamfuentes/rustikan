@@ -16,7 +16,7 @@ class VerifyEmailController extends Controller
     {
         if ($request->user()->hasVerifiedEmail()) {
             return redirect()->route('home')
-                ->with('success', '¡Tu correo ya estaba verificado! Bienvenido/a de nuevo a Rustikan 🌿');
+                ->with('success', '¡Tu correo ya estaba verificado! Bienvenido/a de nuevo a Rustikan.');
         }
 
         if ($request->user()->markEmailAsVerified()) {
@@ -26,6 +26,6 @@ class VerifyEmailController extends Controller
         $nombre = $request->user()->name;
 
         return redirect()->route('home')
-            ->with('success', "¡Cuenta verificada, {$nombre}! Bienvenido/a a Rustikan 🌿 Ya puedes explorar y comprar productos locales.");
+            ->with('success', "¡Cuenta verificada, {$nombre}! Bienvenido/a a Rustikan. Ya puedes explorar y comprar productos locales.");
     }
 }

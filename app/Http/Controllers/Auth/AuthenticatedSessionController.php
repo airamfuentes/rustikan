@@ -47,7 +47,7 @@ class AuthenticatedSessionController extends Controller
         }
 
         return redirect()->route('home')
-            ->with('success', "¡Hola de nuevo, {$nombre}! Nos alegra verte por aquí 🌿");
+            ->with('success', "¡Hola de nuevo, {$nombre}! Nos alegra verte por aquí.");
     }
 
     /**

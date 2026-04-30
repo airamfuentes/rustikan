@@ -9,7 +9,7 @@
     >
         <div
             v-if="show"
-            class="pointer-events-auto fixed right-0 top-20 z-50 mx-4 w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 sm:mx-6"
+            class="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black/5 dark:ring-white/10"
         >
             <div class="p-4">
                 <div class="flex items-start">
@@ -76,17 +76,17 @@
                         </svg>
                     </div>
                     <div class="ml-3 w-0 flex-1 pt-0.5">
-                        <p class="text-sm font-medium text-gray-900">
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">
                             {{ title }}
                         </p>
-                        <p v-if="message" class="mt-1 text-sm text-gray-500">
+                        <p v-if="message" class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                             {{ message }}
                         </p>
                     </div>
                     <div class="ml-4 flex shrink-0">
                         <button
                             @click="close"
-                            class="inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                            class="inline-flex rounded-md bg-white dark:bg-gray-800 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                         >
                             <span class="sr-only">Cerrar</span>
                             <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -101,7 +101,7 @@
                 </div>
             </div>
             <!-- Progress Bar -->
-            <div class="h-1 w-full bg-gray-200">
+            <div class="h-1 w-full bg-gray-200 dark:bg-gray-700">
                 <div
                     class="h-full transition-all duration-100 ease-linear"
                     :class="{
@@ -118,7 +118,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, onUnmounted } from 'vue';
 
 const props = defineProps({
     type: {
@@ -138,6 +138,12 @@ const props = defineProps({
         type: Number,
         default: 5000,
     },
+    // Si es false, el toast se monta visualmente pero no arranca su timer.
+    // Esto permite encolarlos: el contenedor activa uno cada vez.
+    active: {
+        type: Boolean,
+        default: true,
+    },
 });
 
 const emit = defineEmits(['close']);
@@ -147,42 +153,39 @@ const progress = ref(100);
 let timer = null;
 let progressInterval = null;
 
+const clearTimers = () => {
+    if (timer) { clearTimeout(timer); timer = null; }
+    if (progressInterval) { clearInterval(progressInterval); progressInterval = null; }
+};
+
 const close = () => {
     show.value = false;
-    if (timer) clearTimeout(timer);
-    if (progressInterval) clearInterval(progressInterval);
-    setTimeout(() => {
-        emit('close');
-    }, 300);
+    clearTimers();
+    setTimeout(() => emit('close'), 300);
 };
 
 const startTimer = () => {
+    clearTimers();
     show.value = true;
     progress.value = 100;
 
-    // Iniciar barra de progreso
     const steps = props.duration / 100;
     progressInterval = setInterval(() => {
         progress.value -= 100 / (props.duration / 100);
-        if (progress.value <= 0) {
-            clearInterval(progressInterval);
-        }
+        if (progress.value <= 0) clearInterval(progressInterval);
     }, steps);
 
-    // Auto-cerrar después de la duración
-    timer = setTimeout(() => {
-        close();
-    }, props.duration);
+    timer = setTimeout(close, props.duration);
 };
 
 onMounted(() => {
-    startTimer();
+    if (props.active) startTimer();
 });
 
-// Reiniciar timer si cambia el título
-watch(() => props.title, () => {
-    if (timer) clearTimeout(timer);
-    if (progressInterval) clearInterval(progressInterval);
-    startTimer();
+onUnmounted(clearTimers);
+
+// Cuando el contenedor "activa" este toast (le toca su turno), arranca el timer.
+watch(() => props.active, (val) => {
+    if (val && !timer) startTimer();
 });
 </script>

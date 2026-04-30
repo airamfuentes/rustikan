@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Mail\PedidoConfirmado;
 use App\Models\Pedido;
+use App\Models\PedidoItem;
 use App\Models\Producto;
+use App\Models\Resena;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -130,22 +132,33 @@ class PedidoController extends Controller
 
         $pedidosActivos = Pedido::where('user_id', $userId)
             ->whereIn('estado', ['pendiente', 'confirmado', 'preparando', 'en_camino'])
-            ->with('items')
+            ->with(['items.tienda:id,nombre,slug'])
             ->withCount('items')
             ->orderBy('created_at', 'desc')
             ->get();
 
         $pedidosHistorial = Pedido::where('user_id', $userId)
             ->whereIn('estado', ['entregado', 'cancelado'])
-            ->with('items')
+            ->with(['items.tienda:id,nombre,slug'])
             ->withCount('items')
             ->orderBy('created_at', 'desc')
             ->paginate(10)
             ->withQueryString();
 
+        $tiendaIdsDelivered = PedidoItem::whereHas('pedido', fn($q) =>
+            $q->where('user_id', $userId)->where('estado', 'entregado')
+        )->pluck('tienda_id')->unique();
+
+        $yaReseniados = Resena::where('user_id', $userId)
+            ->whereIn('tienda_id', $tiendaIdsDelivered)
+            ->pluck('tienda_id');
+
+        $reviewableStoreIds = $tiendaIdsDelivered->diff($yaReseniados)->values();
+
         return Inertia::render('MisPedidos', [
-            'pedidosActivos'   => $pedidosActivos,
-            'pedidosHistorial' => $pedidosHistorial,
+            'pedidosActivos'    => $pedidosActivos,
+            'pedidosHistorial'  => $pedidosHistorial,
+            'reviewableStoreIds'=> $reviewableStoreIds,
         ]);
     }
 }

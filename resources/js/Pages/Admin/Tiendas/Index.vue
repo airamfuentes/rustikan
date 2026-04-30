@@ -58,7 +58,7 @@
                             >
                                 <option value="">Todas</option>
                                 <option v-for="categoria in categorias" :key="categoria.id" :value="categoria.id">
-                                    {{ categoria.icono }} {{ categoria.nombre }}
+                                    {{ categoria.nombre }}
                                 </option>
                             </select>
                         </div>
@@ -130,8 +130,9 @@
                                             </div>
                                         </td>
                                         <td class="whitespace-nowrap px-6 py-4">
-                                            <span class="inline-flex rounded-full bg-gray-100 px-2 text-xs font-semibold leading-5 text-gray-800">
-                                                {{ tienda.categoria.icono }} {{ tienda.categoria.nombre }}
+                                            <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-xs font-semibold leading-5 text-gray-800 dark:text-gray-200">
+                                                <CategoriaIcono :slug="tienda.categoria.slug" :icono="tienda.categoria.icono" class="h-3 w-3" />
+                                                {{ tienda.categoria.nombre }}
                                             </span>
                                         </td>
                                         <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
@@ -258,6 +259,7 @@ import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { reactive } from 'vue';
 import { ArrowLeft, Eye, EyeOff, Star } from 'lucide-vue-next';
+import CategoriaIcono from '@/Components/CategoriaIcono.vue';
 
 const props = defineProps({
     tiendas: Object,

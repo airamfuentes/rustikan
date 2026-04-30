@@ -31,22 +31,10 @@
                                     <select v-model="form.categoria_id" required class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500">
                                         <option value="">Selecciona una categoría</option>
                                         <option v-for="categoria in categorias" :key="categoria.id" :value="categoria.id">
-                                            {{ categoria.icono }} {{ categoria.nombre }}
+                                            {{ categoria.nombre }}
                                         </option>
                                     </select>
                                     <p v-if="form.errors.categoria_id" class="mt-1 text-sm text-red-600">{{ form.errors.categoria_id }}</p>
-                                </div>
-
-                                <!-- Propietario -->
-                                <div>
-                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Propietario *</label>
-                                    <select v-model="form.user_id" required class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                        <option value="">Selecciona un usuario</option>
-                                        <option v-for="usuario in usuarios" :key="usuario.id" :value="usuario.id">
-                                            {{ usuario.name }} ({{ usuario.email }})
-                                        </option>
-                                    </select>
-                                    <p v-if="form.errors.user_id" class="mt-1 text-sm text-red-600">{{ form.errors.user_id }}</p>
                                 </div>
 
                                 <!-- Descripción -->
@@ -91,6 +79,83 @@
                                         </div>
                                     </div>
                                     <p class="mt-1 text-xs text-gray-400">Puedes obtenerlas desde Google Maps (clic derecho ? coordenadas)</p>
+                                </div>
+
+                                <!-- Propietario -->
+                                <div class="rounded-lg border border-primary-200 dark:border-primary-800 bg-primary-50 dark:bg-primary-900/10 p-4">
+                                    <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold text-primary-900 dark:text-primary-300">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                        </svg>
+                                        Propietario
+                                    </h3>
+
+                                    <!-- Usuario seleccionado -->
+                                    <div v-if="usuarioSeleccionado" class="mb-3 flex items-center justify-between rounded-xl bg-white dark:bg-gray-700 border border-primary-200 dark:border-primary-700 px-4 py-3">
+                                        <div class="flex items-center gap-3">
+                                            <img v-if="usuarioSeleccionado.avatar" :src="'/storage/' + usuarioSeleccionado.avatar" class="h-9 w-9 rounded-full object-cover" alt="" />
+                                            <div v-else class="flex h-9 w-9 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 font-bold text-sm">
+                                                {{ usuarioSeleccionado.name.charAt(0).toUpperCase() }}
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ usuarioSeleccionado.name }}</p>
+                                                <p class="text-xs text-gray-400">{{ usuarioSeleccionado.email }}</p>
+                                            </div>
+                                        </div>
+                                        <button type="button" @click="form.user_id = null"
+                                                class="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 transition-colors">
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <p v-else class="mb-3 text-xs text-gray-500 dark:text-gray-400 italic">Sin propietario asignado</p>
+
+                                    <!-- Buscador de usuarios -->
+                                    <div class="relative">
+                                        <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/>
+                                        </svg>
+                                        <input
+                                            v-model="busquedaUsuario"
+                                            type="text"
+                                            placeholder="Buscar usuario por nombre o email..."
+                                            class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 pl-9 pr-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400"
+                                        />
+                                    </div>
+
+                                    <!-- Lista de usuarios filtrados -->
+                                    <div v-if="busquedaUsuario.trim()" class="mt-2 max-h-52 overflow-y-auto rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 divide-y divide-gray-100 dark:divide-gray-600">
+                                        <div v-if="usuariosFiltrados.length === 0" class="px-4 py-3 text-sm text-gray-400 text-center">
+                                            Sin resultados
+                                        </div>
+                                        <button
+                                            v-for="u in usuariosFiltrados"
+                                            :key="u.id"
+                                            type="button"
+                                            @click="seleccionarUsuario(u)"
+                                            :class="['w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors',
+                                                form.user_id === u.id ? 'bg-primary-50 dark:bg-primary-900/20' : '']"
+                                        >
+                                            <img v-if="u.avatar" :src="'/storage/' + u.avatar" class="h-7 w-7 rounded-full object-cover flex-shrink-0" alt="" />
+                                            <div v-else class="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-600 text-gray-500 text-xs font-bold flex-shrink-0">
+                                                {{ u.name.charAt(0).toUpperCase() }}
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ u.name }}</p>
+                                                <p class="text-xs text-gray-400 truncate">{{ u.email }}</p>
+                                            </div>
+                                            <span :class="['text-xs px-1.5 py-0.5 rounded font-medium flex-shrink-0',
+                                                u.role === 'admin' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
+                                                u.role === 'owner' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' :
+                                                'bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-300']">
+                                                {{ u.role }}
+                                            </span>
+                                            <svg v-if="form.user_id === u.id" class="h-4 w-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -193,17 +258,17 @@
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import ImageCropper from '@/Components/ImageCropper.vue';
 import { Link, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 const props = defineProps({
     categorias: Array,
-    usuarios: Array,
+    usuarios: { type: Array, default: () => [] },
 });
 
 const form = useForm({
+    user_id: null,
     nombre: '',
     categoria_id: '',
-    user_id: '',
     descripcion: '',
     telefono: '',
     email: '',
@@ -213,6 +278,26 @@ const form = useForm({
     logo: null,
     imagen_portada: null,
 });
+
+// ── Buscador de usuarios ──────────────────────────────────────────────────
+const busquedaUsuario = ref('');
+
+const usuariosFiltrados = computed(() => {
+    const q = busquedaUsuario.value.trim().toLowerCase();
+    if (!q) return [];
+    return props.usuarios
+        .filter(u => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q))
+        .slice(0, 8);
+});
+
+const usuarioSeleccionado = computed(() =>
+    form.user_id ? props.usuarios.find(u => u.id === form.user_id) ?? null : null
+);
+
+const seleccionarUsuario = (u) => {
+    form.user_id = u.id;
+    busquedaUsuario.value = '';
+};
 
 const logoPreview    = ref(null);
 const portadaPreview = ref(null);

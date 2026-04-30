@@ -101,7 +101,7 @@ class ProductoController extends Controller
         ActivityLog::log(
             'nuevo_producto',
             "Nuevo producto creado: {$producto->nombre} en {$producto->tienda->nombre}",
-            '📦',
+            'producto',
             'purple',
             $producto
         );
@@ -169,7 +169,7 @@ class ProductoController extends Controller
         ActivityLog::log(
             'actualizar_producto',
             "Producto actualizado: {$producto->nombre}{$descripcionCambios}",
-            '✏️',
+            'editar',
             'yellow',
             $producto,
             $validated
@@ -191,7 +191,7 @@ class ProductoController extends Controller
         ActivityLog::log(
             'eliminar_producto',
             "Producto eliminado: {$nombre}",
-            '🗑️',
+            'eliminar',
             'red'
         );
 
@@ -214,7 +214,7 @@ class ProductoController extends Controller
         ActivityLog::log(
             'actualizar_stock',
             "Stock actualizado: {$producto->nombre} ahora tiene {$validated['stock']} unidades",
-            '📊',
+            'stock',
             'blue',
             $producto,
             $validated
@@ -235,7 +235,7 @@ class ProductoController extends Controller
             $producto->oferta_activa
                 ? "Oferta activada: {$producto->nombre} ({$producto->precio_oferta}€)"
                 : "Oferta desactivada: {$producto->nombre}",
-            '🏷️',
+            'oferta',
             'amber',
             $producto
         );

@@ -1,6 +1,7 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import CategoriaIcono from '@/Components/CategoriaIcono.vue';
 
 const props = defineProps({
     tienda: {
@@ -42,8 +43,8 @@ const ondaPath = computed(() => {
             />
             
             <!-- Badge Categoría -->
-            <div class="absolute left-3 top-3 z-20 flex items-center gap-1 rounded-full bg-primary-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
-                <span>{{ tienda.categoria.icono }}</span>
+            <div class="absolute left-3 top-3 z-20 flex items-center gap-1.5 rounded-full bg-primary-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
+                <CategoriaIcono :slug="tienda.categoria.slug" :icono="tienda.categoria.icono" class="h-3.5 w-3.5" />
                 <span>{{ tienda.categoria.nombre }}</span>
             </div>
 

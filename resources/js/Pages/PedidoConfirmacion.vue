@@ -1,9 +1,22 @@
 <script setup>
+import { onMounted } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
+import confetti from 'canvas-confetti';
 
 const props = defineProps({
     pedido: { type: Object, required: true },
+});
+
+onMounted(() => {
+    if (props.pedido.estado !== 'cancelado') {
+        confetti({
+            particleCount: 120,
+            spread: 70,
+            origin: { y: 0.55 },
+            colors: ['#7c3aed', '#10b981', '#f59e0b', '#3b82f6', '#ec4899'],
+        });
+    }
 });
 
 const estadoLabels = {

@@ -58,15 +58,17 @@
                         <!-- Filtro por Estado -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estado</label>
-                            <select 
+                            <select
                                 v-model="form.estado"
                                 @change="buscar"
                                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                             >
                                 <option value="">Todos</option>
                                 <option value="pendiente">Pendiente</option>
-                                <option value="en_proceso">En Proceso</option>
-                                <option value="completado">Completado</option>
+                                <option value="confirmado">Confirmado</option>
+                                <option value="preparando">Preparando</option>
+                                <option value="en_camino">En camino</option>
+                                <option value="entregado">Entregado</option>
                                 <option value="cancelado">Cancelado</option>
                             </select>
                         </div>
@@ -146,29 +148,33 @@
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
                             <tr v-for="pedido in pedidos.data" :key="pedido.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                                <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">#{{ pedido.id }}</td>
+                                <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
+                                    {{ pedido.numero_pedido ?? '#' + pedido.id }}
+                                </td>
                                 <td class="whitespace-nowrap px-6 py-4">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ pedido.user.name }}</div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ pedido.user.email }}</div>
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ pedido.user?.name ?? '—' }}</div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ pedido.user?.email ?? '' }}</div>
                                 </td>
                                 <td class="whitespace-nowrap px-6 py-4">
                                     <span :class="{
-                                        'bg-yellow-100 text-yellow-800': pedido.estado === 'pendiente',
-                                        'bg-blue-100 text-blue-800': pedido.estado === 'en_proceso',
-                                        'bg-green-100 text-green-800': pedido.estado === 'completado',
-                                        'bg-red-100 text-red-800': pedido.estado === 'cancelado'
-                                    }" class="inline-flex rounded-full px-2 py-1 text-xs font-semibold">
-                                        {{ pedido.estado }}
+                                        'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300': pedido.estado === 'pendiente',
+                                        'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300': pedido.estado === 'confirmado',
+                                        'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300': pedido.estado === 'preparando',
+                                        'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300': pedido.estado === 'en_camino',
+                                        'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300': pedido.estado === 'entregado',
+                                        'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300': pedido.estado === 'cancelado',
+                                    }" class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize">
+                                        {{ pedido.estado.replace('_', ' ') }}
                                     </span>
                                 </td>
-                                <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-white">{{ pedido.items.length }}</td>
-                                <td class="whitespace-nowrap px-6 py-4 text-sm font-bold text-gray-900 dark:text-white">{{ Number(pedido.total).toFixed(2) }}€</td>
+                                <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-white">{{ pedido.items?.length ?? 0 }}</td>
+                                <td class="whitespace-nowrap px-6 py-4 text-sm font-bold text-gray-900 dark:text-white">{{ Number(pedido.total ?? 0).toFixed(2) }}€</td>
                                 <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ new Date(pedido.created_at).toLocaleDateString('es-ES') }}
                                     <br>
                                     <span class="text-xs">{{ new Date(pedido.created_at).toLocaleTimeString('es-ES') }}</span>
                                 </td>
                                 <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                                    <Link :href="route('admin.pedidos.show', pedido.id)" class="text-primary-600 hover:text-primary-900">
+                                    <Link :href="route('admin.pedidos.show', pedido.id)" class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
                                         Ver detalles
                                     </Link>
                                 </td>

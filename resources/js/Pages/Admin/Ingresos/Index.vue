@@ -109,13 +109,13 @@
                             </thead>
                             <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
                                 <tr v-for="mes in ingresos_mensuales" :key="mes.mes">
-                                    <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
+                                    <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
                                         {{ formatMes(mes.mes) }}
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
+                                    <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500 dark:text-gray-400">
                                         {{ mes.cantidad }}
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-semibold text-gray-900">
+                                    <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-semibold text-gray-900 dark:text-gray-100">
                                         {{ formatPrice(mes.total) }}€
                                     </td>
                                     <td class="px-6 py-4">
@@ -134,7 +134,7 @@
                     <div class="rounded-lg bg-white dark:bg-gray-800 p-6 shadow">
                         <h3 class="mb-4 text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2"><Store class="h-5 w-5 text-gray-500" /> Top 10 Tiendas por Ingresos</h3>
                         <div class="space-y-3">
-                            <div v-for="(tienda, index) in ingresos_por_tienda" :key="tienda.id" class="flex items-center gap-3 rounded-lg border p-3">
+                            <div v-for="(tienda, index) in ingresos_por_tienda" :key="tienda.id" class="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 p-3">
                                 <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-600 text-white font-bold text-sm">
                                     {{ index + 1 }}
                                 </div>
@@ -170,7 +170,7 @@
                                     <div class="h-4 w-full rounded-full bg-gray-200 dark:bg-gray-700">
                                         <div class="h-4 rounded-full bg-gradient-to-r from-green-400 to-green-600" :style="{ width: calcularPorcentajeCategoria(categoria.total_ingresos) }"></div>
                                     </div>
-                                    <span class="text-sm text-gray-500 whitespace-nowrap">{{ categoria.total_pedidos }} pedidos</span>
+                                    <span class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ categoria.total_pedidos }} pedidos</span>
                                 </div>
                             </div>
                         </div>
@@ -178,7 +178,7 @@
                 </div>
 
                 <!-- Productos Más Vendidos -->
-                <div class="mt-6 rounded-lg bg-white p-6 shadow">
+                <div class="mt-6 rounded-lg bg-white dark:bg-gray-800 p-6 shadow">
                     <h3 class="mb-4 text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2"><Star class="h-5 w-5 text-yellow-400 fill-yellow-400" /> Top 10 Productos Más Vendidos</h3>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -206,12 +206,12 @@
                                             <span class="text-sm font-medium text-gray-900 dark:text-white">{{ producto.nombre }}</span>
                                         </div>
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-900">
+                                    <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
                                         <span class="inline-flex rounded-full bg-blue-100 dark:bg-blue-900/30 px-3 py-1 text-sm font-semibold text-blue-800 dark:text-blue-300">
                                             {{ producto.total_vendido }} unidades
                                         </span>
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-bold text-green-600">
+                                    <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-bold text-green-600 dark:text-green-400">
                                         {{ formatPrice(producto.total_ingresos) }}€
                                     </td>
                                 </tr>

@@ -68,7 +68,7 @@ watch(
             }
         }
     },
-    { deep: true, immediate: true }
+    { deep: true }
 );
 </script>
 
@@ -77,11 +77,12 @@ watch(
         <!-- Toast Notifications -->
         <div class="pointer-events-none fixed inset-0 z-50 flex flex-col items-end justify-start space-y-4 p-6 sm:p-6">
             <Toast
-                v-for="toast in toasts"
+                v-for="(toast, index) in toasts"
                 :key="toast.id"
                 :type="toast.type"
                 :title="toast.title"
                 :message="toast.message"
+                :active="index === 0"
                 @close="removeToast(toast.id)"
             />
         </div>

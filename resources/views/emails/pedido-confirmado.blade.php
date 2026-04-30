@@ -37,7 +37,7 @@
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;">
         <tr>
             <td style="background:#FDF6EE;border-radius:12px 12px 0 0;padding:12px 20px;border:1px solid #F3CFA3;border-bottom:none;">
-                <p style="margin:0;font-size:13px;font-weight:700;color:#A85D18;text-transform:uppercase;letter-spacing:1px;">🛒 Artículos del pedido</p>
+                <p style="margin:0;font-size:13px;font-weight:700;color:#A85D18;text-transform:uppercase;letter-spacing:1px;">Artículos del pedido</p>
             </td>
         </tr>
         <tr>
@@ -101,7 +101,7 @@
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
         <tr>
             <td style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;padding:20px 24px;">
-                <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:1px;">📦 Datos de entrega</p>
+                <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:1px;">Datos de entrega</p>
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                     <tr>
                         <td width="50%" style="vertical-align:top;padding-right:12px;">
@@ -137,7 +137,7 @@
                             <p style="margin:0;font-size:12px;color:#9CA3AF;line-height:1.5;">Te notificaremos cuando tu pedido sea enviado. Puedes hacer seguimiento desde tu panel de usuario.</p>
                         </td>
                         <td align="right" style="white-space:nowrap;padding-left:16px;">
-                            <span style="display:inline-block;background:#FED7AA;color:#9A3412;font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px;text-transform:uppercase;letter-spacing:0.5px;">⏳ Pendiente</span>
+                            <span style="display:inline-block;background:#FED7AA;color:#9A3412;font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px;text-transform:uppercase;letter-spacing:0.5px;">Pendiente</span>
                         </td>
                     </tr>
                 </table>
@@ -148,7 +148,7 @@
     <!-- Thank you message -->
     <div style="text-align:center;padding:8px 0;">
         <p style="margin:0;font-size:15px;color:#6B7280;line-height:1.7;">
-            🌿 Gracias por apoyar los <strong style="color:#A85D18;">productos locales de Lanzarote</strong>.<br>
+            Gracias por apoyar los <strong style="color:#A85D18;">productos locales de Lanzarote</strong>.<br>
             Tu compra hace posible que los productores de la isla sigan adelante.
         </p>
     </div>

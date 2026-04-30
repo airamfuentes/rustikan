@@ -128,8 +128,28 @@ const deleteResena = (id) => {
     useForm({}).delete(route('resenas.destroy', id), { preserveScroll: true });
 };
 
-// Distribución % para barras
-const totalResenas = computed(() => props.resenas.length);
+// ─── Compartir tienda ─────────────────────────────────────────────────────────
+const copiado = ref(false);
+
+const copiarEnlace = async () => {
+    await navigator.clipboard.writeText(window.location.href);
+    copiado.value = true;
+    setTimeout(() => { copiado.value = false; }, 2000);
+};
+
+const formatPhone = (tel) => {
+    if (!tel) return null;
+    const digits = tel.replace(/[\s\-\+]/g, '');
+    if (/^[67]/.test(digits)) return `34${digits}`;
+    return digits;
+};
+
+const whatsappUrl = computed(() => {
+    const phone = formatPhone(props.tienda.telefono);
+    if (!phone) return null;
+    const text = encodeURIComponent(`¡Mira esta tienda en Rustikan! ${props.tienda.nombre} - ${window.location.href}`);
+    return `https://wa.me/${phone}?text=${text}`;
+});
 const pct = (n) => totalResenas.value > 0
     ? Math.round(((props.distribucion[n] ?? 0) / totalResenas.value) * 100)
     : 0;
@@ -215,7 +235,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                     </div>
                 </div>
 
-                <!-- Contact info -->
+                <!-- Contact info + Share -->
                 <div class="mt-6 flex flex-wrap items-center gap-4 text-sm text-gray-400">
                     <span v-if="tienda.direccion" class="flex items-center gap-1.5">
                         <svg class="h-4 w-4 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -236,6 +256,19 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                         </svg>
                         {{ tienda.email }}
                     </span>
+                    <a
+                        v-if="whatsappUrl"
+                        :href="whatsappUrl"
+                        target="_blank"
+                        rel="noopener"
+                        title="Contactar por WhatsApp"
+                        class="flex h-9 w-9 items-center justify-center rounded-full bg-green-600/80 text-white transition-all hover:bg-green-600 hover:scale-105"
+                    >
+                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.549 4.122 1.512 5.863L.057 23.998l6.305-1.654A11.947 11.947 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.89 0-3.659-.518-5.177-1.42l-.371-.22-3.742.981.999-3.651-.242-.376A9.955 9.955 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+                        </svg>
+                    </a>
                 </div>
             </div>
 

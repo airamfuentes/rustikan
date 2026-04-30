@@ -76,7 +76,7 @@ class RegisteredUserController extends Controller
         ActivityLog::log(
             'nuevo_usuario',
             "Nuevo usuario registrado: {$user->name}",
-            '👤',
+            'usuario',
             'blue',
             $user
         );

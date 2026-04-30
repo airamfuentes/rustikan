@@ -18,12 +18,38 @@ const { isDark, toggleDark } = useDarkMode();
 const scrolled           = ref(false);
 const busqueda           = ref('');
 const showDropdown       = ref(false);
+const showHistory        = ref(false);
 const showProfileMenu    = ref(false);
 const sugerenciasTiendas = ref([]);
 const searchRef          = ref(null);
 const profileMenuRef     = ref(null);
 let   scrollTimeout      = null;
 let   searchTimeout      = null;
+
+const HISTORY_KEY = 'rustikan_busquedas';
+const searchHistory = ref(
+    typeof window !== 'undefined'
+        ? JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]')
+        : []
+);
+
+const saveToHistory = (query) => {
+    const q = query.trim();
+    if (!q) return;
+    const filtered = searchHistory.value.filter(h => h !== q);
+    searchHistory.value = [q, ...filtered].slice(0, 5);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(searchHistory.value));
+};
+
+const removeFromHistory = (query) => {
+    searchHistory.value = searchHistory.value.filter(h => h !== query);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(searchHistory.value));
+};
+
+const clearHistory = () => {
+    searchHistory.value = [];
+    localStorage.removeItem(HISTORY_KEY);
+};
 
 const handleScroll = () => {
     if (scrollTimeout) return;
@@ -36,6 +62,7 @@ const handleScroll = () => {
 const handleClickOutside = (event) => {
     if (searchRef.value && !searchRef.value.contains(event.target)) {
         showDropdown.value = false;
+        showHistory.value = false;
     }
     if (profileMenuRef.value && !profileMenuRef.value.contains(event.target)) {
         showProfileMenu.value = false;
@@ -47,6 +74,7 @@ const normalizar = (str) =>
 
 const buscarTiendas = () => {
     if (searchTimeout) clearTimeout(searchTimeout);
+    showHistory.value = false;
     searchTimeout = setTimeout(() => {
         const q = normalizar(busqueda.value.trim());
         if (q === '') {
@@ -66,7 +94,17 @@ const buscarTiendas = () => {
 
 const buscarEnHome = () => {
     const q = busqueda.value.trim();
-    if (q) router.visit(`/?busqueda=${encodeURIComponent(q)}`);
+    if (q) {
+        saveToHistory(q);
+        router.visit(`/?busqueda=${encodeURIComponent(q)}`);
+    }
+};
+
+const selectHistory = (query) => {
+    busqueda.value = query;
+    showHistory.value = false;
+    saveToHistory(query);
+    router.visit(`/?busqueda=${encodeURIComponent(query)}`);
 };
 
 onMounted(() => {
@@ -97,7 +135,7 @@ onUnmounted(() => {
                 <!-- Logo -->
                 <div class="flex shrink-0 items-center">
                     <Link href="/" class="flex items-center">
-                        <img src="/images/logo.png" alt="Rustikan" class="h-10 w-auto" />
+                        <img src="/images/logo.png" alt="Rustikan" class="h-10 w-auto brightness-0 dark:invert" />
                     </Link>
                 </div>
 
@@ -113,10 +151,48 @@ onUnmounted(() => {
                             v-model="busqueda"
                             @input="buscarTiendas"
                             @keydown.enter="buscarEnHome"
+                            @focus="showHistory = busqueda.trim() === '' && searchHistory.length > 0"
                             type="text"
                             placeholder="Buscar tiendas o ubicaciones..."
                             class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 py-2 pl-12 pr-4 text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                         />
+
+                        <!-- Historial de búsquedas -->
+                        <Transition
+                            enter-active-class="transition ease-out duration-200"
+                            enter-from-class="opacity-0 translate-y-1"
+                            enter-to-class="opacity-100 translate-y-0"
+                            leave-active-class="transition ease-in duration-150"
+                            leave-from-class="opacity-100 translate-y-0"
+                            leave-to-class="opacity-0 translate-y-1"
+                        >
+                            <div
+                                v-if="showHistory && !showDropdown && searchHistory.length > 0"
+                                class="absolute left-0 right-0 top-full mt-2 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl"
+                            >
+                                <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 px-3 py-2">
+                                    <span class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Búsquedas recientes</span>
+                                    <button @click.prevent="clearHistory" class="text-xs text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">Limpiar todo</button>
+                                </div>
+                                <div>
+                                    <button
+                                        v-for="item in searchHistory"
+                                        :key="item"
+                                        @click.prevent="selectHistory(item)"
+                                        class="flex w-full items-center gap-3 px-3 py-2.5 text-sm text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
+                                    >
+                                        <svg class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span class="flex-1 text-left">{{ item }}</span>
+                                        <span
+                                            @click.stop="removeFromHistory(item)"
+                                            class="flex h-5 w-5 items-center justify-center rounded-full text-gray-300 hover:bg-gray-200 dark:text-gray-600 dark:hover:bg-gray-600 transition-colors"
+                                        >×</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </Transition>
 
                         <!-- Dropdown de Sugerencias -->
                         <Transition
@@ -354,3 +430,9 @@ onUnmounted(() => {
         </div>
     </nav>
 </template>
+
+<style>
+.dark .nav-logo {
+    filter: brightness(0) invert(1);
+}
+</style>

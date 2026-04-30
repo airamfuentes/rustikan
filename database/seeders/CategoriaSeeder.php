@@ -13,48 +13,13 @@ class CategoriaSeeder extends Seeder
     public function run(): void
     {
         $categorias = [
-            [
-                'nombre' => 'Frutas y Verduras',
-                'slug' => 'frutas-y-verduras',
-                'icono' => '🍎',
-                'descripcion' => 'Frutas y verduras frescas de productores locales',
-            ],
-            [
-                'nombre' => 'Carnes',
-                'slug' => 'carnes',
-                'icono' => '🥩',
-                'descripcion' => 'Carnes frescas y de calidad',
-            ],
-            [
-                'nombre' => 'Pescados y Mariscos',
-                'slug' => 'pescados-y-mariscos',
-                'icono' => '🐟',
-                'descripcion' => 'Pescado fresco del día',
-            ],
-            [
-                'nombre' => 'Panadería',
-                'slug' => 'panaderia',
-                'icono' => '🥖',
-                'descripcion' => 'Pan y bollería artesanal',
-            ],
-            [
-                'nombre' => 'Lácteos y Quesos',
-                'slug' => 'lacteos-y-quesos',
-                'icono' => '🧀',
-                'descripcion' => 'Productos lácteos y quesos artesanales',
-            ],
-            [
-                'nombre' => 'Vinoteca',
-                'slug' => 'vinoteca',
-                'icono' => '🍷',
-                'descripcion' => 'Vinos locales y bebidas artesanales',
-            ],
-            [
-                'nombre' => 'Artesanía',
-                'slug' => 'artesania',
-                'icono' => '🏺',
-                'descripcion' => 'Productos artesanales de Lanzarote',
-            ],
+            ['nombre' => 'Frutas y Verduras',   'slug' => 'frutas-y-verduras',   'icono' => 'frutas-y-verduras',   'descripcion' => 'Frutas y verduras frescas de productores locales'],
+            ['nombre' => 'Carnes',              'slug' => 'carnes',              'icono' => 'carnes',              'descripcion' => 'Carnes frescas y de calidad'],
+            ['nombre' => 'Pescados y Mariscos', 'slug' => 'pescados-y-mariscos', 'icono' => 'pescados-y-mariscos', 'descripcion' => 'Pescado fresco del día'],
+            ['nombre' => 'Panadería',           'slug' => 'panaderia',           'icono' => 'panaderia',           'descripcion' => 'Pan y bollería artesanal'],
+            ['nombre' => 'Lácteos y Quesos',    'slug' => 'lacteos-y-quesos',    'icono' => 'lacteos-y-quesos',    'descripcion' => 'Productos lácteos y quesos artesanales'],
+            ['nombre' => 'Vinoteca',            'slug' => 'vinoteca',            'icono' => 'vinoteca',            'descripcion' => 'Vinos locales y bebidas artesanales'],
+            ['nombre' => 'Artesanía',           'slug' => 'artesania',           'icono' => 'artesania',           'descripcion' => 'Productos artesanales de Lanzarote'],
         ];
 
         foreach ($categorias as $categoria) {

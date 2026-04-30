@@ -41,7 +41,7 @@ class ActivityLog extends Model
     /**
      * Helper estático para registrar actividad rápidamente
      */
-    public static function log($tipo, $descripcion, $icono = '📝', $color = 'gray', $model = null, $datos = null)
+    public static function log($tipo, $descripcion, $icono = 'editar', $color = 'gray', $model = null, $datos = null)
     {
         return self::create([
             'tipo' => $tipo,

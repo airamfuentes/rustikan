@@ -480,6 +480,174 @@ class TiendaSeeder extends Seeder
                 'latitud' => 28.9230, 'longitud' => -13.6610,
                 'activa' => true, 'visible' => true,
             ],
+
+            // ─────────────────────────────────────────────────────────────────
+            // ── BLOQUE NUEVO (+15 tiendas) ───────────────────────────────────
+            // ─────────────────────────────────────────────────────────────────
+
+            // ── Frutas y Verduras ────────────────────────────────────────────
+            [
+                'user_id' => $juan->id, 'categoria_id' => $cats['frutas-y-verduras'],
+                'nombre' => 'Huerto del Risco', 'slug' => 'huerto-del-risco',
+                'descripcion' => 'Pequeño huerto familiar en el Risco de Famara. Hortalizas de hoja, calabazas y batatas dulces.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=800',
+                'telefono' => '928835980', 'email' => 'huerto@risco.es',
+                'direccion' => 'Famara, Lanzarote', 'valoracion' => 4.7, 'total_resenas' => 58,
+                'latitud' => 29.1280, 'longitud' => -13.5570,
+                'activa' => true, 'visible' => true,
+            ],
+            [
+                'user_id' => $ana->id, 'categoria_id' => $cats['frutas-y-verduras'],
+                'nombre' => 'Frutería del Sol', 'slug' => 'fruteria-del-sol',
+                'descripcion' => 'Cítricos, granadas y caquis cultivados al sol del sur. Recogida diaria para máxima frescura.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=800',
+                'telefono' => '928518732', 'email' => 'fruta@delsol.com',
+                'direccion' => 'Playa Blanca, Lanzarote', 'valoracion' => 4.5, 'total_resenas' => 71,
+                'latitud' => 28.8650, 'longitud' => -13.8290,
+                'activa' => true, 'visible' => true,
+            ],
+
+            // ── Carnes ───────────────────────────────────────────────────────
+            [
+                'user_id' => $luis->id, 'categoria_id' => $cats['carnes'],
+                'nombre' => 'El Asadero de Mancha Blanca', 'slug' => 'el-asadero-de-mancha-blanca',
+                'descripcion' => 'Carnes adobadas y marinadas listas para asar. Especialidad en costilla a la brasa y secreto ibérico canario.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1558030006-450675393462?w=800',
+                'telefono' => '928840221', 'email' => 'asados@manchablanca.com',
+                'direccion' => 'Tinajo, Lanzarote', 'valoracion' => 4.6, 'total_resenas' => 84,
+                'latitud' => 29.0580, 'longitud' => -13.6920,
+                'activa' => true, 'visible' => true,
+            ],
+            [
+                'user_id' => $miguel->id, 'categoria_id' => $cats['carnes'],
+                'nombre' => 'Granja El Cuchillo', 'slug' => 'granja-el-cuchillo',
+                'descripcion' => 'Pavos, gallinas y huevos de corral. Animales criados en pastos abiertos sin estrés.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1612170153139-6f881ff067e0?w=800',
+                'telefono' => '928847215', 'email' => 'granja@elcuchillo.es',
+                'direccion' => 'Tinajo, Lanzarote', 'valoracion' => 4.7, 'total_resenas' => 96,
+                'latitud' => 29.0680, 'longitud' => -13.6810,
+                'activa' => true, 'visible' => true,
+            ],
+
+            // ── Pescados y Mariscos ──────────────────────────────────────────
+            [
+                'user_id' => $sofia->id, 'categoria_id' => $cats['pescados-y-mariscos'],
+                'nombre' => 'Atún del Atlántico', 'slug' => 'atun-del-atlantico',
+                'descripcion' => 'Atún rojo y blanco capturado con técnicas sostenibles. También conservas artesanales en aceite de oliva.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1574781330855-d0db8cc6a79c?w=800',
+                'telefono' => '928810890', 'email' => 'atun@atlantico.com',
+                'direccion' => 'Arrecife, Lanzarote', 'valoracion' => 4.8, 'total_resenas' => 132,
+                'latitud' => 28.9650, 'longitud' => -13.5485,
+                'activa' => true, 'visible' => true,
+            ],
+            [
+                'user_id' => $maria->id, 'categoria_id' => $cats['pescados-y-mariscos'],
+                'nombre' => 'Salazones del Norte', 'slug' => 'salazones-del-norte',
+                'descripcion' => 'Pescado en salazón al estilo canario: cherne salado, sama y bonito seco. Recetas centenarias.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1606851094291-6efae152bb87?w=800',
+                'telefono' => '928842680', 'email' => 'salazones@norte.es',
+                'direccion' => 'Órzola, Lanzarote', 'valoracion' => 4.6, 'total_resenas' => 64,
+                'latitud' => 29.2120, 'longitud' => -13.4400,
+                'activa' => true, 'visible' => true,
+            ],
+
+            // ── Panadería ────────────────────────────────────────────────────
+            [
+                'user_id' => $elena->id, 'categoria_id' => $cats['panaderia'],
+                'nombre' => 'Bollería La Geria', 'slug' => 'bolleria-la-geria',
+                'descripcion' => 'Donuts, magdalenas y bizcochos artesanales con harinas integrales. Sin aceite de palma.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1568571780765-9276ac8b75a2?w=800',
+                'telefono' => '928175420', 'email' => 'bolleria@lageria.com',
+                'direccion' => 'La Geria, Lanzarote', 'valoracion' => 4.5, 'total_resenas' => 92,
+                'latitud' => 28.9870, 'longitud' => -13.6900,
+                'activa' => true, 'visible' => true,
+            ],
+            [
+                'user_id' => $isabel->id, 'categoria_id' => $cats['panaderia'],
+                'nombre' => 'Empanadas de Tías', 'slug' => 'empanadas-de-tias',
+                'descripcion' => 'Empanadillas, pastelitos salados y pizzas caseras al horno de leña. Para llevar o pedir a domicilio.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1585238342024-78d387f4a707?w=800',
+                'telefono' => '928834910', 'email' => 'empanadas@tias.com',
+                'direccion' => 'Tías, Lanzarote', 'valoracion' => 4.4, 'total_resenas' => 56,
+                'latitud' => 28.9610, 'longitud' => -13.6390,
+                'activa' => true, 'visible' => true,
+            ],
+
+            // ── Lácteos y Quesos ─────────────────────────────────────────────
+            [
+                'user_id' => $rosa->id, 'categoria_id' => $cats['lacteos-y-quesos'],
+                'nombre' => 'Pastor de Mácher', 'slug' => 'pastor-de-macher',
+                'descripcion' => 'Queso de pastor con leche cruda de cabra y oveja. Curado en bodega volcánica durante seis meses.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=800',
+                'telefono' => '928832145', 'email' => 'pastor@macher.es',
+                'direccion' => 'Tías, Lanzarote', 'valoracion' => 4.9, 'total_resenas' => 178,
+                'latitud' => 28.9540, 'longitud' => -13.6520,
+                'activa' => true, 'visible' => true,
+            ],
+            [
+                'user_id' => $juan->id, 'categoria_id' => $cats['lacteos-y-quesos'],
+                'nombre' => 'Helados El Volcán', 'slug' => 'helados-el-volcan',
+                'descripcion' => 'Helados artesanales con leche fresca local y frutas de temporada. Sabores únicos como mojo dulce y gofio.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1567206563064-6f60f40a2b57?w=800',
+                'telefono' => '928814560', 'email' => 'helados@elvolcan.com',
+                'direccion' => 'Arrecife, Lanzarote', 'valoracion' => 4.8, 'total_resenas' => 245,
+                'latitud' => 28.9605, 'longitud' => -13.5500,
+                'activa' => true, 'visible' => true,
+            ],
+
+            // ── Vinoteca ─────────────────────────────────────────────────────
+            [
+                'user_id' => $miguel->id, 'categoria_id' => $cats['vinoteca'],
+                'nombre' => 'Bodega Stratvs', 'slug' => 'bodega-stratvs',
+                'descripcion' => 'Vinos premium con técnicas modernas. Crianzas en barrica francesa y diseño contemporáneo.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1543007630-9710e4a00a20?w=800',
+                'telefono' => '928174060', 'email' => 'tienda@stratvs.com',
+                'direccion' => 'La Geria, Lanzarote', 'valoracion' => 4.9, 'total_resenas' => 298,
+                'latitud' => 28.9890, 'longitud' => -13.6960,
+                'activa' => true, 'visible' => true,
+            ],
+            [
+                'user_id' => $carlos->id, 'categoria_id' => $cats['vinoteca'],
+                'nombre' => 'Sidras Volcánicas', 'slug' => 'sidras-volcanicas',
+                'descripcion' => 'Sidra natural y vermut artesanal con hierbas locales. Producción limitada y embotellado a mano.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1542843137-8791a6904d14?w=800',
+                'telefono' => '928721045', 'email' => 'sidra@volcanicas.com',
+                'direccion' => 'San Bartolomé, Lanzarote', 'valoracion' => 4.4, 'total_resenas' => 47,
+                'latitud' => 29.0060, 'longitud' => -13.6170,
+                'activa' => true, 'visible' => true,
+            ],
+
+            // ── Artesanía ────────────────────────────────────────────────────
+            [
+                'user_id' => $pedro->id, 'categoria_id' => $cats['artesania'],
+                'nombre' => 'Velas y Aromas Lanzarote', 'slug' => 'velas-y-aromas-lanzarote',
+                'descripcion' => 'Velas de soja perfumadas con aromas de la isla: lavanda volcánica, salitre marino y aloe.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1602874801007-0d4c50ee6c0d?w=800',
+                'telefono' => '928812890', 'email' => 'velas@aromaslanzarote.com',
+                'direccion' => 'Costa Teguise, Lanzarote', 'valoracion' => 4.7, 'total_resenas' => 103,
+                'latitud' => 29.0020, 'longitud' => -13.4995,
+                'activa' => true, 'visible' => true,
+            ],
+            [
+                'user_id' => $sofia->id, 'categoria_id' => $cats['artesania'],
+                'nombre' => 'Cuero de Famara', 'slug' => 'cuero-de-famara',
+                'descripcion' => 'Bolsos, cinturones y carteras de cuero curtido a mano con vegetales locales. Diseños únicos surferos.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=800',
+                'telefono' => '928835010', 'email' => 'cuero@famara.es',
+                'direccion' => 'Famara, Lanzarote', 'valoracion' => 4.6, 'total_resenas' => 79,
+                'latitud' => 29.1290, 'longitud' => -13.5550,
+                'activa' => true, 'visible' => true,
+            ],
+            [
+                'user_id' => $luis->id, 'categoria_id' => $cats['artesania'],
+                'nombre' => 'Madera de Tinguatón', 'slug' => 'madera-de-tinguaton',
+                'descripcion' => 'Tablas de cocina, utensilios y decoración tallada en madera de palma canaria reciclada.',
+                'imagen_portada' => 'https://images.unsplash.com/photo-1632467489875-1d11e87a3df9?w=800',
+                'telefono' => '928731200', 'email' => 'madera@tinguaton.com',
+                'direccion' => 'Tinajo, Lanzarote', 'valoracion' => 4.8, 'total_resenas' => 145,
+                'latitud' => 29.0700, 'longitud' => -13.7080,
+                'activa' => true, 'visible' => true,
+            ],
         ];
 
         foreach ($tiendas as $datos) {

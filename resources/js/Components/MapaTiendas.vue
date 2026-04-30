@@ -119,9 +119,9 @@ const initMap = () => {
         [29.38, -13.28],  // NE — un poco al noreste de Punta Fariones
     );
 
-    // Centro por defecto: Lanzarote
+    // Centro por defecto: Lanzarote centrado visualmente
     map = L.map(mapContainer.value, {
-        center: [29.0469, -13.5800],
+        center: [29.05, -13.77],
         zoom: 11,
         minZoom: 10,                      // no se puede alejar más de la isla
         maxBounds: lanzaroteBounds,       // no se puede panear fuera de Lanzarote

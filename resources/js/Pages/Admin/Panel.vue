@@ -135,7 +135,7 @@
                         <div v-if="actividad_reciente.length > 0" class="space-y-3">
                             <div v-for="(actividad, index) in actividad_reciente" :key="index" class="flex items-start gap-3 rounded-lg border-l-4 p-4 transition-all hover:shadow-md" :class="`border-${actividad.color}-500 bg-${actividad.color}-50 hover:bg-${actividad.color}-100`">
                                 <div class="flex-shrink-0 mt-0.5">
-                                    <span class="text-2xl">{{ actividad.icono }}</span>
+                                    <ActivityIcono :icono="actividad.icono" :class="`h-6 w-6 text-${actividad.color}-600 dark:text-${actividad.color}-400`" />
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ actividad.descripcion }}</p>
@@ -167,6 +167,7 @@ import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref, reactive } from 'vue';
 import { Clock } from 'lucide-vue-next';
+import ActivityIcono from '@/Components/ActivityIcono.vue';
 
 const props = defineProps({
     usuarios_recientes: Array,

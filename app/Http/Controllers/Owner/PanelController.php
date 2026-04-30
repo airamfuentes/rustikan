@@ -158,4 +158,47 @@ class PanelController extends Controller
             'solicitudes'          => $solicitudes,
         ]);
     }
+
+    public function pedidoDetalle(Pedido $pedido)
+    {
+        $user   = auth()->user();
+        $tienda = $user->tiendas()->firstOrFail();
+
+        if (!$pedido->items()->where('tienda_id', $tienda->id)->exists()) {
+            abort(403);
+        }
+
+        $pedido->load([
+            'user:id,name,email',
+            'items' => fn($q) => $q->where('tienda_id', $tienda->id),
+        ]);
+
+        return Inertia::render('Owner/PedidoDetalle', [
+            'pedido' => [
+                'id'                => $pedido->id,
+                'numero_pedido'     => $pedido->numero_pedido,
+                'estado'            => $pedido->estado,
+                'subtotal'          => $pedido->subtotal,
+                'gastos_envio'      => $pedido->gastos_envio,
+                'total'             => $pedido->total,
+                'notas'             => $pedido->notas,
+                'direccion_envio'   => $pedido->direccion_envio,
+                'telefono_contacto' => $pedido->telefono_contacto,
+                'created_at'        => $pedido->created_at->toIso8601String(),
+                'user'              => $pedido->user ? [
+                    'name'  => $pedido->user->name,
+                    'email' => $pedido->user->email,
+                ] : null,
+                'items'        => $pedido->items->map(fn($item) => [
+                    'id'              => $item->id,
+                    'producto_nombre' => $item->producto_nombre,
+                    'producto_imagen' => $item->producto_imagen,
+                    'cantidad'        => $item->cantidad,
+                    'precio_unitario' => $item->precio_unitario,
+                    'subtotal'        => $item->subtotal,
+                ]),
+                'total_tienda' => $pedido->items->sum('subtotal'),
+            ],
+        ]);
+    }
 }

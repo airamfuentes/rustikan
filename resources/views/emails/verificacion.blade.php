@@ -27,7 +27,7 @@
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                     <tr>
                         <td width="40" valign="top">
-                            <div style="background:#FAE9D5;border-radius:8px;width:36px;height:36px;text-align:center;line-height:36px;font-size:18px;">📬</div>
+                            <div style="background:#FAE9D5;border-radius:8px;width:36px;height:36px;text-align:center;line-height:36px;font-size:14px;font-weight:700;color:#A85D18;">@</div>
                         </td>
                         <td style="padding-left:14px;vertical-align:top;">
                             <p style="margin:0 0 4px;font-size:14px;font-weight:700;color:#A85D18;">Verifica tu correo electrónico</p>
@@ -47,7 +47,7 @@
             <td align="center">
                 <a href="{{ $url }}"
                    style="display:inline-block;background:linear-gradient(135deg,#C97420,#A85D18);color:#FFFFFF;text-decoration:none;font-size:16px;font-weight:700;padding:16px 40px;border-radius:12px;letter-spacing:0.3px;box-shadow:0 4px 14px rgba(168,93,24,0.4);">
-                    ✉️ &nbsp; Verificar mi correo electrónico
+                    Verificar mi correo electrónico
                 </a>
             </td>
         </tr>
@@ -66,7 +66,7 @@
         <tr>
             <td style="border-left:3px solid #FED7AA;padding:12px 16px;">
                 <p style="margin:0;font-size:12px;color:#9CA3AF;line-height:1.6;">
-                    🔒 Si no has creado ninguna cuenta en Rustikan, ignora este mensaje. Tu dirección de correo no será utilizada sin tu confirmación.
+                    Si no has creado ninguna cuenta en Rustikan, ignora este mensaje. Tu dirección de correo no será utilizada sin tu confirmación.
                 </p>
             </td>
         </tr>

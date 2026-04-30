@@ -90,6 +90,18 @@ Route::get('/carrito', function () {
     return Inertia::render('Carrito');
 })->name('carrito');
 
+// ── Páginas informativas ────────────────────────────────────────────────────
+Route::prefix('')->name('info.')->group(function () {
+    Route::get('/quienes-somos',          fn() => Inertia::render('Info/QuienesSomos'))->name('quienes-somos');
+    Route::get('/nuestra-mision',         fn() => Inertia::render('Info/NuestraMision'))->name('mision');
+    Route::get('/contacto',               fn() => Inertia::render('Info/Contacto'))->name('contacto');
+    Route::get('/vende-con-nosotros',     fn() => Inertia::render('Info/VendeConNosotros'))->name('vende');
+    Route::get('/preguntas-frecuentes',   fn() => Inertia::render('Info/PreguntasFrecuentes'))->name('faq');
+    Route::get('/terminos-y-condiciones', fn() => Inertia::render('Info/Terminos'))->name('terminos');
+    Route::get('/politica-de-privacidad', fn() => Inertia::render('Info/Privacidad'))->name('privacidad');
+    Route::get('/cookies',                fn() => Inertia::render('Info/Cookies'))->name('cookies');
+});
+
 // Pedidos (usuario autenticado)
 Route::middleware('auth')->group(function () {
     Route::post('/pedidos', [\App\Http\Controllers\PedidoController::class, 'store'])->name('pedidos.store');
@@ -122,6 +134,7 @@ Route::middleware('auth')->group(function () {
 // Owner Routes
 Route::middleware(['auth', 'owner'])->prefix('mi-tienda')->name('owner.')->group(function () {
     Route::get('/panel', [\App\Http\Controllers\Owner\PanelController::class, 'index'])->name('panel');
+    Route::get('/pedidos/{pedido}', [\App\Http\Controllers\Owner\PanelController::class, 'pedidoDetalle'])->name('pedido.show');
     Route::get('/editar', [\App\Http\Controllers\Owner\TiendaController::class, 'edit'])->name('tienda.edit');
     Route::post('/editar', [\App\Http\Controllers\Owner\TiendaController::class, 'update'])->name('tienda.update');
     // Productos (solo edición directa vía owner, sin aprobación — toggles rápidos)

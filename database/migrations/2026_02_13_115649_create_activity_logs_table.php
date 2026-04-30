@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('tipo'); // nuevo_usuario, nuevo_pedido, nueva_tienda, eliminar_tienda, etc.
             $table->text('descripcion'); // Descripción legible de la actividad
-            $table->string('icono')->default('📝'); // Emoji/icono para mostrar
+            $table->string('icono')->default('editar'); // Clave semántica que el frontend mapea a un icono Lucide
             $table->string('color')->default('gray'); // Color del tema (blue, green, red, etc)
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null'); // Usuario que realizó la acción
             $table->string('model_type')->nullable(); // Tipo de modelo afectado (App\Models\Tienda)

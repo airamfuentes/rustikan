@@ -102,7 +102,7 @@ const submit = () => {
 
         <!-- Toasts -->
         <div class="pointer-events-none fixed inset-0 z-[60] flex flex-col items-end justify-start space-y-4 p-6">
-            <Toast v-for="t in toasts" :key="t.id" :type="t.type" :title="t.title" :message="t.message" @close="toasts = toasts.filter(x => x.id !== t.id)" />
+            <Toast v-for="(t, index) in toasts" :key="t.id" :type="t.type" :title="t.title" :message="t.message" :active="index === 0" @close="toasts = toasts.filter(x => x.id !== t.id)" />
         </div>
 
         <div class="py-8">
@@ -129,7 +129,7 @@ const submit = () => {
                                         class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition">
                                     <option value="" disabled>Selecciona una categoría</option>
                                     <option v-for="cat in categorias" :key="cat.id" :value="cat.id">
-                                        {{ cat.icono }} {{ cat.nombre }}
+                                        {{ cat.nombre }}
                                     </option>
                                 </select>
                                 <p v-if="form.errors.categoria_id" class="mt-1 text-xs text-red-500">{{ form.errors.categoria_id }}</p>

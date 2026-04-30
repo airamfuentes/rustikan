@@ -13,7 +13,7 @@ return new class extends Migration
             ->update([
                 'nombre' => 'Vinoteca',
                 'slug'   => 'vinoteca',
-                'icono'  => '🍷',
+                'icono'  => 'vinoteca',
             ]);
 
         // Eliminar "Conservas y Mermeladas"
@@ -30,14 +30,14 @@ return new class extends Migration
             ->update([
                 'nombre' => 'Vinos y Bebidas',
                 'slug'   => 'vinos-y-bebidas',
-                'icono'  => '🍷',
+                'icono'  => 'vinoteca',
             ]);
 
         // Restaurar "Conservas y Mermeladas"
         DB::table('categorias')->insertOrIgnore([
             'nombre'      => 'Conservas y Mermeladas',
             'slug'        => 'conservas-y-mermeladas',
-            'icono'       => '🫙',
+            'icono'       => 'conservas',
             'descripcion' => 'Conservas y mermeladas caseras',
             'created_at'  => now(),
             'updated_at'  => now(),

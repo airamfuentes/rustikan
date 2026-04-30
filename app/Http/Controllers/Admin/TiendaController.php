@@ -29,6 +29,7 @@ class TiendaController extends Controller
             return null;
         }
     }
+
     /**
      * Display a listing of the resource.
      */
@@ -93,11 +94,11 @@ class TiendaController extends Controller
     public function create()
     {
         $categorias = Categoria::all();
-        $usuarios = User::all(['id', 'name', 'email']);
-        
+        $usuarios   = User::orderBy('name')->get(['id', 'name', 'email', 'avatar', 'role']);
+
         return Inertia::render('Admin/Tiendas/Crear', [
             'categorias' => $categorias,
-            'usuarios' => $usuarios,
+            'usuarios'   => $usuarios,
         ]);
     }
 
@@ -107,7 +108,7 @@ class TiendaController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'user_id' => 'nullable|exists:users,id',
             'categoria_id' => 'required|exists:categorias,id',
             'nombre' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
@@ -150,7 +151,7 @@ class TiendaController extends Controller
         ActivityLog::log(
             'nueva_tienda',
             "Nueva tienda creada: {$tienda->nombre}",
-            '🏪',
+            'tienda',
             'blue',
             $tienda
         );
@@ -165,7 +166,7 @@ class TiendaController extends Controller
     public function show(Tienda $tienda)
     {
         $tienda->load(['user', 'categoria', 'productos']);
-        
+
         return Inertia::render('Admin/Tiendas/Detalle', [
             'tienda' => $tienda,
         ]);
@@ -176,11 +177,14 @@ class TiendaController extends Controller
      */
     public function edit(Tienda $tienda)
     {
+        $tienda->load('user:id,name,email,avatar,role');
         $categorias = Categoria::all();
-        
+        $usuarios   = User::orderBy('name')->get(['id', 'name', 'email', 'avatar', 'role']);
+
         return Inertia::render('Admin/Tiendas/Editar', [
-            'tienda' => $tienda,
+            'tienda'     => $tienda,
             'categorias' => $categorias,
+            'usuarios'   => $usuarios,
         ]);
     }
 
@@ -190,6 +194,7 @@ class TiendaController extends Controller
     public function update(Request $request, Tienda $tienda)
     {
         $validated = $request->validate([
+            'user_id'               => 'sometimes|nullable|exists:users,id',
             'categoria_id'          => 'sometimes|exists:categorias,id',
             'nombre'                => 'sometimes|string|max:255',
             'descripcion'           => 'nullable|string',
@@ -252,7 +257,7 @@ class TiendaController extends Controller
         ActivityLog::log(
             'actualizar_tienda',
             "Tienda actualizada: {$tienda->nombre}",
-            '✏️',
+            'editar',
             'yellow',
             $tienda,
             $validated
@@ -273,7 +278,7 @@ class TiendaController extends Controller
         ActivityLog::log(
             'eliminar_tienda',
             "Tienda eliminada: {$nombre}",
-            '🗑️',
+            'eliminar',
             'red'
         );
 
@@ -287,17 +292,17 @@ class TiendaController extends Controller
     public function toggleVisible(Tienda $tienda)
     {
         $tienda->update(['visible' => !$tienda->visible]);
-        
+
         // Registrar actividad
         $estado = $tienda->visible ? 'visible' : 'oculta';
         ActivityLog::log(
             'cambiar_visibilidad_tienda',
             "Tienda cambió visibilidad: {$tienda->nombre} ahora {$estado}",
-            '👁️',
+            'visibilidad',
             'purple',
             $tienda
         );
-        
+
         return back()->with('success', 'Visibilidad actualizada');
     }
 
@@ -307,17 +312,17 @@ class TiendaController extends Controller
     public function toggleActive(Tienda $tienda)
     {
         $tienda->update(['activa' => !$tienda->activa]);
-        
+
         // Registrar actividad
         $estado = $tienda->activa ? 'activada' : 'desactivada';
         ActivityLog::log(
             'cambiar_estado_tienda',
             "Tienda {$estado}: {$tienda->nombre}",
-            $tienda->activa ? '✅' : '❌',
+            $tienda->activa ? 'confirmado' : 'cancelado',
             $tienda->activa ? 'green' : 'orange',
             $tienda
         );
-        
+
         return back()->with('success', 'Estado actualizado');
     }
 }
