@@ -27,7 +27,7 @@ const tabActiva = ref('Todos');
 const tabs = computed(() => {
     const mapa = {};
     props.tienda.productos.forEach(p => {
-        const cat = p.categoria.nombre;
+        const cat = p.categoria?.nombre ?? 'Sin categoría';
         mapa[cat] = (mapa[cat] || 0) + 1;
     });
     return [
@@ -41,7 +41,7 @@ const busquedaProducto = ref('');
 const productosFiltrados = computed(() => {
     let lista = tabActiva.value === 'Todos'
         ? props.tienda.productos
-        : props.tienda.productos.filter(p => p.categoria.nombre === tabActiva.value);
+        : props.tienda.productos.filter(p => (p.categoria?.nombre ?? 'Sin categoría') === tabActiva.value);
     const q = busquedaProducto.value.trim().toLowerCase();
     if (q) {
         lista = lista.filter(p =>
@@ -203,7 +203,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                         <div>
                             <div class="mb-2 flex flex-wrap items-center gap-2">
                                 <span v-if="tienda.categoria" class="rounded-full bg-primary-500/20 px-3 py-1 text-xs font-bold text-primary-300">
-                                    {{ tienda.categoria.nombre }}
+                                    {{ tienda.categoria?.nombre ?? '—' }}
                                 </span>
                                 <span class="flex items-center gap-1 rounded-full bg-yellow-500/20 px-3 py-1 text-xs font-bold text-yellow-300">
                                     <svg class="h-3.5 w-3.5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
@@ -381,7 +381,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
 
                     <!-- Info -->
                     <div class="flex flex-1 flex-col p-5">
-                        <div :class="['mb-1 text-xs font-medium', isDark ? 'text-gray-500' : 'text-gray-400']">{{ producto.categoria.nombre }}</div>
+                        <div :class="['mb-1 text-xs font-medium', isDark ? 'text-gray-500' : 'text-gray-400']">{{ producto.categoria?.nombre ?? 'Sin categoría' }}</div>
                         <h3 :class="['text-base font-bold transition-colors group-hover:text-primary-500', isDark ? 'text-gray-100' : 'text-gray-900']">
                             {{ producto.nombre }}
                         </h3>
@@ -781,7 +781,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
 
                     <!-- Contenido -->
                     <div class="px-6 py-5">
-                        <p :class="['mb-1 text-xs font-medium', isDark ? 'text-gray-400' : 'text-gray-400']">{{ productoModal.categoria.nombre }}</p>
+                        <p :class="['mb-1 text-xs font-medium', isDark ? 'text-gray-400' : 'text-gray-400']">{{ productoModal.categoria?.nombre ?? 'Sin categoría' }}</p>
                         <h2 :class="['text-xl font-extrabold', isDark ? 'text-white' : 'text-gray-900']">{{ productoModal.nombre }}</h2>
                         <p v-if="productoModal.descripcion" :class="['mt-2 text-sm leading-relaxed', isDark ? 'text-gray-300' : 'text-gray-600']">
                             {{ productoModal.descripcion }}
