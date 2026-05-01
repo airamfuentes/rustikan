@@ -1,8 +1,17 @@
+# Logs
 *.log
+
+# Sistema operativo
 .DS_Store
+Thumbs.db
+
+# Variables de entorno (NUNCA subir a git)
 .env
 .env.backup
 .env.production
+.env.*.local
+
+# Editores / IDE
 .phpactor.json
 .phpunit.result.cache
 /.fleet
@@ -11,16 +20,42 @@
 /.phpunit.cache
 /.vscode
 /.zed
+
+# Auth de Composer
 /auth.json
+
+# Dependencias
 /node_modules
+/vendor
+
+# Build / runtime
 /public/build
 /public/hot
 /public/storage
+
+# Storage runtime (Laravel)
 /storage/*.key
 /storage/pail
-/vendor
+/storage/app/public/*
+!/storage/app/public/.gitkeep
+/storage/framework/cache/*
+!/storage/framework/cache/.gitkeep
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitkeep
+/storage/framework/views/*
+!/storage/framework/views/.gitkeep
+/storage/logs/*
+!/storage/logs/.gitkeep
+
+# Homestead
 Homestead.json
 Homestead.yaml
-Thumbs.db
+
 # Output/debug text files
 *.txt
+!.gitkeep
+
+# Backups de base de datos
+*.sql
+*.sql.gz
+*.dump
