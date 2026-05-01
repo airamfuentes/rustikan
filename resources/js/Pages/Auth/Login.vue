@@ -18,7 +18,7 @@ defineProps({
     },
 });
 
-const RECAPTCHA_SITE_KEY = '6LceSbUsAAAAAA9bdOLoaga8Mzy3lZ7uBuQjSK9_';
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 const recaptchaRef = ref(null);
 
 const form = useForm({
