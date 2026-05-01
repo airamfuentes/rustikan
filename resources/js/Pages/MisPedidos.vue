@@ -159,7 +159,7 @@ const submitRating = (tiendaId) => {
                         <Transition enter-active-class="transition-all duration-200" enter-from-class="max-h-0 opacity-0" enter-to-class="max-h-screen opacity-100" leave-active-class="transition-all duration-200" leave-from-class="max-h-screen opacity-100" leave-to-class="max-h-0 opacity-0">
                             <div v-if="expandidos.has(pedido.id)" class="overflow-hidden border-t border-gray-100 dark:border-gray-700">
                                 <div class="divide-y divide-gray-100 dark:divide-gray-700">
-                                    <div v-for="item in pedido.items" :key="item.id" class="flex items-center gap-4 px-6 py-3">
+                                    <div v-for="item in pedido.items" :key="item.id" class="flex flex-wrap items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3">
                                         <img :src="item.producto_imagen || '/images/logo.png'" :alt="item.producto_nombre" class="h-12 w-12 flex-shrink-0 rounded-lg object-cover" />
                                         <div class="min-w-0 flex-1 text-sm">
                                             <p class="font-medium text-gray-900 dark:text-white">{{ item.producto_nombre }}</p>
@@ -223,7 +223,7 @@ const submitRating = (tiendaId) => {
                             <div v-if="expandidos.has('h-' + pedido.id)" class="overflow-hidden border-t border-gray-100 dark:border-gray-700">
                                 <div class="divide-y divide-gray-100 dark:divide-gray-700">
                                     <template v-for="item in pedido.items" :key="item.id">
-                                        <div class="flex items-center gap-4 px-6 py-3">
+                                        <div class="flex flex-wrap items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3">
                                             <img :src="item.producto_imagen || '/images/logo.png'" :alt="item.producto_nombre" class="h-12 w-12 flex-shrink-0 rounded-lg object-cover" />
                                             <div class="min-w-0 flex-1 text-sm">
                                                 <p class="font-medium text-gray-900 dark:text-white">{{ item.producto_nombre }}</p>

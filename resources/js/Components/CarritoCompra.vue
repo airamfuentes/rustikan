@@ -71,7 +71,7 @@ onUnmounted(() => document.removeEventListener('mousedown', cerrarSiClickFuera))
         >
             <div
                 v-if="abierto"
-                class="absolute right-0 top-12 z-50 w-96 origin-top-right overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-2xl"
+                class="fixed sm:absolute right-2 sm:right-0 top-16 sm:top-12 z-50 w-[calc(100vw-1rem)] max-w-sm sm:w-96 origin-top-right overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-2xl"
             >
                 <!-- Cabecera del dropdown -->
                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 px-5 py-4">

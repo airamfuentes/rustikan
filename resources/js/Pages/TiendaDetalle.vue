@@ -150,6 +150,8 @@ const whatsappUrl = computed(() => {
     const text = encodeURIComponent(`¡Mira esta tienda en Rustikan! ${props.tienda.nombre} - ${window.location.href}`);
     return `https://wa.me/${phone}?text=${text}`;
 });
+const totalResenas = computed(() => props.tienda.total_resenas ?? props.resenas.length);
+
 const pct = (n) => totalResenas.value > 0
     ? Math.round(((props.distribucion[n] ?? 0) / totalResenas.value) * 100)
     : 0;
@@ -474,7 +476,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
 
                         <!-- Nota grande -->
                         <div class="mb-6 flex items-center gap-4">
-                            <span :class="['text-7xl font-black leading-none', isDark ? 'text-white' : 'text-gray-900']">
+                            <span :class="['text-5xl sm:text-6xl lg:text-7xl font-black leading-none', isDark ? 'text-white' : 'text-gray-900']">
                                 {{ Number(tienda.valoracion).toFixed(1) }}
                             </span>
                             <div>
@@ -661,45 +663,47 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                         <div v-if="totalResenas > 0" class="grid gap-4 sm:grid-cols-2">
                             <div
                                 v-for="r in resenas" :key="r.id"
-                                :class="['group relative rounded-2xl p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md',
+                                :class="['rounded-2xl p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md',
                                     isDark ? 'bg-gray-800' : 'bg-white border border-gray-100']"
                             >
-                                <!-- Comillas decorativas -->
-                                <svg class="absolute right-5 top-4 h-6 w-6 opacity-10" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z"/>
-                                </svg>
-
-                                <!-- Header: avatar + nombre + fecha -->
-                                <div class="mb-3 flex items-center gap-3">
-                                    <div :class="['flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white shadow-sm', avatarColor(r.inicial)]">
-                                        {{ r.inicial }}
-                                    </div>
+                                <div class="flex gap-4">
+                                    <!-- ── Contenido de la reseña (izquierda) ── -->
                                     <div class="min-w-0 flex-1">
-                                        <p :class="['truncate text-sm font-semibold', isDark ? 'text-white' : 'text-gray-900']">{{ r.nombre }}</p>
-                                        <p :class="['text-xs', isDark ? 'text-gray-500' : 'text-gray-400']">{{ r.created_at }}</p>
-                                    </div>
-                                    <!-- Estrellas -->
-                                    <div class="flex gap-0.5 shrink-0">
-                                        <svg v-for="i in 5" :key="i"
-                                             :class="['h-4 w-4', i <= r.puntuacion ? 'text-yellow-400' : isDark ? 'text-gray-600' : 'text-gray-200']"
-                                             fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                        </svg>
-                                    </div>
-                                </div>
+                                        <!-- Estrellas -->
+                                        <div class="mb-2 flex gap-0.5">
+                                            <svg v-for="i in 5" :key="i"
+                                                 :class="['h-4 w-4', i <= r.puntuacion ? 'text-yellow-400' : isDark ? 'text-gray-600' : 'text-gray-200']"
+                                                 fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            </svg>
+                                        </div>
 
-                                <!-- Título + comentario -->
-                                <p v-if="r.titulo" :class="['mb-1 text-sm font-semibold', isDark ? 'text-white' : 'text-gray-900']">{{ r.titulo }}</p>
-                                <p :class="['text-sm leading-relaxed line-clamp-4', isDark ? 'text-gray-300' : 'text-gray-600']">{{ r.comentario }}</p>
+                                        <!-- Título -->
+                                        <p v-if="r.titulo" :class="['mb-1 text-sm font-semibold', isDark ? 'text-white' : 'text-gray-900']">{{ r.titulo }}</p>
 
-                                <!-- Badge puntuación -->
-                                <div class="mt-3 flex items-center justify-end">
-                                    <span :class="['rounded-full px-2.5 py-0.5 text-xs font-bold',
-                                        r.puntuacion >= 4 ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' :
-                                        r.puntuacion === 3 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400' :
-                                        'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400']">
-                                        {{ r.puntuacion }}/5
-                                    </span>
+                                        <!-- Comentario -->
+                                        <p :class="['text-sm leading-relaxed line-clamp-4', isDark ? 'text-gray-300' : 'text-gray-600']">{{ r.comentario }}</p>
+
+                                        <!-- Badge + fecha -->
+                                        <div class="mt-3 flex items-center gap-2">
+                                            <span :class="['rounded-full px-2.5 py-0.5 text-xs font-bold',
+                                                r.puntuacion >= 4 ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' :
+                                                r.puntuacion === 3 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400' :
+                                                'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400']">
+                                                {{ r.puntuacion }}/5
+                                            </span>
+                                            <span :class="['text-xs', isDark ? 'text-gray-600' : 'text-gray-400']">{{ r.created_at }}</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- ── Info del usuario (derecha) ── -->
+                                    <div :class="['flex w-20 shrink-0 flex-col items-center gap-1.5 border-l pl-4 pt-0.5 text-center', isDark ? 'border-gray-700' : 'border-gray-100']">
+                                        <div :class="['flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white shadow-sm', avatarColor(r.inicial)]">
+                                            {{ r.inicial }}
+                                        </div>
+                                        <p :class="['w-full truncate text-xs font-semibold leading-tight', isDark ? 'text-white' : 'text-gray-900']">{{ r.nombre }}</p>
+                                        <p v-if="r.email" :class="['w-full break-all text-[10px] font-mono leading-tight', isDark ? 'text-gray-500' : 'text-gray-400']">{{ r.email }}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -711,7 +715,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                             <p :class="['text-sm', isDark ? 'text-gray-400' : 'text-gray-500']">
-                                Para dejar una reseña necesitas haber completado un pedido en esta tienda.
+                                Para dejar una reseña necesitas haber recibido un pedido en esta tienda en los últimos 30 días.
                             </p>
                         </div>
                     </div>

@@ -17,82 +17,172 @@ const {
     vaciarCarrito,
 } = useCarrito();
 
-/** Envío gratis a partir de 50 € */
 const gastosEnvio = computed(() => (totalPrecio.value >= 50 ? 0 : totalPrecio.value > 0 ? 2.5 : 0));
-
-/** Total final incluyendo envío */
-const totalFinal = computed(() => totalPrecio.value + gastosEnvio.value);
-
-/** Vaciar carrito */
+const totalFinal  = computed(() => totalPrecio.value + gastosEnvio.value);
 const handleVaciar = () => vaciarCarrito();
 
-// ─── Checkout modal ─────────────────────────────────────────────────────────
+// ─── Checkout multi-step ──────────────────────────────────────────────────────
 const mostrarCheckout = ref(false);
-const enviando        = ref(false);
+const step            = ref(1); // 1: envío, 2: pago, 3: procesando
 const errores         = ref({});
+const erroresPago     = ref({});
 
-const form = ref({
-    direccion_envio:   user.value?.direccion  ?? '',
-    telefono_contacto: user.value?.telefono   ?? '',
+const envioForm = ref({
+    direccion_envio:   '',
+    telefono_contacto: '',
     notas:             '',
 });
 
+const pagoForm = ref({
+    titular:    '',
+    numero:     '',
+    expiry:     '',
+    cvv:        '',
+    metodo:     'tarjeta', // tarjeta | bizum
+});
+
 const abrirCheckout = () => {
-    if (!user.value) {
-        router.visit(route('login'));
-        return;
-    }
-    // Re-sincronizar con datos del usuario por si cambió
-    form.value.direccion_envio   = form.value.direccion_envio   || user.value?.direccion  || '';
-    form.value.telefono_contacto = form.value.telefono_contacto || user.value?.telefono   || '';
-    errores.value = {};
+    if (!user.value) { router.visit(route('login')); return; }
+    envioForm.value.direccion_envio   = user.value?.direccion  || '';
+    envioForm.value.telefono_contacto = user.value?.telefono   || '';
+    envioForm.value.notas             = '';
+    pagoForm.value = { titular: '', numero: '', expiry: '', cvv: '', metodo: 'tarjeta' };
+    errores.value     = {};
+    erroresPago.value = {};
+    step.value        = 1;
     mostrarCheckout.value = true;
 };
 
-const cerrarCheckout = () => { mostrarCheckout.value = false; };
+const cerrarCheckout = () => { if (step.value !== 3) mostrarCheckout.value = false; };
 
-const confirmarPedido = () => {
+// ── Step 1: validar datos de envío ───────────────────────────────────────────
+const siguientePaso = () => {
     errores.value = {};
-
-    // Validación básica cliente
-    if (!form.value.direccion_envio.trim()) {
+    if (!envioForm.value.direccion_envio.trim()) {
         errores.value.direccion_envio = 'La dirección de envío es obligatoria.';
         return;
     }
-    if (!form.value.telefono_contacto.trim()) {
+    if (!envioForm.value.telefono_contacto.trim()) {
         errores.value.telefono_contacto = 'El teléfono de contacto es obligatorio.';
         return;
     }
-
-    enviando.value = true;
-
-    router.post(route('pedidos.store'), {
-        items: items.value.map(i => ({
-            id:           i.id,
-            cantidad:     i.cantidad,
-            precio:       i.precio,
-            nombre:       i.nombre,
-            tienda_id:    i.tienda_id,
-            tienda_nombre:i.tienda_nombre,
-            imagen:       i.imagen,
-            unidad:       i.unidad,
-        })),
-        direccion_envio:   form.value.direccion_envio.trim(),
-        telefono_contacto: form.value.telefono_contacto.trim(),
-        notas:             form.value.notas.trim(),
-    }, {
-        onSuccess: () => {
-            vaciarCarrito();
-            mostrarCheckout.value = false;
-        },
-        onError: (e) => {
-            errores.value = e;
-        },
-        onFinish: () => {
-            enviando.value = false;
-        },
-    });
+    step.value = 2;
 };
+
+// ── Helpers de formateo de tarjeta ───────────────────────────────────────────
+const formatCardNumber = (val) => {
+    const digits = val.replace(/\D/g, '').slice(0, 16);
+    return digits.replace(/(.{4})/g, '$1 ').trim();
+};
+
+const formatExpiry = (val) => {
+    const digits = val.replace(/\D/g, '').slice(0, 4);
+    if (digits.length >= 3) return digits.slice(0, 2) + '/' + digits.slice(2);
+    return digits;
+};
+
+const onCardInput = (e) => {
+    pagoForm.value.numero = formatCardNumber(e.target.value);
+};
+
+const onExpiryInput = (e) => {
+    pagoForm.value.expiry = formatExpiry(e.target.value);
+};
+
+const onCvvInput = (e) => {
+    pagoForm.value.cvv = e.target.value.replace(/\D/g, '').slice(0, 4);
+};
+
+// Luhn check para simular validación real
+const luhnCheck = (num) => {
+    const digits = num.replace(/\D/g, '');
+    if (digits.length < 13) return false;
+    let sum = 0;
+    let alt = false;
+    for (let i = digits.length - 1; i >= 0; i--) {
+        let n = parseInt(digits[i]);
+        if (alt) { n *= 2; if (n > 9) n -= 9; }
+        sum += n;
+        alt = !alt;
+    }
+    return sum % 10 === 0;
+};
+
+const cardBrand = computed(() => {
+    const n = pagoForm.value.numero.replace(/\D/g, '');
+    if (/^4/.test(n)) return 'visa';
+    if (/^5[1-5]|^2[2-7]/.test(n)) return 'mastercard';
+    if (/^3[47]/.test(n)) return 'amex';
+    return null;
+});
+
+// ── Step 2: validar pago y procesar ──────────────────────────────────────────
+const procesando = ref(false);
+
+const pagar = () => {
+    erroresPago.value = {};
+
+    if (pagoForm.value.metodo === 'tarjeta') {
+        if (!pagoForm.value.titular.trim()) {
+            erroresPago.value.titular = 'El nombre del titular es obligatorio.';
+        }
+        const digits = pagoForm.value.numero.replace(/\D/g, '');
+        if (digits.length < 16 || !luhnCheck(digits)) {
+            erroresPago.value.numero = 'Número de tarjeta no válido.';
+        }
+        const [mes, anio] = pagoForm.value.expiry.split('/');
+        const ahora = new Date();
+        const mesN = parseInt(mes); const anioN = 2000 + parseInt(anio ?? '0');
+        if (!mes || !anio || mesN < 1 || mesN > 12 || anioN < ahora.getFullYear() ||
+            (anioN === ahora.getFullYear() && mesN < ahora.getMonth() + 1)) {
+            erroresPago.value.expiry = 'Fecha de caducidad no válida.';
+        }
+        if (!pagoForm.value.cvv || pagoForm.value.cvv.length < 3) {
+            erroresPago.value.cvv = 'CVV no válido.';
+        }
+        if (Object.keys(erroresPago.value).length) return;
+    }
+
+    // Pasar a step 3: animación de procesamiento
+    step.value = 3;
+    procesando.value = true;
+
+    // Simular procesamiento (~2 s) y luego enviar al backend
+    setTimeout(() => {
+        router.post(route('pedidos.store'), {
+            items: items.value.map(i => ({
+                id:            i.id,
+                cantidad:      i.cantidad,
+                precio:        i.precio,
+                nombre:        i.nombre,
+                tienda_id:     i.tienda_id,
+                tienda_nombre: i.tienda_nombre,
+                imagen:        i.imagen,
+                unidad:        i.unidad,
+            })),
+            direccion_envio:   envioForm.value.direccion_envio.trim(),
+            telefono_contacto: envioForm.value.telefono_contacto.trim(),
+            notas:             envioForm.value.notas.trim(),
+        }, {
+            onSuccess: () => {
+                vaciarCarrito();
+                mostrarCheckout.value = false;
+            },
+            onError: (e) => {
+                procesando.value = false;
+                step.value = 1;
+                errores.value = e;
+            },
+        });
+    }, 2200);
+};
+
+// Título del paso
+const stepTitle = computed(() => ({
+    1: 'Datos de entrega',
+    2: 'Método de pago',
+    3: 'Procesando pago…',
+}[step.value]));
 </script>
 
 <template>
@@ -166,17 +256,17 @@ const confirmarPedido = () => {
                             <div
                                 v-for="item in grupo.items"
                                 :key="item.id"
-                                class="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                                class="flex flex-wrap items-center gap-3 sm:gap-4 px-3 sm:px-5 py-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
                             >
                                 <!-- Imagen -->
                                 <img
                                     :src="item.imagen || '/images/logo.png'"
                                     :alt="item.nombre"
-                                    class="h-20 w-20 flex-shrink-0 rounded-xl object-cover shadow-sm"
+                                    class="h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0 rounded-xl object-cover shadow-sm"
                                 />
 
                                 <!-- Info -->
-                                <div class="min-w-0 flex-1">
+                                <div class="min-w-0 flex-1 basis-[calc(100%-5rem)] sm:basis-auto">
                                     <h3 class="font-semibold text-gray-900 dark:text-white">{{ item.nombre }}</h3>
                                     <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{{ item.precio.toFixed(2) }}€ / {{ item.unidad }}</p>
                                 </div>
@@ -205,7 +295,7 @@ const confirmarPedido = () => {
                                 </div>
 
                                 <!-- Precio de línea -->
-                                <div class="w-20 text-right">
+                                <div class="ml-auto sm:ml-0 sm:w-20 text-right">
                                     <span class="font-bold text-gray-900 dark:text-white">{{ (item.precio * item.cantidad).toFixed(2) }}€</span>
                                 </div>
 
@@ -312,7 +402,7 @@ const confirmarPedido = () => {
         </main>
     </div>
 
-    <!-- ── Modal de checkout ────────────────────────────────────────────────── -->
+    <!-- ── Modal de checkout multi-step ───────────────────────────────────────── -->
     <Transition
         enter-active-class="transition duration-300"
         enter-from-class="opacity-0"
@@ -323,7 +413,7 @@ const confirmarPedido = () => {
     >
         <div
             v-if="mostrarCheckout"
-            class="fixed inset-0 z-50 flex items-end justify-center bg-black/50 px-4 pb-0 sm:items-center sm:pb-4"
+            class="fixed inset-0 z-50 flex items-end justify-center bg-black/60 px-4 pb-0 sm:items-center sm:pb-4"
             @click.self="cerrarCheckout"
         >
             <Transition
@@ -337,15 +427,28 @@ const confirmarPedido = () => {
             >
                 <div class="w-full max-w-lg overflow-hidden rounded-t-3xl bg-white dark:bg-gray-800 shadow-2xl sm:rounded-3xl">
 
-                    <!-- Header del modal -->
+                    <!-- ── Header ─────────────────────────────────────────── -->
                     <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 px-6 py-5">
-                        <div>
-                            <h2 class="text-xl font-extrabold text-gray-900 dark:text-white">Confirmar pedido</h2>
-                            <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{{ totalItems }} producto{{ totalItems !== 1 ? 's' : '' }} · <span class="font-semibold text-primary-600">{{ totalFinal.toFixed(2) }}€</span></p>
+                        <div class="flex items-center gap-3">
+                            <!-- Step indicator -->
+                            <div class="flex items-center gap-1.5">
+                                <div v-for="s in [1, 2, 3]" :key="s"
+                                     :class="['h-2 rounded-full transition-all duration-300',
+                                         s === step ? 'w-6 bg-primary-500' :
+                                         s < step   ? 'w-2 bg-primary-300' : 'w-2 bg-gray-200 dark:bg-gray-600']">
+                                </div>
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-extrabold text-gray-900 dark:text-white leading-tight">{{ stepTitle }}</h2>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    {{ totalItems }} producto{{ totalItems !== 1 ? 's' : '' }} ·
+                                    <span class="font-semibold text-primary-600">{{ totalFinal.toFixed(2) }}€</span>
+                                </p>
+                            </div>
                         </div>
-                        <button
+                        <button v-if="step < 3"
                             @click="cerrarCheckout"
-                            class="flex h-9 w-9 items-center justify-center rounded-full text-gray-400 dark:text-gray-500 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300"
+                            class="flex h-9 w-9 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -353,12 +456,18 @@ const confirmarPedido = () => {
                         </button>
                     </div>
 
-                    <!-- Formulario -->
-                    <div class="space-y-5 px-6 py-6">
+                    <!-- ══════════ STEP 1: DATOS DE ENTREGA ══════════ -->
+                    <Transition
+                        enter-active-class="transition duration-200"
+                        enter-from-class="opacity-0 translate-x-4"
+                        enter-to-class="opacity-100 translate-x-0"
+                        mode="out-in"
+                    >
+                    <div v-if="step === 1" key="step1" class="px-6 py-6 space-y-5">
 
                         <!-- Error de stock -->
-                        <div v-if="errores.stock" class="flex items-start gap-3 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
-                            <svg class="mt-0.5 h-4 w-4 shrink-0 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div v-if="errores.stock" class="flex items-start gap-3 rounded-xl bg-red-50 dark:bg-red-900/20 px-4 py-3 text-sm text-red-700 dark:text-red-400">
+                            <svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             {{ errores.stock }}
@@ -367,19 +476,15 @@ const confirmarPedido = () => {
                         <!-- Dirección de envío -->
                         <div>
                             <label class="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                Dirección de envío <span class="text-red-500">*</span>
+                                Dirección de entrega <span class="text-red-500">*</span>
                             </label>
                             <textarea
-                                v-model="form.direccion_envio"
+                                v-model="envioForm.direccion_envio"
                                 rows="2"
                                 placeholder="Calle, número, piso… Municipio, Lanzarote"
-                                :class="[
-                                    'w-full resize-none rounded-xl border px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:ring-2',
-                                    errores.direccion_envio
-                                        ? 'border-red-400 focus:ring-red-300 dark:border-red-500'
-                                        : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
-                                    'dark:bg-gray-700 dark:text-white dark:placeholder-gray-500',
-                                ]"
+                                :class="['w-full resize-none rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2',
+                                    errores.direccion_envio ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
+                                    'dark:bg-gray-700 dark:text-white dark:placeholder-gray-500']"
                             />
                             <p v-if="errores.direccion_envio" class="mt-1 text-xs text-red-500">{{ errores.direccion_envio }}</p>
                         </div>
@@ -390,16 +495,12 @@ const confirmarPedido = () => {
                                 Teléfono de contacto <span class="text-red-500">*</span>
                             </label>
                             <input
-                                v-model="form.telefono_contacto"
+                                v-model="envioForm.telefono_contacto"
                                 type="tel"
                                 placeholder="+34 600 000 000"
-                                :class="[
-                                    'w-full rounded-xl border px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:ring-2',
-                                    errores.telefono_contacto
-                                        ? 'border-red-400 focus:ring-red-300 dark:border-red-500'
-                                        : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
-                                    'dark:bg-gray-700 dark:text-white dark:placeholder-gray-500',
-                                ]"
+                                :class="['w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2',
+                                    errores.telefono_contacto ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
+                                    'dark:bg-gray-700 dark:text-white dark:placeholder-gray-500']"
                             />
                             <p v-if="errores.telefono_contacto" class="mt-1 text-xs text-red-500">{{ errores.telefono_contacto }}</p>
                         </div>
@@ -407,13 +508,14 @@ const confirmarPedido = () => {
                         <!-- Notas -->
                         <div>
                             <label class="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                Notas del pedido <span class="text-xs font-normal text-gray-400">(opcional)</span>
+                                Notas del pedido
+                                <span class="text-xs font-normal text-gray-400">(opcional)</span>
                             </label>
                             <textarea
-                                v-model="form.notas"
+                                v-model="envioForm.notas"
                                 rows="2"
                                 placeholder="Instrucciones de entrega, alergias, preferencias…"
-                                class="w-full resize-none rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-primary-400 focus:ring-2 focus:ring-primary-200"
+                                class="w-full resize-none rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500 px-4 py-3 text-sm outline-none transition focus:border-primary-400 focus:ring-2 focus:ring-primary-200"
                             />
                         </div>
 
@@ -425,40 +527,251 @@ const confirmarPedido = () => {
                             </div>
                             <div class="mt-1 flex justify-between text-gray-600 dark:text-gray-400">
                                 <span>Envío</span>
-                                <span :class="gastosEnvio === 0 ? 'font-medium text-green-600' : 'font-medium text-gray-800'">
+                                <span :class="gastosEnvio === 0 ? 'font-semibold text-green-600' : 'font-medium text-gray-800 dark:text-gray-200'">
                                     {{ gastosEnvio === 0 ? 'GRATIS' : gastosEnvio.toFixed(2) + '€' }}
                                 </span>
-                            </div>
-                            <div v-if="gastosEnvio > 0" class="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                                Envío gratis a partir de 50€
                             </div>
                             <div class="mt-3 flex justify-between border-t border-gray-200 dark:border-gray-600 pt-3">
                                 <span class="font-bold text-gray-900 dark:text-white">Total</span>
                                 <span class="text-lg font-extrabold text-primary-600">{{ totalFinal.toFixed(2) }}€</span>
                             </div>
                         </div>
+
+                        <!-- Botón siguiente -->
+                        <div class="border-t border-gray-100 dark:border-gray-700 pt-4">
+                            <button
+                                @click="siguientePaso"
+                                class="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-500 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-primary-600 hover:shadow-md"
+                            >
+                                Continuar al pago
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    </Transition>
+
+                    <!-- ══════════ STEP 2: PAGO ══════════ -->
+                    <Transition
+                        enter-active-class="transition duration-200"
+                        enter-from-class="opacity-0 translate-x-4"
+                        enter-to-class="opacity-100 translate-x-0"
+                        mode="out-in"
+                    >
+                    <div v-if="step === 2" key="step2" class="px-6 py-6 space-y-5">
+
+                        <!-- Selector de método -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <button
+                                @click="pagoForm.metodo = 'tarjeta'"
+                                :class="['flex items-center gap-2.5 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-all',
+                                    pagoForm.metodo === 'tarjeta'
+                                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
+                                        : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300']"
+                            >
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                                </svg>
+                                Tarjeta
+                            </button>
+                            <button
+                                @click="pagoForm.metodo = 'bizum'"
+                                :class="['flex items-center gap-2.5 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-all',
+                                    pagoForm.metodo === 'bizum'
+                                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
+                                        : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300']"
+                            >
+                                <span class="font-black text-base leading-none">B</span>
+                                Bizum
+                            </button>
+                        </div>
+
+                        <!-- ── Formulario tarjeta ── -->
+                        <div v-if="pagoForm.metodo === 'tarjeta'" class="space-y-4">
+
+                            <!-- Número de tarjeta -->
+                            <div>
+                                <label class="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                    Número de tarjeta <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <input
+                                        :value="pagoForm.numero"
+                                        @input="onCardInput"
+                                        type="text"
+                                        inputmode="numeric"
+                                        maxlength="19"
+                                        placeholder="1234 5678 9012 3456"
+                                        autocomplete="cc-number"
+                                        :class="['w-full rounded-xl border py-3 pl-4 pr-12 text-sm font-mono tracking-widest outline-none transition focus:ring-2',
+                                            erroresPago.numero ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
+                                            'dark:bg-gray-700 dark:text-white dark:placeholder-gray-500']"
+                                    />
+                                    <!-- Card brand icon -->
+                                    <div class="absolute right-3 top-1/2 -translate-y-1/2">
+                                        <span v-if="cardBrand === 'visa'" class="text-xs font-black italic text-blue-700 dark:text-blue-400">VISA</span>
+                                        <span v-else-if="cardBrand === 'mastercard'" class="text-xs font-bold text-orange-600 dark:text-orange-400">MC</span>
+                                        <span v-else-if="cardBrand === 'amex'" class="text-xs font-bold text-blue-500 dark:text-blue-300">AMEX</span>
+                                        <svg v-else class="h-5 w-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p v-if="erroresPago.numero" class="mt-1 text-xs text-red-500">{{ erroresPago.numero }}</p>
+                            </div>
+
+                            <!-- Titular -->
+                            <div>
+                                <label class="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                    Titular de la tarjeta <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                    v-model="pagoForm.titular"
+                                    type="text"
+                                    placeholder="NOMBRE APELLIDOS"
+                                    autocomplete="cc-name"
+                                    :class="['w-full rounded-xl border px-4 py-3 text-sm uppercase outline-none transition focus:ring-2',
+                                        erroresPago.titular ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
+                                        'dark:bg-gray-700 dark:text-white dark:placeholder-gray-500']"
+                                />
+                                <p v-if="erroresPago.titular" class="mt-1 text-xs text-red-500">{{ erroresPago.titular }}</p>
+                            </div>
+
+                            <!-- Caducidad + CVV -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                        Caducidad <span class="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        :value="pagoForm.expiry"
+                                        @input="onExpiryInput"
+                                        type="text"
+                                        inputmode="numeric"
+                                        maxlength="5"
+                                        placeholder="MM/AA"
+                                        autocomplete="cc-exp"
+                                        :class="['w-full rounded-xl border px-4 py-3 text-sm font-mono outline-none transition focus:ring-2',
+                                            erroresPago.expiry ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
+                                            'dark:bg-gray-700 dark:text-white dark:placeholder-gray-500']"
+                                    />
+                                    <p v-if="erroresPago.expiry" class="mt-1 text-xs text-red-500">{{ erroresPago.expiry }}</p>
+                                </div>
+                                <div>
+                                    <label class="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                        CVV <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <input
+                                            :value="pagoForm.cvv"
+                                            @input="onCvvInput"
+                                            type="password"
+                                            inputmode="numeric"
+                                            maxlength="4"
+                                            placeholder="•••"
+                                            autocomplete="cc-csc"
+                                            :class="['w-full rounded-xl border px-4 py-3 text-sm font-mono outline-none transition focus:ring-2',
+                                                erroresPago.cvv ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
+                                                'dark:bg-gray-700 dark:text-white dark:placeholder-gray-500']"
+                                        />
+                                    </div>
+                                    <p v-if="erroresPago.cvv" class="mt-1 text-xs text-red-500">{{ erroresPago.cvv }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── Bizum ── -->
+                        <div v-else class="rounded-xl border border-gray-200 dark:border-gray-600 px-5 py-6 text-center">
+                            <div class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30">
+                                <span class="text-2xl font-black text-primary-600">B</span>
+                            </div>
+                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Pagar con Bizum</p>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Introduce tu número de teléfono y confirma el pago en tu app bancaria.
+                            </p>
+                            <input
+                                type="tel"
+                                placeholder="+34 600 000 000"
+                                class="mt-4 w-full rounded-xl border border-gray-200 dark:border-gray-600 px-4 py-3 text-center text-sm dark:bg-gray-700 dark:text-white outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200"
+                            />
+                        </div>
+
+                        <!-- Importe a pagar -->
+                        <div class="flex items-center justify-between rounded-xl bg-gray-50 dark:bg-gray-700/50 px-4 py-3">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">Importe total</span>
+                            <span class="text-xl font-extrabold text-primary-600">{{ totalFinal.toFixed(2) }}€</span>
+                        </div>
+
+                        <!-- Sellos de seguridad -->
+                        <div class="flex flex-wrap items-center justify-center gap-3 text-xs text-gray-400">
+                            <span class="flex items-center gap-1">
+                                <svg class="h-3.5 w-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                </svg>
+                                SSL 256-bit
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <svg class="h-3.5 w-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                </svg>
+                                3D Secure
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <svg class="h-3.5 w-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Datos cifrados
+                            </span>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="border-t border-gray-100 dark:border-gray-700 pt-4 flex flex-col gap-3">
+                            <button
+                                @click="pagar"
+                                class="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-green-700 hover:shadow-md"
+                            >
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                </svg>
+                                Pagar {{ totalFinal.toFixed(2) }}€
+                            </button>
+                            <button
+                                @click="step = 1"
+                                class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                            >
+                                ← Volver a datos de entrega
+                            </button>
+                        </div>
+                    </div>
+                    </Transition>
+
+                    <!-- ══════════ STEP 3: PROCESANDO ══════════ -->
+                    <div v-if="step === 3" key="step3" class="px-6 py-16 flex flex-col items-center text-center">
+                        <!-- Animación spinner + texto secuencial -->
+                        <div class="relative mb-6 flex h-20 w-20 items-center justify-center">
+                            <svg class="absolute inset-0 h-20 w-20 animate-spin text-primary-200" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                            </svg>
+                            <div class="h-12 w-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                                <svg class="h-6 w-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Procesando tu pago</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 max-w-xs">
+                            Estamos verificando tu pago de forma segura. Por favor, no cierres esta ventana…
+                        </p>
+                        <div class="mt-6 flex items-center gap-2 rounded-full bg-green-50 dark:bg-green-900/20 px-4 py-2 text-xs font-medium text-green-700 dark:text-green-400">
+                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                            Conexión segura SSL
+                        </div>
                     </div>
 
-                    <!-- Footer con botón -->
-                    <div class="border-t border-gray-100 dark:border-gray-700 px-6 py-4">
-                        <button
-                            @click="confirmarPedido"
-                            :disabled="enviando"
-                            class="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-500 py-4 text-sm font-bold text-white shadow-sm transition-all hover:bg-primary-600 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                            <svg v-if="enviando" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                            </svg>
-                            <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            {{ enviando ? 'Procesando…' : 'Confirmar pedido' }}
-                        </button>
-                        <p class="mt-3 text-center text-xs text-gray-400">
-                            Al confirmar aceptas nuestros <span class="text-primary-500 cursor-pointer hover:underline">términos de servicio</span>
-                        </p>
-                    </div>
                 </div>
             </Transition>
         </div>

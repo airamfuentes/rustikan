@@ -31,20 +31,29 @@ Route::get('/tienda/{tienda:slug}', function (\App\Models\Tienda $tienda) {
 
     // Cargar reseñas con datos parciales del usuario
     $resenas = $tienda->resenas()
-        ->with('user:id,name')
+        ->with('user:id,name,email')
         ->orderByDesc('created_at')
         ->get()
         ->map(function ($r) {
             $nombre = $r->user?->name ?? 'Cliente';
-            // Privacy: show only first name + first letter of last name
+            $email  = $r->user?->email ?? '';
             $partes = explode(' ', $nombre);
-            $nombreMostrado = $partes[0] . (count($partes) > 1 ? ' ' . strtoupper(substr($partes[1], 0, 1)) . '.' : '');
+
+            // Mask email: ai***@gmail.com
+            $emailMostrado = '';
+            if ($email) {
+                [$local, $domain] = array_pad(explode('@', $email, 2), 2, '');
+                $visible = substr($local, 0, min(2, strlen($local)));
+                $emailMostrado = $visible . str_repeat('*', max(3, strlen($local) - 2)) . '@' . $domain;
+            }
+
             return [
                 'id'          => $r->id,
                 'puntuacion'  => $r->puntuacion,
                 'titulo'      => $r->titulo,
                 'comentario'  => $r->comentario,
-                'nombre'      => $nombreMostrado,
+                'nombre'      => $partes[0] . (count($partes) > 1 ? ' ' . strtoupper(substr($partes[1], 0, 1)) . '.' : ''),
+                'email'       => $emailMostrado,
                 'inicial'     => strtoupper(substr($partes[0], 0, 1)),
                 'user_id'     => $r->user_id,
                 'created_at'  => $r->created_at->diffForHumans(),
@@ -67,7 +76,8 @@ Route::get('/tienda/{tienda:slug}', function (\App\Models\Tienda $tienda) {
         if (!$userReview) {
             $canReview = \App\Models\PedidoItem::where('tienda_id', $tienda->id)
                 ->whereHas('pedido', fn($q) => $q->where('user_id', $user->id)
-                    ->whereIn('estado', ['entregado', 'completado']))
+                    ->whereIn('estado', ['entregado', 'completado'])
+                    ->where('created_at', '>=', now()->subDays(30)))
                 ->exists();
         }
     }
@@ -89,6 +99,16 @@ Route::get('/tienda/{tienda:slug}', function (\App\Models\Tienda $tienda) {
 Route::get('/carrito', function () {
     return Inertia::render('Carrito');
 })->name('carrito');
+
+// Chat IA (Gemini) — público, con rate limit por IP/usuario
+Route::post('/api/chat-ia', [\App\Http\Controllers\ChatIAController::class, 'send'])
+    ->middleware('throttle:30,1')
+    ->name('chat.ia');
+
+// Solicitud de creación de tienda (requiere autenticación)
+Route::post('/vende-con-nosotros', [\App\Http\Controllers\SolicitudCreacionTiendaController::class, 'store'])
+    ->middleware(['auth', 'throttle:5,10'])
+    ->name('solicitud-tienda.store');
 
 // ── Páginas informativas ────────────────────────────────────────────────────
 Route::prefix('')->name('info.')->group(function () {
@@ -185,6 +205,11 @@ Route::middleware(['auth', 'admin', 'throttle:60,1'])->prefix('admin')->name('ad
     Route::post('/solicitudes/{solicitud}/rechazar', [\App\Http\Controllers\Admin\SolicitudController::class, 'rechazar'])->name('solicitudes.rechazar');
     Route::post('/solicitudes/tienda/{tienda}/aprobar-todas', [\App\Http\Controllers\Admin\SolicitudController::class, 'aprobarTodas'])->name('solicitudes.aprobar-todas');
     Route::post('/solicitudes/tienda/{tienda}/rechazar-todas', [\App\Http\Controllers\Admin\SolicitudController::class, 'rechazarTodas'])->name('solicitudes.rechazar-todas');
+
+    // Solicitudes de creación de nueva tienda
+    Route::get('/solicitudes-creacion', [\App\Http\Controllers\Admin\SolicitudCreacionTiendaController::class, 'index'])->name('solicitudes-creacion.index');
+    Route::post('/solicitudes-creacion/{solicitud}/aprobar', [\App\Http\Controllers\Admin\SolicitudCreacionTiendaController::class, 'aprobar'])->name('solicitudes-creacion.aprobar');
+    Route::post('/solicitudes-creacion/{solicitud}/rechazar', [\App\Http\Controllers\Admin\SolicitudCreacionTiendaController::class, 'rechazar'])->name('solicitudes-creacion.rechazar');
 });
 
 require __DIR__.'/auth.php';

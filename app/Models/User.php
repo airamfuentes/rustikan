@@ -29,9 +29,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'telefono',
         'direccion',
         'edad',
-        'telefono_verificado_at',
-        'sms_verification_token',
-        'sms_verification_expires_at',
+        'email_verification_code',
+        'email_verification_expires_at',
     ];
 
     /**
@@ -42,7 +41,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
-        'sms_verification_token',
+        'email_verification_code',
     ];
 
     /**
@@ -53,10 +52,9 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'telefono_verificado_at' => 'datetime',
-            'sms_verification_expires_at' => 'datetime',
+            'email_verified_at'             => 'datetime',
+            'email_verification_expires_at' => 'datetime',
+            'password'                      => 'hashed',
         ];
     }
 
@@ -103,11 +101,18 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Send the email verification notification (custom branded template).
+     * Send the email verification notification using a 6-digit code.
      */
     public function sendEmailVerificationNotification(): void
     {
-        $this->notify(new VerificacionEmail());
+        $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        $this->forceFill([
+            'email_verification_code'         => $code,
+            'email_verification_expires_at'   => now()->addHours(24),
+        ])->save();
+
+        $this->notify(new VerificacionEmail($code));
     }
 
     /**

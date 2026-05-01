@@ -2,41 +2,27 @@
 
 namespace App\Notifications;
 
-use Illuminate\Auth\Notifications\VerifyEmail as BaseVerifyEmail;
+use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\URL;
 
-class VerificacionEmail extends BaseVerifyEmail
+class VerificacionEmail extends Notification
 {
-    /**
-     * Build the mail representation of the notification.
-     */
-    public function toMail(mixed $notifiable): MailMessage
-    {
-        $verificationUrl = $this->verificationUrl($notifiable);
+    public function __construct(
+        public readonly string $codigo
+    ) {}
 
-        return (new MailMessage)
-            ->subject('Verifica tu correo electrónico — Rustikan')
-            ->view('emails.verificacion', [
-                'url'            => $verificationUrl,
-                'nombreUsuario'  => $notifiable->name,
-            ]);
+    public function via(mixed $notifiable): array
+    {
+        return ['mail'];
     }
 
-    /**
-     * Get the verification URL for the given notifiable.
-     */
-    protected function verificationUrl(mixed $notifiable): string
+    public function toMail(mixed $notifiable): MailMessage
     {
-        return URL::temporarySignedRoute(
-            'verification.verify',
-            Carbon::now()->addMinutes(Config::get('auth.verification.expire', 60)),
-            [
-                'id'   => $notifiable->getKey(),
-                'hash' => sha1($notifiable->getEmailForVerification()),
-            ]
-        );
+        return (new MailMessage)
+            ->subject('Tu código de verificación — Rustikan')
+            ->view('emails.verificacion', [
+                'codigo'         => $this->codigo,
+                'nombreUsuario'  => $notifiable->name,
+            ]);
     }
 }

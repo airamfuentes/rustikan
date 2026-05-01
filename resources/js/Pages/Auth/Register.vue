@@ -7,7 +7,6 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import Recaptcha from '@/Components/Recaptcha.vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
-import { ref } from 'vue';
 
 const RECAPTCHA_SITE_KEY = usePage().props.recaptchaSiteKey;
 
@@ -18,40 +17,19 @@ const form = useForm({
     email: '',
     edad: '',
     direccion: '',
-    sms_verification_code: '',
     accept_terms: false,
     password: '',
     password_confirmation: '',
     turnstile_token: '',
 });
 
-const smsSent = ref(false);
-
 const onVerify  = (token) => { form.turnstile_token = token; };
 const onExpire  = ()      => { form.turnstile_token = ''; };
 const onError   = ()      => { form.turnstile_token = ''; };
 
-const sendSmsCode = () => {
-    if (!form.telefono) {
-        form.setError('telefono', 'Introduce un número de teléfono para recibir el SMS.');
-        return;
-    }
-
-    smsSent.value = true;
-    form.clearErrors('telefono');
-};
-
 const submit = () => {
-    if (!smsSent.value) {
-        form.setError('sms_verification_code', 'Envía primero el código SMS (simulado).');
-        return;
-    }
-
     form.post(route('register'), {
-        onSuccess: () => {
-            smsSent.value = false;
-        },
-        onFinish: () => form.reset('password', 'password_confirmation', 'sms_verification_code'),
+        onFinish: () => form.reset('password', 'password_confirmation'),
     });
 };
 </script>
@@ -100,14 +78,13 @@ const submit = () => {
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
-                    <InputLabel for="telefono" value="Teléfono" />
+                    <InputLabel for="telefono" value="Teléfono (opcional)" />
 
                     <TextInput
                         id="telefono"
                         type="tel"
                         class="mt-1 block w-full"
                         v-model="form.telefono"
-                        required
                         autocomplete="tel"
                         placeholder="Ej: 612345678"
                     />
@@ -160,37 +137,6 @@ const submit = () => {
                 />
 
                 <InputError class="mt-2" :message="form.errors.direccion" />
-            </div>
-
-            <div class="rounded-lg border border-tierra-200 dark:border-tierra-800 bg-tierra-50 dark:bg-tierra-900/10 p-4">
-                <p class="text-sm font-medium text-tierra-800 dark:text-tierra-200">Verificación por SMS</p>
-                <p class="mt-1 text-xs text-tierra-600 dark:text-tierra-400">
-                    Simulación activa: por ahora puedes introducir cualquier código para continuar.
-                </p>
-
-                <div class="mt-3 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
-                    <div>
-                        <InputLabel for="sms_verification_code" value="Código SMS" />
-                        <TextInput
-                            id="sms_verification_code"
-                            type="text"
-                            class="mt-1 block w-full"
-                            v-model="form.sms_verification_code"
-                            :disabled="!smsSent"
-                            placeholder="Ej: 123456"
-                        />
-                    </div>
-
-                    <button
-                        type="button"
-                        @click="sendSmsCode"
-                        class="inline-flex items-center justify-center rounded-md border border-primary-500 dark:border-primary-600 px-4 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 transition hover:bg-primary-50 dark:hover:bg-primary-900/20"
-                    >
-                        {{ smsSent ? 'Reenviar SMS' : 'Enviar SMS' }}
-                    </button>
-                </div>
-
-                <InputError class="mt-2" :message="form.errors.sms_verification_code" />
             </div>
 
             <div>

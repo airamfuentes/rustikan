@@ -10,9 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rules;
-use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -34,16 +32,15 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name'                 => 'required|string|max:255',
-            'apellidos'            => 'required|string|max:255',
-            'telefono'             => 'required|string|min:9|max:20|unique:users,telefono',
-            'email'                => 'required|string|lowercase|email|max:255|unique:'.User::class,
-            'edad'                 => 'nullable|integer|min:14|max:120',
-            'direccion'            => 'nullable|string|max:500',
-            'sms_verification_code'=> 'required|string|min:4|max:10',
-            'accept_terms'         => 'accepted',
-            'password'             => ['required', 'confirmed', Rules\Password::defaults()],
-            'turnstile_token'      => 'required|string',
+            'name'          => 'required|string|max:255',
+            'apellidos'     => 'required|string|max:255',
+            'telefono'      => 'nullable|string|min:9|max:20',
+            'email'         => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'edad'          => 'nullable|integer|min:14|max:120',
+            'direccion'     => 'nullable|string|max:500',
+            'accept_terms'  => 'accepted',
+            'password'      => ['required', 'confirmed', Rules\Password::defaults()],
+            'turnstile_token' => 'required|string',
         ]);
 
         // Verify Turnstile with Cloudflare
@@ -60,14 +57,13 @@ class RegisteredUserController extends Controller
         }
 
         $user = User::create([
-            'name' => $request->name,
+            'name'      => $request->name,
             'apellidos' => $request->apellidos,
-            'telefono' => $request->telefono,
-            'email' => $request->email,
-            'edad' => $request->edad,
+            'telefono'  => $request->telefono,
+            'email'     => $request->email,
+            'edad'      => $request->edad,
             'direccion' => $request->direccion,
-            'telefono_verificado_at' => now(),
-            'password' => Hash::make($request->password),
+            'password'  => Hash::make($request->password),
         ]);
 
         event(new Registered($user));

@@ -1,6 +1,20 @@
 <template>
     <div class="min-h-screen bg-white dark:bg-gray-900">
         <Head title="Vende con nosotros - Rustikan" />
+
+        <!-- Toast container -->
+        <div class="pointer-events-none fixed inset-0 z-[9999] flex flex-col items-end justify-start gap-3 p-6">
+            <Toast
+                v-for="(toast, index) in toasts"
+                :key="toast.id"
+                :type="toast.type"
+                :title="toast.title"
+                :message="toast.message"
+                :active="index === 0"
+                @close="removeToast(toast.id)"
+            />
+        </div>
+
         <NavbarPublico />
 
         <!-- Hero -->
@@ -15,7 +29,7 @@
                 <p class="mt-4 text-xl text-primary-100 max-w-2xl mx-auto">
                     Abre tu tienda en Rustikan y lleva tus productos locales a más personas de Lanzarote.
                 </p>
-                <a href="mailto:hola@rustikan.com?subject=Quiero ser productor en Rustikan"
+                <a href="#solicitar"
                     class="mt-8 inline-block rounded-full bg-white text-primary-700 px-8 py-3 font-bold text-sm hover:bg-primary-50 transition-colors shadow-lg">
                     Solicitar mi tienda →
                 </a>
@@ -39,7 +53,7 @@
 
                 <!-- Proceso -->
                 <h2 class="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">¿Cómo funciona?</h2>
-                <div class="relative">
+                <div class="relative mb-16">
                     <div class="absolute left-6 top-0 bottom-0 w-px bg-primary-200 dark:bg-primary-800 hidden sm:block"></div>
                     <div class="space-y-8">
                         <div v-for="(paso, i) in pasos" :key="i" class="flex gap-5 items-start">
@@ -52,14 +66,194 @@
                     </div>
                 </div>
 
-                <!-- CTA final -->
-                <div class="mt-16 rounded-2xl bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-800 p-8 text-center">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">¿Listo para empezar?</h3>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">Escríbenos y te ayudamos a configurar tu tienda en menos de 24 horas.</p>
-                    <a href="mailto:hola@rustikan.com?subject=Quiero ser productor en Rustikan"
-                        class="inline-block rounded-full bg-primary-600 text-white px-8 py-3 font-semibold text-sm hover:bg-primary-700 transition-colors">
-                        Contactar ahora
-                    </a>
+                <!-- ── Formulario de solicitud ────────────────────────────── -->
+                <div id="solicitar" class="scroll-mt-24">
+
+                    <!-- Éxito -->
+                    <Transition
+                        enter-active-class="transition duration-500"
+                        enter-from-class="opacity-0 scale-95"
+                        enter-to-class="opacity-100 scale-100"
+                    >
+                    <div v-if="enviado" class="rounded-2xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-10 text-center">
+                        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-800">
+                            <svg class="h-8 w-8 text-green-600 dark:text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-green-800 dark:text-green-200 mb-2">¡Solicitud enviada!</h3>
+                        <p class="text-sm text-green-700 dark:text-green-300">
+                            Hemos recibido tu solicitud y te hemos enviado un email de confirmación. Revisaremos tus datos y nos pondremos en contacto contigo en menos de 48 horas.
+                        </p>
+                    </div>
+                    </Transition>
+
+                    <!-- Auth gate (no hay sesión) -->
+                    <div v-if="!user && !enviado"
+                         class="rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 p-10 text-center">
+                        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-800">
+                            <svg class="h-8 w-8 text-amber-600 dark:text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-amber-800 dark:text-amber-200 mb-2">Inicia sesión para solicitar tu tienda</h3>
+                        <p class="text-sm text-amber-700 dark:text-amber-300 mb-6">
+                            Necesitas una cuenta en Rustikan para enviar tu solicitud. Es rápido y gratuito.
+                        </p>
+                        <div class="flex flex-wrap items-center justify-center gap-3">
+                            <Link :href="route('login')"
+                                  class="rounded-xl bg-primary-600 px-6 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-primary-700">
+                                Iniciar sesión
+                            </Link>
+                            <Link :href="route('register')"
+                                  class="rounded-xl border border-primary-300 dark:border-primary-700 bg-white dark:bg-gray-800 px-6 py-2.5 text-sm font-bold text-primary-700 dark:text-primary-300 shadow-sm transition hover:bg-primary-50 dark:hover:bg-gray-700">
+                                Crear cuenta gratis
+                            </Link>
+                        </div>
+                    </div>
+
+                    <!-- Formulario (sesión activa) -->
+                    <div v-if="user && !enviado" class="rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-8">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1">Solicita tu tienda en Rustikan</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-8">Rellena el formulario y nos ponemos en contacto contigo en 48 horas.</p>
+
+                        <form @submit.prevent="enviar" class="space-y-6">
+                            <!-- Fila 1: Nombre tienda + categoría -->
+                            <div class="grid gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Nombre de la tienda <span class="text-red-500">*</span>
+                                    </label>
+                                    <input v-model="form.nombre_tienda" type="text" required maxlength="120"
+                                        placeholder="Ej: Miel de Lanzarote"
+                                        :class="inputClass(form.errors.nombre_tienda)" />
+                                    <p v-if="form.errors.nombre_tienda" class="mt-1 text-xs text-red-500">{{ form.errors.nombre_tienda }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Categoría <span class="text-red-500">*</span>
+                                    </label>
+                                    <select v-model="form.categoria" required :class="inputClass(form.errors.categoria)">
+                                        <option value="" disabled>Selecciona una categoría</option>
+                                        <option v-for="c in categorias" :key="c" :value="c">{{ c }}</option>
+                                    </select>
+                                    <p v-if="form.errors.categoria" class="mt-1 text-xs text-red-500">{{ form.errors.categoria }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Fila 2: Nombre contacto + email -->
+                            <div class="grid gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Nombre de contacto <span class="text-red-500">*</span>
+                                    </label>
+                                    <input v-model="form.nombre_contacto" type="text" required maxlength="120"
+                                        placeholder="Tu nombre y apellidos"
+                                        :class="inputClass(form.errors.nombre_contacto)" />
+                                    <p v-if="form.errors.nombre_contacto" class="mt-1 text-xs text-red-500">{{ form.errors.nombre_contacto }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Email <span class="text-red-500">*</span>
+                                    </label>
+                                    <input v-model="form.email" type="email" required maxlength="180"
+                                        placeholder="tu@email.com"
+                                        :class="inputClass(form.errors.email)" />
+                                    <p v-if="form.errors.email" class="mt-1 text-xs text-red-500">{{ form.errors.email }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Fila 3: Teléfono + municipio -->
+                            <div class="grid gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Teléfono</label>
+                                    <input v-model="form.telefono" type="tel" maxlength="20"
+                                        placeholder="Ej: 628 000 000"
+                                        :class="inputClass(form.errors.telefono)" />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Municipio</label>
+                                    <select v-model="form.municipio" :class="inputClass(form.errors.municipio)">
+                                        <option value="">-- Selecciona --</option>
+                                        <option v-for="m in municipios" :key="m" :value="m">{{ m }}</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Dirección -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dirección</label>
+                                <input v-model="form.direccion" type="text" maxlength="200"
+                                    placeholder="Calle, número, localidad..."
+                                    :class="inputClass(form.errors.direccion)" />
+                            </div>
+
+                            <!-- Fila: web + instagram -->
+                            <div class="grid gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Página web</label>
+                                    <input v-model="form.web" type="url" maxlength="200"
+                                        placeholder="https://..."
+                                        :class="inputClass(form.errors.web)" />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Instagram</label>
+                                    <div class="flex">
+                                        <span :class="['flex items-center rounded-l-xl border border-r-0 px-3 text-sm text-gray-500', isDark ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-200']">@</span>
+                                        <input v-model="form.instagram" type="text" maxlength="80"
+                                            placeholder="tutienda"
+                                            :class="['flex-1 rounded-l-none rounded-r-xl', inputClass(form.errors.instagram)]" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Descripción de la tienda -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Descripción de tu negocio <span class="text-red-500">*</span>
+                                </label>
+                                <textarea v-model="form.descripcion" required rows="3" minlength="20" maxlength="1000"
+                                    placeholder="¿Qué haces? ¿De dónde eres? ¿Cuánto llevas en el sector?..."
+                                    :class="['resize-none', inputClass(form.errors.descripcion)]"></textarea>
+                                <div class="flex justify-between mt-1">
+                                    <p v-if="form.errors.descripcion" class="text-xs text-red-500">{{ form.errors.descripcion }}</p>
+                                    <span class="ml-auto text-xs text-gray-400">{{ form.descripcion.length }}/1000</span>
+                                </div>
+                            </div>
+
+                            <!-- Productos que vende -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Productos que vendes <span class="text-red-500">*</span>
+                                </label>
+                                <textarea v-model="form.productos_descripcion" required rows="3" minlength="20" maxlength="1000"
+                                    placeholder="Describe qué productos ofrecerías: tipos, formatos, precio aproximado, estacionalidad..."
+                                    :class="['resize-none', inputClass(form.errors.productos_descripcion)]"></textarea>
+                                <div class="flex justify-between mt-1">
+                                    <p v-if="form.errors.productos_descripcion" class="text-xs text-red-500">{{ form.errors.productos_descripcion }}</p>
+                                    <span class="ml-auto text-xs text-gray-400">{{ form.productos_descripcion.length }}/1000</span>
+                                </div>
+                            </div>
+
+                            <!-- Submit -->
+                            <div class="flex items-center justify-end gap-3 pt-2">
+                                <p class="text-xs text-gray-400 flex-1">
+                                    Al enviar aceptas que procesemos tus datos para gestionar tu solicitud.
+                                </p>
+                                <button
+                                    type="submit"
+                                    :disabled="form.processing"
+                                    class="flex items-center gap-2 rounded-xl bg-primary-600 px-8 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow-md disabled:opacity-60"
+                                >
+                                    <svg v-if="form.processing" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                    </svg>
+                                    {{ form.processing ? 'Enviando...' : 'Enviar solicitud' }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
 
             </div>
@@ -70,12 +264,93 @@
 </template>
 
 <script setup>
-import { Head } from '@inertiajs/vue3';
+import { ref, computed, watch } from 'vue';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import FooterPublico from '@/Components/FooterPublico.vue';
+import Toast from '@/Components/Toast.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
 import { Gift, Smartphone, CreditCard, Package, BarChart3, Globe } from 'lucide-vue-next';
-useDarkMode();
+
+const { isDark } = useDarkMode();
+const page = usePage();
+
+const user    = computed(() => page.props.auth?.user ?? null);
+const enviado = computed(() => !!page.props.flash?.solicitud_enviada);
+
+// ── Toast ────────────────────────────────────────────────────────────────────
+const toasts = ref([]);
+const addToast    = (type, title, message = '') => {
+    toasts.value.push({ id: Date.now() + Math.random(), type, title, message });
+};
+const removeToast = (id) => {
+    toasts.value = toasts.value.filter(t => t.id !== id);
+};
+watch(
+    () => page.props.flash,
+    (flash) => {
+        if (!flash) return;
+        if (flash.success) addToast('success', '¡Éxito!',  flash.success);
+        if (flash.error)   addToast('error',   'Error',    flash.error);
+        if (flash.info)    addToast('info',     'Info',     flash.info);
+        if (flash.warning) addToast('warning',  'Aviso',   flash.warning);
+    },
+    { deep: true, immediate: true },
+);
+
+const form = useForm({
+    nombre_tienda:         '',
+    nombre_contacto:       page.props.auth?.user?.name  ?? '',
+    email:                 page.props.auth?.user?.email ?? '',
+    telefono:              '',
+    categoria:             '',
+    descripcion:           '',
+    municipio:             '',
+    direccion:             '',
+    web:                   '',
+    instagram:             '',
+    productos_descripcion: '',
+});
+
+const enviar = () => {
+    form.post(route('solicitud-tienda.store'), { preserveScroll: true });
+};
+
+const inputClass = (error) => [
+    'w-full rounded-xl px-4 py-2.5 text-sm outline-none transition border focus:ring-2',
+    isDark.value
+        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500 focus:border-primary-500 focus:ring-primary-500/20'
+        : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:ring-primary-500/20',
+    error ? 'border-red-400' : '',
+];
+
+const categorias = [
+    'Alimentación y bebidas',
+    'Aceites y conservas',
+    'Vinos y licores',
+    'Miel y apicultura',
+    'Quesos y lácteos',
+    'Carnes y embutidos',
+    'Frutas y verduras',
+    'Panadería y repostería',
+    'Artesanía',
+    'Cosmética natural',
+    'Plantas y flores',
+    'Textil y ropa',
+    'Madera y decoración',
+    'Cerámica y alfarería',
+    'Otra',
+];
+
+const municipios = [
+    'Arrecife',
+    'Teguise',
+    'San Bartolomé',
+    'Tías',
+    'Yaiza',
+    'Tinajo',
+    'Haría',
+];
 
 const beneficios = [
     { icon: Gift,       titulo: 'Alta gratuita',              desc: 'Crear tu tienda en Rustikan no tiene ningún coste de entrada. Solo pagas cuando vendes.' },
@@ -87,9 +362,9 @@ const beneficios = [
 ];
 
 const pasos = [
-    { titulo: 'Contáctanos', desc: 'Escríbenos un email o usa el formulario de contacto. Cuéntanos qué produces y dónde estás.' },
-    { titulo: 'Revisamos tu solicitud', desc: 'En menos de 24 horas revisamos tu perfil y te informamos de los próximos pasos.' },
-    { titulo: 'Creamos tu tienda', desc: 'Configuramos tu tienda y te damos acceso al panel de gestión para que subas tus productos.' },
-    { titulo: 'Empieza a vender', desc: 'Tu tienda aparece en Rustikan y empieza a recibir pedidos de clientes de toda la isla.' },
+    { titulo: 'Rellena el formulario',    desc: 'Cuéntanos qué produces, dónde estás y cómo contactarte. Solo tardas 2 minutos.' },
+    { titulo: 'Revisamos tu solicitud',   desc: 'En menos de 48 horas revisamos tu perfil y te informamos de los próximos pasos.' },
+    { titulo: 'Creamos tu tienda',        desc: 'Configuramos tu tienda y te damos acceso al panel de gestión para que subas tus productos.' },
+    { titulo: 'Empieza a vender',         desc: 'Tu tienda aparece en Rustikan y empieza a recibir pedidos de clientes de toda la isla.' },
 ];
 </script>
