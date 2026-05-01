@@ -30,7 +30,7 @@ class LoginRequest extends FormRequest
         return [
             'email'           => ['required', 'string', 'email'],
             'password'        => ['required', 'string'],
-            'recaptcha_token' => ['required', 'string'],
+            'turnstile_token' => ['required', 'string'],
         ];
     }
 
@@ -41,15 +41,15 @@ class LoginRequest extends FormRequest
      */
     public function verifyRecaptcha(): void
     {
-        $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
-            'secret'   => config('services.recaptcha.secret'),
-            'response' => $this->input('recaptcha_token'),
+        $response = Http::asForm()->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
+            'secret'   => config('services.turnstile.secret'),
+            'response' => $this->input('turnstile_token'),
             'remoteip' => $this->ip(),
         ]);
 
         if (! $response->json('success')) {
             throw ValidationException::withMessages([
-                'recaptcha_token' => 'La verificación reCAPTCHA ha fallado. Inténtalo de nuevo.',
+                'turnstile_token' => 'La verificación ha fallado. Inténtalo de nuevo.',
             ]);
         }
     }

@@ -25,8 +25,8 @@
         @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])
         @inertiaHead
 
-        <!-- Google reCAPTCHA v2 -->
-        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+        <!-- Cloudflare Turnstile -->
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     </head>
     <body class="font-sans antialiased">
         @inertia

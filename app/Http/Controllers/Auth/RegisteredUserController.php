@@ -43,19 +43,19 @@ class RegisteredUserController extends Controller
             'sms_verification_code'=> 'required|string|min:4|max:10',
             'accept_terms'         => 'accepted',
             'password'             => ['required', 'confirmed', Rules\Password::defaults()],
-            'recaptcha_token'      => 'required|string',
+            'turnstile_token'      => 'required|string',
         ]);
 
-        // Verify reCAPTCHA with Google
-        $recaptcha = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
-            'secret'   => config('services.recaptcha.secret'),
-            'response' => $request->input('recaptcha_token'),
+        // Verify Turnstile with Cloudflare
+        $turnstile = Http::asForm()->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
+            'secret'   => config('services.turnstile.secret'),
+            'response' => $request->input('turnstile_token'),
             'remoteip' => $request->ip(),
         ]);
 
-        if (! $recaptcha->json('success')) {
+        if (! $turnstile->json('success')) {
             throw ValidationException::withMessages([
-                'recaptcha_token' => 'La verificación reCAPTCHA ha fallado. Inténtalo de nuevo.',
+                'turnstile_token' => 'La verificación ha fallado. Inténtalo de nuevo.',
             ]);
         }
 

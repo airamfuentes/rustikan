@@ -25,19 +25,19 @@ const form = useForm({
     email: '',
     password: '',
     remember: false,
-    recaptcha_token: '',
+    turnstile_token: '',
 });
 
-const onVerify  = (token) => { form.recaptcha_token = token; };
-const onExpire  = ()      => { form.recaptcha_token = ''; };
-const onError   = ()      => { form.recaptcha_token = ''; };
+const onVerify  = (token) => { form.turnstile_token = token; };
+const onExpire  = ()      => { form.turnstile_token = ''; };
+const onError   = ()      => { form.turnstile_token = ''; };
 
 const submit = () => {
     form.post(route('login'), {
         onFinish: () => form.reset('password'),
         onError: () => {
             recaptchaRef.value?.reset();
-            form.recaptcha_token = '';
+            form.turnstile_token = '';
         },
     });
 };
@@ -101,7 +101,7 @@ const submit = () => {
                     @expire="onExpire"
                     @error="onError"
                 />
-                <InputError class="mt-1" :message="form.errors.recaptcha_token" />
+                <InputError class="mt-1" :message="form.errors.turnstile_token" />
             </div>
 
             <div class="mt-4 flex items-center justify-end">
@@ -115,8 +115,8 @@ const submit = () => {
 
                 <PrimaryButton
                     class="ms-4"
-                    :class="{ 'opacity-25': form.processing || !form.recaptcha_token }"
-                    :disabled="form.processing || !form.recaptcha_token"
+                    :class="{ 'opacity-25': form.processing || !form.turnstile_token }"
+                    :disabled="form.processing || !form.turnstile_token"
                 >
                     Iniciar Sesión
                 </PrimaryButton>

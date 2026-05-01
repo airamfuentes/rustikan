@@ -12,8 +12,8 @@ let widgetId  = null;
 let pollTimer = null;
 
 const tryRender = () => {
-    if (window.grecaptcha && window.grecaptcha.render && container.value) {
-        widgetId = window.grecaptcha.render(container.value, {
+    if (window.turnstile && container.value) {
+        widgetId = window.turnstile.render(container.value, {
             sitekey:          props.sitekey,
             callback:         (token) => emit('verify', token),
             'expired-callback': ()    => emit('expire'),
@@ -24,17 +24,19 @@ const tryRender = () => {
 };
 
 onMounted(() => {
-    // Poll until the reCAPTCHA script (loaded async in blade) is ready
     pollTimer = setInterval(tryRender, 100);
 });
 
 onBeforeUnmount(() => {
     clearInterval(pollTimer);
+    if (window.turnstile && widgetId !== null) {
+        window.turnstile.remove(widgetId);
+    }
 });
 
 const reset = () => {
-    if (window.grecaptcha && widgetId !== null) {
-        window.grecaptcha.reset(widgetId);
+    if (window.turnstile && widgetId !== null) {
+        window.turnstile.reset(widgetId);
     }
 };
 

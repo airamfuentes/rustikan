@@ -22,14 +22,14 @@ const form = useForm({
     accept_terms: false,
     password: '',
     password_confirmation: '',
-    recaptcha_token: '',
+    turnstile_token: '',
 });
 
 const smsSent = ref(false);
 
-const onVerify  = (token) => { form.recaptcha_token = token; };
-const onExpire  = ()      => { form.recaptcha_token = ''; };
-const onError   = ()      => { form.recaptcha_token = ''; };
+const onVerify  = (token) => { form.turnstile_token = token; };
+const onExpire  = ()      => { form.turnstile_token = ''; };
+const onError   = ()      => { form.turnstile_token = ''; };
 
 const sendSmsCode = () => {
     if (!form.telefono) {
@@ -245,7 +245,7 @@ const submit = () => {
                     @expire="onExpire"
                     @error="onError"
                 />
-                <InputError class="mt-1" :message="form.errors.recaptcha_token" />
+                <InputError class="mt-1" :message="form.errors.turnstile_token" />
             </div>
 
             <div class="flex flex-col-reverse items-start gap-3 pt-1 sm:flex-row sm:items-center sm:justify-between">
@@ -258,8 +258,8 @@ const submit = () => {
 
                 <PrimaryButton
                     class="w-full justify-center sm:w-auto"
-                    :class="{ 'opacity-25': form.processing || !form.recaptcha_token }"
-                    :disabled="form.processing || !form.recaptcha_token"
+                    :class="{ 'opacity-25': form.processing || !form.turnstile_token }"
+                    :disabled="form.processing || !form.turnstile_token"
                 >
                     Crear cuenta
                 </PrimaryButton>
