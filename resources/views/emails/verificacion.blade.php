@@ -57,6 +57,3 @@
         </tr>
     </table>
 @endsection
-        </tr>
-    </table>
-@endsection
