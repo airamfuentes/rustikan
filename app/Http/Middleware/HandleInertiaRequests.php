@@ -47,6 +47,7 @@ class HandleInertiaRequests extends Middleware
                 'info'    => $request->session()->get('info'),
                 'warning' => $request->session()->get('warning'),
             ],
+            'recaptchaSiteKey' => config('services.recaptcha.key'),
         ];
     }
 }
