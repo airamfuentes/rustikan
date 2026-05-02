@@ -1,9 +1,8 @@
-<script setup>
+﻿<script setup>
 import { ref, computed } from 'vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import Toast from '@/Components/Toast.vue';
-import { watch } from 'vue';
 
 const props = defineProps({
     tienda:     { type: Object, required: true },
@@ -12,17 +11,14 @@ const props = defineProps({
 
 const page = usePage();
 
-// ── Toasts ────────────────────────────────────────────────────────────────
+// ── Toasts (únicamente para errores locales, flash lo maneja el layout) ────────
 const toasts = ref([]);
 const addToast = (type, title, msg) => {
     const id = Date.now();
     toasts.value.push({ id, type, title, message: msg });
     setTimeout(() => { toasts.value = toasts.value.filter(t => t.id !== id); }, 4000);
 };
-watch(() => page.props.flash, (flash) => {
-    if (flash?.success) addToast('success', 'Éxito',  flash.success);
-    if (flash?.error)   addToast('error',   'Error',  flash.error);
-}, { deep: true });
+// Flash handled by LayoutAutenticado — no duplicate watcher needed
 
 // ── Helper imagen ─────────────────────────────────────────────────────────
 const imgUrl = (path) => {
@@ -102,10 +98,8 @@ const onPortadaUrlInput = () => {
 
 // ── Submit ────────────────────────────────────────────────────────────────
 const submit = () => {
-    form.post(route('owner.tienda.update'), {
+    form.post(route('solicitar.tienda'), {
         forceFormData: true,
-        onSuccess: () => addToast('success', 'Guardado', 'Los cambios se han guardado correctamente.'),
-        onError: () => addToast('error', 'Error', 'Revisa los campos e inténtalo de nuevo.'),
     });
 };
 </script>
@@ -130,7 +124,7 @@ const submit = () => {
         </template>
 
         <!-- Toasts -->
-        <div class="pointer-events-none fixed inset-0 z-[60] flex flex-col items-end justify-start space-y-4 p-6">
+        <div class="pointer-events-none fixed top-20 right-4 z-[9999] flex flex-col items-end gap-3 max-w-sm w-full">
             <Toast v-for="(t, index) in toasts" :key="t.id" :type="t.type" :title="t.title" :message="t.message" :active="index === 0" @close="toasts = toasts.filter(x => x.id !== t.id)" />
         </div>
 

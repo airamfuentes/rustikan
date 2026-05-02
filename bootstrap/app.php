@@ -18,8 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-            'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
-            'owner' => \App\Http\Middleware\EnsureUserIsOwner::class,
+            'admin'    => \App\Http\Middleware\EnsureUserIsAdmin::class,
+            'owner'    => \App\Http\Middleware\EnsureUserIsOwner::class,
+            'supplier' => \App\Http\Middleware\EnsureUserIsSupplier::class,
         ]);
 
         $middleware->trustProxies(at: env('TRUSTED_PROXIES', '*'), headers:

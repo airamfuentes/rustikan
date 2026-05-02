@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import MapaTiendas from '@/Components/MapaTiendas.vue';
@@ -58,7 +58,7 @@ onMounted(() => {
     <Head title="Tiendas - Rustikan" />
 
     <!-- Toast container -->
-    <div class="pointer-events-none fixed inset-0 z-[9999] flex flex-col items-end justify-start gap-3 p-6">
+    <div class="pointer-events-none fixed top-20 right-4 z-[9999] flex flex-col items-end gap-3 max-w-sm w-full">
         <Toast
             v-for="(toast, index) in toasts"
             :key="toast.id"

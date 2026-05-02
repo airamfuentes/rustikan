@@ -38,7 +38,7 @@ const pagoForm = ref({
     numero:     '',
     expiry:     '',
     cvv:        '',
-    metodo:     'tarjeta', // tarjeta | bizum
+    metodo:     'tarjeta',
 });
 
 const abrirCheckout = () => {
@@ -163,6 +163,7 @@ const pagar = () => {
             direccion_envio:   envioForm.value.direccion_envio.trim(),
             telefono_contacto: envioForm.value.telefono_contacto.trim(),
             notas:             envioForm.value.notas.trim(),
+            metodo_pago:       pagoForm.value.metodo,
         }, {
             onSuccess: () => {
                 vaciarCarrito();
@@ -561,31 +562,42 @@ const stepTitle = computed(() => ({
                     >
                     <div v-if="step === 2" key="step2" class="px-6 py-6 space-y-5">
 
-                        <!-- Selector de método -->
+                        <!-- ── Selector de método de pago ── -->
                         <div class="grid grid-cols-2 gap-3">
+                            <!-- Tarjeta -->
                             <button
+                                type="button"
                                 @click="pagoForm.metodo = 'tarjeta'"
-                                :class="['flex items-center gap-2.5 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-all',
+                                :class="['flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-sm font-semibold transition-all',
                                     pagoForm.metodo === 'tarjeta'
                                         ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
                                         : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300']"
                             >
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                                 </svg>
-                                Tarjeta
+                                <span>Tarjeta</span>
                             </button>
+                            <!-- RustiCoin -->
                             <button
-                                @click="pagoForm.metodo = 'bizum'"
-                                :class="['flex items-center gap-2.5 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-all',
-                                    pagoForm.metodo === 'bizum'
-                                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
+                                type="button"
+                                @click="pagoForm.metodo = 'rusticoin'"
+                                :disabled="(user?.rusticoin_balance ?? 0) < totalFinal"
+                                :class="['flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed',
+                                    pagoForm.metodo === 'rusticoin'
+                                        ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300'
                                         : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300']"
                             >
-                                <span class="font-black text-base leading-none">B</span>
-                                Bizum
+                                <span class="text-xl">🪙</span>
+                                <span>RustiCoin</span>
+                                <span :class="['text-xs font-normal', (user?.rusticoin_balance ?? 0) >= totalFinal ? 'text-green-600 dark:text-green-400' : 'text-red-500']">
+                                    {{ Number(user?.rusticoin_balance ?? 0).toFixed(2) }} RC disponibles
+                                </span>
                             </button>
                         </div>
+                        <p v-if="pagoForm.metodo === 'rusticoin' && (user?.rusticoin_balance ?? 0) < totalFinal" class="text-xs text-red-500 text-center">
+                            Saldo insuficiente. <Link :href="route('monedero.index')" class="underline font-semibold">Recargar monedero</Link>
+                        </p>
 
                         <!-- ── Formulario tarjeta ── -->
                         <div v-if="pagoForm.metodo === 'tarjeta'" class="space-y-4">
@@ -679,22 +691,6 @@ const stepTitle = computed(() => ({
                                     <p v-if="erroresPago.cvv" class="mt-1 text-xs text-red-500">{{ erroresPago.cvv }}</p>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- ── Bizum ── -->
-                        <div v-else class="rounded-xl border border-gray-200 dark:border-gray-600 px-5 py-6 text-center">
-                            <div class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30">
-                                <span class="text-2xl font-black text-primary-600">B</span>
-                            </div>
-                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Pagar con Bizum</p>
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                Introduce tu número de teléfono y confirma el pago en tu app bancaria.
-                            </p>
-                            <input
-                                type="tel"
-                                placeholder="+34 600 000 000"
-                                class="mt-4 w-full rounded-xl border border-gray-200 dark:border-gray-600 px-4 py-3 text-center text-sm dark:bg-gray-700 dark:text-white outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200"
-                            />
                         </div>
 
                         <!-- Importe a pagar -->

@@ -105,9 +105,17 @@ const faqs = [
     {
         categoria: 'Para productores',
         items: [
-            { q: '¿Cómo puedo vender en Rustikan?', a: 'Contáctanos a través del formulario de "Vende con nosotros" o escríbenos a hola@rustikan.com. Revisaremos tu solicitud y te configuramos la tienda.' },
+            { q: '¿Cómo puedo vender en Rustikan?', a: 'Contáctanos a través del formulario de "Vende con nosotros" o eschíbenos a info@rustikan.com. Revisaremos tu solicitud y te configuramos la tienda.' },
             { q: '¿Tiene coste abrir una tienda?', a: 'El alta es gratuita. Rustikan aplica una pequeña comisión sobre cada venta para mantener la plataforma y los servicios de reparto.' },
             { q: '¿Quién gestiona las entregas?', a: 'Rustikan cuenta con repartidores locales. También puedes gestionar tus propias entregas si lo prefieres.' },
+        ],
+    },
+    {
+        categoria: 'Asistente IA',
+        items: [
+            { q: '¿Qué es Rusti, el asistente de Rustikan?', a: 'Rusti es nuestro asistente virtual potenciado por inteligencia artificial. Puedes acceder a él desde el botón naranja en la esquina inferior derecha de cualquier página. Está disponible 24/7 para ayudarte con dudas sobre productos, pedidos, tiendas y más.' },
+            { q: '¿Qué puede hacer el asistente IA?', a: 'Rusti puede responder preguntas sobre cómo comprar, cómo vender, información sobre categorías y productores locales, estado de pedidos y cualquier duda general sobre la plataforma.' },
+            { q: '¿Guarda el asistente mi conversación?', a: 'La conversación se guarda temporalmente en tu dispositivo para que puedas continuarla si cierras el chat. Al cerrar sesión, el historial se elimina automáticamente.' },
         ],
     },
 ];

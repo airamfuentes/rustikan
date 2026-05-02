@@ -15,7 +15,7 @@
                 <p class="mt-4 text-xl text-orange-100 max-w-2xl mx-auto">
                     Trabaja a tu ritmo, gana dinero haciendo entregas locales y sé parte de la economía de tu isla.
                 </p>
-                <a href="mailto:hola@rustikan.com?subject=Quiero ser repartidor en Rustikan"
+                <a href="mailto:info@rustikan.com?subject=Quiero ser repartidor en Rustikan"
                     class="mt-8 inline-block rounded-full bg-white text-orange-600 px-8 py-3 font-bold text-sm hover:bg-orange-50 transition-colors shadow-lg">
                     Unirme al equipo →
                 </a>
@@ -55,7 +55,7 @@
                 <div class="rounded-2xl bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 p-8 text-center">
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">¿Te animas?</h3>
                     <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">Mándanos un email con tus datos y te explicamos todo el proceso de incorporación.</p>
-                    <a href="mailto:hola@rustikan.com?subject=Quiero ser repartidor en Rustikan"
+                    <a href="mailto:info@rustikan.com?subject=Quiero ser repartidor en Rustikan"
                         class="inline-block rounded-full bg-orange-500 text-white px-8 py-3 font-semibold text-sm hover:bg-orange-600 transition-colors">
                         Solicitar información
                     </a>

@@ -77,6 +77,11 @@ class Tienda extends Model
         return $this->hasMany(SolicitudCambio::class);
     }
 
+    public function pedidoItems()
+    {
+        return $this->hasMany(PedidoItem::class);
+    }
+
     /**
      * Recalculate valoracion + total_resenas from the resenas table
      */

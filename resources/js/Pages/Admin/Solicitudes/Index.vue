@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, computed, watch } from 'vue';
 import { Head, Link, router, usePage, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
@@ -12,19 +12,8 @@ const props = defineProps({
 });
 
 const page = usePage();
-
-// ── Toasts ─────────────────────────────────────────────────────────────────
+// Flash handled by LayoutAutenticado — no duplicate watcher needed
 const toasts = ref([]);
-const addToast = (type, title, msg) => {
-    const id = Date.now();
-    toasts.value.push({ id, type, title, message: msg });
-    setTimeout(() => { toasts.value = toasts.value.filter(t => t.id !== id); }, 4500);
-};
-watch(() => page.props.flash, (flash) => {
-    if (flash?.success) addToast('success', 'Listo', flash.success);
-    if (flash?.error)   addToast('error',   'Error',  flash.error);
-    if (flash?.info)    addToast('info',    'Info',   flash.info);
-}, { deep: true });
 
 // ── Filtro por estado (server-side) ──────────────────────────────────────
 const estadoFiltro = ref(props.estado);
@@ -179,8 +168,8 @@ watch(() => props.estado, (v) => { estadoFiltro.value = v; });
             </div>
         </template>
 
-        <!-- Toasts -->
-        <div class="pointer-events-none fixed inset-0 z-[60] flex flex-col items-end justify-start space-y-4 p-6">
+        <!-- Toasts (local actions) -->
+        <div class="pointer-events-none fixed top-20 right-4 z-[9999] flex flex-col items-end gap-3 max-w-sm w-full">
             <Toast v-for="(t, index) in toasts" :key="t.id" :type="t.type" :title="t.title" :message="t.message"
                    :active="index === 0"
                    @close="toasts = toasts.filter(x => x.id !== t.id)" />

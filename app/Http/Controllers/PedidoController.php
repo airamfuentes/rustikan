@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Mail\PedidoConfirmado;
+use App\Models\Notificacion;
 use App\Models\Pedido;
 use App\Models\PedidoItem;
 use App\Models\Producto;
 use App\Models\Resena;
+use App\Models\RusticoinTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 
@@ -32,10 +35,15 @@ class PedidoController extends Controller
             'direccion_envio'          => 'required|string|max:500',
             'telefono_contacto'        => 'required|string|max:20',
             'notas'                    => 'nullable|string|max:1000',
+            'metodo_pago'              => 'nullable|in:tarjeta,rusticoin',
         ]);
 
         try {
-            $pedido = DB::transaction(function () use ($validated) {
+            $metodoPago = $validated['metodo_pago'] ?? 'tarjeta';
+
+            $pedido = DB::transaction(function () use ($validated, $metodoPago) {
+                $user = auth()->user();
+
                 // Verificar stock para cada producto (con bloqueo optimista)
                 foreach ($validated['items'] as $item) {
                     $producto = Producto::lockForUpdate()->find($item['id']);
@@ -64,9 +72,17 @@ class PedidoController extends Controller
                 $gastosEnvio = $subtotal >= 50 ? 0.00 : 2.50;
                 $total       = $subtotal + $gastosEnvio;
 
+                // Verificar saldo RustiCoin si se usa ese método
+                if ($metodoPago === 'rusticoin') {
+                    $user->refresh(); // saldo actualizado
+                    if ((float) $user->rusticoin_balance < $total) {
+                        throw new \Exception("Saldo insuficiente en tu monedero RustiCoin. Necesitas {$total} RC, tienes " . number_format($user->rusticoin_balance, 2) . ' RC.');
+                    }
+                }
+
                 // Crear el pedido
                 $pedido = Pedido::create([
-                    'user_id'           => auth()->id(),
+                    'user_id'           => $user->id,
                     'numero_pedido'     => Pedido::generateOrderNumber(),
                     'estado'            => 'pendiente',
                     'subtotal'          => $subtotal,
@@ -75,6 +91,7 @@ class PedidoController extends Controller
                     'direccion_envio'   => $validated['direccion_envio'],
                     'telefono_contacto' => $validated['telefono_contacto'],
                     'notas'             => $validated['notas'] ?? null,
+                    'metodo_pago'       => $metodoPago,
                 ]);
 
                 // Crear items y decrementar stock
@@ -93,12 +110,54 @@ class PedidoController extends Controller
                     Producto::find($item['id'])->decrement('stock', $item['cantidad']);
                 }
 
+                // Descontar RustiCoins si aplica
+                if ($metodoPago === 'rusticoin') {
+                    $nuevoSaldo = (float) $user->rusticoin_balance - $total;
+                    $user->forceFill(['rusticoin_balance' => $nuevoSaldo])->save();
+
+                    RusticoinTransaction::create([
+                        'user_id'       => $user->id,
+                        'tipo'          => 'compra',
+                        'cantidad'      => -$total,
+                        'saldo_despues' => $nuevoSaldo,
+                        'descripcion'   => "Pago pedido #{$pedido->numero_pedido}",
+                        'pedido_id'     => $pedido->id,
+                    ]);
+                }
+
                 return $pedido;
             });
 
             // Enviar email de confirmación al comprador
-            $pedido->load(['items', 'user']);
+            $pedido->load(['items.tienda.user', 'user']);
             Mail::to($pedido->user->email)->send(new PedidoConfirmado($pedido));
+
+            // Notificar a los owners de las tiendas involucradas
+            $tiendasNotificadas = [];
+            foreach ($pedido->items as $item) {
+                if ($item->tienda && $item->tienda->user_id && !in_array($item->tienda->user_id, $tiendasNotificadas)) {
+                    $tiendasNotificadas[] = $item->tienda->user_id;
+                    Notificacion::enviar(
+                        $item->tienda->user_id,
+                        'nuevo_pedido',
+                        'Nuevo pedido recibido',
+                        "Has recibido el pedido #{$pedido->numero_pedido} por " . number_format($pedido->total, 2) . "€",
+                        route('owner.panel'),
+                        'cart',
+                        'green'
+                    );
+                }
+            }
+
+            // Notificar a los admins
+            Notificacion::enviarAdmins(
+                'nuevo_pedido',
+                'Nuevo pedido en la plataforma',
+                "Pedido #{$pedido->numero_pedido} de {$pedido->user->name} por " . number_format($pedido->total, 2) . "€",
+                route('admin.pedidos.index'),
+                'cart',
+                'primary'
+            );
 
             return redirect()
                 ->route('pedidos.confirmacion', $pedido)
@@ -160,5 +219,72 @@ class PedidoController extends Controller
             'pedidosHistorial'  => $pedidosHistorial,
             'reviewableStoreIds'=> $reviewableStoreIds,
         ]);
+    }
+
+    /**
+     * Cancelar un pedido y gestionar el reembolso.
+     */
+    public function cancelar(Request $request, Pedido $pedido)
+    {
+        // Verificar que el pedido pertenece al usuario autenticado
+        if ($pedido->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        // Solo se pueden cancelar pedidos en estado pendiente o confirmado
+        if (!in_array($pedido->estado, ['pendiente', 'confirmado'])) {
+            return back()->with('error', 'Este pedido no se puede cancelar en su estado actual.');
+        }
+
+        $validated = $request->validate([
+            'tipo_reembolso' => 'required|in:tarjeta,rusticoin',
+        ]);
+
+        DB::transaction(function () use ($pedido, $validated) {
+            $pedido->update(['estado' => 'cancelado']);
+
+            // Si el reembolso es a RustiCoin, añadir al saldo del usuario
+            if ($validated['tipo_reembolso'] === 'rusticoin' && $pedido->total > 0) {
+                $user = $pedido->user;
+                $nuevoSaldo = (float) $user->rusticoin_balance + (float) $pedido->total;
+                $user->forceFill(['rusticoin_balance' => $nuevoSaldo])->save();
+
+                RusticoinTransaction::create([
+                    'user_id'       => $user->id,
+                    'tipo'          => 'reembolso',
+                    'cantidad'      => (float) $pedido->total,
+                    'saldo_despues' => $nuevoSaldo,
+                    'descripcion'   => "Reembolso por cancelación del pedido #{$pedido->numero_pedido}",
+                    'pedido_id'     => $pedido->id,
+                ]);
+            }
+        });
+
+        $mensaje = $validated['tipo_reembolso'] === 'rusticoin'
+            ? "Pedido cancelado. Se han añadido " . number_format($pedido->total, 2) . " RC a tu monedero RustiCoin."
+            : "Pedido cancelado. El reembolso a tu tarjeta se procesará en 5-10 días hábiles.";
+
+        // Notificar al usuario
+        Notificacion::enviar(
+            $pedido->user_id,
+            'pedido_cancelado',
+            'Pedido cancelado',
+            $mensaje,
+            route('pedidos.index'),
+            'x',
+            'red'
+        );
+
+        // Notificar a admins
+        Notificacion::enviarAdmins(
+            'pedido_cancelado',
+            'Pedido cancelado por el cliente',
+            "El pedido #{$pedido->numero_pedido} ha sido cancelado por el cliente.",
+            route('admin.pedidos.show', $pedido),
+            'x',
+            'orange'
+        );
+
+        return redirect()->route('pedidos.index')->with('success', $mensaje);
     }
 }

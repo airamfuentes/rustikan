@@ -108,6 +108,6 @@
     <!-- Contacto -->
     <p style="margin:0;text-align:center;font-size:12px;color:#9CA3AF;line-height:1.6;">
         ¿Tienes alguna pregunta? Responde a este email o contáctanos en
-        <a href="mailto:hola@rustikan.com" style="color:#C97420;text-decoration:none;">hola@rustikan.com</a>
+        <a href="mailto:info@rustikan.com" style="color:#C97420;text-decoration:none;">info@rustikan.com</a>
     </p>
 @endsection

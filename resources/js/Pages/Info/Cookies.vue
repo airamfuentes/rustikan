@@ -86,7 +86,7 @@
                     <h3 class="font-semibold text-gray-900 dark:text-white mb-2">¿Tienes preguntas?</h3>
                     <p class="text-sm text-gray-600 dark:text-gray-400">
                         Si tienes alguna duda sobre nuestra política de cookies, escríbenos a
-                        <a href="mailto:privacidad@rustikan.com" class="text-primary-600 dark:text-primary-400 hover:underline">privacidad@rustikan.com</a>.
+                        <a href="mailto:info@rustikan.com" class="text-primary-600 dark:text-primary-400 hover:underline">info@rustikan.com</a>.
                     </p>
                 </div>
 
@@ -135,8 +135,7 @@ const tipos = [
 ];
 
 const servicios = [
-    { nombre: 'OpenStreetMap / Leaflet', fin: 'Visualización del mapa de tiendas' },
-    { nombre: 'Stripe / Pasarela de pago', fin: 'Procesamiento seguro de pagos' },
+    { nombre: 'Cloudflare Turnstile', fin: 'Verificación anti-bots en formularios' },
 ];
 
 const navegadores = [

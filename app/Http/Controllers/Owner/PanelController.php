@@ -138,10 +138,34 @@ class PanelController extends Controller
             ? round((($ingresosMesActual - $ingresosMesAnterior) / $ingresosMesAnterior) * 100, 1)
             : ($ingresosMesActual > 0 ? 100 : 0);
 
+        // ── Beneficios (comisión 10%) ──────────────────────────────────────────────
+        $comisionPct = 10.0;
+
+        // Ingresos brutos por mes (últimos 12 meses)
+        $beneficiosPorMes = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $fecha = Carbon::now()->subMonths($i);
+            $bruto = (float) PedidoItem::where('tienda_id', $tienda->id)
+                ->whereMonth('created_at', $fecha->month)
+                ->whereYear('created_at', $fecha->year)
+                ->sum('subtotal');
+            $comision = round($bruto * $comisionPct / 100, 2);
+            $beneficiosPorMes[] = [
+                'mes'      => $fecha->format('M y'),
+                'bruto'    => round($bruto, 2),
+                'comision' => $comision,
+                'neto'     => round($bruto - $comision, 2),
+            ];
+        }
+
+        $totalBruto    = round((float) $totalIngresos, 2);
+        $totalComision = round($totalBruto * $comisionPct / 100, 2);
+        $totalNeto     = round($totalBruto - $totalComision, 2);
+
         return Inertia::render('Owner/Panel', [
             'tienda'               => $tienda,
             'stats'                => [
-                'totalIngresos'        => round((float) $totalIngresos, 2),
+                'totalIngresos'        => $totalBruto,
                 'totalPedidos'         => $totalPedidos,
                 'totalProductos'       => $totalProductos,
                 'productosDisponibles' => $productosDisponibles,
@@ -149,7 +173,12 @@ class PanelController extends Controller
                 'totalResenas'         => $tienda->total_resenas,
                 'ingresosMesActual'    => round((float) $ingresosMesActual, 2),
                 'crecimiento'          => $crecimiento,
+                'comisionPct'          => $comisionPct,
+                'totalComision'        => $totalComision,
+                'totalNeto'            => $totalNeto,
+                'netMesActual'         => round((float) $ingresosMesActual * (1 - $comisionPct / 100), 2),
             ],
+            'beneficiosPorMes'     => $beneficiosPorMes,
             'ingresosGrafica'      => $ingresosGrafica,
             'topProductos'         => $topProductos,
             'pedidosRecientes'     => $pedidosRecientes,

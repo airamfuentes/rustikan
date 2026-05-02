@@ -35,9 +35,9 @@
                             <!-- Tienda (bloqueada) -->
                             <div>
                                 <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Tienda</label>
-                                <div class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                                <div class="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-4 py-3">
                                     <img v-if="tienda.logo" :src="`/storage/${tienda.logo}`" class="h-8 w-8 rounded-full object-cover" />
-                                    <div v-else class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-sm font-semibold text-primary-600">{{ tienda.nombre.charAt(0) }}</div>
+                                    <div v-else class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 dark:bg-gray-600 text-sm font-semibold text-primary-600 dark:text-primary-400">{{ tienda.nombre.charAt(0) }}</div>
                                     <span class="font-medium text-gray-900 dark:text-white">{{ tienda.nombre }}</span>
                                     <span class="text-sm text-gray-500 dark:text-gray-400">· {{ tienda.categoria?.nombre }}</span>
                                 </div>
@@ -86,13 +86,21 @@
                                 <!-- Unidad -->
                                 <div>
                                     <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Unidad *</label>
-                                    <input
+                                    <select
                                         v-model="form.unidad"
-                                        type="text"
-                                        placeholder="kg, unidad, litro..."
                                         required
                                         class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                                    />
+                                    >
+                                        <option value="unidad">Unidad</option>
+                                        <option value="kg">Kilogramo (kg)</option>
+                                        <option value="g">Gramo (g)</option>
+                                        <option value="litro">Litro</option>
+                                        <option value="ml">Mililitro (ml)</option>
+                                        <option value="docena">Docena</option>
+                                        <option value="caja">Caja</option>
+                                        <option value="bote">Bote</option>
+                                        <option value="bolsa">Bolsa</option>
+                                    </select>
                                     <p v-if="errors.unidad" class="mt-1 text-sm text-red-600">{{ errors.unidad }}</p>
                                 </div>
                             </div>
@@ -192,27 +200,27 @@
                                 </div>
 
                                 <!-- Oferta activa -->
-                                <div class="rounded-lg border p-4" :class="producto.oferta_activa ? 'border-green-300 bg-green-50' : ''">
+                                <div class="rounded-lg border p-4" :class="form.oferta_activa ? 'border-green-300 bg-green-50 dark:bg-green-900/20 dark:border-green-700' : 'dark:border-gray-600'">
                                     <div class="flex items-center justify-between">
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                 Oferta activa
-                                                <span v-if="producto.oferta_activa" class="ml-1 text-green-600">?</span>
+                                                <span v-if="form.oferta_activa" class="ml-1 text-green-600">✓</span>
                                             </label>
                                             <p class="text-xs text-gray-500 dark:text-gray-400">
-                                                <span v-if="producto.precio_oferta">Precio: {{ Number(producto.precio_oferta).toFixed(2) }}€</span>
+                                                <span v-if="form.precio_oferta">Precio: {{ Number(form.precio_oferta).toFixed(2) }}€</span>
                                                 <span v-else class="text-amber-600">Introduce un precio de oferta</span>
                                             </p>
                                         </div>
                                         <button
                                             type="button"
-                                            :disabled="!producto.precio_oferta"
-                                            @click="router.post(route('admin.productos.toggle-oferta', producto.id))"
+                                            :disabled="!form.precio_oferta"
+                                            @click="form.oferta_activa = !form.oferta_activa"
                                             :class="['flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed',
-                                                producto.oferta_activa ? 'bg-green-500' : 'bg-gray-300']"
+                                                form.oferta_activa ? 'bg-green-500' : 'bg-gray-300']"
                                         >
                                             <span :class="['ml-1 h-4 w-4 rounded-full bg-white transition-transform',
-                                                producto.oferta_activa ? 'translate-x-5' : '']"></span>
+                                                form.oferta_activa ? 'translate-x-5' : '']"></span>
                                         </button>
                                     </div>
                                 </div>
@@ -258,6 +266,7 @@ const form = useForm({
     descripcion: props.producto.descripcion || '',
     precio: props.producto.precio,
     precio_oferta: props.producto.precio_oferta || '',
+    oferta_activa: props.producto.oferta_activa ?? false,
     unidad: props.producto.unidad,
     imagen: props.producto.imagen || '',
     stock: props.producto.stock,

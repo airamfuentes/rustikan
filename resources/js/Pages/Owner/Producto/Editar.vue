@@ -1,14 +1,12 @@
-<script setup>
-import { ref } from 'vue';
-import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+﻿<script setup>
+import { ref, computed, watch } from 'vue';
+import { Head, Link, useForm, usePage, router } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import Toast from '@/Components/Toast.vue';
-import { watch } from 'vue';
 import { Star } from 'lucide-vue-next';
 
 const props = defineProps({
     producto:   { type: Object, required: true },
-    categorias: { type: Array,  default: () => [] },
     tienda:     { type: Object, required: true },
 });
 
@@ -21,10 +19,7 @@ const addToast = (type, title, msg) => {
     toasts.value.push({ id, type, title, message: msg });
     setTimeout(() => { toasts.value = toasts.value.filter(t => t.id !== id); }, 4000);
 };
-watch(() => page.props.flash, (flash) => {
-    if (flash?.success) addToast('success', 'Éxito',  flash.success);
-    if (flash?.error)   addToast('error',   'Error',  flash.error);
-}, { deep: true });
+// Flash handled by LayoutAutenticado — no duplicate watcher needed
 
 const imgUrl = (path) => {
     if (!path) return null;
@@ -37,10 +32,10 @@ const imagenMode = ref('file');
 const form = useForm({
     _method:       'POST',
     nombre:        props.producto.nombre        ?? '',
-    categoria_id:  props.producto.categoria_id  ?? '',
     descripcion:   props.producto.descripcion   ?? '',
     precio:        props.producto.precio        ?? '',
     precio_oferta: props.producto.precio_oferta ?? '',
+    oferta_activa: props.producto.oferta_activa  ?? false,
     unidad:        props.producto.unidad        ?? 'kg',
     stock:         props.producto.stock         ?? 0,
     stock_minimo:  props.producto.stock_minimo  ?? 3,
@@ -73,10 +68,28 @@ const onUrlInput = () => {
 };
 
 const submit = () => {
-    form.post(route('owner.producto.update', props.producto.id), {
+    form.post(route('solicitar.producto.editar', props.producto.id), {
         forceFormData: true,
-        onSuccess: () => addToast('success', 'Guardado', 'Producto actualizado correctamente.'),
-        onError:   () => addToast('error', 'Error', 'Revisa los campos e inténtalo de nuevo.'),
+    });
+};
+
+// Precio oferta válido → habilita el toggle de oferta activa en tiempo real
+const tieneOferta = computed(() => {
+    const v = parseFloat(form.precio_oferta);
+    return !isNaN(v) && v > 0;
+});
+
+// Si se borra el precio oferta, desactivar la oferta automáticamente
+watch(tieneOferta, (val) => {
+    if (!val) form.oferta_activa = false;
+});
+
+const toggleOfertaActiva = () => {
+    if (!tieneOferta.value) return;
+    form.oferta_activa = !form.oferta_activa;
+    router.post(route('owner.producto.oferta', props.producto.id), {}, {
+        preserveScroll: true,
+        onError: () => { form.oferta_activa = !form.oferta_activa; }, // revert on error
     });
 };
 </script>
@@ -101,7 +114,7 @@ const submit = () => {
         </template>
 
         <!-- Toasts -->
-        <div class="pointer-events-none fixed inset-0 z-[60] flex flex-col items-end justify-start space-y-4 p-6">
+        <div class="pointer-events-none fixed top-20 right-4 z-[9999] flex flex-col items-end gap-3 max-w-sm w-full">
             <Toast v-for="(t, index) in toasts" :key="t.id" :type="t.type" :title="t.title" :message="t.message" :active="index === 0" @close="toasts = toasts.filter(x => x.id !== t.id)" />
         </div>
 
@@ -120,19 +133,6 @@ const submit = () => {
                                 <input v-model="form.nombre" type="text" required
                                        class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition" />
                                 <p v-if="form.errors.nombre" class="mt-1 text-xs text-red-500">{{ form.errors.nombre }}</p>
-                            </div>
-
-                            <!-- Categoría -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoría <span class="text-red-500">*</span></label>
-                                <select v-model="form.categoria_id" required
-                                        class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition">
-                                    <option value="" disabled>Selecciona una categoría</option>
-                                    <option v-for="cat in categorias" :key="cat.id" :value="cat.id">
-                                        {{ cat.nombre }}
-                                    </option>
-                                </select>
-                                <p v-if="form.errors.categoria_id" class="mt-1 text-xs text-red-500">{{ form.errors.categoria_id }}</p>
                             </div>
 
                             <!-- Descripción -->
@@ -200,7 +200,7 @@ const submit = () => {
                             </div>
                         </div>
 
-                        <!-- Toggles disponible/destacado -->
+                        <!-- Toggles disponible/destacado/oferta -->
                         <div class="mt-5 flex flex-wrap gap-6">
                             <label class="flex cursor-pointer items-center gap-3">
                                 <div class="relative">
@@ -219,6 +219,20 @@ const submit = () => {
                                 </div>
                                 <span class="flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-300"><Star class="h-4 w-4 text-yellow-500" /> Destacar producto</span>
                             </label>
+
+                            <button type="button"
+                                    :disabled="!tieneOferta"
+                                    @click="toggleOfertaActiva"
+                                    class="flex cursor-pointer items-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed">
+                                <div class="relative pointer-events-none">
+                                    <div :class="['h-6 w-11 rounded-full transition-colors', form.oferta_activa ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-600']"></div>
+                                    <div :class="['absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform', form.oferta_activa ? 'translate-x-5' : 'translate-x-0.5']"></div>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Oferta activa
+                                    <span class="text-xs text-gray-400">{{ form.precio_oferta ? `(${Number(form.precio_oferta).toFixed(2)}€)` : '(pon precio oferta)' }}</span>
+                                </span>
+                            </button>
                         </div>
                     </div>
 

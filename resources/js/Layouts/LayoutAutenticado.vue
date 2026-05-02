@@ -8,6 +8,7 @@ import Toast from '@/Components/Toast.vue';
 import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
 import CarritoCompra from '@/Components/CarritoCompra.vue';
 import DarkModeToggle from '@/Components/DarkModeToggle.vue';
+import CampanaNotificaciones from '@/Components/CampanaNotificaciones.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { useDarkMode } from '@/Composables/useDarkMode';
 import { ShieldCheck, Store } from 'lucide-vue-next';
@@ -75,7 +76,7 @@ watch(
 <template>
     <div>
         <!-- Toast Notifications -->
-        <div class="pointer-events-none fixed inset-0 z-50 flex flex-col items-end justify-start space-y-4 p-6 sm:p-6">
+        <div class="pointer-events-none fixed top-20 right-4 z-[9999] flex flex-col items-end gap-3 max-w-sm w-full">
             <Toast
                 v-for="(toast, index) in toasts"
                 :key="toast.id"
@@ -145,6 +146,9 @@ watch(
 
                             <!-- Carrito -->
                             <CarritoCompra />
+
+                            <!-- Notificaciones -->
+                            <CampanaNotificaciones />
 
                             <!-- Avatar + Dropdown -->
                             <div ref="profileMenuRef" class="relative">

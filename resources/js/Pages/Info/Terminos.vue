@@ -37,7 +37,7 @@
                     <div class="mt-12 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-6">
                         <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Contacto legal</h3>
                         <p class="text-sm text-gray-600 dark:text-gray-400">Para cualquier cuestión relacionada con estos términos, puedes escribirnos a
-                            <a href="mailto:legal@rustikan.com" class="text-primary-600 dark:text-primary-400 hover:underline">legal@rustikan.com</a>
+                            <a href="mailto:info@rustikan.com" class="text-primary-600 dark:text-primary-400 hover:underline">info@rustikan.com</a>
                         </p>
                     </div>
 

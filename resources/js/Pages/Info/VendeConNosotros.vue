@@ -1,9 +1,9 @@
-<template>
+﻿<template>
     <div class="min-h-screen bg-white dark:bg-gray-900">
         <Head title="Vende con nosotros - Rustikan" />
 
         <!-- Toast container -->
-        <div class="pointer-events-none fixed inset-0 z-[9999] flex flex-col items-end justify-start gap-3 p-6">
+        <div class="pointer-events-none fixed top-20 right-4 z-[9999] flex flex-col items-end gap-3 max-w-sm w-full">
             <Toast
                 v-for="(toast, index) in toasts"
                 :key="toast.id"
@@ -69,27 +69,8 @@
                 <!-- ── Formulario de solicitud ────────────────────────────── -->
                 <div id="solicitar" class="scroll-mt-24">
 
-                    <!-- Éxito -->
-                    <Transition
-                        enter-active-class="transition duration-500"
-                        enter-from-class="opacity-0 scale-95"
-                        enter-to-class="opacity-100 scale-100"
-                    >
-                    <div v-if="enviado" class="rounded-2xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-10 text-center">
-                        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-800">
-                            <svg class="h-8 w-8 text-green-600 dark:text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-green-800 dark:text-green-200 mb-2">¡Solicitud enviada!</h3>
-                        <p class="text-sm text-green-700 dark:text-green-300">
-                            Hemos recibido tu solicitud y te hemos enviado un email de confirmación. Revisaremos tus datos y nos pondremos en contacto contigo en menos de 48 horas.
-                        </p>
-                    </div>
-                    </Transition>
-
                     <!-- Auth gate (no hay sesión) -->
-                    <div v-if="!user && !enviado"
+                    <div v-if="!user"
                          class="rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 p-10 text-center">
                         <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-800">
                             <svg class="h-8 w-8 text-amber-600 dark:text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,7 +94,7 @@
                     </div>
 
                     <!-- Formulario (sesión activa) -->
-                    <div v-if="user && !enviado" class="rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-8">
+                    <div v-if="user" class="rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-8">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1">Solicita tu tienda en Rustikan</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-8">Rellena el formulario y nos ponemos en contacto contigo en 48 horas.</p>
 
@@ -276,7 +257,6 @@ const { isDark } = useDarkMode();
 const page = usePage();
 
 const user    = computed(() => page.props.auth?.user ?? null);
-const enviado = computed(() => !!page.props.flash?.solicitud_enviada);
 
 // ── Toast ────────────────────────────────────────────────────────────────────
 const toasts = ref([]);
@@ -290,10 +270,11 @@ watch(
     () => page.props.flash,
     (flash) => {
         if (!flash) return;
-        if (flash.success) addToast('success', '¡Éxito!',  flash.success);
-        if (flash.error)   addToast('error',   'Error',    flash.error);
-        if (flash.info)    addToast('info',     'Info',     flash.info);
-        if (flash.warning) addToast('warning',  'Aviso',   flash.warning);
+        if (flash.success)          addToast('success', '¡Éxito!',  flash.success);
+        if (flash.solicitud_enviada) addToast('success', '¡Solicitud enviada!', 'Revisaremos tus datos y te contactaremos en menos de 48 horas.');
+        if (flash.error)            addToast('error',   'Error',    flash.error);
+        if (flash.info)             addToast('info',     'Info',     flash.info);
+        if (flash.warning)          addToast('warning',  'Aviso',   flash.warning);
     },
     { deep: true, immediate: true },
 );
@@ -313,7 +294,20 @@ const form = useForm({
 });
 
 const enviar = () => {
-    form.post(route('solicitud-tienda.store'), { preserveScroll: true });
+    form.post(route('solicitud-tienda.store'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            // Limpiar todos los campos del formulario
+            form.reset();
+            // Restaurar valores del usuario autenticado
+            form.nombre_contacto = page.props.auth?.user?.name  ?? '';
+            form.email           = page.props.auth?.user?.email ?? '';
+            addToast('success', '¡Solicitud enviada!', 'Hemos recibido tu solicitud. Nos pondremos en contacto contigo en menos de 48 horas.');
+        },
+        onError: () => {
+            addToast('error', 'Error al enviar', 'Revisa los campos e inténtalo de nuevo.');
+        },
+    });
 };
 
 const inputClass = (error) => [

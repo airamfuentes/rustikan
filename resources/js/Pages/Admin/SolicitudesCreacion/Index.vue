@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { Head, Link, router, usePage, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import Toast from '@/Components/Toast.vue';
@@ -11,17 +11,9 @@ const props = defineProps({
 });
 
 const page = usePage();
+// Flash handled by LayoutAutenticado — no duplicate watcher needed
 
 const toasts = ref([]);
-const addToast = (type, title, msg) => {
-    const id = Date.now();
-    toasts.value.push({ id, type, title, message: msg });
-    setTimeout(() => { toasts.value = toasts.value.filter(t => t.id !== id); }, 4500);
-};
-watch(() => page.props.flash, (flash) => {
-    if (flash?.success) addToast('success', 'Listo', flash.success);
-    if (flash?.error)   addToast('error',   'Error',  flash.error);
-}, { deep: true });
 
 const cambiarEstado = (est) => {
     router.get(route('admin.solicitudes-creacion.index'), { estado: est }, { preserveState: true });

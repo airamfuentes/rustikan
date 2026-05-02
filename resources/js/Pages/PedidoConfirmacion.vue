@@ -1,6 +1,6 @@
 <script setup>
-import { onMounted } from 'vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { ref, onMounted } from 'vue';
+import { Head, Link, router } from '@inertiajs/vue3';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import confetti from 'canvas-confetti';
 
@@ -29,6 +29,30 @@ const estadoLabels = {
 };
 
 const estadoInfo = estadoLabels[props.pedido.estado] ?? estadoLabels.pendiente;
+
+const imgSrc = (path) => {
+    if (!path) return '/images/logo.png';
+    return path.startsWith('http') ? path : '/storage/' + path;
+};
+
+// ── Cancelación ────────────────────────────────────────────────────────────
+const mostrarModalCancelar = ref(false);
+const tipoReembolso = ref('tarjeta');
+const cancelando = ref(false);
+
+const cancelarPedido = () => {
+    cancelando.value = true;
+    router.post(route('pedidos.cancelar', props.pedido.id), {
+        tipo_reembolso: tipoReembolso.value,
+    }, {
+        onFinish: () => {
+            cancelando.value = false;
+            mostrarModalCancelar.value = false;
+        },
+    });
+};
+
+const puedeCancelar = ['pendiente', 'confirmado'].includes(props.pedido.estado);
 </script>
 
 <template>
@@ -73,7 +97,7 @@ const estadoInfo = estadoLabels[props.pedido.estado] ?? estadoLabels.pendiente;
                         class="flex items-center gap-4 px-6 py-4"
                     >
                         <img
-                            :src="item.producto_imagen || '/images/logo.png'"
+                            :src="imgSrc(item.producto_imagen)"
                             :alt="item.producto_nombre"
                             class="h-16 w-16 flex-shrink-0 rounded-xl object-cover"
                         />
@@ -153,6 +177,81 @@ const estadoInfo = estadoLabels[props.pedido.estado] ?? estadoLabels.pendiente;
                 </Link>
             </div>
 
+            <!-- Cancelar pedido -->
+            <div v-if="puedeCancelar" class="mt-6 flex justify-center">
+                <button
+                    @click="mostrarModalCancelar = true"
+                    class="text-sm text-red-500 hover:text-red-700 dark:hover:text-red-400 underline underline-offset-2 transition-colors"
+                >
+                    Cancelar este pedido
+                </button>
+            </div>
+
         </main>
     </div>
+
+    <!-- Modal cancelación -->
+    <Transition
+        enter-active-class="transition duration-200 ease-out"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition duration-150 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+    >
+        <div v-if="mostrarModalCancelar" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div class="w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-2xl">
+                <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+                    <svg class="h-6 w-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Cancelar pedido</h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">¿Estás seguro? Esta acción no se puede deshacer. Si ya pagaste, elige cómo quieres recibir el reembolso:</p>
+
+                <div class="mt-5 grid grid-cols-2 gap-3">
+                    <button
+                        @click="tipoReembolso = 'tarjeta'"
+                        :class="['flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all',
+                            tipoReembolso === 'tarjeta'
+                                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                                : 'border-gray-200 dark:border-gray-600 hover:border-gray-300']"
+                    >
+                        <svg class="h-6 w-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                        <span class="text-sm font-semibold text-gray-800 dark:text-white">Tarjeta</span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">Reembolso en 5-10 días</span>
+                    </button>
+                    <button
+                        @click="tipoReembolso = 'rusticoin'"
+                        :class="['flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all',
+                            tipoReembolso === 'rusticoin'
+                                ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
+                                : 'border-gray-200 dark:border-gray-600 hover:border-gray-300']"
+                    >
+                        <span class="text-2xl">🪙</span>
+                        <span class="text-sm font-semibold text-gray-800 dark:text-white">RustiCoin</span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">Inmediato al monedero</span>
+                    </button>
+                </div>
+
+                <div class="mt-6 flex gap-3">
+                    <button
+                        @click="mostrarModalCancelar = false"
+                        class="flex-1 rounded-xl border border-gray-200 dark:border-gray-600 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    >
+                        Volver
+                    </button>
+                    <button
+                        @click="cancelarPedido"
+                        :disabled="cancelando"
+                        class="flex-1 rounded-xl bg-red-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-60 transition-colors"
+                    >
+                        {{ cancelando ? 'Cancelando...' : 'Confirmar cancelación' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </Transition>
 </template>

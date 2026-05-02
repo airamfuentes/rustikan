@@ -150,6 +150,7 @@ class ProductoController extends Controller
             'stock_minimo' => 'sometimes|integer|min:0',
             'disponible' => 'sometimes|boolean',
             'destacado' => 'sometimes|boolean',
+            'oferta_activa' => 'sometimes|boolean',
         ]);
 
         if (isset($validated['nombre'])) {

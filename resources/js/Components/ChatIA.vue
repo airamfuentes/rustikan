@@ -2,6 +2,7 @@
 import { ref, nextTick, watch, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { MessageCircle, X, Send, Sparkles } from 'lucide-vue-next';
+import { usePage } from '@inertiajs/vue3';
 
 const STORAGE_KEY = 'rustikan_chat_ia';
 
@@ -58,8 +59,18 @@ const toggleOpen = async () => {
 
 const resetChat = () => {
     messages.value = [initialGreeting];
+    open.value = false;
     localStorage.removeItem(STORAGE_KEY);
 };
+
+// Reset al hacer logout (usuario pasa a null) o al logearse (usuario cambia)
+const page = usePage();
+watch(() => page.props.auth?.user?.id, (newId, prevId) => {
+    // Logout: tenía usuario y ahora no
+    if (prevId && !newId) resetChat();
+    // Login: no tenía usuario y ahora sí
+    if (!prevId && newId) resetChat();
+});
 
 const canSend = computed(() => userInput.value.trim().length > 0 && !sending.value);
 

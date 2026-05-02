@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
 use App\Models\Categoria;
+use App\Models\Notificacion;
 use App\Models\Producto;
 use App\Models\SolicitudCambio;
 use Illuminate\Http\Request;
@@ -103,6 +104,16 @@ class SolicitudController extends Controller
         if ($cambiosCreados === 0) {
             return back()->with('info', 'No se detectaron cambios respecto a los datos actuales.');
         }
+
+        // Notificar a los admins
+        Notificacion::enviarAdmins(
+            'nueva_solicitud_tienda',
+            'Nueva solicitud de cambio en tienda',
+            "La tienda \"{$tienda->nombre}\" ha enviado {$cambiosCreados} solicitud(es) de cambio.",
+            route('solicitudes.index'),
+            'store',
+            'orange'
+        );
 
         return back()->with('success', "Se ha enviado la solicitud con {$cambiosCreados} " . ($cambiosCreados === 1 ? 'cambio' : 'cambios') . " al administrador para su revisión.");
     }

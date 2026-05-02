@@ -4,6 +4,7 @@ import { Link, usePage, router } from '@inertiajs/vue3';
 import CarritoCompra from '@/Components/CarritoCompra.vue';
 import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
 import DarkModeToggle from '@/Components/DarkModeToggle.vue';
+import CampanaNotificaciones from '@/Components/CampanaNotificaciones.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
 import { ShieldCheck, Store, Menu, X, Search } from 'lucide-vue-next';
 
@@ -268,6 +269,9 @@ onUnmounted(() => {
                     <LanguageSwitcher />
                     <DarkModeToggle />
 
+                    <!-- Notificaciones para admin/owner -->
+                    <CampanaNotificaciones v-if="user && (user.role === 'admin' || user.role === 'owner')" />
+
                     <Link
                         v-if="!user"
                         :href="route('login')"
@@ -330,6 +334,15 @@ onUnmounted(() => {
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                     </svg>
                                     Mis pedidos
+                                </Link>
+                                <Link :href="route('monedero.index')" class="flex items-center justify-between gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700" @click="showProfileMenu = false">
+                                    <span class="flex items-center gap-3">
+                                        <span class="text-base">🪙</span>
+                                        Mi monedero
+                                    </span>
+                                    <span class="rounded-full bg-orange-100 dark:bg-orange-900/40 px-2 py-0.5 text-xs font-bold text-orange-600 dark:text-orange-300">
+                                        {{ Number(user.rusticoin_balance ?? 0).toFixed(2) }} RC
+                                    </span>
                                 </Link>
                                 <Link :href="route('profile.edit')" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700" @click="showProfileMenu = false">
                                     <svg class="h-4 w-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

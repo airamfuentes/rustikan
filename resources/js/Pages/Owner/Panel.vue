@@ -1,18 +1,19 @@
-<script setup>
+﻿<script setup>
 import { ref, computed, watch } from 'vue';
 import { Head, Link, router, usePage, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import Toast from '@/Components/Toast.vue';
 
 const props = defineProps({
-    tienda:           { type: Object,  required: true },
-    stats:            { type: Object,  required: true },
-    ingresosGrafica:  { type: Array,   default: () => [] },
-    topProductos:     { type: Array,   default: () => [] },
-    pedidosRecientes: { type: Array,   default: () => [] },
-    productos:        { type: Array,   default: () => [] },
-    categorias:       { type: Array,   default: () => [] },
-    solicitudes:      { type: Array,   default: () => [] },
+    tienda:            { type: Object,  required: true },
+    stats:             { type: Object,  required: true },
+    ingresosGrafica:   { type: Array,   default: () => [] },
+    topProductos:      { type: Array,   default: () => [] },
+    pedidosRecientes:  { type: Array,   default: () => [] },
+    productos:         { type: Array,   default: () => [] },
+    categorias:        { type: Array,   default: () => [] },
+    solicitudes:       { type: Array,   default: () => [] },
+    beneficiosPorMes:  { type: Array,   default: () => [] },
 });
 
 const page = usePage();
@@ -221,7 +222,6 @@ watch(solicitudesFiltros, () => { solicitudesPagina.value = 1; }, { deep: true }
 const showAddForm = ref(false);
 const addForm = useForm({
     nombre:        '',
-    categoria_id:  '',
     descripcion:   '',
     precio:        '',
     precio_oferta: '',
@@ -256,7 +256,6 @@ const editProducto = ref(null);
 const editOriginal = ref({});
 const editForm = useForm({
     nombre:        '',
-    categoria_id:  '',
     descripcion:   '',
     precio:        '',
     precio_oferta: '',
@@ -272,7 +271,6 @@ const openEdit = (p) => {
     editProducto.value = p;
     editOriginal.value = {
         nombre:        p.nombre,
-        categoria_id:  String(p.categoria_id),
         descripcion:   p.descripcion ?? '',
         precio:        String(p.precio),
         precio_oferta: String(p.precio_oferta ?? ''),
@@ -280,7 +278,6 @@ const openEdit = (p) => {
         stock:         String(p.stock),
     };
     editForm.nombre        = p.nombre;
-    editForm.categoria_id  = p.categoria_id;
     editForm.descripcion   = p.descripcion ?? '';
     editForm.precio        = p.precio;
     editForm.precio_oferta = p.precio_oferta ?? '';
@@ -300,7 +297,6 @@ const editPriceChanged = computed(() => {
 const editOtherChanged = computed(() => {
     if (!editProducto.value) return false;
     return editForm.nombre !== editOriginal.value.nombre ||
-           String(editForm.categoria_id) !== editOriginal.value.categoria_id ||
            editForm.descripcion !== editOriginal.value.descripcion ||
            editForm.unidad !== editOriginal.value.unidad ||
            String(editForm.stock) !== editOriginal.value.stock ||
@@ -352,7 +348,7 @@ const submitDeleteProducto = (producto) => {
 
     <AuthenticatedLayout>
         <!-- Toasts -->
-        <div class="pointer-events-none fixed inset-0 z-[60] flex flex-col items-end justify-start space-y-4 p-6">
+        <div class="pointer-events-none fixed top-20 right-4 z-[9999] flex flex-col items-end gap-3 max-w-sm w-full">
             <Toast v-for="(t, index) in toasts" :key="t.id" :type="t.type" :title="t.title" :message="t.message" :active="index === 0" @close="toasts = toasts.filter(x => x.id !== t.id)" />
         </div>
 
@@ -379,11 +375,12 @@ const submitDeleteProducto = (producto) => {
                 </div>
 
                 <!-- ── Tabs ──────────────────────────────────────────────────── -->
-                <div class="flex gap-1 rounded-xl bg-white dark:bg-gray-800 p-1 shadow-sm border border-gray-100 dark:border-gray-700 w-fit">
+                <div class="flex gap-1 rounded-xl bg-white dark:bg-gray-800 p-1 shadow-sm border border-gray-100 dark:border-gray-700 w-fit flex-wrap">
                     <button v-for="t in [
                         { key:'resumen',     label:'Resumen' },
                         { key:'pedidos',     label:'Pedidos' },
                         { key:'productos',   label:'Productos' },
+                        { key:'beneficios',  label:'Beneficios' },
                         { key:'solicitudes', label:'Mis solicitudes' },
                     ]" :key="t.key"
                         @click="tab = t.key"
@@ -781,14 +778,6 @@ const submitDeleteProducto = (producto) => {
                                            class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400" />
                                     <p v-if="addForm.errors.nombre" class="mt-1 text-xs text-red-500">{{ addForm.errors.nombre }}</p>
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Categoría *</label>
-                                    <select v-model="addForm.categoria_id" required
-                                            class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400">
-                                        <option value="">Seleccionar...</option>
-                                        <option v-for="c in categorias" :key="c.id" :value="c.id">{{ c.nombre }}</option>
-                                    </select>
-                                </div>
                                 <div class="sm:col-span-2">
                                     <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Descripción</label>
                                     <textarea v-model="addForm.descripcion" rows="2"
@@ -1024,10 +1013,18 @@ const submitDeleteProducto = (producto) => {
                                                                class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 text-gray-900 dark:text-white" />
                                                     </div>
                                                     <div>
-                                                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Categoría *</label>
-                                                        <select v-model="editForm.categoria_id" required
+                                                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Unidad</label>
+                                                        <select v-model="editForm.unidad"
                                                                 class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 text-gray-900 dark:text-white">
-                                                            <option v-for="c in categorias" :key="c.id" :value="c.id">{{ c.nombre }}</option>
+                                                            <option value="unidad">Unidad</option>
+                                                            <option value="kg">Kilogramo (kg)</option>
+                                                            <option value="g">Gramo (g)</option>
+                                                            <option value="litro">Litro</option>
+                                                            <option value="ml">Mililitro (ml)</option>
+                                                            <option value="docena">Docena</option>
+                                                            <option value="caja">Caja</option>
+                                                            <option value="bote">Bote</option>
+                                                            <option value="bolsa">Bolsa</option>
                                                         </select>
                                                     </div>
                                                     <div class="sm:col-span-2">
@@ -1304,6 +1301,67 @@ const submitDeleteProducto = (producto) => {
                             </div>
                         </div>
                     </div>
+                </template>
+
+                <!-- ════════════════ TAB BENEFICIOS ════════════════ -->
+                <template v-if="tab === 'beneficios'">
+
+                    <!-- Resumen tarjetas -->
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <div class="rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-5 shadow-sm">
+                            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Ingresos brutos totales</p>
+                            <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ stats.totalIngresos.toFixed(2) }} €</p>
+                            <p class="mt-1 text-xs text-gray-400">Suma de todos los pedidos</p>
+                        </div>
+                        <div class="rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 p-5 shadow-sm">
+                            <p class="text-xs font-medium text-red-600 dark:text-red-400 uppercase tracking-wide">Comisión Rustikan ({{ stats.comisionPct }}%)</p>
+                            <p class="mt-2 text-2xl font-bold text-red-600 dark:text-red-400">–{{ stats.totalComision.toFixed(2) }} €</p>
+                            <p class="mt-1 text-xs text-red-400">Plataforma de intermediación</p>
+                        </div>
+                        <div class="rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 p-5 shadow-sm">
+                            <p class="text-xs font-medium text-white/80 uppercase tracking-wide">Beneficio neto total</p>
+                            <p class="mt-2 text-2xl font-bold text-white">{{ stats.totalNeto.toFixed(2) }} €</p>
+                            <p class="mt-1 text-xs text-white/70">Este mes neto: {{ stats.netMesActual.toFixed(2) }} €</p>
+                        </div>
+                    </div>
+
+                    <!-- Tabla mensual -->
+                    <div class="rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+                            <h3 class="text-base font-semibold text-gray-900 dark:text-white">Desglose mensual (últimos 12 meses)</h3>
+                            <p class="text-xs text-gray-400 mt-0.5">Comisión del {{ stats.comisionPct }}% aplicada sobre ingresos brutos</p>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
+                                <thead class="bg-gray-50 dark:bg-gray-900/40">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Mes</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Bruto</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-red-400 uppercase tracking-wide">Comisión</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-green-500 uppercase tracking-wide">Neto</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                                    <tr v-for="fila in beneficiosPorMes" :key="fila.mes"
+                                        class="hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors">
+                                        <td class="px-6 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 capitalize">{{ fila.mes }}</td>
+                                        <td class="px-6 py-3 text-sm text-right text-gray-600 dark:text-gray-300">{{ fila.bruto.toFixed(2) }} €</td>
+                                        <td class="px-6 py-3 text-sm text-right text-red-500 dark:text-red-400">–{{ fila.comision.toFixed(2) }} €</td>
+                                        <td class="px-6 py-3 text-sm text-right font-semibold text-green-600 dark:text-green-400">{{ fila.neto.toFixed(2) }} €</td>
+                                    </tr>
+                                    <tr v-if="beneficiosPorMes.length === 0">
+                                        <td colspan="4" class="px-6 py-8 text-center text-sm text-gray-400">Sin datos de ventas aún</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Nota informativa -->
+                    <div class="rounded-2xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 px-5 py-4 text-sm text-blue-700 dark:text-blue-300">
+                        <strong>¿Cómo funciona?</strong> Rustikan retiene un {{ stats.comisionPct }}% de cada pedido como comisión por el uso de la plataforma. El beneficio neto es lo que recibes tú como vendedor. Los importes se calculan sobre los ingresos brutos de todos tus pedidos registrados.
+                    </div>
+
                 </template>
 
             </div>

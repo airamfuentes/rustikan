@@ -1,7 +1,12 @@
-<template>
+﻿<template>
     <div class="min-h-screen bg-white dark:bg-gray-900">
         <Head title="Contacto - Rustikan" />
         <NavbarPublico />
+
+        <!-- Toasts -->
+        <div class="pointer-events-none fixed top-20 right-4 z-[9999] flex flex-col items-end gap-3 max-w-sm w-full">
+            <Toast v-for="(t, i) in toasts" :key="t.id" :type="t.type" :title="t.title" :message="t.message" :active="i === 0" @close="toasts = toasts.filter(x => x.id !== t.id)" />
+        </div>
 
         <!-- Hero -->
         <section class="bg-gradient-to-br from-sky-600 via-blue-700 to-indigo-800 pt-32 pb-20 text-white">
@@ -31,11 +36,13 @@
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre *</label>
                                 <input v-model="form.nombre" type="text" required placeholder="Tu nombre completo"
                                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500" />
+                                <p v-if="form.errors.nombre" class="mt-1 text-xs text-red-500">{{ form.errors.nombre }}</p>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email *</label>
                                 <input v-model="form.email" type="email" required placeholder="tu@email.com"
                                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500" />
+                                <p v-if="form.errors.email" class="mt-1 text-xs text-red-500">{{ form.errors.email }}</p>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Asunto *</label>
@@ -47,19 +54,17 @@
                                     <option value="colaboracion">Colaboración</option>
                                     <option value="otro">Otro</option>
                                 </select>
+                                <p v-if="form.errors.asunto" class="mt-1 text-xs text-red-500">{{ form.errors.asunto }}</p>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mensaje *</label>
                                 <textarea v-model="form.mensaje" required rows="5" placeholder="Cuéntanos en qué podemos ayudarte..."
                                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"></textarea>
+                                <p v-if="form.errors.mensaje" class="mt-1 text-xs text-red-500">{{ form.errors.mensaje }}</p>
                             </div>
-                            <div v-if="enviado" class="flex items-center gap-2 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 p-4 text-sm text-green-700 dark:text-green-300">
-                                <CheckCircle2 class="h-4 w-4 shrink-0" />
-                                <span>¡Mensaje recibido! Te responderemos en menos de 48 horas.</span>
-                            </div>
-                            <button type="submit" :disabled="enviando"
+                            <button type="submit" :disabled="form.processing"
                                 class="w-full rounded-lg bg-primary-600 px-6 py-3 font-semibold text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
-                                {{ enviando ? 'Enviando...' : 'Enviar mensaje' }}
+                                {{ form.processing ? 'Enviando...' : 'Enviar mensaje' }}
                             </button>
                         </form>
                     </div>
@@ -76,7 +81,7 @@
                             </div>
                             <div>
                                 <p class="font-medium text-gray-900 dark:text-white">Email</p>
-                                <a href="mailto:hola@rustikan.com" class="text-sm text-primary-600 dark:text-primary-400 hover:underline">hola@rustikan.com</a>
+                                <a href="mailto:info@rustikan.com" class="text-sm text-primary-600 dark:text-primary-400 hover:underline">info@rustikan.com</a>
                             </div>
                         </div>
 
@@ -105,7 +110,12 @@
                             </div>
                         </div>
 
-                        <div class="mt-6 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-5">
+                        <div class="mt-6 rounded-xl bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 p-5">
+                            <p class="text-sm font-semibold text-orange-900 dark:text-orange-300 mb-1">🤖 ¿Tienes una duda rápida?</p>
+                            <p class="text-sm text-orange-700 dark:text-orange-400">Prueba a preguntarle a <strong>Rusti</strong>, nuestro asistente IA disponible 24/7 en el botón naranja de la esquina inferior derecha.</p>
+                        </div>
+
+                        <div class="mt-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-5">
                             <p class="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-1">⏱️ Tiempo de respuesta</p>
                             <p class="text-sm text-blue-700 dark:text-blue-400">Respondemos todos los mensajes en un plazo máximo de 48 horas hábiles.</p>
                         </div>
@@ -119,26 +129,35 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
-import { Head } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import FooterPublico from '@/Components/FooterPublico.vue';
+import Toast from '@/Components/Toast.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
 import { CheckCircle2 } from 'lucide-vue-next';
 useDarkMode();
 
-const form    = reactive({ nombre: '', email: '', asunto: '', mensaje: '' });
-const enviado  = ref(false);
-const enviando = ref(false);
+const page = usePage();
+
+const toasts = ref([]);
+const addToast = (type, title, msg = '') => {
+    const id = Date.now();
+    toasts.value.push({ id, type, title, message: msg });
+    setTimeout(() => { toasts.value = toasts.value.filter(t => t.id !== id); }, 5000);
+};
+
+watch(() => page.props.flash, (flash) => {
+    if (!flash) return;
+    if (flash.success) addToast('success', '¡Enviado!', flash.success);
+    if (flash.error)   addToast('error', 'Error', flash.error);
+}, { deep: true, immediate: true });
+
+const form = useForm({ nombre: '', email: '', asunto: '', mensaje: '' });
 
 const enviar = () => {
-    enviando.value = true;
-    // Simula el envío (en producción conectar con un endpoint real)
-    setTimeout(() => {
-        enviado.value  = true;
-        enviando.value = false;
-        Object.assign(form, { nombre: '', email: '', asunto: '', mensaje: '' });
-        setTimeout(() => { enviado.value = false; }, 6000);
-    }, 800);
+    form.post(route('info.contacto.store'), {
+        onSuccess: () => form.reset(),
+    });
 };
 </script>

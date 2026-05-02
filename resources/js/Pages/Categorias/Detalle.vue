@@ -181,11 +181,49 @@ onUnmounted(() => {
             </svg>
         </div>
 
+        <!-- Mapa expandible -->
+        <Transition
+            enter-active-class="transition-all duration-500 ease-out"
+            enter-from-class="max-h-0 opacity-0"
+            enter-to-class="max-h-[600px] opacity-100"
+            leave-active-class="transition-all duration-300 ease-in"
+            leave-from-class="max-h-[600px] opacity-100"
+            leave-to-class="max-h-0 opacity-0"
+        >
+            <div v-if="showMap" :class="['overflow-hidden', isDark ? 'bg-gray-900' : 'bg-white']">
+                <div class="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+                    <MapaTiendas
+                        :tiendas="tiendasOrdenadas"
+                        :categorias="[]"
+                        height="400px"
+                    />
+                </div>
+            </div>
+        </Transition>
+
+        <!-- Botón mapa debajo del mapa -->
+        <div v-if="tiendasConMapa" :class="['border-b', isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200']">
+            <div class="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8 flex justify-center">
+                <button
+                    @click="showMap = !showMap"
+                    :class="['inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold transition-all',
+                        showMap
+                            ? 'bg-primary-500 text-white shadow-sm'
+                            : isDark ? 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200']"
+                >
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                    </svg>
+                    {{ showMap ? 'Ocultar mapa' : 'Ver mapa de tiendas' }}
+                </button>
+            </div>
+        </div>
+
         <!-- Barra de controles -->
         <div :class="['sticky top-0 z-40 border-b backdrop-blur-sm', isDark ? 'border-gray-700 bg-gray-900/95' : 'border-gray-200 bg-white/95']">
             <div class="mx-auto flex max-w-7xl items-center gap-2 px-4 py-3 sm:px-6 lg:px-8">
 
-                <!-- Izquierda: Sort dropdown + Mapa toggle -->
+                <!-- Izquierda: Sort dropdown -->
                 <div class="flex items-center gap-2">
                     <!-- Sort dropdown -->
                     <div class="relative" ref="sortMenuRef">
@@ -229,21 +267,6 @@ onUnmounted(() => {
                             </div>
                         </Transition>
                     </div>
-
-                    <!-- Mapa toggle -->
-                    <button
-                        v-if="tiendasConMapa"
-                        @click="showMap = !showMap"
-                        :class="['inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition-all',
-                            showMap
-                                ? 'bg-primary-500 text-white shadow-sm'
-                                : isDark ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200']"
-                    >
-                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                        </svg>
-                        <span class="hidden sm:inline">{{ showMap ? 'Ocultar mapa' : 'Mapa' }}</span>
-                    </button>
                 </div>
 
                 <!-- Derecha: búsqueda compacta + contador -->
@@ -269,26 +292,6 @@ onUnmounted(() => {
                 </div>
             </div>
         </div>
-
-        <!-- Mapa expandible -->
-        <Transition
-            enter-active-class="transition-all duration-500 ease-out"
-            enter-from-class="max-h-0 opacity-0"
-            enter-to-class="max-h-[600px] opacity-100"
-            leave-active-class="transition-all duration-300 ease-in"
-            leave-from-class="max-h-[600px] opacity-100"
-            leave-to-class="max-h-0 opacity-0"
-        >
-            <div v-if="showMap" :class="['overflow-hidden border-b', isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200']">
-                <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                    <MapaTiendas
-                        :tiendas="tiendasOrdenadas"
-                        :categorias="[]"
-                        height="400px"
-                    />
-                </div>
-            </div>
-        </Transition>
 
         <!-- Contenido principal -->
         <main class="mx-auto max-w-7xl flex-1 px-4 py-10 sm:px-6 lg:px-8">

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\Notificacion;
 use App\Models\Producto;
 use App\Models\SolicitudCambio;
 use App\Models\Tienda;
@@ -81,6 +82,19 @@ class SolicitudController extends Controller
             'model_id'    => $solicitud->id,
         ]);
 
+        // Notificar al owner
+        if ($solicitud->user_id) {
+            Notificacion::enviar(
+                $solicitud->user_id,
+                'solicitud_aprobada',
+                'Cambio aprobado',
+                "Tu solicitud de cambio en \"{$solicitud->labelCampo()}\" ha sido aprobada.",
+                route('owner.panel'),
+                'check',
+                'green'
+            );
+        }
+
         return back()->with('success', "Cambio de \"{$solicitud->labelCampo()}\" aprobado y aplicado.");
     }
 
@@ -113,6 +127,20 @@ class SolicitudController extends Controller
             'model_type'  => 'SolicitudCambio',
             'model_id'    => $solicitud->id,
         ]);
+
+        // Notificar al owner
+        if ($solicitud->user_id) {
+            $motivoTexto = $request->motivo ? ": {$request->motivo}" : '.';
+            Notificacion::enviar(
+                $solicitud->user_id,
+                'solicitud_rechazada',
+                'Cambio rechazado',
+                "Tu solicitud de cambio en \"{$solicitud->labelCampo()}\" ha sido rechazada{$motivoTexto}",
+                route('owner.panel'),
+                'x',
+                'red'
+            );
+        }
 
         return back()->with('success', "Cambio de \"{$solicitud->labelCampo()}\" rechazado.");
     }

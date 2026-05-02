@@ -5,10 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Tienda;
 use App\Models\Pedido;
+use App\Models\PedidoItem;
 use App\Models\User;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -74,14 +77,54 @@ class DashboardController extends Controller
                 'usuario' => $log->user?->name ?? 'Sistema',
             ]);
 
+        // ── Beneficios / comisiones Rustikan (10%) ────────────────────────────────
+        $comisionPct = 10.0;
+
+        $comisionesPorMes = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $fecha = Carbon::now()->subMonths($i);
+            $bruto = (float) PedidoItem::whereHas('pedido', fn($q) => $q->where('estado', 'entregado'))
+                ->whereMonth('created_at', $fecha->month)
+                ->whereYear('created_at', $fecha->year)
+                ->sum('subtotal');
+            $comision = round($bruto * $comisionPct / 100, 2);
+            $comisionesPorMes[] = [
+                'mes'      => $fecha->format('M y'),
+                'bruto'    => round($bruto, 2),
+                'comision' => $comision,
+                'neto'     => round($bruto - $comision, 2),
+            ];
+        }
+
+        $totalBrutoPlataforma = (float) PedidoItem::whereHas('pedido', fn($q) => $q->where('estado', 'entregado'))->sum('subtotal');
+        $totalComisionPlataforma = round($totalBrutoPlataforma * $comisionPct / 100, 2);
+
+        $comisionesPorTienda = Tienda::withSum(['pedidoItems as bruto_tienda' => fn($q) => $q->whereHas('pedido', fn($p) => $p->where('estado', 'entregado'))], 'subtotal')
+            ->orderByDesc('bruto_tienda')
+            ->limit(10)
+            ->get(['id', 'nombre', 'logo'])
+            ->map(fn($t) => [
+                'id'       => $t->id,
+                'nombre'   => $t->nombre,
+                'logo'     => $t->logo,
+                'bruto'    => round((float) $t->bruto_tienda, 2),
+                'comision' => round((float) $t->bruto_tienda * $comisionPct / 100, 2),
+                'neto'     => round((float) $t->bruto_tienda * (1 - $comisionPct / 100), 2),
+            ]);
+
         return Inertia::render('Admin/Panel', [
-            'usuarios_recientes' => $usuarios_recientes,
-            'total_usuarios' => $total_usuarios,
-            'pedidos_recientes' => $pedidos_recientes,
-            'pedidos_stats' => $pedidos_stats,
-            'tiendas_stats' => $tiendas_stats,
-            'actividad_reciente' => $actividad_reciente,
-            'filtros_aplicados' => $request->only(['fecha_desde', 'fecha_hasta']),
+            'usuarios_recientes'       => $usuarios_recientes,
+            'total_usuarios'           => $total_usuarios,
+            'pedidos_recientes'        => $pedidos_recientes,
+            'pedidos_stats'            => $pedidos_stats,
+            'tiendas_stats'            => $tiendas_stats,
+            'actividad_reciente'       => $actividad_reciente,
+            'filtros_aplicados'        => $request->only(['fecha_desde', 'fecha_hasta']),
+            'comision_pct'             => $comisionPct,
+            'comisiones_por_mes'       => $comisionesPorMes,
+            'total_bruto_plataforma'   => round($totalBrutoPlataforma, 2),
+            'total_comision_plataforma'=> $totalComisionPlataforma,
+            'comisiones_por_tienda'    => $comisionesPorTienda,
         ]);
     }
 }

@@ -31,6 +31,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'edad',
         'email_verification_code',
         'email_verification_expires_at',
+        'rusticoin_balance',
     ];
 
     /**
@@ -55,6 +56,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at'             => 'datetime',
             'email_verification_expires_at' => 'datetime',
             'password'                      => 'hashed',
+            'rusticoin_balance'             => 'decimal:2',
         ];
     }
 
@@ -69,6 +71,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isOwner(): bool
     {
         return $this->role === 'owner';
+    }
+
+    public function isSupplier(): bool
+    {
+        return $this->role === 'supplier';
     }
 
     /**
@@ -98,6 +105,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function pedidos()
     {
         return $this->hasMany(Pedido::class);
+    }
+
+    /**
+     * Get RustiCoin transactions
+     */
+    public function rusticoinTransactions()
+    {
+        return $this->hasMany(RusticoinTransaction::class);
     }
 
     /**

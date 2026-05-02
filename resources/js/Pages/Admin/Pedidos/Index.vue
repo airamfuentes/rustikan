@@ -13,9 +13,9 @@
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 
                 <!-- Estadísticas -->
-                <div class="mb-6 grid gap-4 sm:grid-cols-6">
+                <div class="mb-6 grid gap-4 sm:grid-cols-7">
                     <div class="rounded-lg bg-white dark:bg-gray-800 p-4 shadow">
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Total Pedidos</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Total</p>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total }}</p>
                     </div>
                     <div class="rounded-lg bg-yellow-100 p-4 shadow">
@@ -33,6 +33,10 @@
                     <div class="rounded-lg bg-red-100 p-4 shadow">
                         <p class="text-sm text-red-800">Cancelados</p>
                         <p class="text-2xl font-bold text-red-900">{{ stats.cancelados }}</p>
+                    </div>
+                    <div class="rounded-lg bg-orange-100 p-4 shadow cursor-pointer hover:bg-orange-200 transition-colors" @click="filtrarIncidencias">
+                        <p class="text-sm text-orange-800 font-medium">⚠ Incidencias</p>
+                        <p class="text-2xl font-bold text-orange-900">{{ stats.incidencias ?? 0 }}</p>
                     </div>
                     <div class="rounded-lg bg-emerald-100 p-4 shadow">
                         <p class="flex items-center gap-1.5 text-sm text-emerald-800"><DollarSign class="h-4 w-4" /> Ingresos</p>
@@ -65,10 +69,13 @@
                             >
                                 <option value="">Todos</option>
                                 <option value="pendiente">Pendiente</option>
+                                <option value="en_preparacion">En preparación</option>
                                 <option value="confirmado">Confirmado</option>
                                 <option value="preparando">Preparando</option>
                                 <option value="en_camino">En camino</option>
+                                <option value="enviado">Enviado</option>
                                 <option value="entregado">Entregado</option>
+                                <option value="incidencia">Incidencia</option>
                                 <option value="cancelado">Cancelado</option>
                             </select>
                         </div>
@@ -158,13 +165,13 @@
                                 <td class="whitespace-nowrap px-6 py-4">
                                     <span :class="{
                                         'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300': pedido.estado === 'pendiente',
-                                        'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300': pedido.estado === 'confirmado',
+                                        'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300': ['confirmado','en_preparacion'].includes(pedido.estado),
                                         'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300': pedido.estado === 'preparando',
-                                        'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300': pedido.estado === 'en_camino',
+                                        'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300': ['en_camino','enviado'].includes(pedido.estado),
                                         'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300': pedido.estado === 'entregado',
-                                        'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300': pedido.estado === 'cancelado',
+                                        'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300': ['cancelado','incidencia'].includes(pedido.estado),
                                     }" class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize">
-                                        {{ pedido.estado.replace('_', ' ') }}
+                                        {{ pedido.estado.replace(/_/g, ' ') }}
                                     </span>
                                 </td>
                                 <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-white">{{ pedido.items?.length ?? 0 }}</td>
@@ -184,23 +191,29 @@
 
                     <!-- Paginación -->
                     <div class="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 sm:px-6">
-                        <div class="flex items-center justify-between">
-                            <div class="text-sm text-gray-700 dark:text-gray-300">Mostrando <span class="font-medium">{{ pedidos.from }}</span> a <span class="font-medium">{{ pedidos.to }}</span> de <span class="font-medium">{{ pedidos.total }}</span> resultados
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+                            <div class="text-sm text-gray-700 dark:text-gray-300">
+                                Mostrando
+                                <span class="font-medium">{{ pedidos.from ?? 0 }}</span> a
+                                <span class="font-medium">{{ pedidos.to ?? 0 }}</span> de
+                                <span class="font-medium">{{ pedidos.total }}</span> pedidos
                             </div>
-                            <div class="flex gap-2">
-                                <component
-                                    v-for="link in pedidos.links" 
-                                    :key="link.label" 
-                                    :is="link.url ? Link : 'span'"
-                                    :href="link.url" 
-                                    :class="{
-                                        'bg-primary-600 text-white': link.active,
-                                        'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700': !link.active && link.url,
-                                        'cursor-not-allowed opacity-50': !link.url
-                                    }"
-                                    class="rounded-md border px-3 py-2 text-sm font-medium shadow-sm"
-                                    v-html="link.label"
-                                />
+                            <div class="flex flex-wrap items-center gap-1">
+                                <template v-for="link in pedidos.links" :key="link.label">
+                                    <component
+                                        :is="link.url ? Link : 'span'"
+                                        :href="link.url ?? undefined"
+                                        v-html="link.label"
+                                        :class="[
+                                            'inline-flex items-center justify-center min-w-[2.2rem] h-9 px-3 rounded-lg text-sm font-medium transition-colors border',
+                                            link.active
+                                                ? 'bg-primary-600 text-white border-primary-600 shadow-sm'
+                                                : link.url
+                                                    ? 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                                                    : 'bg-gray-100 dark:bg-gray-700/50 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-700 cursor-not-allowed'
+                                        ]"
+                                    />
+                                </template>
                             </div>
                         </div>
                     </div>
@@ -256,6 +269,11 @@ const limpiarFiltros = () => {
         precio_min: '',
         precio_max: '',
     };
+    buscar();
+};
+
+const filtrarIncidencias = () => {
+    form.value.estado = form.value.estado === 'incidencia' ? '' : 'incidencia';
     buscar();
 };
 </script>

@@ -429,7 +429,6 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                             <div :class="['h-1.5 w-full overflow-hidden rounded-full', isDark ? 'bg-gray-700' : 'bg-gray-100']">
                                 <div class="h-full rounded-full bg-orange-400" :style="{ width: `${Math.min((producto.stock / producto.stock_minimo) * 100, 100)}%` }"></div>
                             </div>
-                            <p class="mt-1 text-xs text-orange-500">Quedan {{ producto.stock }} uds.</p>
                         </div>
                     </div>
 
@@ -798,13 +797,10 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                             <span :class="['text-sm', isDark ? 'text-gray-400' : 'text-gray-500']">/ {{ productoModal.unidad }}</span>
                         </div>
 
-                        <!-- Stock -->
+                        <!-- Stock bajo -->
                         <p v-if="productoModal.stock > 0 && productoModal.stock <= productoModal.stock_minimo"
                             class="mt-2 flex items-center gap-1 text-xs font-medium text-orange-500">
-                            <AlertTriangle class="h-3.5 w-3.5" /> Solo quedan {{ productoModal.stock }} unidades
-                        </p>
-                        <p v-else class="mt-2 flex items-center gap-1 text-xs font-medium text-green-500">
-                            <Check class="h-3.5 w-3.5" /> En stock ({{ productoModal.stock }} disponibles)
+                            <AlertTriangle class="h-3.5 w-3.5" /> ¡Últimas unidades disponibles!
                         </p>
 
                         <!-- Selector de cantidad -->

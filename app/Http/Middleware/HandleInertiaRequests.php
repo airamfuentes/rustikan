@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use App\Models\Notificacion;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -47,7 +48,10 @@ class HandleInertiaRequests extends Middleware
                 'info'    => $request->session()->get('info'),
                 'warning' => $request->session()->get('warning'),
             ],
-            'recaptchaSiteKey' => config('services.turnstile.site_key'),
+            'recaptchaSiteKey'   => config('services.turnstile.site_key'),
+            'notificacionesCount' => $user
+                ? Notificacion::where('user_id', $user->id)->where('leida', false)->count()
+                : 0,
         ];
     }
 }

@@ -20,6 +20,7 @@ class Pedido extends Model
         'telefono_contacto',
         'notas',
         'fecha_entrega',
+        'metodo_pago',
     ];
 
     protected $casts = [

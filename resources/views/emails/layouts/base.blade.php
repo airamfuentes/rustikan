@@ -64,6 +64,9 @@
                         <p style="margin:0 0 8px;color:#9CA3AF;font-size:12px;line-height:1.6;">
                             Este mensaje fue enviado por <strong>Rustikan</strong> · Marketplace de Lanzarote
                         </p>
+                        <p style="margin:0 0 4px;font-size:12px;">
+                            <a href="mailto:info@rustikan.com" style="color:#C97420;text-decoration:none;">info@rustikan.com</a>
+                        </p>
                         <p style="margin:0;color:#C4A882;font-size:11px;">
                             © {{ date('Y') }} Rustikan · Todos los derechos reservados
                         </p>

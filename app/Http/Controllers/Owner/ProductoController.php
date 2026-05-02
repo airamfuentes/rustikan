@@ -39,7 +39,6 @@ class ProductoController extends Controller
 
         $validated = $request->validate([
             'nombre'        => 'required|string|max:255',
-            'categoria_id'  => 'required|exists:categorias,id',
             'descripcion'   => 'nullable|string|max:3000',
             'precio'        => 'required|numeric|min:0|max:99999',
             'precio_oferta' => 'nullable|numeric|min:0|lt:precio',
@@ -48,6 +47,7 @@ class ProductoController extends Controller
             'stock_minimo'  => 'required|integer|min:0',
             'disponible'    => 'boolean',
             'destacado'     => 'boolean',
+            'oferta_activa' => 'boolean',
             // Imagen: archivo
             'imagen'        => 'nullable|image|max:3072',
             // Imagen: URL

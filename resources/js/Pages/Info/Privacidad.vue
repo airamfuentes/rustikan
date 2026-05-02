@@ -49,7 +49,7 @@
                     <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Contacto para asuntos de privacidad</h3>
                     <p class="text-sm text-gray-600 dark:text-gray-400">
                         Para ejercer tus derechos o realizar cualquier consulta sobre el tratamiento de tus datos, escríbenos a
-                        <a href="mailto:privacidad@rustikan.com" class="text-primary-600 dark:text-primary-400 hover:underline">privacidad@rustikan.com</a>
+                        <a href="mailto:info@rustikan.com" class="text-primary-600 dark:text-primary-400 hover:underline">info@rustikan.com</a>
                         . Responderemos en un plazo máximo de 30 días.
                     </p>
                 </div>
@@ -74,7 +74,7 @@ const secciones = [
     {
         titulo: 'Responsable del tratamiento',
         contenido: [
-            'El responsable del tratamiento de tus datos personales es Rustikan, con domicilio en Lanzarote, Islas Canarias. Puedes contactarnos en privacidad@rustikan.com para cualquier cuestión relacionada con la protección de datos.',
+            'El responsable del tratamiento de tus datos personales es Rustikan, con domicilio en Lanzarote, Islas Canarias. Puedes contactarnos en info@rustikan.com para cualquier cuestión relacionada con la protección de datos.',
         ],
     },
     {

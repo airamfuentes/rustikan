@@ -115,6 +115,7 @@ Route::prefix('')->name('info.')->group(function () {
     Route::get('/quienes-somos',          fn() => Inertia::render('Info/QuienesSomos'))->name('quienes-somos');
     Route::get('/nuestra-mision',         fn() => Inertia::render('Info/NuestraMision'))->name('mision');
     Route::get('/contacto',               fn() => Inertia::render('Info/Contacto'))->name('contacto');
+    Route::post('/contacto',              [\App\Http\Controllers\ContactoController::class, 'store'])->name('contacto.store');
     Route::get('/vende-con-nosotros',     fn() => Inertia::render('Info/VendeConNosotros'))->name('vende');
     Route::get('/preguntas-frecuentes',   fn() => Inertia::render('Info/PreguntasFrecuentes'))->name('faq');
     Route::get('/terminos-y-condiciones', fn() => Inertia::render('Info/Terminos'))->name('terminos');
@@ -126,11 +127,22 @@ Route::prefix('')->name('info.')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/pedidos', [\App\Http\Controllers\PedidoController::class, 'store'])->name('pedidos.store');
     Route::get('/pedidos/{pedido}/confirmacion', [\App\Http\Controllers\PedidoController::class, 'show'])->name('pedidos.confirmacion');
+    Route::post('/pedidos/{pedido}/cancelar', [\App\Http\Controllers\PedidoController::class, 'cancelar'])->name('pedidos.cancelar');
     Route::get('/mis-pedidos', [\App\Http\Controllers\PedidoController::class, 'index'])->name('pedidos.index');
 
     // Reseñas
     Route::post('/tienda/{tienda}/resenas', [\App\Http\Controllers\ResenaController::class, 'store'])->name('resenas.store');
     Route::delete('/resenas/{resena}', [\App\Http\Controllers\ResenaController::class, 'destroy'])->name('resenas.destroy');
+
+    // Monedero RustiCoin
+    Route::get('/monedero', [\App\Http\Controllers\RusticoinController::class, 'index'])->name('monedero.index');
+    Route::post('/monedero/recargar', [\App\Http\Controllers\RusticoinController::class, 'recargar'])->name('monedero.recargar');
+    Route::post('/monedero/retirar', [\App\Http\Controllers\RusticoinController::class, 'retirar'])->name('monedero.retirar');
+
+    // Notificaciones
+    Route::get('/notificaciones', [\App\Http\Controllers\NotificacionController::class, 'index'])->name('notificaciones.index');
+    Route::post('/notificaciones/{notificacion}/leer', [\App\Http\Controllers\NotificacionController::class, 'marcarLeida'])->name('notificaciones.leer');
+    Route::post('/notificaciones/leer-todas', [\App\Http\Controllers\NotificacionController::class, 'marcarTodasLeidas'])->name('notificaciones.leer-todas');
 });
 
 Route::middleware('auth')->group(function () {
@@ -189,6 +201,7 @@ Route::middleware(['auth', 'admin', 'throttle:60,1'])->prefix('admin')->name('ad
     
     // Pedidos
     Route::resource('pedidos', \App\Http\Controllers\Admin\PedidoController::class);
+    Route::post('/pedidos/{pedido}/cancelar', [\App\Http\Controllers\Admin\PedidoController::class, 'cancelar'])->name('pedidos.cancelar');
     
     // Usuarios
     Route::resource('usuarios', \App\Http\Controllers\Admin\UsuarioController::class);
@@ -210,6 +223,13 @@ Route::middleware(['auth', 'admin', 'throttle:60,1'])->prefix('admin')->name('ad
     Route::get('/solicitudes-creacion', [\App\Http\Controllers\Admin\SolicitudCreacionTiendaController::class, 'index'])->name('solicitudes-creacion.index');
     Route::post('/solicitudes-creacion/{solicitud}/aprobar', [\App\Http\Controllers\Admin\SolicitudCreacionTiendaController::class, 'aprobar'])->name('solicitudes-creacion.aprobar');
     Route::post('/solicitudes-creacion/{solicitud}/rechazar', [\App\Http\Controllers\Admin\SolicitudCreacionTiendaController::class, 'rechazar'])->name('solicitudes-creacion.rechazar');
+});
+
+// ── Panel Supplier (almacén) ──────────────────────────────────────────────────
+Route::prefix('supplier')->name('supplier.')->middleware(['auth', 'supplier'])->group(function () {
+    Route::get('/', [\App\Http\Controllers\Supplier\PedidoController::class, 'index'])->name('pedidos.index');
+    Route::get('/pedidos/{pedido}', [\App\Http\Controllers\Supplier\PedidoController::class, 'show'])->name('pedidos.show');
+    Route::post('/pedidos/{pedido}/estado', [\App\Http\Controllers\Supplier\PedidoController::class, 'cambiarEstado'])->name('pedidos.estado');
 });
 
 require __DIR__.'/auth.php';
