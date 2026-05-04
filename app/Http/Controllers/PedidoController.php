@@ -285,6 +285,14 @@ class PedidoController extends Controller
             'orange'
         );
 
+        // Email al cliente con plantilla bonita
+        try {
+            \Illuminate\Support\Facades\Mail::to($pedido->user->email)
+                ->send(new \App\Mail\PedidoCancelado($pedido->fresh(['items', 'user']), $validated['tipo_reembolso']));
+        } catch (\Throwable $e) {
+            // No interrumpir el flujo si falla el email
+        }
+
         return redirect()->route('pedidos.index')->with('success', $mensaje);
     }
 }

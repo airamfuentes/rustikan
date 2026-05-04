@@ -63,6 +63,7 @@
                                 <option value="">Todos</option>
                                 <option value="admin">Admin</option>
                                 <option value="owner">Propietario</option>
+                                <option value="supplier">Supplier</option>
                                 <option value="user">Usuario</option>
                             </select>
                         </div>
@@ -127,9 +128,10 @@
                                     <span :class="{
                                         'bg-purple-100 text-purple-800': usuario.role === 'admin',
                                         'bg-green-100 text-green-800': usuario.role === 'owner',
+                                        'bg-yellow-100 text-yellow-800': usuario.role === 'supplier',
                                         'bg-blue-100 text-blue-800': usuario.role === 'user'
-                                    }" class="inline-flex rounded-full px-2 py-1 text-xs font-semibold">
-                                        {{ usuario.role === 'owner' ? 'Propietario' : usuario.role }}
+                                    }" class="inline-flex rounded-full px-2 py-1 text-xs font-semibold capitalize">
+                                        {{ usuario.role === 'owner' ? 'Propietario' : usuario.role === 'supplier' ? 'Supplier' : usuario.role }}
                                     </span>
                                 </td>
                                 <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-white">{{ usuario.pedidos_count || 0 }}</td>

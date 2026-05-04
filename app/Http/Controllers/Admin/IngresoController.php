@@ -19,15 +19,19 @@ class IngresoController extends Controller
         $fecha_desde = $request->input('fecha_desde', now()->subMonths(6)->format('Y-m-d'));
         $fecha_hasta = $request->input('fecha_hasta', now()->format('Y-m-d'));
 
-        // Estadísticas generales
+        $comisionPct = 10.0;
+
+        $ingresosTotales = (float) Pedido::where('estado', 'entregado')->sum('total');
+        $ingresosPeriodo = (float) Pedido::where('estado', 'entregado')
+            ->whereBetween('created_at', [$fecha_desde, $fecha_hasta])
+            ->sum('total');
+
         $stats = [
-            'ingresos_totales' => Pedido::where('estado', 'entregado')->sum('total'),
-            'ingresos_periodo' => Pedido::where('estado', 'entregado')
-                ->whereBetween('created_at', [$fecha_desde, $fecha_hasta])
-                ->sum('total'),
-            'pedidos_completados' => Pedido::where('estado', 'entregado')->count(),
-            'ticket_promedio' => Pedido::where('estado', 'entregado')->avg('total') ?? 0,
-            'ingresos_mes_actual' => Pedido::where('estado', 'entregado')
+            'ingresos_totales'      => $ingresosTotales,
+            'ingresos_periodo'      => $ingresosPeriodo,
+            'pedidos_completados'   => Pedido::where('estado', 'entregado')->count(),
+            'ticket_promedio'       => Pedido::where('estado', 'entregado')->avg('total') ?? 0,
+            'ingresos_mes_actual'   => Pedido::where('estado', 'entregado')
                 ->whereMonth('created_at', now()->month)
                 ->whereYear('created_at', now()->year)
                 ->sum('total'),
@@ -35,6 +39,9 @@ class IngresoController extends Controller
                 ->whereMonth('created_at', now()->subMonth()->month)
                 ->whereYear('created_at', now()->subMonth()->year)
                 ->sum('total'),
+            'comision_pct'          => $comisionPct,
+            'beneficio_total'       => round($ingresosTotales * $comisionPct / 100, 2),
+            'beneficio_periodo'     => round($ingresosPeriodo * $comisionPct / 100, 2),
         ];
 
         // Calcular crecimiento mensual

@@ -42,28 +42,6 @@
                     </div>
                 </div>
 
-                <!-- Cookies de terceros -->
-                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Cookies de terceros</h2>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                    Algunos servicios integrados en la Plataforma pueden establecer sus propias cookies. Estos servicios tienen sus propias políticas de privacidad que te recomendamos revisar.
-                </p>
-                <div class="rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 overflow-hidden mb-12">
-                    <table class="w-full text-sm">
-                        <thead>
-                            <tr class="border-b border-gray-100 dark:border-gray-700">
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Servicio</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Finalidad</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                            <tr v-for="s in servicios" :key="s.nombre" class="hover:bg-gray-100 dark:hover:bg-gray-700">
-                                <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ s.nombre }}</td>
-                                <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ s.fin }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
                 <!-- Gestionar cookies -->
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Cómo gestionar las cookies</h2>
                 <div class="space-y-4 mb-10">
@@ -132,10 +110,6 @@ const tipos = [
         desc: 'Nos permiten analizar el uso de la Plataforma de forma agregada y anónima para mejorar su funcionamiento. No identifican a los usuarios individualmente.',
         ejemplos: 'Páginas más visitadas, tiempo de sesión, flujo de navegación.',
     },
-];
-
-const servicios = [
-    { nombre: 'Cloudflare Turnstile', fin: 'Verificación anti-bots en formularios' },
 ];
 
 const navegadores = [

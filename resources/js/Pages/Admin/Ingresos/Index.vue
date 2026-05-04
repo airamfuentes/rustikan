@@ -94,6 +94,18 @@
                     </div>
                 </div>
 
+                <!-- Beneficio íntegro Rustikan -->
+                <div class="mb-6 rounded-lg bg-gradient-to-r from-emerald-500 to-green-600 p-5 shadow text-white flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium uppercase tracking-wide opacity-80">Beneficio íntegro Rustikan ({{ stats.comision_pct }}% comisión)</p>
+                        <p class="mt-1 text-3xl font-bold">{{ formatPrice(stats.beneficio_total) }}€</p>
+                        <p class="mt-1 text-xs opacity-75">En el periodo seleccionado: {{ formatPrice(stats.beneficio_periodo) }}€</p>
+                    </div>
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
+                        <DollarSign class="h-6 w-6" />
+                    </div>
+                </div>
+
                 <!-- Ingresos Mensuales (Gráfico de Tabla) -->
                 <div class="mb-6 rounded-lg bg-white dark:bg-gray-800 p-6 shadow">
                     <h3 class="mb-4 text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2"><BarChart2 class="h-5 w-5 text-gray-500" /> Ingresos por Mes (Últimos 12 meses)</h3>

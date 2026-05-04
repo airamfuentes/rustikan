@@ -134,6 +134,9 @@ const toggle = async () => {
     abierto.value = !abierto.value;
     if (abierto.value) {
         await cargar();
+    } else if (notificaciones.value.length > 0) {
+        // Al cerrar tras haber visto las notis: borrarlas todas
+        await marcarTodas();
     }
 };
 
@@ -154,19 +157,17 @@ const cargar = async () => {
 };
 
 const abrirNotificacion = async (n) => {
-    if (!n.leida) {
-        // Mark as read
-        await fetch(route('notificaciones.leer', n.id), {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
-            },
-        });
-        n.leida = true;
-        count.value = Math.max(0, count.value - 1);
-    }
+    // Marcar como leída → la borra del backend
+    await fetch(route('notificaciones.leer', n.id), {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+        },
+    });
+    notificaciones.value = notificaciones.value.filter(x => x.id !== n.id);
+    count.value = Math.max(0, count.value - 1);
     abierto.value = false;
     if (n.enlace) {
         router.visit(n.enlace);
@@ -182,7 +183,7 @@ const marcarTodas = async () => {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
         },
     });
-    notificaciones.value.forEach(n => n.leida = true);
+    notificaciones.value = [];
     count.value = 0;
 };
 

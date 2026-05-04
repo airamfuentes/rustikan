@@ -27,7 +27,7 @@
                 <div style="display:inline-block;background:linear-gradient(135deg,#FDF6EE,#FAE9D5);border:2px solid #F3CFA3;border-radius:16px;padding:24px 40px;text-align:center;">
                     <p style="margin:0 0 6px;font-size:11px;color:#A85D18;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Tu código de verificación</p>
                     <p style="margin:0;font-size:42px;font-weight:900;color:#874915;letter-spacing:10px;font-family:monospace;">{{ $codigo }}</p>
-                    <p style="margin:8px 0 0;font-size:12px;color:#9CA3AF;">Válido durante <strong>24 horas</strong></p>
+                    <p style="margin:8px 0 0;font-size:12px;color:#9CA3AF;">Válido durante <strong>5 minutos</strong></p>
                 </div>
             </td>
         </tr>

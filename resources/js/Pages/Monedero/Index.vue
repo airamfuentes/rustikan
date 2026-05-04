@@ -3,7 +3,7 @@
         <Head title="Mi Monedero RustiCoin" />
         <NavbarPublico />
 
-        <main class="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
+        <main class="mx-auto max-w-5xl px-4 pt-28 pb-12 sm:px-6 lg:px-8">
 
             <!-- Header -->
             <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -61,20 +61,47 @@
 
                         <!-- Datos tarjeta (simulación) -->
                         <div :class="['rounded-xl border p-4 space-y-3', isDark ? 'border-gray-600 bg-gray-700/50' : 'border-gray-200 bg-gray-50']">
-                            <p :class="['text-xs font-semibold uppercase tracking-wider', isDark ? 'text-gray-400' : 'text-gray-500']">Datos de tarjeta (simulado)</p>
-                            <input v-model="cardNumber" type="text" placeholder="**** **** **** ****" maxlength="19" @input="formatCard"
-                                :class="['w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400',
-                                    isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400']"
-                            />
+                            <div class="flex items-center justify-between">
+                                <p :class="['text-xs font-semibold uppercase tracking-wider', isDark ? 'text-gray-400' : 'text-gray-500']">Datos de tarjeta</p>
+                                <span v-if="cardBrand" class="text-[10px] font-bold uppercase rounded px-1.5 py-0.5"
+                                    :class="cardBrand === 'visa' ? 'bg-blue-100 text-blue-700' : cardBrand === 'mastercard' ? 'bg-orange-100 text-orange-700' : 'bg-gray-200 text-gray-700'">{{ cardBrand }}</span>
+                            </div>
+
+                            <div>
+                                <input v-model="cardData.numero" type="text" placeholder="1234 5678 9012 3456" inputmode="numeric" autocomplete="cc-number" @input="formatCard"
+                                    :class="['w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2',
+                                        cardErrors.numero ? 'border-red-400 focus:ring-red-200' : 'focus:ring-primary-400',
+                                        isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400']"
+                                />
+                                <p v-if="cardErrors.numero" class="mt-1 text-xs text-red-500">{{ cardErrors.numero }}</p>
+                            </div>
+
+                            <div>
+                                <input v-model="cardData.titular" type="text" placeholder="Titular de la tarjeta" autocomplete="cc-name"
+                                    :class="['w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2',
+                                        cardErrors.titular ? 'border-red-400 focus:ring-red-200' : 'focus:ring-primary-400',
+                                        isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400']"
+                                />
+                                <p v-if="cardErrors.titular" class="mt-1 text-xs text-red-500">{{ cardErrors.titular }}</p>
+                            </div>
+
                             <div class="grid grid-cols-2 gap-2">
-                                <input v-model="cardExpiry" type="text" placeholder="MM/AA" maxlength="5"
-                                    :class="['w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400',
-                                        isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400']"
-                                />
-                                <input v-model="cardCvv" type="text" placeholder="CVV" maxlength="3"
-                                    :class="['w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400',
-                                        isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400']"
-                                />
+                                <div>
+                                    <input :value="cardData.expiry" type="text" placeholder="MM/AA" inputmode="numeric" autocomplete="cc-exp" @input="formatExpiry"
+                                        :class="['w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2',
+                                            cardErrors.expiry ? 'border-red-400 focus:ring-red-200' : 'focus:ring-primary-400',
+                                            isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400']"
+                                    />
+                                    <p v-if="cardErrors.expiry" class="mt-1 text-xs text-red-500">{{ cardErrors.expiry }}</p>
+                                </div>
+                                <div>
+                                    <input :value="cardData.cvv" type="text" placeholder="CVV" inputmode="numeric" autocomplete="cc-csc" @input="formatCvv"
+                                        :class="['w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2',
+                                            cardErrors.cvv ? 'border-red-400 focus:ring-red-200' : 'focus:ring-primary-400',
+                                            isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400']"
+                                    />
+                                    <p v-if="cardErrors.cvv" class="mt-1 text-xs text-red-500">{{ cardErrors.cvv }}</p>
+                                </div>
                             </div>
                         </div>
 
@@ -192,7 +219,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import FooterPublico from '@/Components/FooterPublico.vue';
@@ -207,24 +234,81 @@ const { isDark } = useDarkMode();
 
 const recargaForm  = useForm({ cantidad: 10 });
 const retiradaForm = useForm({ cantidad: null });
-const cardNumber   = ref('');
-const cardExpiry   = ref('');
-const cardCvv      = ref('');
 
-const formatCard = () => {
-    cardNumber.value = cardNumber.value
+const cardData = ref({
+    titular: '',
+    numero:  '',
+    expiry:  '',
+    cvv:     '',
+});
+const cardErrors = ref({});
+
+const formatCard = (e) => {
+    cardData.value.numero = e.target.value
         .replace(/\D/g, '')
+        .slice(0, 16)
         .replace(/(.{4})/g, '$1 ')
-        .trim()
-        .slice(0, 19);
+        .trim();
+};
+
+const formatExpiry = (e) => {
+    const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+    cardData.value.expiry = digits.length >= 3 ? digits.slice(0, 2) + '/' + digits.slice(2) : digits;
+};
+
+const formatCvv = (e) => {
+    cardData.value.cvv = e.target.value.replace(/\D/g, '').slice(0, 4);
+};
+
+const luhnCheck = (num) => {
+    const digits = num.replace(/\D/g, '');
+    if (digits.length < 13) return false;
+    let sum = 0, alt = false;
+    for (let i = digits.length - 1; i >= 0; i--) {
+        let n = parseInt(digits[i]);
+        if (alt) { n *= 2; if (n > 9) n -= 9; }
+        sum += n;
+        alt = !alt;
+    }
+    return sum % 10 === 0;
+};
+
+const cardBrand = computed(() => {
+    const n = cardData.value.numero.replace(/\D/g, '');
+    if (/^4/.test(n)) return 'visa';
+    if (/^5[1-5]|^2[2-7]/.test(n)) return 'mastercard';
+    if (/^3[47]/.test(n)) return 'amex';
+    return null;
+});
+
+const validarTarjeta = () => {
+    cardErrors.value = {};
+    if (!cardData.value.titular.trim()) {
+        cardErrors.value.titular = 'El nombre del titular es obligatorio.';
+    }
+    const digits = cardData.value.numero.replace(/\D/g, '');
+    if (digits.length < 16 || !luhnCheck(digits)) {
+        cardErrors.value.numero = 'Número de tarjeta no válido.';
+    }
+    const [mes, anio] = cardData.value.expiry.split('/');
+    const ahora = new Date();
+    const mesN = parseInt(mes); const anioN = 2000 + parseInt(anio ?? '0');
+    if (!mes || !anio || mesN < 1 || mesN > 12 || anioN < ahora.getFullYear() ||
+        (anioN === ahora.getFullYear() && mesN < ahora.getMonth() + 1)) {
+        cardErrors.value.expiry = 'Fecha de caducidad no válida.';
+    }
+    if (!cardData.value.cvv || cardData.value.cvv.length < 3) {
+        cardErrors.value.cvv = 'CVV no válido.';
+    }
+    return Object.keys(cardErrors.value).length === 0;
 };
 
 const recargar = () => {
+    if (!validarTarjeta()) return;
     recargaForm.post(route('monedero.recargar'), {
         onSuccess: () => {
-            cardNumber.value = '';
-            cardExpiry.value = '';
-            cardCvv.value    = '';
+            cardData.value = { titular: '', numero: '', expiry: '', cvv: '' };
+            cardErrors.value = {};
         },
     });
 };

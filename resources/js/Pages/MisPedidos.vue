@@ -96,7 +96,7 @@ const submitRating = (tiendaId) => {
     <Head title="Mis pedidos – Rustikan" />
 
     <!-- Toasts -->
-    <div class="pointer-events-none fixed inset-0 z-50 flex flex-col items-end justify-start gap-3 p-6">
+    <div class="pointer-events-none fixed top-20 right-4 z-[9999] flex flex-col items-end gap-3 max-w-sm w-full">
         <Toast v-for="(toast, index) in toasts" :key="toast.id" :type="toast.type" :title="toast.title" :message="toast.message" :active="index === 0" @close="removeToast(toast.id)" />
     </div>
 

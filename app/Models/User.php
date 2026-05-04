@@ -29,6 +29,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'telefono',
         'direccion',
         'edad',
+        'fecha_nacimiento',
         'email_verification_code',
         'email_verification_expires_at',
         'rusticoin_balance',
@@ -55,6 +56,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at'             => 'datetime',
             'email_verification_expires_at' => 'datetime',
+            'fecha_nacimiento'              => 'date',
             'password'                      => 'hashed',
             'rusticoin_balance'             => 'decimal:2',
         ];
@@ -124,7 +126,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
         $this->forceFill([
             'email_verification_code'         => $code,
-            'email_verification_expires_at'   => now()->addHours(24),
+            'email_verification_expires_at'   => now()->addMinutes(5),
         ])->save();
 
         $this->notify(new VerificacionEmail($code));

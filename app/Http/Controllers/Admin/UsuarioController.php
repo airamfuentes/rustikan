@@ -43,10 +43,11 @@ class UsuarioController extends Controller
 
         // Estadísticas
         $stats = [
-            'total' => User::count(),
-            'admins' => User::where('role', 'admin')->count(),
-            'owners' => User::where('role', 'owner')->count(),
-            'users' => User::where('role', 'user')->count(),
+            'total'       => User::count(),
+            'admins'      => User::where('role', 'admin')->count(),
+            'owners'      => User::where('role', 'owner')->count(),
+            'suppliers'   => User::where('role', 'supplier')->count(),
+            'users'       => User::where('role', 'user')->count(),
             'con_pedidos' => User::has('pedidos')->count(),
             'sin_pedidos' => User::doesntHave('pedidos')->count(),
         ];
@@ -88,7 +89,7 @@ class UsuarioController extends Controller
         $validated = $request->validate([
             'name'      => 'required|string|max:255',
             'email'     => 'required|email|unique:users,email,' . $usuario->id,
-            'role'      => 'required|in:user,admin,owner',
+            'role'      => 'required|in:user,admin,owner,supplier',
             'password'  => 'nullable|confirmed|min:8',
             'avatar'    => 'nullable|image|max:2048',
         ]);

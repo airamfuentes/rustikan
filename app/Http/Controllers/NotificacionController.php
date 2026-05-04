@@ -8,29 +8,27 @@ use Illuminate\Http\Request;
 class NotificacionController extends Controller
 {
     /**
-     * Devuelve las últimas 20 notificaciones del usuario autenticado (para el dropdown).
+     * Devuelve las notificaciones no leídas del usuario autenticado (para el dropdown).
+     * Una vez se marcan como leídas se eliminan automáticamente.
      */
     public function index()
     {
         $user = auth()->user();
 
         $notificaciones = Notificacion::where('user_id', $user->id)
+            ->where('leida', false)
             ->orderByDesc('created_at')
             ->take(20)
             ->get();
 
-        $noLeidas = Notificacion::where('user_id', $user->id)
-            ->where('leida', false)
-            ->count();
-
         return response()->json([
             'notificaciones' => $notificaciones,
-            'no_leidas'      => $noLeidas,
+            'no_leidas'      => $notificaciones->count(),
         ]);
     }
 
     /**
-     * Marcar una notificación como leída.
+     * Marcar una notificación como leída → la elimina.
      */
     public function marcarLeida(Notificacion $notificacion)
     {
@@ -38,19 +36,19 @@ class NotificacionController extends Controller
             abort(403);
         }
 
-        $notificacion->update(['leida' => true]);
+        $notificacion->delete();
 
         return response()->json(['ok' => true]);
     }
 
     /**
-     * Marcar todas las notificaciones del usuario como leídas.
+     * Marcar todas como leídas → elimina todas las no leídas del usuario.
      */
     public function marcarTodasLeidas()
     {
         Notificacion::where('user_id', auth()->id())
             ->where('leida', false)
-            ->update(['leida' => true]);
+            ->delete();
 
         return response()->json(['ok' => true]);
     }

@@ -30,6 +30,11 @@ onMounted(() => {
             }
         }
     } catch (_) { /* ignore */ }
+
+    // Permite abrir el chat desde cualquier parte de la app via evento global
+    window.addEventListener('rusti:open', () => {
+        if (!open.value) toggleOpen();
+    });
 });
 
 // Persistir conversación

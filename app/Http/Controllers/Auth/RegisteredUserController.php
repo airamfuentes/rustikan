@@ -33,16 +33,46 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Dominios de correo permitidos (los más conocidos)
+        $dominiosPermitidos = [
+            'gmail.com', 'googlemail.com',
+            'outlook.com', 'outlook.es', 'hotmail.com', 'hotmail.es', 'live.com', 'msn.com',
+            'yahoo.com', 'yahoo.es',
+            'icloud.com', 'me.com', 'mac.com',
+            'protonmail.com', 'proton.me',
+            'aol.com', 'gmx.com', 'gmx.es',
+            'rustikan.com',
+        ];
+
         $request->validate([
-            'name'          => 'required|string|max:255',
-            'apellidos'     => 'required|string|max:255',
-            'telefono'      => 'nullable|string|min:9|max:20',
-            'email'         => 'required|string|lowercase|email|max:255|unique:'.User::class,
-            'edad'          => 'nullable|integer|min:14|max:120',
-            'direccion'     => 'nullable|string|max:500',
-            'accept_terms'  => 'accepted',
-            'password'      => ['required', 'confirmed', Rules\Password::defaults()],
-            'turnstile_token' => 'required|string',
+            'name'             => 'required|string|min:2|max:60|regex:/^[\pL\s\'-]+$/u',
+            'apellidos'        => 'required|string|min:2|max:80|regex:/^[\pL\s\'-]+$/u',
+            'telefono'         => 'required|string|regex:/^[6-9][0-9]{8}$/',
+            'email'            => [
+                'required', 'string', 'lowercase', 'email:rfc,dns', 'max:255',
+                'unique:'.User::class,
+                function ($attr, $value, $fail) use ($dominiosPermitidos) {
+                    $dominio = strtolower(substr(strrchr($value, '@') ?: '', 1));
+                    if (!in_array($dominio, $dominiosPermitidos)) {
+                        $fail('Solo se permiten correos de proveedores conocidos (Gmail, Outlook, Hotmail, Yahoo, iCloud, Proton, etc.).');
+                    }
+                },
+            ],
+            'fecha_nacimiento' => [
+                'required', 'date',
+                'before_or_equal:' . now()->subYears(14)->format('Y-m-d'),
+                'after_or_equal:' . now()->subYears(120)->format('Y-m-d'),
+            ],
+            'direccion'        => 'required|string|min:5|max:500',
+            'accept_terms'     => 'accepted',
+            'password'         => ['required', 'confirmed', Rules\Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
+            'turnstile_token'  => 'required|string',
+        ], [
+            'telefono.regex'              => 'El teléfono debe tener 9 dígitos y empezar por 6, 7, 8 o 9.',
+            'name.regex'                  => 'El nombre solo puede contener letras.',
+            'apellidos.regex'             => 'Los apellidos solo pueden contener letras.',
+            'fecha_nacimiento.before_or_equal' => 'Debes tener al menos 14 años.',
+            'fecha_nacimiento.after_or_equal'  => 'Fecha de nacimiento no válida.',
         ]);
 
         // Verify Turnstile with Cloudflare
@@ -58,14 +88,17 @@ class RegisteredUserController extends Controller
             ]);
         }
 
+        $edad = \Carbon\Carbon::parse($request->fecha_nacimiento)->age;
+
         $user = User::create([
-            'name'      => $request->name,
-            'apellidos' => $request->apellidos,
-            'telefono'  => $request->telefono,
-            'email'     => $request->email,
-            'edad'      => $request->edad,
-            'direccion' => $request->direccion,
-            'password'  => Hash::make($request->password),
+            'name'             => $request->name,
+            'apellidos'        => $request->apellidos,
+            'telefono'         => $request->telefono,
+            'email'            => $request->email,
+            'fecha_nacimiento' => $request->fecha_nacimiento,
+            'edad'             => $edad,
+            'direccion'        => $request->direccion,
+            'password'         => Hash::make($request->password),
         ]);
 
         event(new Registered($user));
@@ -81,6 +114,7 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('verification.notice', absolute: false));
+        return redirect(route('verification.notice', absolute: false))
+            ->with('success', "¡Bienvenido a Rustikan, {$user->name}! Verifica tu email para empezar.");
     }
 }

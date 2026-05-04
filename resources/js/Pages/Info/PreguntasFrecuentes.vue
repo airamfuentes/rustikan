@@ -51,10 +51,20 @@
 
                 <!-- CTA -->
                 <div class="mt-8 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 p-6 text-center">
-                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">¿No encuentras lo que buscas?</p>
-                    <Link :href="route('info.contacto')" class="inline-block rounded-full bg-indigo-600 text-white px-6 py-2.5 font-semibold text-sm hover:bg-indigo-700 transition-colors">
-                        Escríbenos
-                    </Link>
+                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">¿No encuentras lo que buscas?</p>
+                    <div class="flex flex-wrap items-center justify-center gap-3">
+                        <Link :href="route('info.contacto')" class="inline-flex items-center gap-2 rounded-full bg-indigo-600 text-white px-6 py-2.5 font-semibold text-sm hover:bg-indigo-700 transition-colors">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            Escríbenos
+                        </Link>
+                        <button @click="abrirRusti" class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 text-white px-6 py-2.5 font-semibold text-sm hover:from-orange-600 hover:to-pink-600 transition-colors shadow">
+                            <span class="text-base">🤖</span>
+                            Pregunta a Rusti
+                        </button>
+                    </div>
+                    <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">Rusti es nuestro asistente IA disponible 24/7 para resolver tus dudas al instante.</p>
                 </div>
 
             </div>
@@ -81,6 +91,10 @@ const toggleFaq = (si, i) => {
     const next = new Set(openItems.value);
     next.has(k) ? next.delete(k) : next.add(k);
     openItems.value = next;
+};
+
+const abrirRusti = () => {
+    window.dispatchEvent(new CustomEvent('rusti:open'));
 };
 
 const faqs = [

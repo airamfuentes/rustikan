@@ -165,6 +165,16 @@ class PedidoController extends Controller
             $msgFlash .= ' Reembolso a tarjeta iniciado.';
         }
 
+        // Email al cliente con plantilla
+        try {
+            if ($pedido->user) {
+                \Illuminate\Support\Facades\Mail::to($pedido->user->email)
+                    ->send(new \App\Mail\PedidoCancelado($pedido->fresh(['items', 'user']), $tipoReembolso, 'El administrador ha cancelado tu pedido.'));
+            }
+        } catch (\Throwable $e) {
+            // ignore
+        }
+
         return redirect()->route('admin.pedidos.show', $pedido)->with('success', $msgFlash);
     }
 }

@@ -7,6 +7,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import Recaptcha from '@/Components/Recaptcha.vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 const RECAPTCHA_SITE_KEY = usePage().props.recaptchaSiteKey;
 
@@ -15,12 +16,23 @@ const form = useForm({
     apellidos: '',
     telefono: '',
     email: '',
-    edad: '',
+    fecha_nacimiento: '',
     direccion: '',
     accept_terms: false,
     password: '',
     password_confirmation: '',
     turnstile_token: '',
+});
+
+// Edad mínima 14, máxima 120
+const today = new Date();
+const maxFechaNacimiento = computed(() => {
+    const d = new Date(today.getFullYear() - 14, today.getMonth(), today.getDate());
+    return d.toISOString().split('T')[0];
+});
+const minFechaNacimiento = computed(() => {
+    const d = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate());
+    return d.toISOString().split('T')[0];
 });
 
 const onVerify  = (token) => { form.turnstile_token = token; };
@@ -78,39 +90,42 @@ const submit = () => {
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
-                    <InputLabel for="telefono" value="Teléfono (opcional)" />
+                    <InputLabel for="telefono" value="Teléfono *" />
 
                     <TextInput
                         id="telefono"
                         type="tel"
                         class="mt-1 block w-full"
                         v-model="form.telefono"
+                        required
                         autocomplete="tel"
-                        placeholder="Ej: 612345678"
+                        placeholder="612345678"
+                        pattern="[6-9][0-9]{8}"
+                        title="9 dígitos comenzando por 6, 7, 8 o 9"
                     />
 
                     <InputError class="mt-2" :message="form.errors.telefono" />
                 </div>
 
                 <div>
-                    <InputLabel for="edad" value="Edad (opcional)" />
+                    <InputLabel for="fecha_nacimiento" value="Fecha de nacimiento *" />
 
                     <TextInput
-                        id="edad"
-                        type="number"
+                        id="fecha_nacimiento"
+                        type="date"
                         class="mt-1 block w-full"
-                        v-model="form.edad"
-                        min="14"
-                        max="120"
-                        inputmode="numeric"
+                        v-model="form.fecha_nacimiento"
+                        required
+                        :max="maxFechaNacimiento"
+                        :min="minFechaNacimiento"
                     />
-
-                    <InputError class="mt-2" :message="form.errors.edad" />
+                    <p class="mt-1 text-xs text-tierra-500 dark:text-tierra-400">Debes tener al menos 14 años</p>
+                    <InputError class="mt-2" :message="form.errors.fecha_nacimiento" />
                 </div>
             </div>
 
             <div>
-                <InputLabel for="email" value="Correo Electrónico" />
+                <InputLabel for="email" value="Correo Electrónico *" />
 
                 <TextInput
                     id="email"
@@ -119,21 +134,23 @@ const submit = () => {
                     v-model="form.email"
                     required
                     autocomplete="username"
+                    placeholder="ejemplo@gmail.com"
                 />
-
+                <p class="mt-1 text-xs text-tierra-500 dark:text-tierra-400">Solo dominios conocidos: gmail, outlook, hotmail, yahoo, icloud, etc.</p>
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
             <div>
-                <InputLabel for="direccion" value="Dirección (opcional)" />
+                <InputLabel for="direccion" value="Dirección *" />
 
                 <TextInput
                     id="direccion"
                     type="text"
                     class="mt-1 block w-full"
                     v-model="form.direccion"
+                    required
                     autocomplete="street-address"
-                    placeholder="Calle, número, ciudad"
+                    placeholder="Calle, número, ciudad, CP"
                 />
 
                 <InputError class="mt-2" :message="form.errors.direccion" />

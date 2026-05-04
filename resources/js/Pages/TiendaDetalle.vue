@@ -152,6 +152,11 @@ const whatsappUrl = computed(() => {
 });
 const totalResenas = computed(() => props.tienda.total_resenas ?? props.resenas.length);
 
+const scrollToResenas = () => {
+    const el = document.getElementById('seccion-resenas');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
 const pct = (n) => totalResenas.value > 0
     ? Math.round(((props.distribucion[n] ?? 0) / totalResenas.value) * 100)
     : 0;
@@ -271,6 +276,15 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                             <path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.549 4.122 1.512 5.863L.057 23.998l6.305-1.654A11.947 11.947 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.89 0-3.659-.518-5.177-1.42l-.371-.22-3.742.981.999-3.651-.242-.376A9.955 9.955 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
                         </svg>
                     </a>
+                    <button
+                        @click="scrollToResenas"
+                        title="Dejar reseña"
+                        class="flex h-9 w-9 items-center justify-center rounded-full bg-yellow-500/80 text-white transition-all hover:bg-yellow-500 hover:scale-105"
+                    >
+                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
 
@@ -439,7 +453,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
         </main>
 
         <!-- ══════════════════ SECCIÓN RESEÑAS ══════════════════ -->
-        <section :class="['py-16 px-4 sm:px-6 lg:px-8', isDark ? 'bg-gray-900' : 'bg-gradient-to-b from-gray-50 to-white']">
+        <section id="seccion-resenas" :class="['py-16 px-4 sm:px-6 lg:px-8', isDark ? 'bg-gray-900' : 'bg-gradient-to-b from-gray-50 to-white']">
             <div class="mx-auto max-w-7xl">
 
                 <!-- Cabecera -->

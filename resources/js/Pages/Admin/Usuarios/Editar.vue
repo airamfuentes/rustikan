@@ -90,6 +90,7 @@
                                 >
                                     <option value="user">Usuario</option>
                                     <option value="owner">Propietario de Tienda</option>
+                                    <option value="supplier">Supplier (almacén)</option>
                                     <option value="admin">Administrador</option>
                                 </select>
                                 <p v-if="form.errors.role" class="mt-1 text-sm text-red-600">{{ form.errors.role }}</p>

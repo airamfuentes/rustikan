@@ -70,6 +70,17 @@
                         <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Solicitudes de vendedores</p>
                     </Link>
 
+                    <!-- Incidencias supplier -->
+                    <Link :href="route('admin.pedidos.index', { estado: 'incidencia' })" class="group relative rounded-xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 p-6 shadow-sm transition-all hover:shadow-md hover:border-red-400 hover:-translate-y-1">
+                        <div class="mb-4 inline-flex rounded-lg bg-red-100 p-3">
+                            <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Incidencias</h3>
+                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Pedidos con incidencia reportada</p>
+                    </Link>
+
                     <!-- Gestionar Ingresos -->
                     <Link :href="route('admin.ingresos.index')" class="group rounded-xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 p-6 shadow-sm transition-all hover:shadow-md hover:border-emerald-400 hover:-translate-y-1">
                         <div class="mb-4 inline-flex rounded-lg bg-emerald-100 p-3">
@@ -81,103 +92,6 @@
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white">Ingresos</h3>
                         <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Ver estadísticas</p>
                     </Link>
-                </div>
-
-                <!-- SECCIÓN BENEFICIOS / COMISIONES RUSTIKAN -->
-                <div class="rounded-xl bg-white dark:bg-gray-800 p-6 shadow-lg">
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                            <svg class="h-6 w-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                            </svg>
-                            Beneficios de la plataforma
-                        </h2>
-                        <span class="rounded-full bg-emerald-100 dark:bg-emerald-900/40 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-                            Comisión {{ comision_pct }}%
-                        </span>
-                    </div>
-
-                    <!-- Tarjetas resumen -->
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-6">
-                        <div class="rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/40 p-4">
-                            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Ventas totales plataforma</p>
-                            <p class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{{ total_bruto_plataforma.toFixed(2) }} €</p>
-                            <p class="text-xs text-gray-400 mt-0.5">Solo pedidos entregados</p>
-                        </div>
-                        <div class="rounded-xl border border-red-100 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4">
-                            <p class="text-xs text-red-500 dark:text-red-400 uppercase tracking-wide">Abonado a vendedores</p>
-                            <p class="mt-1 text-2xl font-bold text-red-600 dark:text-red-400">{{ (total_bruto_plataforma - total_comision_plataforma).toFixed(2) }} €</p>
-                            <p class="text-xs text-red-400 mt-0.5">{{ (100 - comision_pct) }}% de las ventas</p>
-                        </div>
-                        <div class="rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 p-4 shadow">
-                            <p class="text-xs text-white/80 uppercase tracking-wide">Ingresos Rustikan</p>
-                            <p class="mt-1 text-2xl font-bold text-white">{{ total_comision_plataforma.toFixed(2) }} €</p>
-                            <p class="text-xs text-white/70 mt-0.5">{{ comision_pct }}% de comisión</p>
-                        </div>
-                    </div>
-
-                    <!-- Top tiendas por volumen -->
-                    <div class="mb-6">
-                        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Top tiendas por volumen</h3>
-                        <div class="overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-700">
-                            <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
-                                <thead class="bg-gray-50 dark:bg-gray-900/40">
-                                    <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Tienda</th>
-                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Ventas brutas</th>
-                                        <th class="px-4 py-3 text-right text-xs font-medium text-emerald-500 uppercase">Comisión</th>
-                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase">Neto vendedor</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800">
-                                    <tr v-for="tienda in comisiones_por_tienda" :key="tienda.id"
-                                        class="hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors">
-                                        <td class="px-4 py-3">
-                                            <div class="flex items-center gap-2">
-                                                <img v-if="tienda.logo" :src="`/storage/${tienda.logo}`" class="h-6 w-6 rounded-full object-cover" />
-                                                <div v-else class="h-6 w-6 rounded-full bg-primary-100 dark:bg-primary-900/40 flex items-center justify-center text-[10px] font-bold text-primary-600">
-                                                    {{ tienda.nombre.charAt(0) }}
-                                                </div>
-                                                <span class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ tienda.nombre }}</span>
-                                            </div>
-                                        </td>
-                                        <td class="px-4 py-3 text-sm text-right text-gray-600 dark:text-gray-300">{{ tienda.bruto.toFixed(2) }} €</td>
-                                        <td class="px-4 py-3 text-sm text-right font-semibold text-emerald-600 dark:text-emerald-400">{{ tienda.comision.toFixed(2) }} €</td>
-                                        <td class="px-4 py-3 text-sm text-right text-gray-500 dark:text-gray-400">{{ tienda.neto.toFixed(2) }} €</td>
-                                    </tr>
-                                    <tr v-if="comisiones_por_tienda.length === 0">
-                                        <td colspan="4" class="px-4 py-8 text-center text-sm text-gray-400">Sin datos aún</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Gráfica mensual -->
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Comisiones mensuales (últimos 12 meses)</h3>
-                        <div class="overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-700">
-                            <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
-                                <thead class="bg-gray-50 dark:bg-gray-900/40">
-                                    <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Mes</th>
-                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Ventas brutas</th>
-                                        <th class="px-4 py-3 text-right text-xs font-medium text-emerald-500 uppercase">Comisión Rustikan</th>
-                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase">A vendedores</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800">
-                                    <tr v-for="fila in comisiones_por_mes" :key="fila.mes"
-                                        class="hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors">
-                                        <td class="px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 capitalize">{{ fila.mes }}</td>
-                                        <td class="px-4 py-3 text-sm text-right text-gray-600 dark:text-gray-300">{{ fila.bruto.toFixed(2) }} €</td>
-                                        <td class="px-4 py-3 text-sm text-right font-semibold text-emerald-600 dark:text-emerald-400">{{ fila.comision.toFixed(2) }} €</td>
-                                        <td class="px-4 py-3 text-sm text-right text-gray-500 dark:text-gray-400">{{ fila.neto.toFixed(2) }} €</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- ACTIVIDAD RECIENTE -->
@@ -287,11 +201,6 @@ const props = defineProps({
     tiendas_stats: Object,
     actividad_reciente: Array,
     filtros_aplicados: Object,
-    comision_pct: { type: Number, default: 10 },
-    comisiones_por_mes: { type: Array, default: () => [] },
-    total_bruto_plataforma: { type: Number, default: 0 },
-    total_comision_plataforma: { type: Number, default: 0 },
-    comisiones_por_tienda: { type: Array, default: () => [] },
 });
 
 const mostrarActividad = ref(false);
