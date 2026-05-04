@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use App\Models\Notificacion;
+use App\Models\MensajeChat;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -52,6 +53,23 @@ class HandleInertiaRequests extends Middleware
             'notificacionesCount' => $user
                 ? Notificacion::where('user_id', $user->id)->where('leida', false)->count()
                 : 0,
+            'chatNoLeidos' => $user ? $this->chatNoLeidos($user) : 0,
         ];
+    }
+
+    private function chatNoLeidos($user): int
+    {
+        if ($user->isSupplier()) {
+            return MensajeChat::where('supplier_id', $user->id)
+                ->where('remitente_id', '!=', $user->id)
+                ->where('leido_supplier', false)
+                ->count();
+        }
+        if ($user->isAdmin()) {
+            return MensajeChat::whereColumn('remitente_id', 'supplier_id')
+                ->where('leido_admin', false)
+                ->count();
+        }
+        return 0;
     }
 }

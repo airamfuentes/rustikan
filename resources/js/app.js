@@ -11,7 +11,7 @@ import ChatIA from '@/Components/ChatIA.vue';
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 // Rutas donde NO queremos mostrar el chat (paneles internos)
-const CHAT_HIDDEN_PREFIXES = ['/admin', '/mi-tienda', '/dashboard'];
+const CHAT_HIDDEN_PREFIXES = ['/admin', '/mi-tienda', '/dashboard', '/supplier'];
 const shouldShowChat = () => {
     if (typeof window === 'undefined') return true;
     const path = window.location.pathname || '/';

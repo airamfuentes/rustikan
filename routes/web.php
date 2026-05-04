@@ -154,6 +154,9 @@ Route::middleware('auth')->group(function () {
         if ($user->isOwner()) {
             return redirect()->route('owner.panel');
         }
+        if ($user->isSupplier()) {
+            return redirect()->route('supplier.dashboard');
+        }
         return redirect()->route('home');
     })->name('dashboard');
     
@@ -227,9 +230,20 @@ Route::middleware(['auth', 'admin', 'throttle:60,1'])->prefix('admin')->name('ad
 
 // ── Panel Supplier (almacén) ──────────────────────────────────────────────────
 Route::prefix('supplier')->name('supplier.')->middleware(['auth', 'supplier'])->group(function () {
-    Route::get('/', [\App\Http\Controllers\Supplier\PedidoController::class, 'index'])->name('pedidos.index');
+    Route::get('/', [\App\Http\Controllers\Supplier\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/pedidos', [\App\Http\Controllers\Supplier\PedidoController::class, 'index'])->name('pedidos.index');
     Route::get('/pedidos/{pedido}', [\App\Http\Controllers\Supplier\PedidoController::class, 'show'])->name('pedidos.show');
     Route::post('/pedidos/{pedido}/estado', [\App\Http\Controllers\Supplier\PedidoController::class, 'cambiarEstado'])->name('pedidos.estado');
+    Route::get('/historial', [\App\Http\Controllers\Supplier\PedidoController::class, 'historial'])->name('historial');
+    Route::get('/stock', [\App\Http\Controllers\Supplier\StockController::class, 'index'])->name('stock');
+});
+
+// ── Chat Admin-Supplier (JSON API) ────────────────────────────────────────────
+Route::middleware(['auth'])->prefix('api/chat-almacen')->name('chat.almacen.')->group(function () {
+    Route::get('/mensajes', [\App\Http\Controllers\ChatAdminSupplierController::class, 'getMensajes'])->name('mensajes');
+    Route::post('/enviar', [\App\Http\Controllers\ChatAdminSupplierController::class, 'enviar'])->middleware('throttle:60,1')->name('enviar');
+    Route::get('/conversaciones', [\App\Http\Controllers\ChatAdminSupplierController::class, 'conversaciones'])->name('conversaciones');
+    Route::get('/no-leidos', [\App\Http\Controllers\ChatAdminSupplierController::class, 'noLeidos'])->name('no-leidos');
 });
 
 require __DIR__.'/auth.php';

@@ -57,6 +57,39 @@ class PedidoController extends Controller
         ]);
     }
 
+    public function historial(Request $request)
+    {
+        $query = Pedido::with(['user:id,name,email', 'items.producto', 'items.tienda'])
+            ->orderBy('created_at', 'desc');
+
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('numero_pedido', 'like', "%{$search}%")
+                  ->orWhereHas('user', fn ($q) => $q->where('name', 'like', "%{$search}%"));
+            });
+        }
+
+        if ($request->filled('fecha_desde')) {
+            $query->whereDate('created_at', '>=', $request->fecha_desde);
+        }
+
+        if ($request->filled('fecha_hasta')) {
+            $query->whereDate('created_at', '<=', $request->fecha_hasta);
+        }
+
+        $pedidos = $query->paginate(25)->withQueryString();
+
+        return Inertia::render('Supplier/Historial', [
+            'pedidos' => $pedidos,
+            'filters' => $request->only(['estado', 'search', 'fecha_desde', 'fecha_hasta']),
+        ]);
+    }
+
     public function cambiarEstado(Request $request, Pedido $pedido)
     {
         $request->validate([

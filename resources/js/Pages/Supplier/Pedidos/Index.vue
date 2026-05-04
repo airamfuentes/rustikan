@@ -1,5 +1,5 @@
 <template>
-    <AuthenticatedLayout>
+    <LayoutSupplier>
         <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
 
@@ -116,11 +116,11 @@
 
             </div>
         </div>
-    </AuthenticatedLayout>
+    </LayoutSupplier>
 </template>
 
 <script setup>
-import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
+import LayoutSupplier from '@/Layouts/LayoutSupplier.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref, onMounted, onUnmounted } from 'vue';
 
