@@ -200,6 +200,9 @@ const formatDate = (dateStr) => {
 // Cerrar al hacer click fuera
 const handleOutsideClick = (e) => {
     if (menuRef.value && !menuRef.value.contains(e.target)) {
+        if (abierto.value && notificaciones.value.length > 0) {
+            marcarTodas();
+        }
         abierto.value = false;
     }
 };

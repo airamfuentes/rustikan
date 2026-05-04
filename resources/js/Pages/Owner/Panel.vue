@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue';
 import { Head, Link, router, usePage, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import Toast from '@/Components/Toast.vue';
+import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
 
 const props = defineProps({
     tienda:            { type: Object,  required: true },
@@ -731,7 +732,7 @@ const submitDeleteProducto = (producto) => {
                                 <button @click="pedidosPagina = Math.max(1, pedidosPagina - 1)"
                                         :disabled="pedidosPagina === 1"
                                         class="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                                    ← Anterior
+                                    <ChevronLeft class="h-3.5 w-3.5 inline" /> Anterior
                                 </button>
                                 <span class="rounded-lg bg-primary-50 dark:bg-primary-900/30 px-3 py-1.5 text-xs font-bold text-primary-600 dark:text-primary-300">
                                     {{ pedidosPagina }}
@@ -739,7 +740,7 @@ const submitDeleteProducto = (producto) => {
                                 <button @click="pedidosPagina = Math.min(pedidosTotalPaginas, pedidosPagina + 1)"
                                         :disabled="pedidosPagina === pedidosTotalPaginas"
                                         class="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                                    Siguiente →
+                                    Siguiente <ChevronRight class="h-3.5 w-3.5 inline" />
                                 </button>
                             </div>
                         </div>
@@ -1126,7 +1127,7 @@ const submitDeleteProducto = (producto) => {
                                 <button @click="productosPagina = Math.max(1, productosPagina - 1)"
                                         :disabled="productosPagina === 1"
                                         class="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                                    ← Anterior
+                                    <ChevronLeft class="h-3.5 w-3.5 inline" /> Anterior
                                 </button>
                                 <span class="rounded-lg bg-primary-50 dark:bg-primary-900/30 px-3 py-1.5 text-xs font-bold text-primary-600 dark:text-primary-300">
                                     {{ productosPagina }}
@@ -1134,7 +1135,7 @@ const submitDeleteProducto = (producto) => {
                                 <button @click="productosPagina = Math.min(productosTotalPaginas, productosPagina + 1)"
                                         :disabled="productosPagina === productosTotalPaginas"
                                         class="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                                    Siguiente →
+                                    Siguiente <ChevronRight class="h-3.5 w-3.5 inline" />
                                 </button>
                             </div>
                         </div>
@@ -1288,7 +1289,7 @@ const submitDeleteProducto = (producto) => {
                                 <button @click="solicitudesPagina = Math.max(1, solicitudesPagina - 1)"
                                         :disabled="solicitudesPagina === 1"
                                         class="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                                    ← Anterior
+                                    <ChevronLeft class="h-3.5 w-3.5 inline" /> Anterior
                                 </button>
                                 <span class="rounded-lg bg-primary-50 dark:bg-primary-900/30 px-3 py-1.5 text-xs font-bold text-primary-600 dark:text-primary-300">
                                     {{ solicitudesPagina }}
@@ -1296,7 +1297,7 @@ const submitDeleteProducto = (producto) => {
                                 <button @click="solicitudesPagina = Math.min(solicitudesTotalPaginas, solicitudesPagina + 1)"
                                         :disabled="solicitudesPagina === solicitudesTotalPaginas"
                                         class="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                                    Siguiente →
+                                    Siguiente <ChevronRight class="h-3.5 w-3.5 inline" />
                                 </button>
                             </div>
                         </div>
@@ -1355,11 +1356,6 @@ const submitDeleteProducto = (producto) => {
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-
-                    <!-- Nota informativa -->
-                    <div class="rounded-2xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 px-5 py-4 text-sm text-blue-700 dark:text-blue-300">
-                        <strong>¿Cómo funciona?</strong> Rustikan retiene un {{ stats.comisionPct }}% de cada pedido como comisión por el uso de la plataforma. El beneficio neto es lo que recibes tú como vendedor. Los importes se calculan sobre los ingresos brutos de todos tus pedidos registrados.
                     </div>
 
                 </template>

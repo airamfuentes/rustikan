@@ -121,7 +121,7 @@ const formatFecha = (d) => {
     <button
         @click="toggleOpen"
         :aria-label="open ? 'Cerrar chat' : 'Chat con almacén'"
-        class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[9996] flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-2xl ring-2 ring-white/40 dark:ring-gray-800 transition-all duration-300 hover:scale-110 focus:outline-none"
+        class="fixed bottom-24 right-4 sm:bottom-28 sm:right-6 z-[9996] flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-2xl ring-2 ring-white/40 dark:ring-gray-800 transition-all duration-300 hover:scale-110 focus:outline-none"
         :class="open ? 'rotate-90 scale-95' : ''"
     >
         <span
@@ -149,7 +149,7 @@ const formatFecha = (d) => {
             role="dialog"
             aria-label="Chat con equipo de almacén"
             class="fixed z-[9996] flex flex-col bg-white dark:bg-gray-900 shadow-2xl border border-gray-200 dark:border-gray-700 origin-bottom-right
-                   inset-0 sm:inset-auto sm:bottom-24 sm:right-6 sm:h-[560px] sm:w-[380px] sm:max-h-[85vh] sm:rounded-2xl overflow-hidden"
+                   inset-0 sm:inset-auto sm:bottom-48 sm:right-6 sm:h-[560px] sm:w-[380px] sm:max-h-[85vh] sm:rounded-2xl overflow-hidden"
         >
             <!-- Header -->
             <div class="flex items-center gap-3 bg-gradient-to-r from-indigo-500 to-indigo-600 px-4 py-3 text-white shrink-0">

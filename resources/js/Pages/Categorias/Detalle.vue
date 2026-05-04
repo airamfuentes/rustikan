@@ -8,6 +8,7 @@ import DarkModeToggle from '@/Components/DarkModeToggle.vue';
 import SkeletonTiendaCard from '@/Components/SkeletonTiendaCard.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
 import { useFavoritos } from '@/Composables/useFavoritos';
+import { ArrowLeft } from 'lucide-vue-next';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import CategoriaIcono from '@/Components/CategoriaIcono.vue';
 
@@ -306,8 +307,8 @@ onUnmounted(() => {
                     <template v-else>Aún no hay establecimientos en esta categoría</template>
                 </h2>
                 <p class="mt-2 text-sm text-gray-400 dark:text-gray-500">Pronto encontrarás productores locales de {{ categoria.nombre }} aquí.</p>
-                <Link href="/" class="mt-6 rounded-lg bg-primary-500 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-600">
-                    ← Volver al inicio
+                <Link href="/" class="mt-6 inline-flex items-center gap-1 rounded-lg bg-primary-500 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-600">
+                    <ArrowLeft class="h-4 w-4" /> Volver al inicio
                 </Link>
             </div>
 

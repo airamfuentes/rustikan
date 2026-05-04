@@ -3,7 +3,7 @@ import { ref, computed, watch } from 'vue';
 import { Head, Link, router, usePage, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import Toast from '@/Components/Toast.vue';
-import { ArrowLeft } from 'lucide-vue-next';
+import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-vue-next';
 
 const props = defineProps({
     tiendas: { type: Array, default: () => [] },
@@ -395,16 +395,16 @@ watch(() => props.estado, (v) => { estadoFiltro.value = v; });
                     <div class="flex items-center gap-1">
                         <button @click="tiendaPagina = Math.max(1, tiendaPagina - 1)"
                                 :disabled="tiendaPagina === 1"
-                                class="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                            ← Anterior
+                                class="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-1">
+                            <ChevronLeft class="h-3.5 w-3.5" /> Anterior
                         </button>
                         <span class="rounded-lg bg-primary-50 dark:bg-primary-900/30 px-3 py-1.5 text-xs font-bold text-primary-600 dark:text-primary-300">
                             {{ tiendaPagina }}
                         </span>
                         <button @click="tiendaPagina = Math.min(tiendasTotalPaginas, tiendaPagina + 1)"
                                 :disabled="tiendaPagina === tiendasTotalPaginas"
-                                class="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                            Siguiente →
+                                class="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-1">
+                            Siguiente <ChevronRight class="h-3.5 w-3.5" />
                         </button>
                     </div>
                 </div>

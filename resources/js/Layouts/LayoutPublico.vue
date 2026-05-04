@@ -50,7 +50,7 @@ watch(
         <button
             @click="toggleDark"
             aria-label="Cambiar tema"
-            class="h-11 w-11 flex items-center justify-center rounded-full border transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2"
+            class="h-9 w-9 flex items-center justify-center rounded-full border transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2"
             :class="isDark
                 ? 'bg-gray-800 border-gray-600 text-amber-400 hover:bg-gray-700 focus:ring-amber-400 focus:ring-offset-gray-900'
                 : 'bg-white border-gray-200 text-indigo-500 hover:bg-gray-50 focus:ring-indigo-400'"
@@ -85,7 +85,7 @@ watch(
         <!-- Logo -->
         <div>
             <Link href="/" class="flex items-center">
-                <img src="/images/logo.png" alt="Rustikan" class="h-16 w-auto" />
+                <img src="/images/logo.png" alt="Rustikan" class="h-16 w-auto brightness-0 dark:invert" />
             </Link>
         </div>
 

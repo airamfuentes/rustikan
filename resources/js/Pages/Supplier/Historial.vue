@@ -2,7 +2,7 @@
 import LayoutSupplier from '@/Layouts/LayoutSupplier.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
-import { ClipboardList } from 'lucide-vue-next';
+import { ClipboardList, ChevronLeft, ChevronRight } from 'lucide-vue-next';
 
 const props = defineProps({
     pedidos: { type: Object, required: true },
@@ -170,12 +170,12 @@ const formatFecha = (d) => new Date(d).toLocaleDateString('es-ES', { day: '2-dig
                     </p>
                     <div class="flex gap-2">
                         <Link v-if="pedidos.prev_page_url" :href="pedidos.prev_page_url"
-                            class="rounded-lg border border-gray-200 dark:border-gray-600 px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300">
-                            ← Anterior
+                            class="rounded-lg border border-gray-200 dark:border-gray-600 px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300 inline-flex items-center gap-1">
+                            <ChevronLeft class="h-4 w-4" /> Anterior
                         </Link>
                         <Link v-if="pedidos.next_page_url" :href="pedidos.next_page_url"
-                            class="rounded-lg border border-gray-200 dark:border-gray-600 px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300">
-                            Siguiente →
+                            class="rounded-lg border border-gray-200 dark:border-gray-600 px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300 inline-flex items-center gap-1">
+                            Siguiente <ChevronRight class="h-4 w-4" />
                         </Link>
                     </div>
                 </div>

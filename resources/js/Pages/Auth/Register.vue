@@ -7,7 +7,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import Recaptcha from '@/Components/Recaptcha.vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 const RECAPTCHA_SITE_KEY = usePage().props.recaptchaSiteKey;
 
@@ -38,6 +38,32 @@ const minFechaNacimiento = computed(() => {
 const onVerify  = (token) => { form.turnstile_token = token; };
 const onExpire  = ()      => { form.turnstile_token = ''; };
 const onError   = ()      => { form.turnstile_token = ''; };
+
+const paises = [
+    { bandera: '🇪🇸', prefijo: '+34', nombre: 'España',           maxLen: 9 },
+    { bandera: '🇵🇹', prefijo: '+351', nombre: 'Portugal',         maxLen: 9 },
+    { bandera: '🇫🇷', prefijo: '+33',  nombre: 'Francia',          maxLen: 9 },
+    { bandera: '🇩🇪', prefijo: '+49',  nombre: 'Alemania',         maxLen: 11 },
+    { bandera: '🇮🇹', prefijo: '+39',  nombre: 'Italia',           maxLen: 10 },
+    { bandera: '🇬🇧', prefijo: '+44',  nombre: 'Reino Unido',      maxLen: 10 },
+    { bandera: '🇺🇸', prefijo: '+1',   nombre: 'EE. UU. / Canadá', maxLen: 10 },
+    { bandera: '🇲🇽', prefijo: '+52',  nombre: 'México',           maxLen: 10 },
+    { bandera: '🇦🇷', prefijo: '+54',  nombre: 'Argentina',        maxLen: 10 },
+    { bandera: '🇧🇷', prefijo: '+55',  nombre: 'Brasil',           maxLen: 11 },
+    { bandera: '🇨🇴', prefijo: '+57',  nombre: 'Colombia',         maxLen: 10 },
+    { bandera: '🇳🇱', prefijo: '+31',  nombre: 'Países Bajos',     maxLen: 9 },
+    { bandera: '🇧🇪', prefijo: '+32',  nombre: 'Bélgica',          maxLen: 9 },
+    { bandera: '🇨🇭', prefijo: '+41',  nombre: 'Suiza',            maxLen: 9 },
+];
+const prefijo         = ref('+34');
+const telefonoNumero  = ref('');
+const maxLenTelefono  = computed(() => paises.find(p => p.prefijo === prefijo.value)?.maxLen ?? 15);
+
+const onTelefonoInput = (e) => {
+    telefonoNumero.value = e.target.value.replace(/\D/g, '').slice(0, maxLenTelefono.value);
+    form.telefono = prefijo.value + telefonoNumero.value;
+};
+watch(prefijo, () => { form.telefono = prefijo.value + telefonoNumero.value; });
 
 const submit = () => {
     form.post(route('register'), {
@@ -92,17 +118,26 @@ const submit = () => {
                 <div>
                     <InputLabel for="telefono" value="Teléfono *" />
 
-                    <TextInput
-                        id="telefono"
-                        type="tel"
-                        class="mt-1 block w-full"
-                        v-model="form.telefono"
-                        required
-                        autocomplete="tel"
-                        placeholder="612345678"
-                        pattern="[6-9][0-9]{8}"
-                        title="9 dígitos comenzando por 6, 7, 8 o 9"
-                    />
+                    <div class="mt-1 flex overflow-hidden rounded-lg border border-gray-300 dark:border-gray-600 focus-within:border-tierra-500 focus-within:ring-2 focus-within:ring-tierra-500/30">
+                        <select
+                            v-model="prefijo"
+                            class="shrink-0 border-r border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-2 py-2.5 text-sm text-gray-700 dark:text-gray-300 focus:outline-none"
+                        >
+                            <option v-for="p in paises" :key="p.prefijo" :value="p.prefijo">{{ p.bandera }} {{ p.prefijo }}</option>
+                        </select>
+                        <input
+                            id="telefono"
+                            type="tel"
+                            :value="telefonoNumero"
+                            @input="onTelefonoInput"
+                            required
+                            autocomplete="tel-national"
+                            inputmode="numeric"
+                            :placeholder="prefijo === '+34' ? '612345678' : ''"
+                            :maxlength="maxLenTelefono"
+                            class="flex-1 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none"
+                        />
+                    </div>
 
                     <InputError class="mt-2" :message="form.errors.telefono" />
                 </div>
@@ -119,7 +154,6 @@ const submit = () => {
                         :max="maxFechaNacimiento"
                         :min="minFechaNacimiento"
                     />
-                    <p class="mt-1 text-xs text-tierra-500 dark:text-tierra-400">Debes tener al menos 14 años</p>
                     <InputError class="mt-2" :message="form.errors.fecha_nacimiento" />
                 </div>
             </div>
@@ -136,7 +170,6 @@ const submit = () => {
                     autocomplete="username"
                     placeholder="ejemplo@gmail.com"
                 />
-                <p class="mt-1 text-xs text-tierra-500 dark:text-tierra-400">Solo dominios conocidos: gmail, outlook, hotmail, yahoo, icloud, etc.</p>
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 

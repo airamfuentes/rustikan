@@ -9,7 +9,7 @@
             <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h1 class="text-3xl font-extrabold tracking-tight flex items-center gap-2">
-                        <span class="text-4xl">🪙</span> Mi Monedero
+                        <Coins class="h-8 w-8 text-primary-500" /> Mi Monedero
                     </h1>
                     <p :class="['mt-1 text-sm', isDark ? 'text-gray-400' : 'text-gray-500']">
                         Usa RustiCoins para pagar tus pedidos de forma rápida.
@@ -17,7 +17,7 @@
                 </div>
                 <!-- Saldo destacado -->
                 <div class="flex items-center gap-4 rounded-2xl bg-gradient-to-br from-primary-500 to-orange-600 px-6 py-4 text-white shadow-lg">
-                    <span class="text-3xl">🪙</span>
+                    <Coins class="h-8 w-8" />
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-wider opacity-80">Saldo disponible</p>
                         <p class="text-3xl font-extrabold">{{ Number(saldo).toFixed(2) }} RC</p>
@@ -31,7 +31,7 @@
                 <!-- Recargar -->
                 <div :class="['rounded-2xl border p-6 shadow-sm', isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200']">
                     <h2 class="mb-1 text-lg font-bold">Añadir fondos</h2>
-                    <p :class="['mb-5 text-sm', isDark ? 'text-gray-400' : 'text-gray-500']">Recarga tu monedero con tarjeta (simulado).</p>
+                    <p :class="['mb-5 text-sm', isDark ? 'text-gray-400' : 'text-gray-500']">Recarga tu monedero con tarjeta.</p>
 
                     <form @submit.prevent="recargar" class="space-y-4">
                         <div>
@@ -110,7 +110,7 @@
                             class="w-full rounded-xl bg-primary-500 px-6 py-3 font-bold text-white shadow transition-all hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <span v-if="recargaForm.processing">Procesando...</span>
-                            <span v-else>Añadir {{ recargaForm.cantidad ? Number(recargaForm.cantidad).toFixed(2) : '0.00' }} RC 🪙</span>
+                            <span v-else>Añadir {{ recargaForm.cantidad ? Number(recargaForm.cantidad).toFixed(2) : '0.00' }} RC</span>
                         </button>
                     </form>
                 </div>
@@ -118,7 +118,7 @@
                 <!-- Retirar -->
                 <div :class="['rounded-2xl border p-6 shadow-sm', isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200']">
                     <h2 class="mb-1 text-lg font-bold">Retirar fondos</h2>
-                    <p :class="['mb-5 text-sm', isDark ? 'text-gray-400' : 'text-gray-500']">Transfiere RustiCoins de vuelta a tu tarjeta (simulado).</p>
+                    <p :class="['mb-5 text-sm', isDark ? 'text-gray-400' : 'text-gray-500']">Transfiere RustiCoins de vuelta a tu tarjeta.</p>
 
                     <form @submit.prevent="retirar" class="space-y-4">
                         <div>
@@ -155,9 +155,9 @@
                         </div>
 
                         <div :class="['rounded-xl border p-3 flex items-center gap-2', isDark ? 'border-gray-600 bg-gray-700/30' : 'border-orange-100 bg-orange-50']">
-                            <span class="text-xl">ℹ️</span>
+                            <Info class="h-5 w-5 shrink-0" :class="isDark ? 'text-gray-400' : 'text-orange-600'" />
                             <p :class="['text-xs', isDark ? 'text-gray-400' : 'text-orange-700']">
-                                El reembolso se hará a la tarjeta original. Puede tardar 5-10 días hábiles (simulado).
+                                El reembolso se hará a la tarjeta original. Puede tardar 5-10 días hábiles.
                             </p>
                         </div>
 
@@ -179,7 +179,7 @@
                 <p :class="['mb-5 text-sm', isDark ? 'text-gray-400' : 'text-gray-500']">Últimas 50 transacciones.</p>
 
                 <div v-if="transacciones.length === 0" class="flex flex-col items-center py-10 text-center">
-                    <span class="text-5xl mb-3">🪙</span>
+                    <Coins class="h-16 w-16 text-gray-300 dark:text-gray-600 mb-3" />
                     <p :class="['text-sm', isDark ? 'text-gray-400' : 'text-gray-500']">Aún no tienes movimientos.</p>
                 </div>
 
@@ -190,13 +190,17 @@
                         :class="['flex items-center gap-3 rounded-xl p-3 transition-colors',
                             isDark ? 'hover:bg-gray-700/60' : 'hover:bg-gray-50']"
                     >
-                        <div :class="['flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-lg',
+                        <div :class="['flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full',
                             tx.tipo === 'recarga'   ? 'bg-green-100 dark:bg-green-900/40' :
                             tx.tipo === 'compra'    ? 'bg-red-100 dark:bg-red-900/40' :
                             tx.tipo === 'retiro'    ? 'bg-orange-100 dark:bg-orange-900/40' :
                             tx.tipo === 'reembolso' ? 'bg-blue-100 dark:bg-blue-900/40' :
                                                       'bg-gray-100 dark:bg-gray-700']">
-                            {{ tx.tipo === 'recarga' ? '➕' : tx.tipo === 'compra' ? '🛒' : tx.tipo === 'retiro' ? '💸' : tx.tipo === 'reembolso' ? '↩️' : '💰' }}
+                            <Plus         v-if="tx.tipo === 'recarga'"   class="h-4 w-4 text-green-600 dark:text-green-400" />
+                            <ShoppingCart v-else-if="tx.tipo === 'compra'"    class="h-4 w-4 text-red-600 dark:text-red-400" />
+                            <ArrowUpRight v-else-if="tx.tipo === 'retiro'"    class="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                            <RotateCcw    v-else-if="tx.tipo === 'reembolso'" class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            <Wallet       v-else                               class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                         </div>
                         <div class="flex-1 min-w-0">
                             <p :class="['text-sm font-medium truncate', isDark ? 'text-gray-200' : 'text-gray-800']">{{ tx.descripcion }}</p>
@@ -224,6 +228,7 @@ import { Head, useForm } from '@inertiajs/vue3';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import FooterPublico from '@/Components/FooterPublico.vue';
 import { useDarkMode } from '@/Composables/useDarkMode.js';
+import { Coins, Plus, ShoppingCart, ArrowUpRight, RotateCcw, Wallet, Info } from 'lucide-vue-next';
 
 const props = defineProps({
     saldo:         { type: Number, default: 0 },
@@ -257,7 +262,7 @@ const formatExpiry = (e) => {
 };
 
 const formatCvv = (e) => {
-    cardData.value.cvv = e.target.value.replace(/\D/g, '').slice(0, 4);
+    cardData.value.cvv = e.target.value.replace(/\D/g, '').slice(0, 3);
 };
 
 const luhnCheck = (num) => {

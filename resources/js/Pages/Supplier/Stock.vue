@@ -2,7 +2,7 @@
 import LayoutSupplier from '@/Layouts/LayoutSupplier.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
-import { Package, AlertTriangle, XCircle } from 'lucide-vue-next';
+import { Package, AlertTriangle, XCircle, ChevronLeft, ChevronRight } from 'lucide-vue-next';
 
 const props = defineProps({
     productos: { type: Object, required: true },
@@ -174,12 +174,12 @@ const stockClass = (prod) => {
                     </p>
                     <div class="flex gap-2">
                         <Link v-if="productos.prev_page_url" :href="productos.prev_page_url"
-                            class="rounded-lg border border-gray-200 dark:border-gray-600 px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300">
-                            ← Anterior
+                            class="rounded-lg border border-gray-200 dark:border-gray-600 px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300 inline-flex items-center gap-1">
+                            <ChevronLeft class="h-4 w-4" /> Anterior
                         </Link>
                         <Link v-if="productos.next_page_url" :href="productos.next_page_url"
-                            class="rounded-lg border border-gray-200 dark:border-gray-600 px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300">
-                            Siguiente →
+                            class="rounded-lg border border-gray-200 dark:border-gray-600 px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300 inline-flex items-center gap-1">
+                            Siguiente <ChevronRight class="h-4 w-4" />
                         </Link>
                     </div>
                 </div>

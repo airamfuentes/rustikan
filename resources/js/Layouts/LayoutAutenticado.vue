@@ -11,7 +11,7 @@ import DarkModeToggle from '@/Components/DarkModeToggle.vue';
 import CampanaNotificaciones from '@/Components/CampanaNotificaciones.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { useDarkMode } from '@/Composables/useDarkMode';
-import { ShieldCheck, Store } from 'lucide-vue-next';
+import { ShieldCheck, Store, Package } from 'lucide-vue-next';
 import ChatConSuppliers from '@/Components/ChatConSuppliers.vue';
 
 const showingNavigationDropdown = ref(false);
@@ -108,7 +108,7 @@ watch(
                             <!-- Logo -->
                             <div class="flex shrink-0 items-center">
                                 <Link :href="route('dashboard')" class="flex items-center">
-                                    <img src="/images/logo.png" alt="Rustikan" class="h-10 w-auto" />
+                                    <img src="/images/logo.png" alt="Rustikan" class="h-10 w-auto brightness-0 dark:invert" />
                                 </Link>
                             </div>
 
@@ -134,6 +134,15 @@ watch(
                                     class="!text-green-600 font-bold"
                                 >
                                     <Store class="mr-1 inline h-4 w-4" /> {{ $page.props.auth.tienda?.nombre || 'Mi Tienda' }}
+                                </NavLink>
+                                <!-- Supplier Panel Link -->
+                                <NavLink
+                                    v-if="$page.props.auth.user.role === 'supplier'"
+                                    :href="route('supplier.dashboard')"
+                                    :active="route().current('supplier.*')"
+                                    class="!text-indigo-600 font-bold"
+                                >
+                                    <Package class="mr-1 inline h-4 w-4" /> Almacén
                                 </NavLink>
                             </div>
                         </div>
@@ -233,6 +242,15 @@ watch(
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                                         </svg>
                                         Mi tienda
+                                    </Link>
+                                    <Link
+                                        v-if="$page.props.auth.user.role === 'supplier'"
+                                        :href="route('supplier.dashboard')"
+                                        class="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-indigo-600 transition-colors hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+                                        @click="showProfileMenu = false"
+                                    >
+                                        <Package class="h-4 w-4" />
+                                        Panel de almacén
                                     </Link>
                                     <Link
                                         :href="route('profile.edit')"

@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { useCarrito } from '@/Composables/useCarrito';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
+import { ChevronLeft } from 'lucide-vue-next';
 
 const page  = usePage();
 const user  = computed(() => page.props.auth?.user);
@@ -39,6 +40,7 @@ const pagoForm = ref({
     expiry:     '',
     cvv:        '',
     metodo:     'tarjeta',
+    rcACusar:   0,
 });
 
 const abrirCheckout = () => {
@@ -46,7 +48,7 @@ const abrirCheckout = () => {
     envioForm.value.direccion_envio   = user.value?.direccion  || '';
     envioForm.value.telefono_contacto = user.value?.telefono   || '';
     envioForm.value.notas             = '';
-    pagoForm.value = { titular: '', numero: '', expiry: '', cvv: '', metodo: 'tarjeta' };
+    pagoForm.value = { titular: '', numero: '', expiry: '', cvv: '', metodo: 'tarjeta', rcACusar: 0 };
     errores.value     = {};
     erroresPago.value = {};
     step.value        = 1;
@@ -90,7 +92,7 @@ const onExpiryInput = (e) => {
 };
 
 const onCvvInput = (e) => {
-    pagoForm.value.cvv = e.target.value.replace(/\D/g, '').slice(0, 4);
+    pagoForm.value.cvv = e.target.value.replace(/\D/g, '').slice(0, 3);
 };
 
 // Luhn check para simular validación real
@@ -119,10 +121,27 @@ const cardBrand = computed(() => {
 // ── Step 2: validar pago y procesar ──────────────────────────────────────────
 const procesando = ref(false);
 
+const rcDisponible    = computed(() => user.value?.rusticoin_balance ?? 0);
+const rcMaxMixto      = computed(() => Math.min(rcDisponible.value, Math.max(0, totalFinal.value - 0.01)));
+const restanteTarjeta = computed(() => {
+    if (pagoForm.value.metodo !== 'mixto') return totalFinal.value;
+    return Math.max(0, totalFinal.value - (pagoForm.value.rcACusar || 0));
+});
+
 const pagar = () => {
     erroresPago.value = {};
 
-    if (pagoForm.value.metodo === 'tarjeta') {
+    if (pagoForm.value.metodo === 'tarjeta' || pagoForm.value.metodo === 'mixto') {
+        if (pagoForm.value.metodo === 'mixto') {
+            const rc = pagoForm.value.rcACusar;
+            if (!rc || rc <= 0) {
+                erroresPago.value.rcACusar = 'Indica cuántos RC quieres usar.';
+            } else if (rc > rcDisponible.value) {
+                erroresPago.value.rcACusar = 'Saldo RC insuficiente.';
+            } else if (rc >= totalFinal.value) {
+                erroresPago.value.rcACusar = 'Usa la opción RustiCoin para pagar todo con RC.';
+            }
+        }
         if (!pagoForm.value.titular.trim()) {
             erroresPago.value.titular = 'El nombre del titular es obligatorio.';
         }
@@ -164,6 +183,7 @@ const pagar = () => {
             telefono_contacto: envioForm.value.telefono_contacto.trim(),
             notas:             envioForm.value.notas.trim(),
             metodo_pago:       pagoForm.value.metodo,
+            rc_a_usar:         pagoForm.value.metodo === 'mixto' ? pagoForm.value.rcACusar : null,
         }, {
             onSuccess: () => {
                 vaciarCarrito();
@@ -563,44 +583,84 @@ const stepTitle = computed(() => ({
                     <div v-if="step === 2" key="step2" class="px-6 py-6 space-y-5">
 
                         <!-- ── Selector de método de pago ── -->
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-3 gap-2">
                             <!-- Tarjeta -->
                             <button
                                 type="button"
                                 @click="pagoForm.metodo = 'tarjeta'"
-                                :class="['flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-sm font-semibold transition-all',
+                                :class="['flex flex-col items-center gap-1.5 rounded-xl border-2 p-3 text-sm font-semibold transition-all',
                                     pagoForm.metodo === 'tarjeta'
                                         ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
                                         : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300']"
                             >
-                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                                 </svg>
-                                <span>Tarjeta</span>
+                                <span class="text-xs">Tarjeta</span>
                             </button>
                             <!-- RustiCoin -->
                             <button
                                 type="button"
                                 @click="pagoForm.metodo = 'rusticoin'"
-                                :disabled="(user?.rusticoin_balance ?? 0) < totalFinal"
-                                :class="['flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed',
+                                :disabled="rcDisponible < totalFinal"
+                                :class="['flex flex-col items-center gap-1.5 rounded-xl border-2 p-3 text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed',
                                     pagoForm.metodo === 'rusticoin'
                                         ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300'
                                         : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300']"
                             >
-                                <span class="text-xl">🪙</span>
-                                <span>RustiCoin</span>
-                                <span :class="['text-xs font-normal', (user?.rusticoin_balance ?? 0) >= totalFinal ? 'text-green-600 dark:text-green-400' : 'text-red-500']">
-                                    {{ Number(user?.rusticoin_balance ?? 0).toFixed(2) }} RC disponibles
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span class="text-xs">RustiCoin</span>
+                                <span :class="['text-[10px] font-normal', rcDisponible >= totalFinal ? 'text-green-600 dark:text-green-400' : 'text-red-500']">
+                                    {{ Number(rcDisponible).toFixed(2) }} RC
                                 </span>
                             </button>
+                            <!-- RC + Tarjeta (mixto) -->
+                            <button
+                                type="button"
+                                @click="pagoForm.metodo = 'mixto'; pagoForm.rcACusar = Math.min(rcDisponible, rcMaxMixto)"
+                                :disabled="rcDisponible <= 0"
+                                :class="['flex flex-col items-center gap-1.5 rounded-xl border-2 p-3 text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed',
+                                    pagoForm.metodo === 'mixto'
+                                        ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300'
+                                        : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300']"
+                            >
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                                </svg>
+                                <span class="text-xs">RC + Tarjeta</span>
+                            </button>
                         </div>
-                        <p v-if="pagoForm.metodo === 'rusticoin' && (user?.rusticoin_balance ?? 0) < totalFinal" class="text-xs text-red-500 text-center">
+                        <p v-if="pagoForm.metodo === 'rusticoin' && rcDisponible < totalFinal" class="text-xs text-red-500 text-center">
                             Saldo insuficiente. <Link :href="route('monedero.index')" class="underline font-semibold">Recargar monedero</Link>
                         </p>
 
+                        <!-- Input RC para pago mixto -->
+                        <div v-if="pagoForm.metodo === 'mixto'" class="rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/20 p-4 space-y-3">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="font-semibold text-indigo-700 dark:text-indigo-300">RC a usar</span>
+                                <span class="text-xs text-indigo-500 dark:text-indigo-400">Disponibles: {{ Number(rcDisponible).toFixed(2) }} RC</span>
+                            </div>
+                            <input
+                                :value="pagoForm.rcACusar"
+                                @input="pagoForm.rcACusar = Math.min(rcMaxMixto, Math.max(0, parseFloat($event.target.value) || 0))"
+                                type="number"
+                                :min="1"
+                                :max="rcMaxMixto"
+                                step="0.01"
+                                class="w-full rounded-xl border border-indigo-300 dark:border-indigo-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-mono outline-none focus:ring-2 focus:ring-indigo-400 dark:text-white"
+                                placeholder="Cantidad de RC..."
+                            />
+                            <p v-if="erroresPago.rcACusar" class="text-xs text-red-500">{{ erroresPago.rcACusar }}</p>
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="text-indigo-600 dark:text-indigo-400">{{ Number(pagoForm.rcACusar || 0).toFixed(2) }} RC = {{ Number(pagoForm.rcACusar || 0).toFixed(2) }}€</span>
+                                <span class="font-semibold text-gray-700 dark:text-gray-300">+ {{ Number(restanteTarjeta).toFixed(2) }}€ con tarjeta</span>
+                            </div>
+                        </div>
+
                         <!-- ── Formulario tarjeta ── -->
-                        <div v-if="pagoForm.metodo === 'tarjeta'" class="space-y-4">
+                        <div v-if="pagoForm.metodo === 'tarjeta' || pagoForm.metodo === 'mixto'" class="space-y-4">
 
                             <!-- Número de tarjeta -->
                             <div>
@@ -680,7 +740,7 @@ const stepTitle = computed(() => ({
                                             @input="onCvvInput"
                                             type="password"
                                             inputmode="numeric"
-                                            maxlength="4"
+                                            maxlength="3"
                                             placeholder="•••"
                                             autocomplete="cc-csc"
                                             :class="['w-full rounded-xl border px-4 py-3 text-sm font-mono outline-none transition focus:ring-2',
@@ -694,9 +754,21 @@ const stepTitle = computed(() => ({
                         </div>
 
                         <!-- Importe a pagar -->
-                        <div class="flex items-center justify-between rounded-xl bg-gray-50 dark:bg-gray-700/50 px-4 py-3">
-                            <span class="text-sm text-gray-600 dark:text-gray-400">Importe total</span>
-                            <span class="text-xl font-extrabold text-primary-600">{{ totalFinal.toFixed(2) }}€</span>
+                        <div class="rounded-xl bg-gray-50 dark:bg-gray-700/50 px-4 py-3 space-y-1">
+                            <template v-if="pagoForm.metodo === 'mixto'">
+                                <div class="flex items-center justify-between text-xs text-indigo-600 dark:text-indigo-400">
+                                    <span>RC: {{ Number(pagoForm.rcACusar || 0).toFixed(2) }} RC</span>
+                                    <span>-{{ Number(pagoForm.rcACusar || 0).toFixed(2) }}€</span>
+                                </div>
+                                <div class="flex items-center justify-between text-sm font-semibold border-t border-gray-200 dark:border-gray-600 pt-1 mt-1">
+                                    <span class="text-gray-600 dark:text-gray-400">Cargo a tarjeta</span>
+                                    <span class="text-xl font-extrabold text-primary-600">{{ Number(restanteTarjeta).toFixed(2) }}€</span>
+                                </div>
+                            </template>
+                            <div v-else class="flex items-center justify-between">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">Importe total</span>
+                                <span class="text-xl font-extrabold text-primary-600">{{ totalFinal.toFixed(2) }}€</span>
+                            </div>
                         </div>
 
                         <!-- Sellos de seguridad -->
@@ -730,13 +802,13 @@ const stepTitle = computed(() => ({
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                                 </svg>
-                                Pagar {{ totalFinal.toFixed(2) }}€
+                                Pagar {{ pagoForm.metodo === 'mixto' ? `${Number(pagoForm.rcACusar || 0).toFixed(2)} RC + ${Number(restanteTarjeta).toFixed(2)}€` : `${totalFinal.toFixed(2)}€` }}
                             </button>
                             <button
                                 @click="step = 1"
-                                class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                                class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors inline-flex items-center gap-1"
                             >
-                                ← Volver a datos de entrega
+                                <ChevronLeft class="h-4 w-4" /> Volver a datos de entrega
                             </button>
                         </div>
                     </div>

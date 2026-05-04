@@ -468,7 +468,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                     </div>
 
                     <!-- Botón "Escribir reseña" -->
-                    <div v-if="canReview && !showReviewForm">
+                    <div v-if="canReview && !showReviewForm && user?.role === 'user'">
                         <button
                             @click="showReviewForm = true"
                             class="group flex items-center gap-2 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-600 px-5 py-3 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
@@ -482,7 +482,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                 </div>
 
                 <!-- Panel resumen + cards -->
-                <div v-if="totalResenas > 0 || canReview || userReview" class="grid gap-8 lg:grid-cols-3">
+                <div v-if="totalResenas > 0 || canReview || userReview || (user && user.role === 'user')" class="grid gap-8 lg:grid-cols-3">
 
                     <!-- ── Panel resumen de puntuación ──────────────────────── -->
                     <div :class="['rounded-3xl p-7 shadow-sm', isDark ? 'bg-gray-800' : 'bg-white border border-gray-100']">
