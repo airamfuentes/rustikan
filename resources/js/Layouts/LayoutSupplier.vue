@@ -4,6 +4,7 @@ import { Link, usePage, router } from '@inertiajs/vue3';
 import { useDarkMode } from '@/Composables/useDarkMode';
 import Toast from '@/Components/Toast.vue';
 import ChatConAdmin from '@/Components/ChatConAdmin.vue';
+import ScrollToTop from '@/Components/ScrollToTop.vue';
 import {
     LayoutDashboard, PackageSearch, ClipboardList,
     Package, LogOut, Menu, X, ChevronRight,
@@ -219,5 +220,6 @@ router.on('navigate', () => { sidebarOpen.value = false; });
 
         <!-- Chat con Admin (flotante) -->
         <ChatConAdmin />
+        <ScrollToTop />
     </div>
 </template>

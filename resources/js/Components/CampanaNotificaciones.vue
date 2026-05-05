@@ -29,7 +29,7 @@
         >
             <div
                 v-if="abierto"
-                class="absolute right-0 top-11 z-50 w-80 sm:w-96 rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl overflow-hidden"
+                class="fixed right-2 top-[4.5rem] sm:absolute sm:right-0 sm:top-11 z-50 w-80 sm:w-96 max-w-[calc(100vw-1rem)] rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl overflow-hidden"
             >
                 <!-- Header -->
                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 px-4 py-3">
@@ -130,6 +130,11 @@ watch(() => page.props.notificacionesCount, (val) => {
     count.value = val ?? 0;
 });
 
+const getCsrfToken = () =>
+    document.querySelector('meta[name="csrf-token"]')?.content
+    ?? document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('XSRF-TOKEN='))?.split('=')[1]
+    ?? '';
+
 const toggle = async () => {
     abierto.value = !abierto.value;
     if (abierto.value) {
@@ -163,7 +168,7 @@ const abrirNotificacion = async (n) => {
         headers: {
             'Accept': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+            'X-CSRF-TOKEN': getCsrfToken(),
         },
     });
     notificaciones.value = notificaciones.value.filter(x => x.id !== n.id);
@@ -180,7 +185,7 @@ const marcarTodas = async () => {
         headers: {
             'Accept': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+            'X-CSRF-TOKEN': getCsrfToken(),
         },
     });
     notificaciones.value = [];
@@ -218,7 +223,7 @@ onBeforeUnmount(() => {
             headers: {
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                'X-CSRF-TOKEN': getCsrfToken(),
             },
         });
     }

@@ -18,17 +18,16 @@ class ResenaController extends Controller
             return back()->with('error', 'Solo los clientes pueden dejar reseñas.');
         }
 
-        // Verificar pedido completado en esta tienda en los últimos 30 días
+        // Verificar que el usuario tiene al menos un pedido entregado/completado en esta tienda
         $tienePedido = PedidoItem::where('tienda_id', $tienda->id)
             ->whereHas('pedido', function ($q) use ($user) {
                 $q->where('user_id', $user->id)
-                  ->whereIn('estado', ['entregado', 'completado'])
-                  ->where('created_at', '>=', now()->subDays(30));
+                  ->whereIn('estado', ['entregado', 'completado']);
             })
             ->exists();
 
         if (!$tienePedido) {
-            return back()->with('error', 'Solo puedes reseñar una tienda donde hayas recibido un pedido en los últimos 30 días.');
+            return back()->with('error', 'Solo puedes reseñar una tienda donde hayas recibido un pedido completado.');
         }
 
         $validated = $request->validate([

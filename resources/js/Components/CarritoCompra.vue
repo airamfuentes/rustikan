@@ -3,7 +3,9 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { useCarrito } from '@/Composables/useCarrito';
 import { ArrowRight } from 'lucide-vue-next';
+import { useI18n } from '@/Composables/useI18n';
 
+const { t } = useI18n();
 const {
     totalItems,
     totalPrecio,
@@ -80,12 +82,12 @@ onUnmounted(() => document.removeEventListener('mousedown', cerrarSiClickFuera))
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                         </svg>
-                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">Mi carrito</h3>
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">{{ t('cart.dropdown_title') }}</h3>
                         <span
                             v-if="totalItems > 0"
                             class="rounded-full bg-primary-100 dark:bg-primary-900/40 px-2 py-0.5 text-xs font-semibold text-primary-700 dark:text-primary-300"
                         >
-                            {{ totalItems }} {{ totalItems === 1 ? 'producto' : 'productos' }}
+                            {{ totalItems }} {{ totalItems === 1 ? t('cart.product_singular') : t('cart.product_plural') }}
                         </span>
                     </div>
                     <button
@@ -110,8 +112,8 @@ onUnmounted(() => document.removeEventListener('mousedown', cerrarSiClickFuera))
                                     d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                         </svg>
                         </div>
-                        <p class="text-sm font-medium text-gray-700 dark:text-gray-200">Tu carrito está vacío</p>
-                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">¡Explora las tiendas y añade productos!</p>
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ t('cart.dropdown_empty') }}</p>
+                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ t('cart.dropdown_empty_sub') }}</p>
                     </div>
 
                     <!-- Items agrupados por tienda -->
@@ -199,7 +201,7 @@ onUnmounted(() => document.removeEventListener('mousedown', cerrarSiClickFuera))
                             <!-- Subtotal de la tienda -->
                             <div class="mt-2 flex justify-end">
                                 <span class="text-xs text-gray-400">
-                                    Subtotal: <span class="font-semibold text-gray-600">{{ grupo.subtotal.toFixed(2) }}€</span>
+                                    {{ t('cart.dropdown_subtotal') }}: <span class="font-semibold text-gray-600">{{ grupo.subtotal.toFixed(2) }}€</span>
                                 </span>
                             </div>
                         </div>
@@ -209,7 +211,7 @@ onUnmounted(() => document.removeEventListener('mousedown', cerrarSiClickFuera))
                 <!-- Pie: total + acciones -->
                 <div v-if="totalItems > 0" class="border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 p-4">
                     <div class="mb-3 flex items-baseline justify-between">
-                        <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Total estimado</span>
+                        <span class="text-sm font-medium text-gray-600 dark:text-gray-300">{{ t('cart.dropdown_total') }}</span>
                         <span class="text-xl font-extrabold text-gray-900 dark:text-white">{{ totalPrecio.toFixed(2) }}€</span>
                     </div>
                     <Link
@@ -218,7 +220,7 @@ onUnmounted(() => document.removeEventListener('mousedown', cerrarSiClickFuera))
                         class="block w-full rounded-xl bg-primary-500 py-3 text-center text-sm font-bold text-white shadow-sm transition-all hover:bg-primary-600 hover:shadow-md"
                     >
                         <span class="inline-flex items-center gap-1.5">
-                            Realizar pedido
+                            {{ t('cart.dropdown_checkout') }}
                             <ArrowRight class="h-4 w-4" />
                         </span>
                     </Link>

@@ -5,6 +5,9 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
+import { useI18n } from '@/Composables/useI18n';
+
+const { t } = useI18n();
 
 defineProps({
     status: {
@@ -23,24 +26,19 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Recuperar contraseña" />
+        <Head :title="t('auth.forgot_title')" />
 
         <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-            ¿Olvidaste tu contraseña? Sin problema. Indícanos tu correo
-            electrónico y te enviaremos un enlace para que puedas establecer
-            una nueva contraseña.
+            {{ t('auth.forgot_desc') }}
         </div>
 
-        <div
-            v-if="status"
-            class="mb-4 text-sm font-medium text-green-600"
-        >
+        <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
             {{ status }}
         </div>
 
         <form @submit.prevent="submit">
             <div>
-                <InputLabel for="email" value="Email" />
+                <InputLabel for="email" :value="t('auth.email_label')" />
 
                 <TextInput
                     id="email"
@@ -60,7 +58,7 @@ const submit = () => {
                     :class="{ 'opacity-25': form.processing }"
                     :disabled="form.processing"
                 >
-                    Enviar enlace de recuperación
+                    {{ t('auth.forgot_btn') }}
                 </PrimaryButton>
             </div>
         </form>

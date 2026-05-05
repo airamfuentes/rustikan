@@ -6,7 +6,10 @@ import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
 import DarkModeToggle from '@/Components/DarkModeToggle.vue';
 import CampanaNotificaciones from '@/Components/CampanaNotificaciones.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
+import { useI18n } from '@/Composables/useI18n';
 import { ShieldCheck, Store, Menu, X, Search, Wallet, Bell } from 'lucide-vue-next';
+
+const { t } = useI18n();
 
 const props = defineProps({
     tiendas: { type: Array, default: () => [] },
@@ -169,7 +172,7 @@ onUnmounted(() => {
                             @keydown.enter="buscarEnHome"
                             @focus="showHistory = busqueda.trim() === '' && searchHistory.length > 0"
                             type="text"
-                            placeholder="Buscar tiendas o ubicaciones..."
+                            :placeholder="t('nav.search_placeholder')"
                             class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 py-2 pl-12 pr-4 text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                         />
 
@@ -187,8 +190,8 @@ onUnmounted(() => {
                                 class="absolute left-0 right-0 top-full mt-2 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl"
                             >
                                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 px-3 py-2">
-                                    <span class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Búsquedas recientes</span>
-                                    <button @click.prevent="clearHistory" class="text-xs text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">Limpiar todo</button>
+                                    <span class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">{{ t('nav.recent_searches') }}</span>
+                                    <button @click.prevent="clearHistory" class="text-xs text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">{{ t('nav.clear_all') }}</button>
                                 </div>
                                 <div>
                                     <button
@@ -278,7 +281,7 @@ onUnmounted(() => {
                         :href="route('login')"
                         class="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600"
                     >
-                        Acceder
+                        {{ t('nav.login') }}
                     </Link>
 
                     <Link
@@ -327,7 +330,7 @@ onUnmounted(() => {
                                 <Link :href="route('monedero.index')" class="flex items-center justify-between gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700" @click="showProfileMenu = false">
                                     <span class="flex items-center gap-3">
                                         <span class="text-base">🪙</span>
-                                        Mi monedero
+                                        {{ t('nav.my_wallet') }}
                                     </span>
                                     <span class="rounded-full bg-orange-100 dark:bg-orange-900/40 px-2 py-0.5 text-xs font-bold text-orange-600 dark:text-orange-300">
                                         {{ Number(user.rusticoin_balance ?? 0).toFixed(2) }} RC
@@ -337,25 +340,25 @@ onUnmounted(() => {
                                     <svg class="h-4 w-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                     </svg>
-                                    Ver carrito
+                                    {{ t('nav.my_cart') }}
                                 </Link>
                                 <Link :href="route('pedidos.index')" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700" @click="showProfileMenu = false">
                                     <svg class="h-4 w-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                     </svg>
-                                    Mis pedidos
+                                    {{ t('nav.my_orders') }}
                                 </Link>
                                 <Link :href="route('profile.edit')" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700" @click="showProfileMenu = false">
                                     <svg class="h-4 w-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                     </svg>
-                                    Mi perfil
+                                    {{ t('nav.my_profile') }}
                                 </Link>
                                 <Link :href="route('info.contacto')" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700" @click="showProfileMenu = false">
                                     <svg class="h-4 w-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                     </svg>
-                                    Contáctanos
+                                    {{ t('nav.contact') }}
                                 </Link>
                                 <Link v-if="user.role === 'admin'" :href="route('admin.dashboard')" class="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-orange-600 transition-colors hover:bg-orange-50 dark:hover:bg-orange-900/20" @click="showProfileMenu = false">
                                     <ShieldCheck class="h-4 w-4" />
@@ -370,7 +373,7 @@ onUnmounted(() => {
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                         </svg>
-                                        Cerrar sesión
+                                        {{ t('nav.logout') }}
                                     </Link>
                                 </div>
                             </div>
@@ -420,32 +423,41 @@ onUnmounted(() => {
                         @input="buscarTiendas"
                         @keydown.enter="buscarEnHome"
                         type="text"
-                        placeholder="Buscar tiendas..."
+                        :placeholder="t('nav.search_placeholder_mobile')"
                         class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 py-2.5 pl-9 pr-3 text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                         autofocus
                     />
                 </form>
-                <!-- Sugerencias móvil -->
-                <div v-if="showDropdown && sugerenciasTiendas.length > 0" class="mt-1 max-h-72 overflow-y-auto rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg">
-                    <Link
-                        v-for="tienda in sugerenciasTiendas"
-                        :key="tienda.id"
-                        :href="`/tienda/${tienda.slug}`"
-                        class="flex items-center gap-3 border-b border-gray-100 dark:border-gray-700 p-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 last:border-b-0"
-                        @click="showMobileSearch = false"
-                    >
-                        <img
-                            :src="tienda.imagen_portada ? `/storage/${tienda.imagen_portada}` : tienda.logo ? `/storage/${tienda.logo}` : '/images/logo.png'"
-                            :alt="tienda.nombre"
-                            loading="lazy"
-                            class="h-10 w-10 flex-shrink-0 rounded-full object-cover"
-                        />
-                        <span class="flex-1 min-w-0 text-sm font-medium text-gray-900 dark:text-white truncate">{{ tienda.nombre }}</span>
-                    </Link>
-                </div>
             </div>
         </Transition>
     </nav>
+
+    <!-- Sugerencias móvil (fuera del nav fixed para no ser recortadas) -->
+    <Teleport to="body">
+        <div
+            v-if="showMobileSearch && showDropdown && sugerenciasTiendas.length > 0"
+            class="md:hidden fixed left-0 right-0 z-[49] px-3"
+            style="top: 116px;"
+        >
+            <div class="max-h-72 overflow-y-auto rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl">
+                <Link
+                    v-for="tienda in sugerenciasTiendas"
+                    :key="tienda.id"
+                    :href="`/tienda/${tienda.slug}`"
+                    class="flex items-center gap-3 border-b border-gray-100 dark:border-gray-700 p-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 last:border-b-0"
+                    @click="showMobileSearch = false; showDropdown = false"
+                >
+                    <img
+                        :src="tienda.imagen_portada ? `/storage/${tienda.imagen_portada}` : tienda.logo ? `/storage/${tienda.logo}` : '/images/logo.png'"
+                        :alt="tienda.nombre"
+                        loading="lazy"
+                        class="h-10 w-10 flex-shrink-0 rounded-full object-cover"
+                    />
+                    <span class="flex-1 min-w-0 text-sm font-medium text-gray-900 dark:text-white truncate">{{ tienda.nombre }}</span>
+                </Link>
+            </div>
+        </div>
+    </Teleport>
 
     <!-- Mobile menu drawer -->
     <Teleport to="body">
@@ -494,7 +506,7 @@ onUnmounted(() => {
                         <input
                             v-model="busqueda"
                             type="text"
-                            placeholder="Buscar tiendas..."
+                            :placeholder="t('nav.search_placeholder_mobile')"
                             class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 py-2.5 pl-9 pr-3 text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                         />
                     </form>
@@ -522,7 +534,7 @@ onUnmounted(() => {
                             v-if="user.role === 'admin'"
                             :href="route('admin.dashboard')"
                             class="flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2.5 text-sm font-bold text-white shadow"
-                        ><ShieldCheck class="h-4 w-4" /> Panel de administración</Link>
+                        ><ShieldCheck class="h-4 w-4" /> {{ t('nav.admin_panel') }}</Link>
                         <Link
                             v-if="user.role === 'owner'"
                             :href="route('owner.panel')"
@@ -535,19 +547,19 @@ onUnmounted(() => {
                         <Link
                             :href="route('login')"
                             class="flex items-center justify-center rounded-lg bg-primary-500 px-4 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-primary-600"
-                        >Acceder</Link>
+                        >{{ t('nav.login') }}</Link>
                     </div>
 
                     <!-- Links principales -->
                     <nav class="px-2 py-2">
                         <Link href="/" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
                             <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                            Inicio
+                            {{ t('nav.home') }}
                         </Link>
                         <Link v-if="user" :href="route('monedero.index')" class="flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
                             <span class="flex items-center gap-3">
                                 <Wallet class="h-5 w-5 text-gray-400" />
-                                Mi monedero
+                                {{ t('nav.my_wallet') }}
                             </span>
                             <span class="rounded-full bg-orange-100 dark:bg-orange-900/40 px-2 py-0.5 text-xs font-bold text-orange-600 dark:text-orange-300">
                                 {{ Number(user.rusticoin_balance ?? 0).toFixed(2) }} RC
@@ -555,29 +567,29 @@ onUnmounted(() => {
                         </Link>
                         <Link v-if="user" :href="route('carrito')" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
                             <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                            Mi carrito
+                            {{ t('nav.my_cart') }}
                         </Link>
                         <Link v-if="user" :href="route('pedidos.index')" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
                             <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                            Mis pedidos
+                            {{ t('nav.my_orders') }}
                         </Link>
                         <Link v-if="user" :href="route('profile.edit')" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
                             <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                            Mi perfil
+                            {{ t('nav.my_profile') }}
                         </Link>
                         <Link :href="route('info.contacto')" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
                             <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            Contacto
+                            {{ t('nav.contact') }}
                         </Link>
                         <Link :href="route('info.faq')" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
                             <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093M12 17h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            Preguntas frecuentes
+                            {{ t('nav.faq') }}
                         </Link>
                     </nav>
 
                     <!-- Preferencias -->
                     <div class="border-t border-gray-100 dark:border-gray-800 px-4 py-4 space-y-3">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Preferencias</p>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">{{ t('nav.preferences') }}</p>
                         <button
                             @click="toggleDark"
                             class="flex w-full items-center justify-between rounded-lg bg-gray-50 dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200"
@@ -595,7 +607,7 @@ onUnmounted(() => {
                                         <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clip-rule="evenodd" />
                                     </svg>
                                 </div>
-                                {{ isDark ? 'Modo oscuro' : 'Modo claro' }}
+                                {{ isDark ? t('nav.dark_mode') : t('nav.light_mode') }}
                             </span>
                             <div
                                 class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200"
@@ -609,7 +621,7 @@ onUnmounted(() => {
                         </button>
 
                         <div class="flex items-center justify-between rounded-lg bg-gray-50 dark:bg-gray-800 px-3 py-2.5">
-                            <span class="text-sm text-gray-700 dark:text-gray-200">Idioma</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-200">{{ t('nav.language') }}</span>
                             <LanguageSwitcher />
                         </div>
                     </div>
@@ -625,7 +637,7 @@ onUnmounted(() => {
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                             </svg>
-                            Cerrar sesión
+                            {{ t('nav.logout') }}
                         </Link>
                     </div>
                 </div>

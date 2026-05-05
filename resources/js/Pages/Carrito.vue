@@ -3,10 +3,12 @@ import { ref, computed, watch } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { useCarrito } from '@/Composables/useCarrito';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
+import { useI18n } from '@/Composables/useI18n';
 import { ChevronLeft } from 'lucide-vue-next';
 
 const page  = usePage();
 const user  = computed(() => page.props.auth?.user);
+const { t } = useI18n();
 
 const {
     items,
@@ -92,23 +94,23 @@ const cerrarCheckout = () => { if (step.value !== 3) mostrarCheckout.value = fal
 const siguientePaso = () => {
     errores.value = {};
     if (!envioForm.value.calle.trim()) {
-        errores.value.calle = 'La calle es obligatoria.';
+        errores.value.calle = t('checkout.street_required');
         return;
     }
     if (!envioForm.value.numero.trim()) {
-        errores.value.numero = 'El número es obligatorio.';
+        errores.value.numero = t('checkout.number_required');
         return;
     }
     if (!envioForm.value.cp.trim() || !/^\d{5}$/.test(envioForm.value.cp)) {
-        errores.value.cp = 'Introduce un código postal válido (5 dígitos).';
+        errores.value.cp = t('checkout.cp_required');
         return;
     }
     if (!envioForm.value.localidad.trim()) {
-        errores.value.localidad = 'La localidad es obligatoria.';
+        errores.value.localidad = t('checkout.city_required');
         return;
     }
     if (!envioForm.value.telefono_contacto.trim()) {
-        errores.value.telefono_contacto = 'El teléfono de contacto es obligatorio.';
+        errores.value.telefono_contacto = t('checkout.phone_required');
         return;
     }
     step.value = 2;
@@ -243,9 +245,9 @@ const pagar = () => {
 
 // Título del paso
 const stepTitle = computed(() => ({
-    1: 'Datos de entrega',
-    2: 'Método de pago',
-    3: 'Procesando pago…',
+    1: t('checkout.step_delivery'),
+    2: t('checkout.step_payment'),
+    3: t('checkout.step_processing'),
 }[step.value]));
 </script>
 
@@ -261,7 +263,7 @@ const stepTitle = computed(() => ({
 
             <!-- Título de página -->
             <div class="mb-8">
-                <h1 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">Mi carrito</h1>
+                <h1 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">{{ t('cart.title') }}</h1>
                 <p v-if="totalItems > 0" class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                     {{ totalItems }} {{ totalItems === 1 ? 'producto' : 'productos' }} de
                     {{ itemsAgrupadosPorTienda.length }} {{ itemsAgrupadosPorTienda.length === 1 ? 'tienda' : 'tiendas' }}
@@ -276,13 +278,13 @@ const stepTitle = computed(() => ({
                             d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                     </svg>
                 </div>
-                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200">Tu carrito está vacío</h2>
-                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Explora las tiendas y añade los productos que más te gusten.</p>
+                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200">{{ t('cart.empty') }}</h2>
+                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ t('cart.empty_sub') }}</p>
                 <Link
                     href="/"
                     class="mt-6 rounded-xl bg-primary-500 px-8 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-primary-600"
                 >
-                    Explorar tiendas
+                    {{ t('cart.explore') }}
                 </Link>
             </div>
 
@@ -311,7 +313,7 @@ const stepTitle = computed(() => ({
                                 {{ grupo.tienda_nombre }}
                             </Link>
                             <span class="text-sm font-semibold text-gray-500 dark:text-gray-400">
-                                Subtotal: <span class="text-gray-800 dark:text-gray-200">{{ grupo.subtotal.toFixed(2) }}€</span>
+                                {{ t('cart.subtotal') }}: <span class="text-gray-800 dark:text-gray-200">{{ grupo.subtotal.toFixed(2) }}€</span>
                             </span>
                         </div>
 
@@ -389,7 +391,7 @@ const stepTitle = computed(() => ({
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
-                            Vaciar carrito
+                            {{ t('cart.clear_cart') }}
                         </button>
                     </div>
                 </div>
@@ -399,29 +401,29 @@ const stepTitle = computed(() => ({
                     <div class="sticky top-24 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
 
                         <div class="border-b border-gray-100 dark:border-gray-700 px-6 py-5">
-                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Resumen del pedido</h2>
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">{{ t('cart.order_summary') }}</h2>
                         </div>
 
                         <div class="space-y-4 px-6 py-5">
                             <!-- Línea de subtotal -->
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600 dark:text-gray-400">Subtotal</span>
+                                <span class="text-gray-600 dark:text-gray-400">{{ t('cart.subtotal') }}</span>
                                 <span class="font-medium text-gray-800 dark:text-gray-200">{{ totalPrecio.toFixed(2) }}€</span>
                             </div>
 
                             <!-- Gastos de envío -->
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600 dark:text-gray-400">Gastos de envío</span>
+                                <span class="text-gray-600 dark:text-gray-400">{{ t('cart.shipping_cost') }}</span>
                                 <span class="font-medium text-gray-800 dark:text-gray-200">{{ gastosEnvio.toFixed(2) }}€</span>
                             </div>
 
                             <!-- Separador -->
                             <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
                                 <div class="flex items-baseline justify-between">
-                                    <span class="font-bold text-gray-900 dark:text-white">Total</span>
+                                    <span class="font-bold text-gray-900 dark:text-white">{{ t('cart.total') }}</span>
                                     <span class="text-2xl font-extrabold text-primary-600">{{ totalFinal.toFixed(2) }}€</span>
                                 </div>
-                                <p class="mt-1 text-xs text-gray-400">IVA incluido</p>
+                                <p class="mt-1 text-xs text-gray-400">{{ t('cart.vat_included') }}</p>
                             </div>
                         </div>
 
@@ -435,7 +437,7 @@ const stepTitle = computed(() => ({
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
-                                Proceder al pago
+                                {{ t('cart.checkout') }}
                             </button>
 
                             <!-- Garantías -->
@@ -444,19 +446,19 @@ const stepTitle = computed(() => ({
                                     <svg class="h-3.5 w-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                     </svg>
-                                    Productos locales de Lanzarote
+                                    {{ t('cart.local_products') }}
                                 </li>
                                 <li class="flex items-center gap-1.5">
                                     <svg class="h-3.5 w-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                     </svg>
-                                    Pago 100% seguro
+                                    {{ t('cart.secure_payment') }}
                                 </li>
                                 <li class="flex items-center gap-1.5">
                                     <svg class="h-3.5 w-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                     </svg>
-                                    Envío a domicilio
+                                    {{ t('cart.home_delivery') }}
                                 </li>
                             </ul>
                         </div>
@@ -541,7 +543,7 @@ const stepTitle = computed(() => ({
                         <!-- Dirección de envío desglosada -->
                         <div class="space-y-3">
                             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                Dirección de entrega <span class="text-red-500">*</span>
+                                {{ t('checkout.shipping_address') }} <span class="text-red-500">*</span>
                             </label>
 
                             <!-- Calle -->
@@ -549,7 +551,7 @@ const stepTitle = computed(() => ({
                                 <input
                                     v-model="envioForm.calle"
                                     type="text"
-                                    placeholder="Calle / Avenida / Urbanización"
+                                    :placeholder="t('checkout.street')"
                                     autocomplete="street-address"
                                     :class="['w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2',
                                         errores.calle ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
@@ -564,7 +566,7 @@ const stepTitle = computed(() => ({
                                     <input
                                         v-model="envioForm.numero"
                                         type="text"
-                                        placeholder="Número"
+                                        :placeholder="t('checkout.number')"
                                         autocomplete="address-line2"
                                         :class="['w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2',
                                             errores.numero ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
@@ -576,7 +578,7 @@ const stepTitle = computed(() => ({
                                     <input
                                         v-model="envioForm.puerta"
                                         type="text"
-                                        placeholder="Piso / Puerta (opc.)"
+                                        :placeholder="t('checkout.door')"
                                         class="w-full rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500 px-4 py-3 text-sm outline-none transition focus:border-primary-400 focus:ring-2 focus:ring-primary-200"
                                     />
                                 </div>
@@ -591,7 +593,7 @@ const stepTitle = computed(() => ({
                                             type="text"
                                             inputmode="numeric"
                                             maxlength="5"
-                                            placeholder="Cód. postal"
+                                            :placeholder="t('checkout.postal_code')"
                                             autocomplete="postal-code"
                                             :class="['w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2',
                                                 errores.cp ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
@@ -610,7 +612,7 @@ const stepTitle = computed(() => ({
                                     <input
                                         v-model="envioForm.localidad"
                                         type="text"
-                                        placeholder="Localidad"
+                                        :placeholder="t('checkout.city')"
                                         autocomplete="address-level2"
                                         :class="['w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2',
                                             errores.localidad ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
@@ -624,7 +626,7 @@ const stepTitle = computed(() => ({
                         <!-- Teléfono -->
                         <div>
                             <label class="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                Teléfono de contacto <span class="text-red-500">*</span>
+                                {{ t('checkout.phone') }} <span class="text-red-500">*</span>
                             </label>
                             <input
                                 v-model="envioForm.telefono_contacto"
@@ -640,8 +642,7 @@ const stepTitle = computed(() => ({
                         <!-- Notas -->
                         <div>
                             <label class="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                Notas del pedido
-                                <span class="text-xs font-normal text-gray-400">(opcional)</span>
+                                {{ t('checkout.notes') }}
                             </label>
                             <textarea
                                 v-model="envioForm.notas"
@@ -654,17 +655,17 @@ const stepTitle = computed(() => ({
                         <!-- Resumen rápido -->
                         <div class="rounded-xl bg-gray-50 dark:bg-gray-700/50 px-4 py-4 text-sm">
                             <div class="flex justify-between text-gray-600 dark:text-gray-400">
-                                <span>Subtotal</span>
+                                <span>{{ t('cart.subtotal') }}</span>
                                 <span class="font-medium text-gray-800 dark:text-gray-200">{{ totalPrecio.toFixed(2) }}€</span>
                             </div>
                             <div class="mt-1 flex justify-between text-gray-600 dark:text-gray-400">
-                                <span>Envío</span>
+                                <span>{{ t('cart.shipping_cost') }}</span>
                                 <span :class="gastosEnvio === 0 ? 'font-semibold text-green-600' : 'font-medium text-gray-800 dark:text-gray-200'">
-                                    {{ gastosEnvio === 0 ? 'GRATIS' : gastosEnvio.toFixed(2) + '€' }}
+                                    {{ gastosEnvio === 0 ? t('orders.free') : gastosEnvio.toFixed(2) + '€' }}
                                 </span>
                             </div>
                             <div class="mt-3 flex justify-between border-t border-gray-200 dark:border-gray-600 pt-3">
-                                <span class="font-bold text-gray-900 dark:text-white">Total</span>
+                                <span class="font-bold text-gray-900 dark:text-white">{{ t('cart.total') }}</span>
                                 <span class="text-lg font-extrabold text-primary-600">{{ totalFinal.toFixed(2) }}€</span>
                             </div>
                         </div>
@@ -675,7 +676,7 @@ const stepTitle = computed(() => ({
                                 @click="siguientePaso"
                                 class="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-500 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-primary-600 hover:shadow-md"
                             >
-                                Continuar al pago
+                                {{ t('checkout.next') }}
                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                 </svg>
@@ -707,7 +708,7 @@ const stepTitle = computed(() => ({
                                 <svg class="h-4 w-4 sm:h-5 sm:w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                                 </svg>
-                                <span class="text-[10px] sm:text-xs leading-tight text-center">Tarjeta</span>
+                                <span class="text-[10px] sm:text-xs leading-tight text-center">{{ t('checkout.pay_with_card') }}</span>
                             </button>
                             <!-- RustiCoin -->
                             <button
@@ -740,7 +741,7 @@ const stepTitle = computed(() => ({
                                 <svg class="h-4 w-4 sm:h-5 sm:w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
                                 </svg>
-                                <span class="text-[10px] sm:text-xs leading-tight text-center">RC + Tarjeta</span>
+                                <span class="text-[10px] sm:text-xs leading-tight text-center">{{ t('checkout.pay_with_mixed') }}</span>
                             </button>
                         </div>
                         <p v-if="pagoForm.metodo === 'rusticoin' && rcDisponible < totalFinal" class="text-xs text-red-500 text-center">
@@ -750,8 +751,8 @@ const stepTitle = computed(() => ({
                         <!-- Input RC para pago mixto -->
                         <div v-if="pagoForm.metodo === 'mixto'" class="rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/20 p-4 space-y-3">
                             <div class="flex items-center justify-between text-sm">
-                                <span class="font-semibold text-indigo-700 dark:text-indigo-300">RC a usar</span>
-                                <span class="text-xs text-indigo-500 dark:text-indigo-400">Disponibles: {{ Number(rcDisponible).toFixed(2) }} RC</span>
+                                <span class="font-semibold text-indigo-700 dark:text-indigo-300">{{ t('checkout.rc_to_use') }}</span>
+                                <span class="text-xs text-indigo-500 dark:text-indigo-400">{{ t('checkout.available_rc', { n: Number(rcDisponible).toFixed(2) }) }}</span>
                             </div>
                             <input
                                 :value="pagoForm.rcACusar"
@@ -766,7 +767,7 @@ const stepTitle = computed(() => ({
                             <p v-if="erroresPago.rcACusar" class="text-xs text-red-500">{{ erroresPago.rcACusar }}</p>
                             <div class="flex items-center justify-between text-xs">
                                 <span class="text-indigo-600 dark:text-indigo-400">{{ Number(pagoForm.rcACusar || 0).toFixed(2) }} RC = {{ Number(pagoForm.rcACusar || 0).toFixed(2) }}€</span>
-                                <span class="font-semibold text-gray-700 dark:text-gray-300">+ {{ Number(restanteTarjeta).toFixed(2) }}€ con tarjeta</span>
+                                <span class="font-semibold text-gray-700 dark:text-gray-300">+ {{ Number(restanteTarjeta).toFixed(2) }}€ {{ t('checkout.rest_card') }}</span>
                             </div>
                         </div>
 
@@ -776,7 +777,7 @@ const stepTitle = computed(() => ({
                             <!-- Número de tarjeta -->
                             <div>
                                 <label class="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                    Número de tarjeta <span class="text-red-500">*</span>
+                                    {{ t('checkout.card_number') }} <span class="text-red-500">*</span>
                                 </label>
                                 <div class="relative">
                                     <input
@@ -807,7 +808,7 @@ const stepTitle = computed(() => ({
                             <!-- Titular -->
                             <div>
                                 <label class="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                    Titular de la tarjeta <span class="text-red-500">*</span>
+                                    {{ t('checkout.card_holder') }} <span class="text-red-500">*</span>
                                 </label>
                                 <input
                                     v-model="pagoForm.titular"
@@ -825,7 +826,7 @@ const stepTitle = computed(() => ({
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                        Caducidad <span class="text-red-500">*</span>
+                                        {{ t('checkout.card_expiry') }} <span class="text-red-500">*</span>
                                     </label>
                                     <input
                                         :value="pagoForm.expiry"
@@ -843,7 +844,7 @@ const stepTitle = computed(() => ({
                                 </div>
                                 <div>
                                     <label class="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                        CVV <span class="text-red-500">*</span>
+                                        {{ t('checkout.card_cvv') }} <span class="text-red-500">*</span>
                                     </label>
                                     <div class="relative">
                                         <input
@@ -872,12 +873,12 @@ const stepTitle = computed(() => ({
                                     <span>-{{ Number(pagoForm.rcACusar || 0).toFixed(2) }}€</span>
                                 </div>
                                 <div class="flex items-center justify-between text-sm font-semibold border-t border-gray-200 dark:border-gray-600 pt-1 mt-1">
-                                    <span class="text-gray-600 dark:text-gray-400">Cargo a tarjeta</span>
+                                    <span class="text-gray-600 dark:text-gray-400">{{ t('checkout.rest_card') }}</span>
                                     <span class="text-xl font-extrabold text-primary-600">{{ Number(restanteTarjeta).toFixed(2) }}€</span>
                                 </div>
                             </template>
                             <div v-else class="flex items-center justify-between">
-                                <span class="text-sm text-gray-600 dark:text-gray-400">Importe total</span>
+                                <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('cart.total') }}</span>
                                 <span class="text-xl font-extrabold text-primary-600">{{ totalFinal.toFixed(2) }}€</span>
                             </div>
                         </div>
@@ -913,13 +914,13 @@ const stepTitle = computed(() => ({
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                                 </svg>
-                                Pagar {{ pagoForm.metodo === 'mixto' ? `${Number(pagoForm.rcACusar || 0).toFixed(2)} RC + ${Number(restanteTarjeta).toFixed(2)}€` : `${totalFinal.toFixed(2)}€` }}
+                                {{ t('checkout.place_order') }} {{ pagoForm.metodo === 'mixto' ? `${Number(pagoForm.rcACusar || 0).toFixed(2)} RC + ${Number(restanteTarjeta).toFixed(2)}€` : `${totalFinal.toFixed(2)}€` }}
                             </button>
                             <button
                                 @click="step = 1"
                                 class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors inline-flex items-center gap-1"
                             >
-                                <ChevronLeft class="h-4 w-4" /> Volver a datos de entrega
+                                <ChevronLeft class="h-4 w-4" /> {{ t('checkout.back') }}
                             </button>
                         </div>
                     </div>
@@ -939,9 +940,9 @@ const stepTitle = computed(() => ({
                                 </svg>
                             </div>
                         </div>
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Procesando tu pago</h3>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">{{ t('checkout.processing') }}</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400 max-w-xs">
-                            Estamos verificando tu pago de forma segura. Por favor, no cierres esta ventana…
+                            {{ t('checkout.processing_sub') }}
                         </p>
                         <div class="mt-6 flex items-center gap-2 rounded-full bg-green-50 dark:bg-green-900/20 px-4 py-2 text-xs font-medium text-green-700 dark:text-green-400">
                             <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

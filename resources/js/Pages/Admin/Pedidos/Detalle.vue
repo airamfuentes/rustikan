@@ -10,9 +10,15 @@
                         Pedido {{ pedido.numero_pedido ?? '#' + pedido.id }}
                     </h2>
                 </div>
-                <span :class="estadoBadgeClass(pedido.estado)" class="rounded-full px-3 py-1 text-sm font-semibold">
-                    {{ estadoLabel(pedido.estado) }}
-                </span>
+                <div class="flex items-center gap-2">
+                    <a :href="route('factura.show', pedido.id)" target="_blank"
+                       class="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20 px-3 py-2 text-sm font-medium text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-colors">
+                        🧾 Ver factura
+                    </a>
+                    <span :class="estadoBadgeClass(pedido.estado)" class="rounded-full px-3 py-1 text-sm font-semibold">
+                        {{ estadoLabel(pedido.estado) }}
+                    </span>
+                </div>
             </div>
         </template>
 

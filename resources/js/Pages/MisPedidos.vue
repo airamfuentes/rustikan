@@ -3,6 +3,7 @@ import { ref, watch } from 'vue';
 import { Head, Link, usePage, useForm } from '@inertiajs/vue3';
 import Toast from '@/Components/Toast.vue';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
+import { useI18n } from '@/Composables/useI18n';
 
 const props = defineProps({
     pedidosActivos:     { type: Array,  required: true },
@@ -46,14 +47,16 @@ const toggleExpand = (id) => {
     }
 };
 
-// -- Estado config
+const { t } = useI18n();
+
+// -- Estado config (labels are translated at render via t())
 const estadoConfig = {
-    pendiente:  { label: 'Pendiente',  bg: 'bg-yellow-100 dark:bg-yellow-900/40', text: 'text-yellow-700 dark:text-yellow-300', dot: 'bg-yellow-400' },
-    confirmado: { label: 'Confirmado', bg: 'bg-blue-100 dark:bg-blue-900/40',     text: 'text-blue-700 dark:text-blue-300',     dot: 'bg-blue-400'   },
-    preparando: { label: 'Preparando', bg: 'bg-indigo-100 dark:bg-indigo-900/40', text: 'text-indigo-700 dark:text-indigo-300', dot: 'bg-indigo-400' },
-    en_camino:  { label: 'En camino',  bg: 'bg-purple-100 dark:bg-purple-900/40', text: 'text-purple-700 dark:text-purple-300', dot: 'bg-purple-400' },
-    entregado:  { label: 'Entregado',  bg: 'bg-green-100 dark:bg-green-900/40',   text: 'text-green-700 dark:text-green-300',   dot: 'bg-green-400'  },
-    cancelado:  { label: 'Cancelado',  bg: 'bg-red-100 dark:bg-red-900/40',       text: 'text-red-700 dark:text-red-300',       dot: 'bg-red-400'    },
+    pendiente:  { key: 'status_pendiente', bg: 'bg-yellow-100 dark:bg-yellow-900/40', text: 'text-yellow-700 dark:text-yellow-300', dot: 'bg-yellow-400' },
+    confirmado: { key: 'status_confirmado', bg: 'bg-blue-100 dark:bg-blue-900/40',     text: 'text-blue-700 dark:text-blue-300',     dot: 'bg-blue-400'   },
+    preparando: { key: 'status_preparando', bg: 'bg-indigo-100 dark:bg-indigo-900/40', text: 'text-indigo-700 dark:text-indigo-300', dot: 'bg-indigo-400' },
+    en_camino:  { key: 'status_en_camino',  bg: 'bg-purple-100 dark:bg-purple-900/40', text: 'text-purple-700 dark:text-purple-300', dot: 'bg-purple-400' },
+    entregado:  { key: 'status_entregado',  bg: 'bg-green-100 dark:bg-green-900/40',   text: 'text-green-700 dark:text-green-300',   dot: 'bg-green-400'  },
+    cancelado:  { key: 'status_cancelado',  bg: 'bg-red-100 dark:bg-red-900/40',       text: 'text-red-700 dark:text-red-300',       dot: 'bg-red-400'    },
 };
 const getEstado = (e) => estadoConfig[e] ?? estadoConfig.pendiente;
 const formatFecha = (dateStr) =>
@@ -107,18 +110,18 @@ const submitRating = (tiendaId) => {
         <main class="mx-auto max-w-3xl px-4 pt-24 pb-10 sm:px-6 lg:px-8">
 
             <div class="mb-8">
-                <h1 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">Mis pedidos</h1>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Consulta el estado de tus pedidos y tu historial de compras</p>
+                <h1 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">{{ t('orders.title') }}</h1>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t('orders.subtitle') }}</p>
             </div>
 
             <!-- Tabs -->
             <div class="mb-6 flex gap-1 rounded-xl bg-gray-100 dark:bg-gray-800 p-1">
                 <button @click="tabActivo = 'activos'" :class="['flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all duration-200', tabActivo === 'activos' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300']">
                     <span :class="['flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1.5 text-xs font-bold text-white', pedidosActivos.length > 0 ? 'bg-primary-500' : 'bg-gray-300']">{{ pedidosActivos.length }}</span>
-                    Pedidos activos
+                    {{ t('orders.active_tab') }}
                 </button>
                 <button @click="tabActivo = 'historial'" :class="['flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all duration-200', tabActivo === 'historial' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300']">
-                    Historial
+                    {{ t('orders.history_tab') }}
                     <span class="text-xs text-gray-400 dark:text-gray-500">({{ pedidosHistorial.total }})</span>
                 </button>
             </div>
@@ -131,9 +134,9 @@ const submitRating = (tiendaId) => {
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
                     </div>
-                    <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200">No tienes pedidos activos</h2>
-                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">¡Explora las tiendas y realiza tu próximo pedido!</p>
-                    <Link href="/" class="mt-6 rounded-xl bg-primary-500 px-8 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-primary-600">Explorar tiendas</Link>
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200">{{ t('orders.no_active') }}</h2>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ t('orders.no_active_sub') }}</p>
+                    <Link href="/" class="mt-6 rounded-xl bg-primary-500 px-8 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-primary-600">{{ t('orders.explore') }}</Link>
                 </div>
 
                 <div v-else class="space-y-4">
@@ -144,7 +147,7 @@ const submitRating = (tiendaId) => {
                                     <span class="font-bold text-gray-900 dark:text-white">{{ pedido.numero_pedido }}</span>
                                     <span :class="['flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold', getEstado(pedido.estado).bg, getEstado(pedido.estado).text]">
                                         <span :class="['inline-block h-1.5 w-1.5 rounded-full animate-pulse', getEstado(pedido.estado).dot]" />
-                                        {{ getEstado(pedido.estado).label }}
+                                        {{ t('orders.' + getEstado(pedido.estado).key) }}
                                     </span>
                                 </div>
                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ formatFecha(pedido.created_at) }} · {{ pedido.items_count }} producto{{ pedido.items_count !== 1 ? 's' : '' }}</p>
@@ -178,7 +181,11 @@ const submitRating = (tiendaId) => {
                                             </svg>
                                             <span>{{ pedido.direccion_envio }}</span>
                                         </div>
-                                        <div class="text-right">Subtotal {{ Number(pedido.subtotal).toFixed(2) }}€ + Envío {{ pedido.gastos_envio == 0 ? 'GRATIS' : Number(pedido.gastos_envio).toFixed(2) + '€' }}</div>
+                                        <div class="flex items-center gap-3">
+                                            <a :href="route('factura.show', pedido.id)" target="_blank"
+                                               class="font-medium text-orange-600 dark:text-orange-400 hover:underline whitespace-nowrap">🧾 Ver factura</a>
+                                            <span class="text-right">{{ t('orders.subtotal') }} {{ Number(pedido.subtotal).toFixed(2) }}€ + {{ t('orders.shipping') }} {{ pedido.gastos_envio == 0 ? t('orders.free') : Number(pedido.gastos_envio).toFixed(2) + '€' }}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -195,8 +202,8 @@ const submitRating = (tiendaId) => {
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200">Sin historial aún</h2>
-                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Aquí verás los pedidos entregados y cancelados.</p>
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200">{{ t('orders.no_history') }}</h2>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ t('orders.no_history_sub') }}</p>
                 </div>
 
                 <div v-else class="space-y-4">
@@ -207,7 +214,7 @@ const submitRating = (tiendaId) => {
                                     <span class="font-bold text-gray-900 dark:text-white">{{ pedido.numero_pedido }}</span>
                                     <span :class="['flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold', getEstado(pedido.estado).bg, getEstado(pedido.estado).text]">
                                         <span :class="['inline-block h-1.5 w-1.5 rounded-full', getEstado(pedido.estado).dot]" />
-                                        {{ getEstado(pedido.estado).label }}
+                                        {{ t('orders.' + getEstado(pedido.estado).key) }}
                                     </span>
                                 </div>
                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ formatFecha(pedido.created_at) }} · {{ pedido.items_count }} producto{{ pedido.items_count !== 1 ? 's' : '' }}</p>
@@ -240,12 +247,12 @@ const submitRating = (tiendaId) => {
                                                 <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
                                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                 </svg>
-                                                Valorar
+                                                {{ t('orders.rate') }}
                                             </button>
                                         </div>
                                         <!-- Formulario inline de valoración -->
                                         <div v-if="ratingOpen === item.tienda_id" class="border-t border-yellow-100 dark:border-yellow-900/30 bg-yellow-50/50 dark:bg-yellow-900/10 px-6 py-4">
-                                            <p class="mb-3 text-sm font-semibold text-gray-800 dark:text-gray-200">Valora {{ item.tienda_nombre }}</p>
+                                            <p class="mb-3 text-sm font-semibold text-gray-800 dark:text-gray-200">{{ t('orders.rate_store', { name: item.tienda_nombre }) }}</p>
                                             <div class="mb-3 flex gap-1">
                                                 <button
                                                     v-for="n in 5" :key="n"
@@ -261,11 +268,11 @@ const submitRating = (tiendaId) => {
                                                     </svg>
                                                 </button>
                                             </div>
-                                            <input v-model="ratingForm.titulo" type="text" placeholder="Título de la reseña (opcional)" class="mb-2 w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500" />
-                                            <textarea v-model="ratingForm.comentario" rows="2" placeholder="Cuéntanos tu experiencia..." class="mb-3 w-full resize-none rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                            <input v-model="ratingForm.titulo" type="text" :placeholder="t('orders.rate_title_placeholder')" class="mb-2 w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                                            <textarea v-model="ratingForm.comentario" rows="2" :placeholder="t('orders.rate_comment_placeholder')" class="mb-3 w-full resize-none rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500" />
                                             <div class="flex gap-2">
-                                                <button @click="submitRating(item.tienda_id)" :disabled="ratingForm.puntuacion === 0 || ratingForm.processing" class="rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed">Enviar valoración</button>
-                                                <button @click="closeRating" class="rounded-lg border border-gray-200 dark:border-gray-600 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700">Cancelar</button>
+                                                <button @click="submitRating(item.tienda_id)" :disabled="ratingForm.puntuacion === 0 || ratingForm.processing" class="rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed">{{ t('orders.submit_rating') }}</button>
+                                                <button @click="closeRating" class="rounded-lg border border-gray-200 dark:border-gray-600 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700">{{ t('orders.cancel') }}</button>
                                             </div>
                                         </div>
                                     </template>
@@ -279,7 +286,7 @@ const submitRating = (tiendaId) => {
                                             </svg>
                                             <span>{{ pedido.direccion_envio }}</span>
                                         </div>
-                                        <div class="text-right">Subtotal {{ Number(pedido.subtotal).toFixed(2) }}€ + Envío {{ pedido.gastos_envio == 0 ? 'GRATIS' : Number(pedido.gastos_envio).toFixed(2) + '€' }}</div>
+                                        <div class="text-right">{{ t('orders.subtotal') }} {{ Number(pedido.subtotal).toFixed(2) }}€ + {{ t('orders.shipping') }} {{ pedido.gastos_envio == 0 ? t('orders.free') : Number(pedido.gastos_envio).toFixed(2) + '€' }}</div>
                                     </div>
                                 </div>
                             </div>

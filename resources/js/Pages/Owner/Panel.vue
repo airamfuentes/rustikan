@@ -3,7 +3,7 @@ import { ref, computed, watch } from 'vue';
 import { Head, Link, router, usePage, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import Toast from '@/Components/Toast.vue';
-import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
+import { ChevronLeft, ChevronRight, Download } from 'lucide-vue-next';
 
 const props = defineProps({
     tienda:            { type: Object,  required: true },
@@ -218,6 +218,16 @@ const solicitudesResetFiltros = () => {
     solicitudesFiltros.value = { busqueda: '', tipo: 'todos', estado: 'todos' };
 };
 watch(solicitudesFiltros, () => { solicitudesPagina.value = 1; }, { deep: true });
+
+// ── Beneficios: filtro mes ────────────────────────────────────────────────────
+const mesFmt = (date) => date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }).toLowerCase();
+const mesActualStr = mesFmt(new Date());
+const selectedMes = ref(mesActualStr);
+
+const beneficiosFiltrados = computed(() => {
+    if (!selectedMes.value) return props.beneficiosPorMes;
+    return props.beneficiosPorMes.filter(f => f.mes === selectedMes.value);
+});
 
 // ── Producto: añadir form ─────────────────────────────────────────────────────
 const showAddForm = ref(false);
@@ -618,6 +628,10 @@ const submitDeleteProducto = (producto) => {
                                     {{ pedidosFiltrados.length }} de {{ pedidosRecientes.length }} pedidos · Mostrando {{ pedidosPaginados.length }} en esta página
                                 </p>
                             </div>
+                            <a :href="route('owner.exportar.pedidos')"
+                               class="inline-flex items-center gap-1.5 rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 text-xs font-medium text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors">
+                                <Download class="h-3.5 w-3.5" /> Exportar pedidos (.csv)
+                            </a>
                         </div>
 
                         <!-- ── Barra de filtros ─────────────────────────────────── -->
@@ -713,9 +727,15 @@ const submitDeleteProducto = (producto) => {
                                         <td class="px-6 py-4 text-sm text-gray-500">{{ p.items_count }} art.</td>
                                         <td class="px-6 py-4 text-xs text-gray-400">{{ p.created_at }}</td>
                                         <td class="px-6 py-4 text-right">
-                                            <Link :href="route('owner.pedido.show', p.id)" class="text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300">
-                                                Ver detalle →
-                                            </Link>
+                                            <div class="flex items-center justify-end gap-2">
+                                                <a :href="route('factura.show', p.id)" target="_blank"
+                                                   class="text-xs font-medium text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" title="Ver factura">
+                                                    🧾
+                                                </a>
+                                                <Link :href="route('owner.pedido.show', p.id)" class="text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300">
+                                                    Ver detalle →
+                                                </Link>
+                                            </div>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -1328,9 +1348,27 @@ const submitDeleteProducto = (producto) => {
 
                     <!-- Tabla mensual -->
                     <div class="rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
-                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-                            <h3 class="text-base font-semibold text-gray-900 dark:text-white">Desglose mensual (últimos 12 meses)</h3>
-                            <p class="text-xs text-gray-400 mt-0.5">Comisión del {{ stats.comisionPct }}% aplicada sobre ingresos brutos</p>
+                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                            <div>
+                                <h3 class="text-base font-semibold text-gray-900 dark:text-white">Desglose mensual (últimos 12 meses)</h3>
+                                <p class="text-xs text-gray-400 mt-0.5">Comisión del {{ stats.comisionPct }}% aplicada sobre ingresos brutos</p>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <label class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">Filtrar mes:</label>
+                                <select
+                                    v-model="selectedMes"
+                                    class="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                >
+                                    <option value="">Todos</option>
+                                    <option v-for="fila in beneficiosPorMes" :key="fila.mes" :value="fila.mes" class="capitalize">
+                                        {{ fila.mes }}
+                                    </option>
+                                </select>
+                                <a :href="route('owner.exportar.beneficios')"
+                                   class="inline-flex items-center gap-1.5 rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 px-2.5 py-1.5 text-xs font-medium text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors">
+                                    <Download class="h-3.5 w-3.5" /> CSV
+                                </a>
+                            </div>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
@@ -1343,15 +1381,19 @@ const submitDeleteProducto = (producto) => {
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                                    <tr v-for="fila in beneficiosPorMes" :key="fila.mes"
-                                        class="hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors">
-                                        <td class="px-6 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 capitalize">{{ fila.mes }}</td>
+                                    <tr v-for="fila in beneficiosFiltrados" :key="fila.mes"
+                                        :class="['hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors',
+                                            fila.mes === mesActualStr ? 'bg-primary-50/40 dark:bg-primary-900/10 font-semibold' : '']">
+                                        <td class="px-6 py-3 text-sm text-gray-700 dark:text-gray-200 capitalize flex items-center gap-2">
+                                            {{ fila.mes }}
+                                            <span v-if="fila.mes === mesActualStr" class="rounded-full bg-primary-100 dark:bg-primary-900/40 px-1.5 py-0.5 text-[10px] font-bold text-primary-600 dark:text-primary-300">Actual</span>
+                                        </td>
                                         <td class="px-6 py-3 text-sm text-right text-gray-600 dark:text-gray-300">{{ fila.bruto.toFixed(2) }} €</td>
                                         <td class="px-6 py-3 text-sm text-right text-red-500 dark:text-red-400">–{{ fila.comision.toFixed(2) }} €</td>
                                         <td class="px-6 py-3 text-sm text-right font-semibold text-green-600 dark:text-green-400">{{ fila.neto.toFixed(2) }} €</td>
                                     </tr>
-                                    <tr v-if="beneficiosPorMes.length === 0">
-                                        <td colspan="4" class="px-6 py-8 text-center text-sm text-gray-400">Sin datos de ventas aún</td>
+                                    <tr v-if="beneficiosFiltrados.length === 0">
+                                        <td colspan="4" class="px-6 py-8 text-center text-sm text-gray-400">Sin datos para este mes</td>
                                     </tr>
                                 </tbody>
                             </table>

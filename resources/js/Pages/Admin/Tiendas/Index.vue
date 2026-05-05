@@ -201,16 +201,16 @@
                                 <Link
                                     v-if="tiendas.prev_page_url"
                                     :href="tiendas.prev_page_url"
-                                    class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                    class="relative inline-flex items-center rounded-md border border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
                                 >
-                                    &lt;
+                                    Anterior
                                 </Link>
                                 <Link
                                     v-if="tiendas.next_page_url"
                                     :href="tiendas.next_page_url"
-                                    class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                    class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
                                 >
-                                    &gt;
+                                    Siguiente
                                 </Link>
                             </div>
                             <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
@@ -228,7 +228,7 @@
                                 <div>
                                     <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
                                         <component
-                                            v-for="(link, index) in tiendas.links"
+                                            v-for="(link, index) in tiendas.links.filter(l => !l.label.includes('&laquo;') && !l.label.includes('&raquo;'))"
                                             :key="index"
                                             :is="link.url ? Link : 'span'"
                                             :href="link.url"

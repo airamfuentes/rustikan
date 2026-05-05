@@ -3,8 +3,8 @@
         <template #header>
             <div class="flex items-center justify-between">
                 <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Gestionar Usuarios</h2>
-                <Link :href="route('admin.dashboard')" class="rounded-lg bg-gray-200 dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600">
-                    ? Volver
+                <Link :href="route('admin.dashboard')" class="inline-flex items-center gap-1.5 rounded-lg bg-gray-200 dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600">
+                    <ArrowLeft class="h-4 w-4" /> Volver
                 </Link>
             </div>
         </template>
@@ -168,10 +168,10 @@
                             </div>
                             <div class="flex gap-2">
                                 <component
-                                    v-for="link in usuarios.links" 
-                                    :key="link.label" 
+                                    v-for="link in usuarios.links.filter(l => !l.label.includes('&laquo;') && !l.label.includes('&raquo;'))"
+                                    :key="link.label"
                                     :is="link.url ? Link : 'span'"
-                                    :href="link.url" 
+                                    :href="link.url"
                                     :class="{
                                         'bg-primary-600 text-white': link.active,
                                         'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700': !link.active && link.url,
@@ -193,6 +193,7 @@
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { ArrowLeft } from 'lucide-vue-next';
 
 const props = defineProps({
     usuarios: Object,

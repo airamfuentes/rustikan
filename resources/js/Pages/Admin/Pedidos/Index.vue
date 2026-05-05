@@ -1,11 +1,16 @@
 <template>
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between gap-3">
                 <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Gestionar Pedidos</h2>
-                <Link :href="route('admin.dashboard')" class="inline-flex items-center gap-1.5 rounded-lg bg-gray-200 dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600">
-                    <ArrowLeft class="h-4 w-4" /> Volver
-                </Link>
+                <div class="flex items-center gap-2">
+                    <a :href="route('admin.exportar.pedidos')" class="inline-flex items-center gap-1.5 rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 px-3 py-2 text-sm font-medium text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors">
+                        <Download class="h-4 w-4" /> CSV
+                    </a>
+                    <Link :href="route('admin.dashboard')" class="inline-flex items-center gap-1.5 rounded-lg bg-gray-200 dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600">
+                        <ArrowLeft class="h-4 w-4" /> Volver
+                    </Link>
+                </div>
             </div>
         </template>
 
@@ -182,9 +187,15 @@
                                     <span class="text-xs">{{ new Date(pedido.created_at).toLocaleTimeString('es-ES') }}</span>
                                 </td>
                                 <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                                    <Link :href="route('admin.pedidos.show', pedido.id)" class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
-                                        Ver detalles
-                                    </Link>
+                                    <div class="flex items-center justify-end gap-3">
+                                        <a :href="route('factura.show', pedido.id)" target="_blank"
+                                           class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" title="Ver factura">
+                                            🧾
+                                        </a>
+                                        <Link :href="route('admin.pedidos.show', pedido.id)" class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
+                                            Ver detalles
+                                        </Link>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>
@@ -201,7 +212,7 @@
                                 <span class="font-medium">{{ pedidos.total }}</span> pedidos
                             </div>
                             <div class="flex flex-wrap items-center gap-1">
-                                <template v-for="link in pedidos.links" :key="link.label">
+                                <template v-for="link in pedidos.links.filter(l => !l.label.includes('&laquo;') && !l.label.includes('&raquo;'))" :key="link.label">
                                     <component
                                         :is="link.url ? Link : 'span'"
                                         :href="link.url ?? undefined"
@@ -229,7 +240,7 @@
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
-import { ArrowLeft, Clock, RefreshCw, DollarSign } from 'lucide-vue-next';
+import { ArrowLeft, Clock, RefreshCw, DollarSign, Download } from 'lucide-vue-next';
 
 const props = defineProps({
     pedidos: Object,

@@ -65,16 +65,15 @@ const tabClass = (est) => props.estado === est
         <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
 
             <!-- Cabecera -->
-            <div class="mb-6 flex items-center gap-4">
-                <Link :href="route('admin.dashboard')" class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                    </svg>
-                </Link>
+            <div class="mb-6 flex items-center justify-between gap-4">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Solicitudes de nueva tienda</h1>
                     <p class="text-sm text-gray-500 dark:text-gray-400">Peticiones de productores que quieren vender en Rustikan</p>
                 </div>
+                <Link :href="route('admin.dashboard')" class="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-gray-200 dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                    Volver
+                </Link>
             </div>
 
             <!-- Tabs -->
@@ -162,7 +161,7 @@ const tabClass = (est) => props.estado === est
             <!-- Paginación -->
             <div v-if="solicitudes.last_page > 1" class="mt-6 flex justify-center gap-2">
                 <Link
-                    v-for="link in solicitudes.links"
+                    v-for="link in solicitudes.links.filter(l => !l.label.includes('&laquo;') && !l.label.includes('&raquo;'))"
                     :key="link.label"
                     :href="link.url ?? '#'"
                     :class="['rounded-lg px-3 py-1.5 text-sm transition-colors',

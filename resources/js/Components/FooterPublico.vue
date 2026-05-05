@@ -9,7 +9,7 @@
                         <img src="/images/logo.png" alt="Rustikan" class="mb-4 h-12 w-auto brightness-0 invert" />
                     </Link>
                     <p class="text-sm leading-relaxed">
-                        Conectamos productores locales con consumidores, promoviendo el comercio justo y sostenible en Lanzarote.
+                        {{ t('footer.tagline') }}
                     </p>
                     <a
                         href="https://github.com/airamfuentes"
@@ -26,37 +26,37 @@
 
                 <!-- Columna 2: Sobre Nosotros -->
                 <div>
-                    <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-white">Sobre Nosotros</h3>
+                    <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-white">{{ t('footer.about_title') }}</h3>
                     <ul class="space-y-2 text-sm">
-                        <li><Link :href="route('info.quienes-somos')" class="hover:text-primary-400 transition-colors">Quiénes somos</Link></li>
-                        <li><Link :href="route('info.mision')" class="hover:text-primary-400 transition-colors">Nuestra misión</Link></li>
-                        <li><Link :href="route('info.contacto')" class="hover:text-primary-400 transition-colors">Contacto</Link></li>
+                        <li><Link :href="route('info.quienes-somos')" class="hover:text-primary-400 transition-colors">{{ t('footer.about_us') }}</Link></li>
+                        <li><Link :href="route('info.mision')" class="hover:text-primary-400 transition-colors">{{ t('footer.mission') }}</Link></li>
+                        <li><Link :href="route('info.contacto')" class="hover:text-primary-400 transition-colors">{{ t('footer.contact') }}</Link></li>
                     </ul>
                 </div>
 
                 <!-- Columna 3: Para Productores -->
                 <div>
-                    <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-white">Para Productores</h3>
+                    <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-white">{{ t('footer.producers_title') }}</h3>
                     <ul class="space-y-2 text-sm">
-                        <li><Link :href="route('info.vende')" class="hover:text-primary-400 transition-colors">Vende con nosotros</Link></li>
-                        <li><Link :href="route('info.faq')" class="hover:text-primary-400 transition-colors">Preguntas frecuentes</Link></li>
+                        <li><Link :href="route('info.vende')" class="hover:text-primary-400 transition-colors">{{ t('footer.sell_with_us') }}</Link></li>
+                        <li><Link :href="route('info.faq')" class="hover:text-primary-400 transition-colors">{{ t('footer.faq') }}</Link></li>
                     </ul>
                 </div>
 
                 <!-- Columna 4: Legal -->
                 <div>
-                    <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-white">Legal</h3>
+                    <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-white">{{ t('footer.legal_title') }}</h3>
                     <ul class="space-y-2 text-sm">
-                        <li><Link :href="route('info.terminos')" class="hover:text-primary-400 transition-colors">Términos y condiciones</Link></li>
-                        <li><Link :href="route('info.privacidad')" class="hover:text-primary-400 transition-colors">Política de privacidad</Link></li>
-                        <li><Link :href="route('info.cookies')" class="hover:text-primary-400 transition-colors">Cookies</Link></li>
+                        <li><Link :href="route('info.terminos')" class="hover:text-primary-400 transition-colors">{{ t('footer.terms') }}</Link></li>
+                        <li><Link :href="route('info.privacidad')" class="hover:text-primary-400 transition-colors">{{ t('footer.privacy') }}</Link></li>
+                        <li><Link :href="route('info.cookies')" class="hover:text-primary-400 transition-colors">{{ t('footer.cookies') }}</Link></li>
                     </ul>
                 </div>
             </div>
 
             <!-- Copyright -->
             <div class="mt-10 border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
-                <p>&copy; {{ new Date().getFullYear() }} Rustikan. Todos los derechos reservados.</p>
+                <p>&copy; {{ new Date().getFullYear() }} Rustikan. {{ t('footer.rights') }}.</p>
             </div>
         </div>
     </footer>
@@ -64,4 +64,6 @@
 
 <script setup>
 import { Link } from '@inertiajs/vue3';
+import { useI18n } from '@/Composables/useI18n';
+const { t } = useI18n();
 </script>

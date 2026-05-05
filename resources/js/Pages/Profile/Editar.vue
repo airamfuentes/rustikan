@@ -6,6 +6,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
 import Toast from '@/Components/Toast.vue';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
+import { useI18n } from '@/Composables/useI18n';
 
 defineProps({
     mustVerifyEmail: { type: Boolean },
@@ -13,6 +14,7 @@ defineProps({
 
 });
 
+const { t } = useI18n();
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 
@@ -40,11 +42,11 @@ watch(
     { deep: true, immediate: true },
 );
 
-const tabs = [
-    { id: 'perfil',    label: 'Mi perfil'   },
-    { id: 'seguridad', label: 'Seguridad'   },
-    { id: 'cuenta',    label: 'Cuenta'      },
-];
+const tabs = computed(() => [
+    { id: 'perfil',    label: t('profile.tab_profile')  },
+    { id: 'seguridad', label: t('profile.tab_security') },
+    { id: 'cuenta',    label: t('profile.tab_account')  },
+]);
 const activeTab = ref('perfil');
 
 // -- Avatar --------------------------------------------------------------------
@@ -65,7 +67,7 @@ const uploadAvatar = () => {
             avatarPreview.value = null;
         },
         onError: () => {
-            addToast('error', 'Error al subir la foto', 'Comprueba el formato y el tamaño (máx. 2 MB).');
+            addToast('error', t('profile.photo_error_title'), t('profile.photo_error_msg'));
         },
     });
 };
@@ -81,7 +83,7 @@ const profileForm = useForm({
 
 const saveProfile = () => {
     profileForm.patch(route('profile.update'), {
-        onError: () => addToast('error', 'No se pudo guardar', 'Revisa los campos marcados en rojo.'),
+        onError: () => addToast('error', t('profile.save_error_title'), t('profile.save_error_msg')),
     });
 };
 
@@ -97,9 +99,9 @@ const updatePassword = () => {
         preserveScroll: true,
         onSuccess: () => {
             passwordForm.reset();
-            addToast('success', 'Contraseña actualizada correctamente.');
+            addToast('success', t('profile.password_updated'));
         },
-        onError: () => addToast('error', 'No se pudo actualizar', 'Comprueba que la contraseña actual sea correcta.'),
+        onError: () => addToast('error', t('profile.password_error_title'), t('profile.password_error_msg')),
     });
 };
 
@@ -113,7 +115,8 @@ const deletePhraseOk    = computed(() => deletePhraseInput.value === FRASE_BORRA
 // -- Helpers -------------------------------------------------------------------
 const memberSince = computed(() => {
     if (!user.value?.created_at) return '';
-    return new Date(user.value.created_at).toLocaleDateString('es-ES', {
+    const { locale } = useI18n();
+    return new Date(user.value.created_at).toLocaleDateString(locale.value, {
         month: 'long',
         year:  'numeric',
     });
@@ -127,7 +130,7 @@ const initials = computed(() => {
 </script>
 
 <template>
-    <Head title="Mi perfil" />
+    <Head :title="t('profile.title')" />
 
     <!-- Toasts -->
     <div class="pointer-events-none fixed inset-0 z-50 flex flex-col items-end justify-start gap-3 p-6">
@@ -162,14 +165,14 @@ const initials = computed(() => {
                                     ? 'border-white/40 shadow-xl hover:border-white/70'
                                     : 'border-dashed border-white/50 hover:border-white bg-white/10 hover:bg-white/20'
                             ]"
-                            title="Cambiar foto de perfil"
+                            :title="t('profile.change_photo')"
                         >
                             <!-- Con foto -->
                             <template v-if="avatarPreview || user.avatar">
                                 <img
                                     :src="avatarPreview ?? `/storage/${user.avatar}`"
                                     class="h-full w-full object-cover"
-                                    alt="Foto de perfil"
+                                    :alt="t('profile.photo')"
                                 />
                                 <!-- Overlay editar -->
                                 <div class="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
@@ -177,7 +180,7 @@ const initials = computed(() => {
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
                                     </svg>
-                                    <span class="text-xs font-medium text-white">Cambiar</span>
+                                    <span class="text-xs font-medium text-white">{{ t('profile.change_photo_overlay') }}</span>
                                 </div>
                             </template>
 
@@ -223,16 +226,16 @@ const initials = computed(() => {
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
                             </svg>
-                            {{ avatarForm.processing ? 'Subiendo...' : 'Guardar foto' }}
+                            {{ avatarForm.processing ? t('profile.uploading') : t('profile.save_photo') }}
                         </button>
-                        <p v-else class="mt-2 text-xs text-white/50">Toca la foto para cambiarla</p>
+                        <p v-else class="mt-2 text-xs text-white/50">{{ t('profile.tap_to_change') }}</p>
                     </Transition>
 
                     <h1 class="mt-4 text-2xl font-bold text-white">
                         {{ user.name }}<span v-if="user.apellidos"> {{ user.apellidos }}</span>
                     </h1>
                     <p class="mt-1 text-sm text-white/70">{{ user.email }}</p>
-                    <p v-if="memberSince" class="mt-1 text-xs text-white/50">Miembro desde {{ memberSince }}</p>
+                    <p v-if="memberSince" class="mt-1 text-xs text-white/50">{{ t('profile.member_since') }} {{ memberSince }}</p>
                 </div>
             </div>
         </div>
@@ -268,12 +271,12 @@ const initials = computed(() => {
                     >
                         <div class="grid gap-4 sm:grid-cols-2">
                             <div>
-                                <InputLabel for="p-name" value="Nombre" />
+                                <InputLabel for="p-name" :value="t('profile.name')" />
                                 <TextInput id="p-name" v-model="profileForm.name" type="text" class="mt-1 block w-full" required autocomplete="given-name" />
                                 <InputError class="mt-1" :message="profileForm.errors.name" />
                             </div>
                             <div>
-                                <InputLabel for="p-apellidos" value="Apellidos" />
+                                <InputLabel for="p-apellidos" :value="t('profile.surname')" />
                                 <TextInput id="p-apellidos" v-model="profileForm.apellidos" type="text" class="mt-1 block w-full" autocomplete="family-name" />
                                 <InputError class="mt-1" :message="profileForm.errors.apellidos" />
                             </div>
@@ -281,7 +284,7 @@ const initials = computed(() => {
 
                         <!-- Email bloqueado -->
                         <div>
-                            <InputLabel for="p-email" value="Correo electrónico" />
+                            <InputLabel for="p-email" :value="t('profile.email_label')" />
                             <div class="mt-1 flex items-center gap-2">
                                 <div class="flex flex-1 items-center rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-3 py-2">
                                     <span class="flex-1 truncate text-sm text-gray-700 dark:text-gray-300">{{ user.email }}</span>
@@ -289,22 +292,22 @@ const initials = computed(() => {
                                         <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                                         </svg>
-                                        Verificado
+                                        {{ t('profile.verified') }}
                                     </span>
                                     <span v-else class="ml-2 flex items-center gap-1 text-xs font-medium text-amber-600">
                                         <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                                         </svg>
-                                        Sin verificar
+                                        {{ t('profile.unverified') }}
                                     </span>
                                 </div>
                             </div>
-                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Para cambiar el correo contacta con soporte.</p>
+                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ t('profile.email_locked') }}</p>
                         </div>
 
                         <!-- Teléfono bloqueado -->
                         <div>
-                            <InputLabel for="p-telefono" value="Teléfono" />
+                            <InputLabel for="p-telefono" :value="t('profile.phone_label')" />
                             <div class="mt-1 flex items-center gap-2">
                                 <div class="flex flex-1 items-center rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-3 py-2">
                                     <span class="flex-1 truncate text-sm text-gray-500 dark:text-gray-400">{{ user.telefono ?? '—' }}</span>
@@ -312,27 +315,27 @@ const initials = computed(() => {
                                         <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                                         </svg>
-                                        Verificado
+                                        {{ t('profile.verified') }}
                                     </span>
                                     <span v-else class="ml-2 flex items-center gap-1 text-xs font-medium text-gray-400">
                                         <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                                         </svg>
-                                        Sin verificar
+                                        {{ t('profile.unverified') }}
                                     </span>
                                 </div>
                             </div>
-                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">El teléfono queda fijo una vez verificado. Contacta con soporte para modificarlo.</p>
+                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ t('profile.phone_locked') }}</p>
                         </div>
 
                         <div class="grid gap-4 sm:grid-cols-2">
                             <div>
-                                <InputLabel for="p-edad" value="Edad" />
+                                <InputLabel for="p-edad" :value="t('profile.age')" />
                                 <TextInput id="p-edad" v-model="profileForm.edad" type="number" min="14" max="120" class="mt-1 block w-full" />
                                 <InputError class="mt-1" :message="profileForm.errors.edad" />
                             </div>
                             <div>
-                                <InputLabel for="p-direccion" value="Dirección" />
+                                <InputLabel for="p-direccion" :value="t('profile.address')" />
                                 <TextInput id="p-direccion" v-model="profileForm.direccion" type="text" class="mt-1 block w-full" autocomplete="street-address" />
                                 <InputError class="mt-1" :message="profileForm.errors.direccion" />
                             </div>
@@ -348,7 +351,7 @@ const initials = computed(() => {
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
                                 </svg>
-                                {{ profileForm.processing ? 'Guardando...' : 'Guardar cambios' }}
+                                {{ profileForm.processing ? t('profile.saving') : t('profile.save') }}
                             </button>
                         </div>
                     </form>
@@ -365,23 +368,23 @@ const initials = computed(() => {
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="text-sm font-semibold text-blue-800 dark:text-blue-300">Consejos para una contraseña segura</h4>
+                                    <h4 class="text-sm font-semibold text-blue-800 dark:text-blue-300">{{ t('profile.security_tips_title') }}</h4>
                                     <ul class="mt-2 space-y-1 text-xs text-blue-700 dark:text-blue-400">
                                         <li class="flex items-center gap-1.5">
                                             <svg class="h-3 w-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                                            Mínimo 8 caracteres, mejor 12 o más
+                                            {{ t('profile.tip_length') }}
                                         </li>
                                         <li class="flex items-center gap-1.5">
                                             <svg class="h-3 w-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                                            Combina mayúsculas, minúsculas, números y símbolos
+                                            {{ t('profile.tip_mix') }}
                                         </li>
                                         <li class="flex items-center gap-1.5">
                                             <svg class="h-3 w-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                                            No uses la misma contraseña en otros sitios
+                                            {{ t('profile.tip_reuse') }}
                                         </li>
                                         <li class="flex items-center gap-1.5">
                                             <svg class="h-3 w-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                                            Evita fechas de nacimiento o nombres propios
+                                            {{ t('profile.tip_names') }}
                                         </li>
                                     </ul>
                                 </div>
@@ -391,36 +394,36 @@ const initials = computed(() => {
                         <!-- Tarjeta de acceso reciente -->
                         <div class="grid gap-3 sm:grid-cols-2">
                             <div class="rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 p-4">
-                                <p class="text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">Correo vinculado</p>
+                                <p class="text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">{{ t('profile.linked_email') }}</p>
                                 <p class="mt-1 truncate text-sm font-semibold text-gray-700 dark:text-gray-300">{{ user.email }}</p>
                             </div>
                             <div class="rounded-xl border border-green-100 bg-green-50 p-4">
-                                <p class="text-xs font-medium uppercase tracking-wide text-green-500">Estado de la cuenta</p>
+                                <p class="text-xs font-medium uppercase tracking-wide text-green-500">{{ t('profile.account_status') }}</p>
                                 <p class="mt-1 flex items-center gap-1.5 text-sm font-semibold text-green-700">
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                                     </svg>
-                                    Activa y protegida
+                                    {{ t('profile.account_active') }}
                                 </p>
                             </div>
                         </div>
 
                         <!-- Formulario cambio contraseña -->
                         <div class="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-700/30 p-5 shadow-sm">
-                            <h4 class="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Cambiar contraseña</h4>
+                            <h4 class="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('profile.change_password_title') }}</h4>
                             <form @submit.prevent="updatePassword" class="space-y-4">
                                 <div>
-                                    <InputLabel for="s-current" value="Contraseña actual" />
+                                    <InputLabel for="s-current" :value="t('profile.current_password')" />
                                     <TextInput id="s-current" v-model="passwordForm.current_password" type="password" class="mt-1 block w-full" autocomplete="current-password" />
                                     <InputError class="mt-1" :message="passwordForm.errors.current_password" />
                                 </div>
                                 <div>
-                                    <InputLabel for="s-new" value="Nueva contraseña" />
+                                    <InputLabel for="s-new" :value="t('profile.new_password')" />
                                     <TextInput id="s-new" v-model="passwordForm.password" type="password" class="mt-1 block w-full" autocomplete="new-password" />
                                     <InputError class="mt-1" :message="passwordForm.errors.password" />
                                 </div>
                                 <div>
-                                    <InputLabel for="s-confirm" value="Confirmar contraseña" />
+                                    <InputLabel for="s-confirm" :value="t('profile.confirm_password')" />
                                     <TextInput id="s-confirm" v-model="passwordForm.password_confirmation" type="password" class="mt-1 block w-full" autocomplete="new-password" />
                                     <InputError class="mt-1" :message="passwordForm.errors.password_confirmation" />
                                 </div>
@@ -434,7 +437,7 @@ const initials = computed(() => {
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
                                         </svg>
-                                        {{ passwordForm.processing ? 'Actualizando...' : 'Actualizar contraseña' }}
+                                        {{ passwordForm.processing ? t('profile.updating') : t('profile.update_password') }}
                                     </button>
                                 </div>
                             </form>
@@ -448,14 +451,14 @@ const initials = computed(() => {
                         <div class="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-700/30 p-5 shadow-sm">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Mis pedidos</h4>
-                                    <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Consulta el estado de tus pedidos activos e historial</p>
+                                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('profile.my_orders_title') }}</h4>
+                                    <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">{{ t('profile.my_orders_sub') }}</p>
                                 </div>
                                 <Link
                                     :href="route('pedidos.index')"
                                     class="flex items-center gap-1.5 rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-600"
                                 >
-                                    Ver pedidos
+                                    {{ t('profile.view_orders') }}
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                     </svg>
@@ -472,9 +475,9 @@ const initials = computed(() => {
                                     </svg>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <h3 class="text-sm font-semibold text-red-700">Eliminar cuenta</h3>
+                                    <h3 class="text-sm font-semibold text-red-700">{{ t('profile.delete_account_title') }}</h3>
                                     <p class="mt-1 text-sm text-red-600/80">
-                                        Esta acción es permanente e irreversible. Se eliminarán todos tus datos, pedidos y cualquier información asociada.
+                                        {{ t('profile.delete_account_desc') }}
                                     </p>
 
                                     <!-- Paso 0: botón inicial -->
@@ -484,25 +487,25 @@ const initials = computed(() => {
                                             @click="deleteStep = 1"
                                             class="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100"
                                         >
-                                            Quiero eliminar mi cuenta
+                                            {{ t('profile.delete_confirm_btn') }}
                                         </button>
                                     </div>
 
                                     <!-- Paso 1: confirmar frase -->
                                     <div v-else-if="deleteStep === 1" class="mt-4 space-y-3">
                                         <p class="text-sm font-medium text-red-700">
-                                            Para continuar, escribe exactamente:
+                                            {{ t('profile.delete_phrase_label') }}
                                             <span class="ml-1 rounded bg-red-100 px-1.5 py-0.5 font-mono text-red-800">{{ FRASE_BORRAR }}</span>
                                         </p>
                                         <input
                                             v-model="deletePhraseInput"
                                             type="text"
-                                            placeholder="Escribe la frase aquí…"
+                                            :placeholder="t('profile.delete_phrase_placeholder')"
                                             class="block w-full rounded-lg border border-red-200 dark:border-red-800 bg-white dark:bg-gray-700 dark:text-white px-3 py-2 text-sm focus:border-red-400 focus:outline-none focus:ring-1 focus:ring-red-400"
                                             :class="deletePhraseInput && !deletePhraseOk ? 'border-red-400 bg-red-50' : ''"
                                         />
                                         <p v-if="deletePhraseInput && !deletePhraseOk" class="text-xs text-red-500">
-                                            La frase no coincide exactamente.
+                                            {{ t('profile.delete_phrase_mismatch') }}
                                         </p>
                                         <div class="flex gap-3">
                                             <button
@@ -510,7 +513,7 @@ const initials = computed(() => {
                                                 @click="deleteStep = 0; deletePhraseInput = ''"
                                                 class="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 transition hover:bg-gray-100 dark:hover:bg-gray-700"
                                             >
-                                                Cancelar
+                                                {{ t('profile.cancel') }}
                                             </button>
                                             <button
                                                 type="button"
@@ -518,20 +521,20 @@ const initials = computed(() => {
                                                 @click="deleteStep = 2"
                                                 class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-40"
                                             >
-                                                Continuar
+                                                {{ t('profile.continue') }}
                                             </button>
                                         </div>
                                     </div>
 
                                     <!-- Paso 2: confirmar contraseña -->
                                     <div v-else-if="deleteStep === 2" class="mt-4 space-y-3">
-                                        <p class="text-sm text-red-700 font-medium">Confirma tu contraseña para eliminar definitivamente la cuenta.</p>
+                                        <p class="text-sm text-red-700 font-medium">{{ t('profile.delete_confirm_password') }}</p>
                                         <TextInput
                                             id="del-pass"
                                             v-model="deleteForm.password"
                                             type="password"
                                             class="mt-1 block w-full"
-                                            placeholder="Tu contraseña actual"
+                                            :placeholder="t('profile.delete_password_placeholder')"
                                         />
                                         <InputError :message="deleteForm.errors.password" />
                                         <div class="flex gap-3 pt-1">
@@ -540,7 +543,7 @@ const initials = computed(() => {
                                                 @click="deleteStep = 0; deletePhraseInput = ''; deleteForm.reset()"
                                                 class="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 transition hover:bg-gray-100 dark:hover:bg-gray-700"
                                             >
-                                                Cancelar
+                                                {{ t('profile.cancel') }}
                                             </button>
                                             <button
                                                 type="button"
@@ -552,7 +555,7 @@ const initials = computed(() => {
                                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
                                                 </svg>
-                                                Eliminar definitivamente
+                                                {{ t('profile.delete_final') }}
                                             </button>
                                         </div>
                                     </div>
@@ -565,7 +568,7 @@ const initials = computed(() => {
             </div>
 
             <div class="py-8 text-center">
-                <Link href="/" class="text-sm text-gray-400 transition hover:text-gray-600">← Volver al inicio</Link>
+                <Link href="/" class="text-sm text-gray-400 transition hover:text-gray-600">{{ t('profile.back_home') }}</Link>
             </div>
         </div>
 

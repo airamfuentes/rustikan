@@ -6,12 +6,14 @@ import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
 import DarkModeToggle from '@/Components/DarkModeToggle.vue';
 import { useCarrito } from '@/Composables/useCarrito';
 import { useDarkMode } from '@/Composables/useDarkMode';
+import { useI18n } from '@/Composables/useI18n';
 import { Store, Package, Star, AlertTriangle, Check } from 'lucide-vue-next';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 const { isDark, toggleDark } = useDarkMode();
+const { t } = useI18n();
 
 const props = defineProps({
     tienda:       { type: Object,  required: true },
@@ -22,26 +24,33 @@ const props = defineProps({
 });
 
 // ─── Filtro de categorías ─────────────────────────────────────────────────────
-const tabActiva = ref('Todos');
+const tabActiva = ref('__all__');
 
 const tabs = computed(() => {
     const mapa = {};
     props.tienda.productos.forEach(p => {
-        const cat = p.categoria?.nombre ?? 'Sin categoría';
+        const cat = p.categoria?.nombre ?? '__no_cat__';
         mapa[cat] = (mapa[cat] || 0) + 1;
     });
     return [
-        { nombre: 'Todos', count: props.tienda.productos.length },
-        ...Object.entries(mapa).map(([nombre, count]) => ({ nombre, count })),
+        { nombre: '__all__', label: t('store.all'), count: props.tienda.productos.length },
+        ...Object.entries(mapa).map(([nombre, count]) => ({
+            nombre,
+            label: nombre === '__no_cat__' ? t('store.no_category') : nombre,
+            count
+        })),
     ];
 });
 
 const busquedaProducto = ref('');
 
 const productosFiltrados = computed(() => {
-    let lista = tabActiva.value === 'Todos'
+    let lista = tabActiva.value === '__all__'
         ? props.tienda.productos
-        : props.tienda.productos.filter(p => (p.categoria?.nombre ?? 'Sin categoría') === tabActiva.value);
+        : props.tienda.productos.filter(p => {
+            const cat = p.categoria?.nombre ?? '__no_cat__';
+            return cat === tabActiva.value;
+        });
     const q = busquedaProducto.value.trim().toLowerCase();
     if (q) {
         lista = lista.filter(p =>
@@ -183,7 +192,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
             <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14">
                 <!-- Breadcrumbs -->
                 <nav class="mb-6 flex items-center gap-2 text-sm text-gray-400">
-                    <Link href="/" class="transition-colors hover:text-primary-400">Inicio</Link>
+                    <Link href="/" class="transition-colors hover:text-primary-400">{{ t('store.breadcrumb_home') }}</Link>
                     <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
@@ -227,10 +236,10 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                 <!-- Stats ribbon -->
                 <div class="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-4">
                     <div v-for="stat in [
-                        { valor: tienda.productos.length, label: 'Productos' },
-                        { valor: productosDestacados,     label: 'Destacados' },
-                        { valor: tienda.total_resenas,    label: 'Reseñas' },
-                        { valor: Number(tienda.valoracion).toFixed(1), label: 'Valoración', estrella: true },
+                        { valor: tienda.productos.length, label: t('store.products') },
+                        { valor: productosDestacados,     label: t('store.highlighted') },
+                        { valor: tienda.total_resenas,    label: t('store.opinions') },
+                        { valor: Number(tienda.valoracion).toFixed(1), label: t('store.score_label'), estrella: true },
                     ]" :key="stat.label" class="flex flex-col items-center bg-white/5 px-6 py-5">
                         <span class="flex items-center gap-1 text-2xl font-extrabold text-white">
                             {{ stat.valor }}
@@ -298,7 +307,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
         <!-- ── Barra de categorías sticky ────────────────────────────────────── -->
         <div :class="['sticky top-0 z-40 border-b backdrop-blur-sm', isDark ? 'border-gray-700 bg-gray-900/95' : 'border-gray-200 bg-white/95']">
             <div class="mx-auto flex max-w-7xl items-center gap-3 overflow-x-auto px-4 py-3 sm:px-6 lg:px-8">
-                <span :class="['hidden text-xs font-medium sm:block', isDark ? 'text-gray-500' : 'text-gray-400']">Filtrar:</span>
+                <span :class="['hidden text-xs font-medium sm:block', isDark ? 'text-gray-500' : 'text-gray-400']">{{ t('store.filter') }}</span>
                 <button
                     v-for="tab in tabs"
                     :key="tab.nombre"
@@ -310,7 +319,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                             : isDark ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
                     ]"
                 >
-                    {{ tab.nombre }} ({{ tab.count }})
+                    {{ tab.label ?? tab.nombre }} ({{ tab.count }})
                 </button>
                 <!-- Buscador de productos + contador -->
                 <div class="ml-auto flex shrink-0 items-center gap-3">
@@ -326,7 +335,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                         <input
                             v-model="busquedaProducto"
                             type="search"
-                            placeholder="Buscar productos..."
+                            :placeholder="t('store.search_products')"
                             :class="['w-44 rounded-full border py-2 pl-9 pr-3 text-xs transition-all focus:w-60 focus:outline-none focus:ring-1 focus:ring-primary-400',
                                 isDark ? 'bg-gray-800 border-gray-600 text-gray-100 placeholder-gray-500 focus:border-primary-400' : 'bg-gray-100 border-transparent text-gray-800 placeholder-gray-400 focus:border-gray-300 focus:bg-white']"
                         />
@@ -343,8 +352,8 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                 <div class="mb-4">
                     <Package class="h-16 w-16 text-gray-300" />
                 </div>
-                <h2 :class="['text-xl font-semibold', isDark ? 'text-gray-300' : 'text-gray-700']">No hay productos en esta categoría</h2>
-                <p :class="['mt-2 text-sm', isDark ? 'text-gray-500' : 'text-gray-400']">Prueba con otra categoría o vuelve más tarde.</p>
+                <h2 :class="['text-xl font-semibold', isDark ? 'text-gray-300' : 'text-gray-700']">{{ t('store.no_products') }}</h2>
+                <p :class="['mt-2 text-sm', isDark ? 'text-gray-500' : 'text-gray-400']">{{ t('store.no_products_sub') }}</p>
             </div>
 
             <!-- Grid de productos -->
@@ -378,24 +387,24 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                         </div>
 
                         <div v-if="producto.stock > 0 && producto.stock <= producto.stock_minimo" class="absolute bottom-3 left-3 rounded-full bg-orange-500 px-2.5 py-1 text-xs font-bold text-white shadow">
-                            ¡Últimas unidades!
+                            {{ t('store.last_units') }}
                         </div>
 
                         <div v-if="producto.stock === 0" class="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                            <span class="rounded-full bg-red-600 px-4 py-2 text-sm font-bold text-white">Agotado</span>
+                            <span class="rounded-full bg-red-600 px-4 py-2 text-sm font-bold text-white">{{ t('store.out_of_stock') }}</span>
                         </div>
 
                         <!-- Hover "Ver detalle" -->
                         <div v-if="producto.stock > 0" class="absolute inset-0 flex items-center justify-center bg-black/25 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                             <span class="rounded-full bg-white/90 px-4 py-2 text-sm font-bold text-gray-900 shadow-lg backdrop-blur-sm">
-                                Ver detalle
+                                {{ t('store.view_detail') }}
                             </span>
                         </div>
                     </div>
 
                     <!-- Info -->
                     <div class="flex flex-1 flex-col p-5">
-                        <div :class="['mb-1 text-xs font-medium', isDark ? 'text-gray-500' : 'text-gray-400']">{{ producto.categoria?.nombre ?? 'Sin categoría' }}</div>
+                        <div :class="['mb-1 text-xs font-medium', isDark ? 'text-gray-500' : 'text-gray-400']">{{ producto.categoria?.nombre ?? t('store.no_category') }}</div>
                         <h3 :class="['text-base font-bold transition-colors group-hover:text-primary-500', isDark ? 'text-gray-100' : 'text-gray-900']">
                             {{ producto.nombre }}
                         </h3>
@@ -434,7 +443,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
                                     </svg>
                                 </Transition>
-                                {{ producto.stock === 0 ? 'Agotado' : añadidos.has(producto.id) ? '¡Listo!' : 'Añadir' }}
+                                {{ producto.stock === 0 ? t('store.out_of_stock') : añadidos.has(producto.id) ? t('store.added') : t('store.add') }}
                             </button>
                         </div>
 
@@ -460,10 +469,10 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                 <div class="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                     <div>
                         <h2 :class="['text-2xl font-extrabold tracking-tight', isDark ? 'text-white' : 'text-gray-900']">
-                            Lo que dicen nuestros clientes
+                            {{ t('store.reviews_title') }}
                         </h2>
                         <p :class="['mt-1 text-sm', isDark ? 'text-gray-400' : 'text-gray-500']">
-                            {{ totalResenas }} opinión{{ totalResenas !== 1 ? 'es' : '' }} verificada{{ totalResenas !== 1 ? 's' : '' }}
+                            {{ totalResenas }} {{ t('store.opinions') }}
                         </p>
                     </div>
 
@@ -476,13 +485,13 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                             <svg class="h-5 w-5 transition-transform group-hover:rotate-12" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                             </svg>
-                            Escribir una reseña
+                            {{ t('store.write_review') }}
                         </button>
                     </div>
                 </div>
 
                 <!-- Panel resumen + cards -->
-                <div v-if="totalResenas > 0 || canReview || userReview || (user && user.role === 'user')" class="grid gap-8 lg:grid-cols-3">
+                <div v-if="totalResenas > 0 || canReview || userReview || user" class="grid gap-8 lg:grid-cols-3">
 
                     <!-- ── Panel resumen de puntuación ──────────────────────── -->
                     <div :class="['rounded-3xl p-7 shadow-sm', isDark ? 'bg-gray-800' : 'bg-white border border-gray-100']">
@@ -501,7 +510,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                                     </svg>
                                 </div>
                                 <p :class="['mt-1 text-xs', isDark ? 'text-gray-400' : 'text-gray-500']">
-                                    {{ tienda.total_resenas }} opiniones
+                                    {{ tienda.total_resenas }} {{ t('store.opinions') }}
                                 </p>
                             </div>
                         </div>
@@ -529,7 +538,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                             <p class="text-xs font-medium text-green-600 dark:text-green-400">
-                                Solo clientes con compra verificada
+                                {{ t('store.only_verified') }}
                             </p>
                         </div>
                     </div>
@@ -541,15 +550,15 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                         <div v-if="userReview && !editMode"
                              :class="['relative rounded-2xl p-5 ring-2 ring-primary-400 shadow-sm', isDark ? 'bg-gray-800' : 'bg-primary-50']">
                             <div class="mb-2 flex items-center justify-between">
-                                <span class="rounded-full bg-primary-500 px-3 py-0.5 text-xs font-bold text-white">Tu reseña</span>
+                                <span class="rounded-full bg-primary-500 px-3 py-0.5 text-xs font-bold text-white">{{ t('store.your_review') }}</span>
                                 <div class="flex gap-2">
                                     <button @click="editMode = true; showReviewForm = true"
                                             :class="['rounded-lg px-3 py-1 text-xs font-medium transition-colors', isDark ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-500 hover:bg-white']">
-                                        Editar
+                                        {{ t('store.edit') }}
                                     </button>
                                     <button @click="deleteResena(userReview.id)"
                                             class="rounded-lg px-3 py-1 text-xs font-medium text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-red-900/30">
-                                        Eliminar
+                                        {{ t('store.delete') }}
                                     </button>
                                 </div>
                             </div>
@@ -579,7 +588,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
 
                             <div class="mb-4 flex items-center justify-between">
                                 <h3 :class="['text-base font-bold', isDark ? 'text-white' : 'text-gray-900']">
-                                    {{ editMode ? 'Editar tu reseña' : 'Escribe tu opinión' }}
+                                    {{ editMode ? t('store.edit_review') : t('store.write_opinion') }}
                                 </h3>
                                 <button type="button" @click="showReviewForm = false; editMode = false"
                                         :class="['rounded-full p-1 transition-colors', isDark ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-500']">
@@ -591,7 +600,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
 
                             <!-- Selector de estrellas -->
                             <div class="mb-5">
-                                <p :class="['mb-2 text-sm font-medium', isDark ? 'text-gray-300' : 'text-gray-700']">Puntuación <span class="text-red-500">*</span></p>
+                                <p :class="['mb-2 text-sm font-medium', isDark ? 'text-gray-300' : 'text-gray-700']">{{ t('store.score_label') }} <span class="text-red-500">*</span></p>
                                 <div class="flex gap-1.5">
                                     <button
                                         v-for="n in 5" :key="n"
@@ -609,7 +618,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                                         </svg>
                                     </button>
                                     <span :class="['ml-2 self-center text-sm font-medium', isDark ? 'text-gray-400' : 'text-gray-500']">
-                                        {{ ['', 'Muy malo', 'Regular', 'Bueno', 'Muy bueno', '¡Excelente!'][resenaForm.puntuacion] }}
+                                        {{ ['', t('store.rating_1'), t('store.rating_2'), t('store.rating_3'), t('store.rating_4'), t('store.rating_5')][resenaForm.puntuacion] }}
                                     </span>
                                 </div>
                                 <p v-if="resenaForm.errors.puntuacion" class="mt-1 text-xs text-red-500">{{ resenaForm.errors.puntuacion }}</p>
@@ -618,10 +627,10 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                             <!-- Título -->
                             <div class="mb-4">
                                 <label :class="['block mb-1 text-sm font-medium', isDark ? 'text-gray-300' : 'text-gray-700']">
-                                    Título <span class="text-gray-400 font-normal">(opcional)</span>
+                                    {{ t('store.review_title_label') }}
                                 </label>
                                 <input v-model="resenaForm.titulo" type="text" maxlength="120"
-                                       :placeholder="`Resumen en pocas palabras...`"
+                                       :placeholder="t('store.review_title_placeholder')"
                                        :class="['w-full rounded-xl px-4 py-2.5 text-sm outline-none transition border focus:ring-2',
                                            isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500 focus:border-primary-500 focus:ring-primary-500/20' : 'bg-gray-50 border-gray-200 text-gray-900 focus:border-primary-500 focus:ring-primary-500/20']"/>
                             </div>
@@ -629,10 +638,10 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                             <!-- Comentario -->
                             <div class="mb-5">
                                 <label :class="['block mb-1 text-sm font-medium', isDark ? 'text-gray-300' : 'text-gray-700']">
-                                    Tu opinión <span class="text-red-500">*</span>
+                                    {{ t('store.review_comment_label') }} <span class="text-red-500">*</span>
                                 </label>
                                 <textarea v-model="resenaForm.comentario" rows="4" maxlength="1000" required minlength="10"
-                                          placeholder="¿Qué te pareció la tienda? ¿Recomendarías sus productos?"
+                                          :placeholder="t('store.review_comment_placeholder')"
                                           :class="['w-full rounded-xl px-4 py-2.5 text-sm outline-none transition border focus:ring-2 resize-none',
                                               isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500 focus:border-primary-500 focus:ring-primary-500/20' : 'bg-gray-50 border-gray-200 text-gray-900 focus:border-primary-500 focus:ring-primary-500/20']">
                                 </textarea>
@@ -646,7 +655,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                             <div class="flex items-center justify-end gap-3">
                                 <button type="button" @click="showReviewForm = false; editMode = false"
                                         :class="['rounded-xl px-4 py-2 text-sm font-medium transition-colors', isDark ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-500 hover:bg-gray-100']">
-                                    Cancelar
+                                    {{ t('store.cancel') }}
                                 </button>
                                 <button type="submit" :disabled="resenaForm.processing || resenaForm.puntuacion === 0"
                                         class="flex items-center gap-2 rounded-xl bg-primary-500 px-6 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-primary-600 hover:shadow-md disabled:opacity-50">
@@ -654,22 +663,22 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                                     </svg>
-                                    {{ editMode ? 'Actualizar reseña' : 'Publicar reseña' }}
+                                    {{ editMode ? t('store.update_review') : t('store.publish') }}
                                 </button>
                             </div>
                         </form>
                         </Transition>
 
                         <!-- Estado vacío (sin reseñas) -->
-                        <div v-if="totalResenas === 0 && !canReview && !userReview"
+                        <div v-if="totalResenas === 0 && !canReview && !userReview && !showReviewForm"
                              :class="['rounded-3xl p-10 text-center', isDark ? 'bg-gray-800' : 'bg-white border border-gray-100 shadow-sm']">
                             <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100">
                                 <svg class="h-8 w-8 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                                 </svg>
                             </div>
-                            <p :class="['text-base font-semibold', isDark ? 'text-white' : 'text-gray-900']">Aún no hay reseñas</p>
-                            <p :class="['mt-1 text-sm', isDark ? 'text-gray-400' : 'text-gray-500']">Sé el primero en opinar sobre esta tienda.</p>
+                            <p :class="['text-base font-semibold', isDark ? 'text-white' : 'text-gray-900']">{{ t('store.no_reviews_yet') }}</p>
+                            <p :class="['mt-1 text-sm', isDark ? 'text-gray-400' : 'text-gray-500']">{{ t('store.be_first') }}</p>
                         </div>
 
                         <!-- Cards de reseñas -->
@@ -728,17 +737,17 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                             <p :class="['text-sm', isDark ? 'text-gray-400' : 'text-gray-500']">
-                                Para dejar una reseña necesitas haber recibido un pedido en esta tienda en los últimos 30 días.
+                                {{ t('store.need_order') }}
                             </p>
                         </div>
                     </div>
 
                 </div>
 
-                <!-- Panel vacío para usuarios no auth -->
+                <!-- Panel vacío para usuarios no autenticados sin reseñas -->
                 <div v-if="!user && totalResenas === 0"
                      :class="['rounded-3xl p-12 text-center', isDark ? 'bg-gray-800' : 'bg-white border border-gray-100 shadow-sm']">
-                    <p :class="['text-sm', isDark ? 'text-gray-400' : 'text-gray-500']">Inicia sesión para ver y escribir reseñas.</p>
+                    <p :class="['text-sm', isDark ? 'text-gray-400' : 'text-gray-500']">{{ t('store.login_to_see') }}</p>
                 </div>
 
             </div>
@@ -775,7 +784,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                         <!-- Badges -->
                         <div class="absolute left-4 top-4 flex flex-wrap gap-2">
                             <span class="rounded-full bg-primary-500 px-3 py-1 text-xs font-bold text-white shadow">Km 0</span>
-                            <span v-if="productoModal.destacado" class="inline-flex items-center gap-1 rounded-full bg-yellow-500 px-3 py-1 text-xs font-bold text-white shadow"><Star class="h-3 w-3 fill-current" /> Destacado</span>
+                            <span v-if="productoModal.destacado" class="inline-flex items-center gap-1 rounded-full bg-yellow-500 px-3 py-1 text-xs font-bold text-white shadow"><Star class="h-3 w-3 fill-current" /> {{ t('store.highlighted') }}</span>
                             <span v-if="productoModal.precio_oferta && productoModal.oferta_activa" class="rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white shadow">
                                 -{{ Math.round((1 - productoModal.precio_oferta / productoModal.precio) * 100) }}%
                             </span>
@@ -794,7 +803,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
 
                     <!-- Contenido -->
                     <div class="px-6 py-5">
-                        <p :class="['mb-1 text-xs font-medium', isDark ? 'text-gray-400' : 'text-gray-400']">{{ productoModal.categoria?.nombre ?? 'Sin categoría' }}</p>
+                        <p :class="['mb-1 text-xs font-medium', isDark ? 'text-gray-400' : 'text-gray-400']">{{ productoModal.categoria?.nombre ?? t('store.no_category') }}</p>
                         <h2 :class="['text-xl font-extrabold', isDark ? 'text-white' : 'text-gray-900']">{{ productoModal.nombre }}</h2>
                         <p v-if="productoModal.descripcion" :class="['mt-2 text-sm leading-relaxed', isDark ? 'text-gray-300' : 'text-gray-600']">
                             {{ productoModal.descripcion }}
@@ -814,12 +823,12 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                         <!-- Stock bajo -->
                         <p v-if="productoModal.stock > 0 && productoModal.stock <= productoModal.stock_minimo"
                             class="mt-2 flex items-center gap-1 text-xs font-medium text-orange-500">
-                            <AlertTriangle class="h-3.5 w-3.5" /> ¡Últimas unidades disponibles!
+                            <AlertTriangle class="h-3.5 w-3.5" /> {{ t('store.last_units') }}
                         </p>
 
                         <!-- Selector de cantidad -->
                         <div class="mt-5 flex items-center gap-4">
-                            <span :class="['text-sm font-semibold', isDark ? 'text-gray-300' : 'text-gray-700']">Cantidad:</span>
+                            <span :class="['text-sm font-semibold', isDark ? 'text-gray-300' : 'text-gray-700']">{{ t('store.quantity') }}</span>
                             <div :class="['flex items-center gap-3 rounded-xl border px-3 py-2', isDark ? 'border-gray-600' : 'border-gray-200']">
                                 <button
                                     @click="decrementar"
@@ -860,7 +869,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
                             </svg>
-                            Añadir {{ cantidadModal > 1 ? cantidadModal + ' al' : 'al' }} carrito ·
+                            {{ t('store.add_to_cart') }} {{ cantidadModal > 1 ? '× ' + cantidadModal : '' }} ·
                             {{ (Number((productoModal.oferta_activa && productoModal.precio_oferta) ? productoModal.precio_oferta : productoModal.precio) * cantidadModal).toFixed(2) }}€
                         </button>
                     </div>

@@ -8,7 +8,9 @@ import TextInput from '@/Components/TextInput.vue';
 import Recaptcha from '@/Components/Recaptcha.vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
+import { useI18n } from '@/Composables/useI18n';
 
+const { t } = useI18n();
 const RECAPTCHA_SITE_KEY = usePage().props.recaptchaSiteKey;
 
 const form = useForm({
@@ -74,16 +76,16 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Registrarse" />
+        <Head :title="t('auth.register')" />
 
         <form @submit.prevent="submit" class="space-y-5">
             <div>
-                <p class="text-sm text-tierra-500 dark:text-tierra-400">Completa los datos para continuar.</p>
+                <p class="text-sm text-tierra-500 dark:text-tierra-400">{{ t('auth.complete_data') }}</p>
             </div>
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
-                    <InputLabel for="name" value="Nombre" />
+                    <InputLabel for="name" :value="t('auth.name_label')" />
 
                     <TextInput
                         id="name"
@@ -99,7 +101,7 @@ const submit = () => {
                 </div>
 
                 <div>
-                    <InputLabel for="apellidos" value="Apellidos" />
+                    <InputLabel for="apellidos" :value="t('auth.surname_label')" />
 
                     <TextInput
                         id="apellidos"
@@ -116,12 +118,12 @@ const submit = () => {
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
-                    <InputLabel for="telefono" value="Teléfono *" />
+                    <InputLabel for="telefono" :value="t('auth.phone_label') + ' *'" />
 
                     <div class="mt-1 flex overflow-hidden rounded-lg border border-gray-300 dark:border-gray-600 focus-within:border-tierra-500 focus-within:ring-2 focus-within:ring-tierra-500/30">
                         <select
                             v-model="prefijo"
-                            class="shrink-0 border-r border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-2 py-2.5 text-sm text-gray-700 dark:text-gray-300 focus:outline-none"
+                            class="shrink-0 cursor-pointer appearance-none border-r border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-2 py-2.5 text-sm text-gray-700 dark:text-gray-300 focus:outline-none"
                         >
                             <option v-for="p in paises" :key="p.prefijo" :value="p.prefijo">{{ p.bandera }} {{ p.prefijo }}</option>
                         </select>
@@ -143,7 +145,7 @@ const submit = () => {
                 </div>
 
                 <div>
-                    <InputLabel for="fecha_nacimiento" value="Fecha de nacimiento *" />
+                    <InputLabel for="fecha_nacimiento" :value="t('auth.birthdate_label') + ' *'" />
 
                     <TextInput
                         id="fecha_nacimiento"
@@ -159,7 +161,7 @@ const submit = () => {
             </div>
 
             <div>
-                <InputLabel for="email" value="Correo Electrónico *" />
+                <InputLabel for="email" :value="t('auth.email_label') + ' *'" />
 
                 <TextInput
                     id="email"
@@ -174,7 +176,7 @@ const submit = () => {
             </div>
 
             <div>
-                <InputLabel for="direccion" value="Dirección *" />
+                <InputLabel for="direccion" :value="t('auth.address_label') + ' *'" />
 
                 <TextInput
                     id="direccion"
@@ -183,14 +185,14 @@ const submit = () => {
                     v-model="form.direccion"
                     required
                     autocomplete="street-address"
-                    placeholder="Calle, número, ciudad, CP"
+                    :placeholder="t('auth.address_placeholder')"
                 />
 
                 <InputError class="mt-2" :message="form.errors.direccion" />
             </div>
 
             <div>
-                <InputLabel for="password" value="Contraseña" />
+                <InputLabel for="password" :value="t('auth.password')" />
 
                 <TextInput
                     id="password"
@@ -207,7 +209,7 @@ const submit = () => {
             <div>
                 <InputLabel
                     for="password_confirmation"
-                    value="Confirmar Contraseña"
+                    :value="t('auth.confirm_password_label')"
                 />
 
                 <TextInput
@@ -227,9 +229,7 @@ const submit = () => {
 
             <div class="flex items-center gap-2">
                 <Checkbox name="accept_terms" v-model:checked="form.accept_terms" />
-                <span class="text-sm text-tierra-700 dark:text-tierra-300">
-                    Acepto los términos y condiciones de uso
-                </span>
+                <span class="text-sm text-tierra-700 dark:text-tierra-300">{{ t('auth.accept_terms') }}</span>
             </div>
             <InputError :message="form.errors.accept_terms" />
 
@@ -249,7 +249,7 @@ const submit = () => {
                     :href="route('login')"
                     class="rounded-md text-sm text-tierra-600 dark:text-tierra-400 underline hover:text-tierra-900 dark:hover:text-tierra-200 focus:outline-none focus:ring-2 focus:ring-tierra-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
                 >
-                    ¿Ya tienes cuenta? Inicia sesión
+                    {{ t('auth.have_account_link') }}
                 </Link>
 
                 <PrimaryButton
@@ -257,7 +257,7 @@ const submit = () => {
                     :class="{ 'opacity-25': form.processing || !form.turnstile_token }"
                     :disabled="form.processing || !form.turnstile_token"
                 >
-                    Crear cuenta
+                    {{ t('auth.register_btn') }}
                 </PrimaryButton>
             </div>
         </form>

@@ -39,6 +39,21 @@
                             </button>
                         </div>
                     </div>
+                    <!-- Botones de descarga -->
+                    <div class="mt-4 flex flex-wrap gap-2 border-t border-gray-100 dark:border-gray-700 pt-4">
+                        <button @click="descargarCsv('ingresos')"
+                            class="inline-flex items-center gap-1.5 rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 text-xs font-medium text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors">
+                            <Download class="h-3.5 w-3.5" /> Ingresos mensuales (.csv)
+                        </button>
+                        <button @click="descargarCsv('tiendas')"
+                            class="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 text-xs font-medium text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors">
+                            <Download class="h-3.5 w-3.5" /> Ingresos por tienda (.csv)
+                        </button>
+                        <button @click="descargarCsv('pedidos')"
+                            class="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20 px-3 py-1.5 text-xs font-medium text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-colors">
+                            <Download class="h-3.5 w-3.5" /> Todos los pedidos (.csv)
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Estadísticas Principales -->
@@ -240,7 +255,7 @@
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { reactive, computed } from 'vue';
-import { ArrowLeft, DollarSign, Calendar, Tag, TrendingUp, TrendingDown, BarChart2, Store, FolderOpen, Star, Package } from 'lucide-vue-next';
+import { ArrowLeft, DollarSign, Calendar, Tag, TrendingUp, TrendingDown, BarChart2, Store, FolderOpen, Star, Package, Download } from 'lucide-vue-next';
 
 const props = defineProps({
     stats: Object,
@@ -260,6 +275,16 @@ const aplicarFiltros = () => {
     router.get(route('admin.ingresos.index'), form, {
         preserveState: true,
     });
+};
+
+const descargarCsv = (tipo) => {
+    const params = new URLSearchParams({ fecha_desde: form.fecha_desde, fecha_hasta: form.fecha_hasta });
+    const rutas = {
+        ingresos: route('admin.exportar.ingresos') + '?' + params,
+        tiendas:  route('admin.exportar.ingresos-tiendas') + '?' + params,
+        pedidos:  route('admin.exportar.pedidos'),
+    };
+    window.location.href = rutas[tipo];
 };
 
 const formatPrice = (price) => {

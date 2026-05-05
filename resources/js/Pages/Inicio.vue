@@ -6,7 +6,9 @@ import Toast from '@/Components/Toast.vue';
 import FooterPublico from '@/Components/FooterPublico.vue';
 import CategoriaIcono from '@/Components/CategoriaIcono.vue';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
+import { useI18n } from '@/Composables/useI18n';
 
+const { t } = useI18n();
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 
@@ -23,10 +25,10 @@ watch(
     () => page.props.flash,
     (flash) => {
         if (!flash) return;
-        if (flash.success) addToast('success', '¡Éxito!', flash.success);
-        if (flash.error)   addToast('error',   'Error',   flash.error);
-        if (flash.info)    addToast('info',     'Info',    flash.info);
-        if (flash.warning) addToast('warning',  'Aviso',   flash.warning);
+        if (flash.success) addToast('success', t('home.toast_success'), flash.success);
+        if (flash.error)   addToast('error',   t('home.toast_error'),   flash.error);
+        if (flash.info)    addToast('info',     t('home.toast_info'),    flash.info);
+        if (flash.warning) addToast('warning',  t('home.toast_warning'), flash.warning);
     },
     { deep: true, immediate: true },
 );
@@ -48,8 +50,8 @@ onMounted(() => {
     if (params.get('verified') === '1' && !page.props.flash?.success) {
         const nombre = user.value?.name ?? '';
         addToast('success',
-            '¡Cuenta verificada!',
-            nombre ? `Bienvenido/a a Rustikan, ${nombre}. Ya puedes empezar a comprar.` : 'Tu correo ha sido verificado. ¡Bienvenido/a!');
+            t('home.verified_title'),
+            nombre ? t('home.verified_msg', { name: nombre }) : t('home.verified_msg_generic'));
     }
 });
 </script>
@@ -94,7 +96,7 @@ onMounted(() => {
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <!-- Encabezado -->
                 <div class="mb-10 text-center">
-                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">¿Qué estás buscando?</h2>
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">{{ t('home.categories_title') }}</h2>
                 </div>
 
                 <!-- Grid de categorías circulares -->
@@ -122,7 +124,7 @@ onMounted(() => {
 
                 <!-- Estado vacío -->
                 <div v-if="categorias.length === 0" class="py-12 text-center text-gray-400">
-                    Cargando categorías...
+                    {{ t('home.categories_loading') }}
                 </div>
             </div>
         </section>
@@ -132,10 +134,10 @@ onMounted(() => {
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="mb-8 text-center">
                     <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">
-                        Encuentra tiendas cerca de ti
+                        {{ t('home.map_title') }}
                     </h2>
                     <p class="mt-3 text-base sm:text-lg text-gray-500 dark:text-gray-400">
-                        Explora los productores locales en el mapa interactivo
+                        {{ t('home.map_subtitle') }}
                     </p>
                 </div>
 
@@ -172,7 +174,7 @@ onMounted(() => {
                             </svg>
                         </div>
                     </div>
-                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white">Colabora con Rustikan</h2>
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white">{{ t('home.collaborate_title') }}</h2>
                 </div>
 
                 <!-- Grid de opciones -->
@@ -192,12 +194,12 @@ onMounted(() => {
                                 />
                             </div>
                         </div>
-                        <h3 class="mb-3 text-lg sm:text-xl font-bold text-white">Hazte repartidor</h3>
+                        <h3 class="mb-3 text-lg sm:text-xl font-bold text-white">{{ t('home.delivery_title') }}</h3>
                         <p class="mb-6 min-h-[3rem] text-sm text-white/90">
-                            Realiza entregas a través de Rustikan y disfruta de flexibilidad, libertad y ganancias competitivas en tu zona.
+                            {{ t('home.delivery_desc') }}
                         </p>
                         <button class="rounded-full bg-white px-6 sm:px-8 py-3 text-sm font-semibold text-primary-600 transition-colors hover:bg-gray-100">
-                            Regístrate aquí
+                            {{ t('home.register_here') }}
                         </button>
                     </div>
 
@@ -215,12 +217,12 @@ onMounted(() => {
                                 />
                             </div>
                         </div>
-                        <h3 class="mb-3 text-lg sm:text-xl font-bold text-white">Hazte Productor</h3>
+                        <h3 class="mb-3 text-lg sm:text-xl font-bold text-white">{{ t('home.producer_title') }}</h3>
                         <p class="mb-6 min-h-[3rem] text-sm text-white/90">
-                            ¡Crece con Rustikan! Aumenta tus ventas y alcanza más clientes con nuestra tecnología y red de usuarios.
+                            {{ t('home.producer_desc') }}
                         </p>
                         <button class="rounded-full bg-white px-6 sm:px-8 py-3 text-sm font-semibold text-primary-600 transition-colors hover:bg-gray-100">
-                            Regístrate aquí
+                            {{ t('home.register_here') }}
                         </button>
                     </div>
 
@@ -238,12 +240,12 @@ onMounted(() => {
                                 />
                             </div>
                         </div>
-                        <h3 class="mb-3 text-lg sm:text-xl font-bold text-white">Trabaja con nosotros</h3>
+                        <h3 class="mb-3 text-lg sm:text-xl font-bold text-white">{{ t('home.work_title') }}</h3>
                         <p class="mb-6 min-h-[3rem] text-sm text-white/90">
-                            ¿Buscas un nuevo reto apasionante? Si eres exigente, humilde y te gusta trabajar en equipo, ¡queremos conocerte!
+                            {{ t('home.work_desc') }}
                         </p>
                         <button class="rounded-full bg-white px-6 sm:px-8 py-3 text-sm font-semibold text-primary-600 transition-colors hover:bg-gray-100">
-                            Regístrate aquí
+                            {{ t('home.register_here') }}
                         </button>
                     </div>
                 </div>

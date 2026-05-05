@@ -3,7 +3,9 @@ import { ref, onMounted } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import confetti from 'canvas-confetti';
+import { useI18n } from '@/Composables/useI18n';
 
+const { t } = useI18n();
 const props = defineProps({
     pedido: { type: Object, required: true },
 });
@@ -20,12 +22,12 @@ onMounted(() => {
 });
 
 const estadoLabels = {
-    pendiente:   { label: 'Pendiente',    bg: 'bg-yellow-100 dark:bg-yellow-900/40', text: 'text-yellow-700 dark:text-yellow-300' },
-    confirmado:  { label: 'Confirmado',   bg: 'bg-blue-100 dark:bg-blue-900/40',   text: 'text-blue-700 dark:text-blue-300'   },
-    preparando:  { label: 'Preparando',   bg: 'bg-indigo-100 dark:bg-indigo-900/40', text: 'text-indigo-700 dark:text-indigo-300' },
-    en_camino:   { label: 'En camino',    bg: 'bg-purple-100 dark:bg-purple-900/40', text: 'text-purple-700 dark:text-purple-300' },
-    entregado:   { label: 'Entregado',    bg: 'bg-green-100 dark:bg-green-900/40',  text: 'text-green-700 dark:text-green-300'  },
-    cancelado:   { label: 'Cancelado',    bg: 'bg-red-100 dark:bg-red-900/40',    text: 'text-red-700 dark:text-red-300'    },
+    pendiente:   { key: 'status_pendiente', bg: 'bg-yellow-100 dark:bg-yellow-900/40', text: 'text-yellow-700 dark:text-yellow-300' },
+    confirmado:  { key: 'status_confirmado', bg: 'bg-blue-100 dark:bg-blue-900/40',   text: 'text-blue-700 dark:text-blue-300'   },
+    preparando:  { key: 'status_preparando', bg: 'bg-indigo-100 dark:bg-indigo-900/40', text: 'text-indigo-700 dark:text-indigo-300' },
+    en_camino:   { key: 'status_en_camino',  bg: 'bg-purple-100 dark:bg-purple-900/40', text: 'text-purple-700 dark:text-purple-300' },
+    entregado:   { key: 'status_entregado',  bg: 'bg-green-100 dark:bg-green-900/40',  text: 'text-green-700 dark:text-green-300'  },
+    cancelado:   { key: 'status_cancelado',  bg: 'bg-red-100 dark:bg-red-900/40',    text: 'text-red-700 dark:text-red-300'    },
 };
 
 const estadoInfo = estadoLabels[props.pedido.estado] ?? estadoLabels.pendiente;
@@ -71,8 +73,8 @@ const puedeCancelar = ['pendiente', 'confirmado'].includes(props.pedido.estado);
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
-                <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">¡Pedido realizado!</h1>
-                <p class="mt-2 text-gray-500 dark:text-gray-400">Hemos recibido tu pedido y lo estamos procesando.</p>
+                <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">{{ t('confirmation.order_placed') }}</h1>
+                <p class="mt-2 text-gray-500 dark:text-gray-400">{{ t('confirmation.order_desc') }}</p>
             </div>
 
             <!-- Tarjeta de resumen -->
@@ -81,11 +83,11 @@ const puedeCancelar = ['pendiente', 'confirmado'].includes(props.pedido.estado);
                 <!-- Header -->
                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 px-6 py-5">
                     <div>
-                        <p class="text-xs font-medium uppercase tracking-widest text-gray-400 dark:text-gray-500">Número de pedido</p>
+                        <p class="text-xs font-medium uppercase tracking-widest text-gray-400 dark:text-gray-500">{{ t('confirmation.order_number') }}</p>
                         <p class="mt-1 text-xl font-extrabold tracking-tight text-gray-900 dark:text-white">{{ pedido.numero_pedido }}</p>
                     </div>
                     <span :class="['rounded-full px-3 py-1.5 text-xs font-bold', estadoInfo.bg, estadoInfo.text]">
-                        {{ estadoInfo.label }}
+                        {{ t('orders.' + estadoInfo.key) }}
                     </span>
                 </div>
 
@@ -113,24 +115,24 @@ const puedeCancelar = ['pendiente', 'confirmado'].includes(props.pedido.estado);
                 <!-- Totales -->
                 <div class="space-y-3 border-t border-gray-100 dark:border-gray-700 px-6 py-5 text-sm">
                     <div class="flex justify-between text-gray-600 dark:text-gray-400">
-                        <span>Subtotal</span>
+                        <span>{{ t('confirmation.subtotal') }}</span>
                         <span>{{ Number(pedido.subtotal).toFixed(2) }}€</span>
                     </div>
                     <div class="flex justify-between text-gray-600 dark:text-gray-400">
-                        <span>Gastos de envío</span>
+                        <span>{{ t('confirmation.shipping') }}</span>
                         <span :class="pedido.gastos_envio == 0 ? 'text-green-600 font-medium' : ''">
-                            {{ pedido.gastos_envio == 0 ? 'GRATIS' : Number(pedido.gastos_envio).toFixed(2) + '€' }}
+                            {{ pedido.gastos_envio == 0 ? t('confirmation.free') : Number(pedido.gastos_envio).toFixed(2) + '€' }}
                         </span>
                     </div>
                     <div class="flex justify-between border-t border-gray-200 dark:border-gray-700 pt-3">
-                        <span class="font-bold text-gray-900 dark:text-white">Total</span>
+                        <span class="font-bold text-gray-900 dark:text-white">{{ t('confirmation.total') }}</span>
                         <span class="text-xl font-extrabold text-primary-600">{{ Number(pedido.total).toFixed(2) }}€</span>
                     </div>
                 </div>
 
                 <!-- Datos de entrega -->
                 <div class="border-t border-gray-100 dark:border-gray-700 px-6 py-5">
-                    <h3 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Datos de entrega</h3>
+                    <h3 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('confirmation.delivery_section') }}</h3>
                     <div class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                         <div class="flex items-start gap-2">
                             <svg class="mt-0.5 h-4 w-4 shrink-0 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,7 +166,7 @@ const puedeCancelar = ['pendiente', 'confirmado'].includes(props.pedido.estado);
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
-                    Ver mis pedidos
+                    {{ t('confirmation.view_orders') }}
                 </Link>
                 <Link
                     href="/"
@@ -173,7 +175,7 @@ const puedeCancelar = ['pendiente', 'confirmado'].includes(props.pedido.estado);
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                     </svg>
-                    Volver al inicio
+                    {{ t('confirmation.back_home') }}
                 </Link>
             </div>
 
@@ -183,7 +185,7 @@ const puedeCancelar = ['pendiente', 'confirmado'].includes(props.pedido.estado);
                     @click="mostrarModalCancelar = true"
                     class="text-sm text-red-500 hover:text-red-700 dark:hover:text-red-400 underline underline-offset-2 transition-colors"
                 >
-                    Cancelar este pedido
+                    {{ t('confirmation.cancel_btn') }}
                 </button>
             </div>
 
@@ -206,8 +208,8 @@ const puedeCancelar = ['pendiente', 'confirmado'].includes(props.pedido.estado);
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                 </div>
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Cancelar pedido</h3>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">¿Estás seguro? Esta acción no se puede deshacer. Si ya pagaste, elige cómo quieres recibir el reembolso:</p>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ t('confirmation.cancel_title') }}</h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t('confirmation.cancel_desc') }}</p>
 
                 <div class="mt-5 grid grid-cols-2 gap-3">
                     <button
@@ -220,8 +222,8 @@ const puedeCancelar = ['pendiente', 'confirmado'].includes(props.pedido.estado);
                         <svg class="h-6 w-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                         </svg>
-                        <span class="text-sm font-semibold text-gray-800 dark:text-white">Tarjeta</span>
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Reembolso en 5-10 días</span>
+                        <span class="text-sm font-semibold text-gray-800 dark:text-white">{{ t('confirmation.refund_card') }}</span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ t('confirmation.refund_card_desc') }}</span>
                     </button>
                     <button
                         @click="tipoReembolso = 'rusticoin'"
@@ -231,8 +233,8 @@ const puedeCancelar = ['pendiente', 'confirmado'].includes(props.pedido.estado);
                                 : 'border-gray-200 dark:border-gray-600 hover:border-gray-300']"
                     >
                         <span class="text-2xl">🪙</span>
-                        <span class="text-sm font-semibold text-gray-800 dark:text-white">RustiCoin</span>
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Inmediato al monedero</span>
+                        <span class="text-sm font-semibold text-gray-800 dark:text-white">{{ t('confirmation.refund_rc') }}</span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ t('confirmation.refund_rc_desc') }}</span>
                     </button>
                 </div>
 
@@ -241,14 +243,14 @@ const puedeCancelar = ['pendiente', 'confirmado'].includes(props.pedido.estado);
                         @click="mostrarModalCancelar = false"
                         class="flex-1 rounded-xl border border-gray-200 dark:border-gray-600 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                     >
-                        Volver
+                        {{ t('confirmation.back') }}
                     </button>
                     <button
                         @click="cancelarPedido"
                         :disabled="cancelando"
                         class="flex-1 rounded-xl bg-red-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-600 disabled:opacity-60 transition-colors"
                     >
-                        {{ cancelando ? 'Cancelando...' : 'Confirmar cancelación' }}
+                        {{ cancelando ? t('confirmation.cancelling') : t('confirmation.confirm_cancel') }}
                     </button>
                 </div>
             </div>

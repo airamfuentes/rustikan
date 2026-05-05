@@ -76,8 +76,7 @@ Route::get('/tienda/{tienda:slug}', function (\App\Models\Tienda $tienda) {
         if (!$userReview) {
             $canReview = \App\Models\PedidoItem::where('tienda_id', $tienda->id)
                 ->whereHas('pedido', fn($q) => $q->where('user_id', $user->id)
-                    ->whereIn('estado', ['entregado', 'completado'])
-                    ->where('created_at', '>=', now()->subDays(30)))
+                    ->whereIn('estado', ['entregado', 'completado']))
                 ->exists();
         }
     }
@@ -133,6 +132,7 @@ Route::middleware('auth')->group(function () {
     // Reseñas
     Route::post('/tienda/{tienda}/resenas', [\App\Http\Controllers\ResenaController::class, 'store'])->name('resenas.store');
     Route::delete('/resenas/{resena}', [\App\Http\Controllers\ResenaController::class, 'destroy'])->name('resenas.destroy');
+    Route::get('/factura/{pedido}', [\App\Http\Controllers\FacturaController::class, 'show'])->name('factura.show');
 
     // Monedero RustiCoin
     Route::get('/monedero', [\App\Http\Controllers\RusticoinController::class, 'index'])->name('monedero.index');
@@ -182,6 +182,9 @@ Route::middleware(['auth', 'owner'])->prefix('mi-tienda')->name('owner.')->group
     Route::post('/solicitar/productos/{producto}',      [\App\Http\Controllers\Owner\SolicitudController::class, 'solicitarEditarProducto'])->name('solicitar.producto.editar');
     Route::delete('/solicitar/productos/{producto}',    [\App\Http\Controllers\Owner\SolicitudController::class, 'solicitarEliminarProducto'])->name('solicitar.producto.eliminar');
     Route::get('/mis-solicitudes',                      [\App\Http\Controllers\Owner\SolicitudController::class, 'misSolicitudes'])->name('mis.solicitudes');
+    // Exportaciones
+    Route::get('/exportar/beneficios-csv',  [\App\Http\Controllers\Owner\ExportController::class, 'beneficiosCsv'])->name('exportar.beneficios');
+    Route::get('/exportar/pedidos-csv',     [\App\Http\Controllers\Owner\ExportController::class, 'pedidosCsv'])->name('exportar.pedidos');
 });
 
 // Admin Routes
@@ -211,6 +214,10 @@ Route::middleware(['auth', 'admin', 'throttle:60,1'])->prefix('admin')->name('ad
     
     // Ingresos
     Route::get('/ingresos', [\App\Http\Controllers\Admin\IngresoController::class, 'index'])->name('ingresos.index');
+    // Exportaciones admin
+    Route::get('/exportar/ingresos-csv',        [\App\Http\Controllers\Admin\ExportController::class, 'ingresosCsv'])->name('exportar.ingresos');
+    Route::get('/exportar/ingresos-tiendas-csv',[\App\Http\Controllers\Admin\ExportController::class, 'ingresosPorTiendaCsv'])->name('exportar.ingresos-tiendas');
+    Route::get('/exportar/pedidos-csv',         [\App\Http\Controllers\Admin\ExportController::class, 'pedidosCsv'])->name('exportar.pedidos');
     
     // Categorías
     Route::resource('categorias', \App\Http\Controllers\Admin\CategoriaController::class);

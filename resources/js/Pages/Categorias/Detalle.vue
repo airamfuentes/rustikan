@@ -8,7 +8,7 @@ import DarkModeToggle from '@/Components/DarkModeToggle.vue';
 import SkeletonTiendaCard from '@/Components/SkeletonTiendaCard.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
 import { useFavoritos } from '@/Composables/useFavoritos';
-import { ArrowLeft } from 'lucide-vue-next';
+import { ArrowLeft, Type } from 'lucide-vue-next';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import CategoriaIcono from '@/Components/CategoriaIcono.vue';
 
@@ -34,7 +34,7 @@ const sortOpciones = [
     { key: 'valoracion', label: 'Valoración',  icon: 'M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z' },
     { key: 'resenas',    label: 'Reseñas',     icon: 'M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97z' },
     { key: 'productos',  label: 'Productos',   icon: 'M12.378 1.602a.75.75 0 00-.756 0L3 6.632l9 5.25 9-5.25-8.622-5.03zM21.75 7.93l-9 5.25v9l8.628-5.032a.75.75 0 00.372-.648V7.93zM11.25 22.18v-9l-9-5.25v8.57a.75.75 0 00.372.648l8.628 5.033z' },
-    { key: 'nombre',     label: 'Nombre',      icon: 'M3.75 6.75h16.5M3.75 12h16.5M12 17.25h8.25' },
+    { key: 'nombre',     label: 'Nombre',      icon: 'M4 6h16M4 12h8m-8 6h16', lucide: Type },
 ];
 
 const normalizar = (str) =>
@@ -259,7 +259,8 @@ onUnmounted(() => {
                                             ? isDark ? 'text-primary-400 bg-primary-900/30' : 'text-primary-600 bg-primary-50'
                                             : isDark ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-50']"
                                 >
-                                    <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path :d="op.icon" /></svg>
+                                    <component v-if="op.lucide" :is="op.lucide" class="h-3.5 w-3.5" />
+                                    <svg v-else class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path :d="op.icon" /></svg>
                                     {{ op.label }}
                                     <svg v-if="ordenActivo === op.key" class="ml-auto h-3.5 w-3.5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
