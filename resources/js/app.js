@@ -1,9 +1,9 @@
 import '../css/app.css';
 import './bootstrap';
 
-import { createInertiaApp, usePage } from '@inertiajs/vue3';
+import { createInertiaApp, router } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-import { createApp, h, defineComponent } from 'vue';
+import { createApp, h, ref } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import { vReveal } from '@/Directives/reveal.js';
 import ChatIA from '@/Components/ChatIA.vue';
@@ -22,27 +22,31 @@ createInertiaApp({
             import.meta.glob('./Pages/**/*.vue'),
         ),
     setup({ el, App, props, plugin }) {
-        const RootApp = defineComponent({
-            setup() {
-                const page = usePage();
-                return () => {
-                    const role = page.props.auth?.user?.role;
-                    const url  = page.url ?? '/';
+        // Reactive role that updates on every Inertia navigation
+        const role = ref(props.initialPage?.props?.auth?.user?.role ?? null);
 
-                    const showChatIA = role !== 'supplier' && !CHAT_IA_HIDDEN_PREFIXES.some(
+        router.on('navigate', (event) => {
+            role.value = event.detail.page.props?.auth?.user?.role ?? null;
+        });
+
+        return createApp({
+            setup() {
+                return () => {
+                    const currentRole = role.value;
+                    const url = typeof window !== 'undefined' ? window.location.pathname : '/';
+
+                    const showChatIA = currentRole !== 'supplier' && !CHAT_IA_HIDDEN_PREFIXES.some(
                         p => url === p || url.startsWith(p + '/') || url.startsWith(p + '?'),
                     );
 
                     return [
                         h(App, props),
                         showChatIA ? h(ChatIA) : null,
-                        role === 'admin' ? h(ChatConSuppliers) : null,
+                        currentRole === 'admin' ? h(ChatConSuppliers) : null,
                     ];
                 };
             },
-        });
-
-        return createApp(RootApp)
+        })
             .use(plugin)
             .use(ZiggyVue)
             .directive('reveal', vReveal)
