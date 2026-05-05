@@ -8,6 +8,7 @@ import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import { vReveal } from '@/Directives/reveal.js';
 import ChatIA from '@/Components/ChatIA.vue';
 import ChatConSuppliers from '@/Components/ChatConSuppliers.vue';
+import { useChatState } from '@/Composables/useChatState';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -29,15 +30,19 @@ createInertiaApp({
             role.value = event.detail.page.props?.auth?.user?.role ?? null;
         });
 
+        const { suppliersOpen } = useChatState();
+
         return createApp({
             setup() {
                 return () => {
                     const currentRole = role.value;
                     const url = typeof window !== 'undefined' ? window.location.pathname : '/';
 
-                    const showChatIA = currentRole !== 'supplier' && !CHAT_IA_HIDDEN_PREFIXES.some(
-                        p => url === p || url.startsWith(p + '/') || url.startsWith(p + '?'),
-                    );
+                    const showChatIA = currentRole !== 'supplier'
+                        && !suppliersOpen.value
+                        && !CHAT_IA_HIDDEN_PREFIXES.some(
+                            p => url === p || url.startsWith(p + '/') || url.startsWith(p + '?'),
+                        );
 
                     return [
                         h(App, props),

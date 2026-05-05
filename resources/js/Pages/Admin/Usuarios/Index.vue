@@ -97,7 +97,8 @@
                 </div>
 
                 <!-- Tabla de Usuarios -->
-                <div class="overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow">
+                <div class="rounded-lg bg-white dark:bg-gray-800 shadow">
+                    <div class="overflow-x-auto rounded-t-lg" style="-webkit-overflow-scrolling: touch;">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
@@ -157,6 +158,7 @@
                             </tr>
                         </tbody>
                     </table>
+                    </div>
 
                     <!-- Paginación -->
                     <div class="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 sm:px-6">

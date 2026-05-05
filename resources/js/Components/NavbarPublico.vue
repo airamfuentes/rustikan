@@ -6,7 +6,7 @@ import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
 import DarkModeToggle from '@/Components/DarkModeToggle.vue';
 import CampanaNotificaciones from '@/Components/CampanaNotificaciones.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
-import { ShieldCheck, Store, Menu, X, Search, Wallet } from 'lucide-vue-next';
+import { ShieldCheck, Store, Menu, X, Search, Wallet, Bell } from 'lucide-vue-next';
 
 const props = defineProps({
     tiendas: { type: Array, default: () => [] },
@@ -22,6 +22,7 @@ const showDropdown       = ref(false);
 const showHistory        = ref(false);
 const showProfileMenu    = ref(false);
 const showMobileMenu     = ref(false);
+const showMobileSearch   = ref(false);
 const sugerenciasTiendas = ref([]);
 const searchRef          = ref(null);
 const profileMenuRef     = ref(null);
@@ -377,8 +378,19 @@ onUnmounted(() => {
                     </div>
                 </div>
 
-                <!-- Acciones móvil: solo carrito + hamburguesa -->
-                <div class="flex md:hidden items-center gap-1">
+                <!-- Acciones móvil: buscar + campana + carrito + hamburguesa -->
+                <div class="flex md:hidden items-center gap-0.5">
+                    <!-- Botón buscador -->
+                    <button
+                        @click="showMobileSearch = !showMobileSearch"
+                        aria-label="Buscar"
+                        :class="['flex h-10 w-10 items-center justify-center rounded-lg transition-colors',
+                            showMobileSearch ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400' : 'text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800']"
+                    >
+                        <Search class="h-5 w-5" />
+                    </button>
+                    <!-- Campana (solo admin/owner) -->
+                    <CampanaNotificaciones v-if="user && (user.role === 'admin' || user.role === 'owner')" />
                     <CarritoCompra />
                     <button
                         @click="showMobileMenu = true"
@@ -390,6 +402,49 @@ onUnmounted(() => {
                 </div>
             </div>
         </div>
+
+        <!-- Buscador móvil colapsable -->
+        <Transition
+            enter-active-class="transition-all duration-200"
+            enter-from-class="opacity-0 -translate-y-2"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition-all duration-150"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 -translate-y-2"
+        >
+            <div v-if="showMobileSearch" class="md:hidden border-t border-gray-100 dark:border-gray-800 px-3 py-2.5">
+                <form @submit.prevent="buscarEnHome" class="relative">
+                    <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <input
+                        v-model="busqueda"
+                        @input="buscarTiendas"
+                        @keydown.enter="buscarEnHome"
+                        type="text"
+                        placeholder="Buscar tiendas..."
+                        class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 py-2.5 pl-9 pr-3 text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                        autofocus
+                    />
+                </form>
+                <!-- Sugerencias móvil -->
+                <div v-if="showDropdown && sugerenciasTiendas.length > 0" class="mt-1 max-h-72 overflow-y-auto rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg">
+                    <Link
+                        v-for="tienda in sugerenciasTiendas"
+                        :key="tienda.id"
+                        :href="`/tienda/${tienda.slug}`"
+                        class="flex items-center gap-3 border-b border-gray-100 dark:border-gray-700 p-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 last:border-b-0"
+                        @click="showMobileSearch = false"
+                    >
+                        <img
+                            :src="tienda.imagen_portada ? `/storage/${tienda.imagen_portada}` : tienda.logo ? `/storage/${tienda.logo}` : '/images/logo.png'"
+                            :alt="tienda.nombre"
+                            loading="lazy"
+                            class="h-10 w-10 flex-shrink-0 rounded-full object-cover"
+                        />
+                        <span class="flex-1 min-w-0 text-sm font-medium text-gray-900 dark:text-white truncate">{{ tienda.nombre }}</span>
+                    </Link>
+                </div>
+            </div>
+        </Transition>
     </nav>
 
     <!-- Mobile menu drawer -->
@@ -483,17 +538,20 @@ onUnmounted(() => {
                         >Acceder</Link>
                     </div>
 
-                    <!-- Notificaciones para admin/owner en móvil -->
-                    <div v-if="user && (user.role === 'admin' || user.role === 'owner')" class="border-b border-gray-100 dark:border-gray-800 px-4 py-3">
-                        <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Notificaciones</p>
-                        <CampanaNotificaciones />
-                    </div>
-
                     <!-- Links principales -->
                     <nav class="px-2 py-2">
                         <Link href="/" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
                             <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                             Inicio
+                        </Link>
+                        <Link v-if="user" :href="route('monedero.index')" class="flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
+                            <span class="flex items-center gap-3">
+                                <Wallet class="h-5 w-5 text-gray-400" />
+                                Mi monedero
+                            </span>
+                            <span class="rounded-full bg-orange-100 dark:bg-orange-900/40 px-2 py-0.5 text-xs font-bold text-orange-600 dark:text-orange-300">
+                                {{ Number(user.rusticoin_balance ?? 0).toFixed(2) }} RC
+                            </span>
                         </Link>
                         <Link v-if="user" :href="route('carrito')" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
                             <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
@@ -506,15 +564,6 @@ onUnmounted(() => {
                         <Link v-if="user" :href="route('profile.edit')" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
                             <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                             Mi perfil
-                        </Link>
-                        <Link v-if="user" :href="route('monedero.index')" class="flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
-                            <span class="flex items-center gap-3">
-                                <Wallet class="h-5 w-5 text-gray-400" />
-                                Mi monedero
-                            </span>
-                            <span class="rounded-full bg-orange-100 dark:bg-orange-900/40 px-2 py-0.5 text-xs font-bold text-orange-600 dark:text-orange-300">
-                                {{ Number(user.rusticoin_balance ?? 0).toFixed(2) }} RC
-                            </span>
                         </Link>
                         <Link :href="route('info.contacto')" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
                             <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>

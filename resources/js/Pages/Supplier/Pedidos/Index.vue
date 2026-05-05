@@ -45,8 +45,8 @@
                 </div>
 
                 <!-- Tabla pedidos -->
-                <div class="rounded-2xl bg-white dark:bg-gray-800 shadow overflow-hidden">
-                    <div class="overflow-x-auto">
+                <div class="rounded-2xl bg-white dark:bg-gray-800 shadow">
+                    <div class="overflow-x-auto rounded-t-2xl" style="-webkit-overflow-scrolling: touch;">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-900/50">
                             <tr>

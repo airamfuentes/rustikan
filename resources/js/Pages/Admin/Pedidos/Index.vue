@@ -141,8 +141,8 @@
                 </div>
 
                 <!-- Tabla de Pedidos -->
-                <div class="overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow">
-                    <div class="overflow-x-auto">
+                <div class="rounded-lg bg-white dark:bg-gray-800 shadow">
+                    <div class="overflow-x-auto rounded-t-lg" style="-webkit-overflow-scrolling: touch;">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-700/50"><tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">ID</th>

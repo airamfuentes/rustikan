@@ -3,8 +3,10 @@ import { ref, nextTick, watch, onMounted, onUnmounted, computed } from 'vue';
 import axios from 'axios';
 import { MessageSquare, X, Send, ChevronLeft, Users } from 'lucide-vue-next';
 import { usePage } from '@inertiajs/vue3';
+import { useChatState } from '@/Composables/useChatState';
 
 const page       = usePage();
+const { suppliersOpen } = useChatState();
 const open       = ref(false);
 const sending    = ref(false);
 const input      = ref('');
@@ -59,6 +61,7 @@ const fetchMensajes = async () => {
 
 const toggleOpen = async () => {
     open.value = !open.value;
+    suppliersOpen.value = open.value;
     if (open.value) {
         vista.value = 'lista';
         supplierActivo.value = null;

@@ -40,7 +40,7 @@ const props = defineProps({
             </div>
 
             <!-- Lista de tiendas -->
-            <div class="rounded-2xl bg-white dark:bg-gray-800 shadow overflow-hidden">
+            <div class="rounded-2xl bg-white dark:bg-gray-800 shadow">
 
                 <!-- Empty state -->
                 <div v-if="tiendas.data.length === 0" class="flex flex-col items-center py-16 text-center">
@@ -49,7 +49,7 @@ const props = defineProps({
                 </div>
 
                 <!-- Tabla de tiendas -->
-                <div v-else class="overflow-x-auto">
+                <div v-else class="overflow-x-auto rounded-t-2xl" style="-webkit-overflow-scrolling: touch;">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-900/50">
                             <tr>
