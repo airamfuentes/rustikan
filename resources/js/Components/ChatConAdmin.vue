@@ -1,7 +1,7 @@
 <script setup>
 import { ref, nextTick, watch, onMounted, onUnmounted, computed } from 'vue';
 import axios from 'axios';
-import { MessageSquare, X, Send, Headphones } from 'lucide-vue-next';
+import { MessageSquare, X, Send, Users } from 'lucide-vue-next';
 import { usePage } from '@inertiajs/vue3';
 
 const open      = ref(false);
@@ -108,7 +108,7 @@ const formatHora = (d) => new Date(d).toLocaleTimeString('es-ES', { hour: '2-dig
 
         <Transition name="icon-swap" mode="out-in">
             <X          v-if="open"  class="h-6 w-6" :key="'x'" />
-            <Headphones v-else class="h-6 w-6" :key="'h'" />
+            <Users v-else class="h-6 w-6" :key="'h'" />
         </Transition>
     </button>
 
@@ -132,7 +132,7 @@ const formatHora = (d) => new Date(d).toLocaleTimeString('es-ES', { hour: '2-dig
             <div class="flex items-center justify-between gap-3 bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-3 text-white shrink-0">
                 <div class="flex items-center gap-3 min-w-0">
                     <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/20">
-                        <Headphones class="h-5 w-5" />
+                        <Users class="h-5 w-5" />
                     </div>
                     <div class="min-w-0">
                         <p class="font-semibold text-sm truncate">Soporte — Administración</p>
@@ -151,7 +151,7 @@ const formatHora = (d) => new Date(d).toLocaleTimeString('es-ES', { hour: '2-dig
             <!-- Mensajes -->
             <div ref="msgsEl" class="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-gray-50 dark:bg-gray-950">
                 <div v-if="messages.length === 0" class="flex flex-col items-center justify-center h-full gap-2 text-center">
-                    <Headphones class="h-10 w-10 text-gray-300 dark:text-gray-600" />
+                    <Users class="h-10 w-10 text-gray-300 dark:text-gray-600" />
                     <p class="text-sm text-gray-500 dark:text-gray-400">Escribe un mensaje para contactar con la administración.</p>
                 </div>
                 <div

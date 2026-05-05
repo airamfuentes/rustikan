@@ -208,5 +208,19 @@ const handleOutsideClick = (e) => {
 };
 
 onMounted(() => document.addEventListener('mousedown', handleOutsideClick));
-onBeforeUnmount(() => document.removeEventListener('mousedown', handleOutsideClick));
+onBeforeUnmount(() => {
+    document.removeEventListener('mousedown', handleOutsideClick);
+    if (abierto.value && notificaciones.value.length > 0) {
+        // keepalive ensures the request survives Inertia navigation
+        fetch(route('notificaciones.leer-todas'), {
+            method: 'POST',
+            keepalive: true,
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+            },
+        });
+    }
+});
 </script>

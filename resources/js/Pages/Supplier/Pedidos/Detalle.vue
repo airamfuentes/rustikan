@@ -164,7 +164,7 @@ let pollInterval = null;
 onMounted(() => {
     pollInterval = setInterval(() => {
         if (!procesando.value) router.reload({ only: ['pedido'] });
-    }, 30000);
+    }, 5000);
 });
 onUnmounted(() => clearInterval(pollInterval));
 
@@ -172,6 +172,7 @@ const estadosAccion = [
     { value: 'en_preparacion', label: 'En preparación', dotColor: 'bg-orange-400', activeClass: 'border-orange-300 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300' },
     { value: 'confirmado',     label: 'Confirmado',     dotColor: 'bg-blue-400',   activeClass: 'border-blue-300 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' },
     { value: 'enviado',        label: 'Enviado',        dotColor: 'bg-purple-400', activeClass: 'border-purple-300 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300' },
+    { value: 'entregado',      label: 'Entregado',      dotColor: 'bg-green-400',  activeClass: 'border-green-300 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' },
     { value: 'incidencia',     label: 'Incidencia',     dotColor: 'bg-red-400',    activeClass: 'border-red-300 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300' },
 ];
 

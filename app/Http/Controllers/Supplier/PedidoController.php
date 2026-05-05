@@ -11,7 +11,7 @@ use Inertia\Inertia;
 
 class PedidoController extends Controller
 {
-    private const ESTADOS_PERMITIDOS = ['en_preparacion', 'confirmado', 'enviado', 'incidencia'];
+    private const ESTADOS_PERMITIDOS = ['en_preparacion', 'confirmado', 'enviado', 'entregado', 'incidencia'];
 
     public function index(Request $request)
     {
@@ -118,6 +118,7 @@ class PedidoController extends Controller
             'en_preparacion' => 'Tu pedido está siendo preparado en nuestro almacén.',
             'confirmado'     => 'Tu pedido ha sido confirmado y está listo.',
             'enviado'        => 'Tu pedido ha sido enviado. ¡Pronto lo recibirás!',
+            'entregado'      => '¡Tu pedido ha sido entregado! Puedes dejar una reseña de la tienda.',
             'incidencia'     => 'Ha ocurrido una incidencia con tu pedido. Nos pondremos en contacto contigo.',
         ];
 

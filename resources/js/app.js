@@ -1,22 +1,18 @@
 import '../css/app.css';
 import './bootstrap';
 
-import { createInertiaApp } from '@inertiajs/vue3';
+import { createInertiaApp, usePage } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-import { createApp, h } from 'vue';
+import { createApp, h, defineComponent } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import { vReveal } from '@/Directives/reveal.js';
 import ChatIA from '@/Components/ChatIA.vue';
+import ChatConSuppliers from '@/Components/ChatConSuppliers.vue';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
-// Rutas donde NO queremos mostrar el chat (paneles internos)
-const CHAT_HIDDEN_PREFIXES = ['/mi-tienda', '/dashboard', '/supplier'];
-const shouldShowChat = () => {
-    if (typeof window === 'undefined') return true;
-    const path = window.location.pathname || '/';
-    return !CHAT_HIDDEN_PREFIXES.some((p) => path === p || path.startsWith(p + '/'));
-};
+// Rutas donde NO queremos mostrar el chat IA (paneles internos)
+const CHAT_IA_HIDDEN_PREFIXES = ['/mi-tienda', '/dashboard', '/supplier'];
 
 createInertiaApp({
     title: (title) => `${appName} - ${title}`,
@@ -26,12 +22,27 @@ createInertiaApp({
             import.meta.glob('./Pages/**/*.vue'),
         ),
     setup({ el, App, props, plugin }) {
-        return createApp({
-            render: () => [
-                h(App, props),
-                shouldShowChat() ? h(ChatIA) : null,
-            ],
-        })
+        const RootApp = defineComponent({
+            setup() {
+                const page = usePage();
+                return () => {
+                    const role = page.props.auth?.user?.role;
+                    const url  = page.url ?? '/';
+
+                    const showChatIA = role !== 'supplier' && !CHAT_IA_HIDDEN_PREFIXES.some(
+                        p => url === p || url.startsWith(p + '/') || url.startsWith(p + '?'),
+                    );
+
+                    return [
+                        h(App, props),
+                        showChatIA ? h(ChatIA) : null,
+                        role === 'admin' ? h(ChatConSuppliers) : null,
+                    ];
+                };
+            },
+        });
+
+        return createApp(RootApp)
             .use(plugin)
             .use(ZiggyVue)
             .directive('reveal', vReveal)

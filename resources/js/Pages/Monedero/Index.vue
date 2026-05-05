@@ -95,7 +95,7 @@
                                     <p v-if="cardErrors.expiry" class="mt-1 text-xs text-red-500">{{ cardErrors.expiry }}</p>
                                 </div>
                                 <div>
-                                    <input :value="cardData.cvv" type="text" placeholder="CVV" inputmode="numeric" autocomplete="cc-csc" @input="formatCvv"
+                                    <input :value="cardData.cvv" type="text" placeholder="CVV" inputmode="numeric" autocomplete="cc-csc" maxlength="3" @input="formatCvv"
                                         :class="['w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2',
                                             cardErrors.cvv ? 'border-red-400 focus:ring-red-200' : 'focus:ring-primary-400',
                                             isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400']"

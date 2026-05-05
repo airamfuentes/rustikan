@@ -12,7 +12,6 @@ import CampanaNotificaciones from '@/Components/CampanaNotificaciones.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { useDarkMode } from '@/Composables/useDarkMode';
 import { ShieldCheck, Store, Package } from 'lucide-vue-next';
-import ChatConSuppliers from '@/Components/ChatConSuppliers.vue';
 
 const showingNavigationDropdown = ref(false);
 const scrolled = ref(false);
@@ -412,8 +411,5 @@ watch(
                 <slot />
             </main>
         </div>
-
-        <!-- Chat con Suppliers (solo admin) -->
-        <ChatConSuppliers v-if="$page.props.auth.user?.role === 'admin'" />
     </div>
 </template>
