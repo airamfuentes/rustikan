@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { useCarrito } from '@/Composables/useCarrito';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
@@ -29,9 +29,32 @@ const errores         = ref({});
 const erroresPago     = ref({});
 
 const envioForm = ref({
-    direccion_envio:   '',
+    calle:             '',
+    numero:            '',
+    puerta:            '',
+    cp:                '',
+    localidad:         '',
     telefono_contacto: '',
     notas:             '',
+});
+
+// CP auto-lookup (España)
+const buscandoLocalidad = ref(false);
+watch(() => envioForm.value.cp, async (cp) => {
+    if (!/^\d{5}$/.test(cp)) return;
+    buscandoLocalidad.value = true;
+    try {
+        const res  = await fetch(`https://nominatim.openstreetmap.org/search?format=json&country=es&postalcode=${cp}&limit=1`, {
+            headers: { 'Accept-Language': 'es' },
+        });
+        const data = await res.json();
+        if (data.length > 0) {
+            const parts = data[0].display_name.split(',');
+            envioForm.value.localidad = parts[0]?.trim() ?? '';
+        }
+    } catch { /* silently fail */ } finally {
+        buscandoLocalidad.value = false;
+    }
 });
 
 const pagoForm = ref({
@@ -45,9 +68,17 @@ const pagoForm = ref({
 
 const abrirCheckout = () => {
     if (!user.value) { router.visit(route('login')); return; }
-    envioForm.value.direccion_envio   = user.value?.direccion  || '';
-    envioForm.value.telefono_contacto = user.value?.telefono   || '';
-    envioForm.value.notas             = '';
+    // Pre-rellenar desde perfil si hay datos
+    const dir = user.value?.direccion || '';
+    envioForm.value = {
+        calle:             dir,
+        numero:            '',
+        puerta:            '',
+        cp:                '',
+        localidad:         '',
+        telefono_contacto: user.value?.telefono || '',
+        notas:             '',
+    };
     pagoForm.value = { titular: '', numero: '', expiry: '', cvv: '', metodo: 'tarjeta', rcACusar: 0 };
     errores.value     = {};
     erroresPago.value = {};
@@ -60,8 +91,20 @@ const cerrarCheckout = () => { if (step.value !== 3) mostrarCheckout.value = fal
 // ── Step 1: validar datos de envío ───────────────────────────────────────────
 const siguientePaso = () => {
     errores.value = {};
-    if (!envioForm.value.direccion_envio.trim()) {
-        errores.value.direccion_envio = 'La dirección de envío es obligatoria.';
+    if (!envioForm.value.calle.trim()) {
+        errores.value.calle = 'La calle es obligatoria.';
+        return;
+    }
+    if (!envioForm.value.numero.trim()) {
+        errores.value.numero = 'El número es obligatorio.';
+        return;
+    }
+    if (!envioForm.value.cp.trim() || !/^\d{5}$/.test(envioForm.value.cp)) {
+        errores.value.cp = 'Introduce un código postal válido (5 dígitos).';
+        return;
+    }
+    if (!envioForm.value.localidad.trim()) {
+        errores.value.localidad = 'La localidad es obligatoria.';
         return;
     }
     if (!envioForm.value.telefono_contacto.trim()) {
@@ -179,7 +222,7 @@ const pagar = () => {
                 imagen:        i.imagen,
                 unidad:        i.unidad,
             })),
-            direccion_envio:   envioForm.value.direccion_envio.trim(),
+            direccion_envio:   [envioForm.value.calle.trim(), envioForm.value.numero.trim(), envioForm.value.puerta.trim()].filter(Boolean).join(', ') + `, ${envioForm.value.cp} ${envioForm.value.localidad}`.trim(),
             telefono_contacto: envioForm.value.telefono_contacto.trim(),
             notas:             envioForm.value.notas.trim(),
             metodo_pago:       pagoForm.value.metodo,
@@ -283,6 +326,7 @@ const stepTitle = computed(() => ({
                                 <img
                                     :src="item.imagen || '/images/logo.png'"
                                     :alt="item.nombre"
+                                    loading="lazy"
                                     class="h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0 rounded-xl object-cover shadow-sm"
                                 />
 
@@ -494,20 +538,87 @@ const stepTitle = computed(() => ({
                             {{ errores.stock }}
                         </div>
 
-                        <!-- Dirección de envío -->
-                        <div>
-                            <label class="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        <!-- Dirección de envío desglosada -->
+                        <div class="space-y-3">
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                                 Dirección de entrega <span class="text-red-500">*</span>
                             </label>
-                            <textarea
-                                v-model="envioForm.direccion_envio"
-                                rows="2"
-                                placeholder="Calle, número, piso… Municipio, Lanzarote"
-                                :class="['w-full resize-none rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2',
-                                    errores.direccion_envio ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
-                                    'dark:bg-gray-700 dark:text-white dark:placeholder-gray-500']"
-                            />
-                            <p v-if="errores.direccion_envio" class="mt-1 text-xs text-red-500">{{ errores.direccion_envio }}</p>
+
+                            <!-- Calle -->
+                            <div>
+                                <input
+                                    v-model="envioForm.calle"
+                                    type="text"
+                                    placeholder="Calle / Avenida / Urbanización"
+                                    autocomplete="street-address"
+                                    :class="['w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2',
+                                        errores.calle ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
+                                        'dark:bg-gray-700 dark:text-white dark:placeholder-gray-500']"
+                                />
+                                <p v-if="errores.calle" class="mt-1 text-xs text-red-500">{{ errores.calle }}</p>
+                            </div>
+
+                            <!-- Número + Puerta -->
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <input
+                                        v-model="envioForm.numero"
+                                        type="text"
+                                        placeholder="Número"
+                                        autocomplete="address-line2"
+                                        :class="['w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2',
+                                            errores.numero ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
+                                            'dark:bg-gray-700 dark:text-white dark:placeholder-gray-500']"
+                                    />
+                                    <p v-if="errores.numero" class="mt-1 text-xs text-red-500">{{ errores.numero }}</p>
+                                </div>
+                                <div>
+                                    <input
+                                        v-model="envioForm.puerta"
+                                        type="text"
+                                        placeholder="Piso / Puerta (opc.)"
+                                        class="w-full rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500 px-4 py-3 text-sm outline-none transition focus:border-primary-400 focus:ring-2 focus:ring-primary-200"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- CP + Localidad -->
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <div class="relative">
+                                        <input
+                                            v-model="envioForm.cp"
+                                            type="text"
+                                            inputmode="numeric"
+                                            maxlength="5"
+                                            placeholder="Cód. postal"
+                                            autocomplete="postal-code"
+                                            :class="['w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2',
+                                                errores.cp ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
+                                                'dark:bg-gray-700 dark:text-white dark:placeholder-gray-500']"
+                                        />
+                                        <div v-if="buscandoLocalidad" class="absolute right-3 top-1/2 -translate-y-1/2">
+                                            <svg class="h-4 w-4 animate-spin text-primary-500" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <p v-if="errores.cp" class="mt-1 text-xs text-red-500">{{ errores.cp }}</p>
+                                </div>
+                                <div>
+                                    <input
+                                        v-model="envioForm.localidad"
+                                        type="text"
+                                        placeholder="Localidad"
+                                        autocomplete="address-level2"
+                                        :class="['w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2',
+                                            errores.localidad ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
+                                            'dark:bg-gray-700 dark:text-white dark:placeholder-gray-500']"
+                                    />
+                                    <p v-if="errores.localidad" class="mt-1 text-xs text-red-500">{{ errores.localidad }}</p>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Teléfono -->
@@ -588,32 +699,32 @@ const stepTitle = computed(() => ({
                             <button
                                 type="button"
                                 @click="pagoForm.metodo = 'tarjeta'"
-                                :class="['flex flex-col items-center gap-1.5 rounded-xl border-2 p-3 text-sm font-semibold transition-all',
+                                :class="['flex flex-col items-center gap-1 rounded-xl border-2 p-2.5 sm:p-3 text-xs sm:text-sm font-semibold transition-all',
                                     pagoForm.metodo === 'tarjeta'
                                         ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
                                         : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300']"
                             >
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="h-4 w-4 sm:h-5 sm:w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                                 </svg>
-                                <span class="text-xs">Tarjeta</span>
+                                <span class="text-[10px] sm:text-xs leading-tight text-center">Tarjeta</span>
                             </button>
                             <!-- RustiCoin -->
                             <button
                                 type="button"
                                 @click="pagoForm.metodo = 'rusticoin'"
                                 :disabled="rcDisponible < totalFinal"
-                                :class="['flex flex-col items-center gap-1.5 rounded-xl border-2 p-3 text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed',
+                                :class="['flex flex-col items-center gap-1 rounded-xl border-2 p-2.5 sm:p-3 text-xs sm:text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed',
                                     pagoForm.metodo === 'rusticoin'
                                         ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300'
                                         : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300']"
                             >
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="h-4 w-4 sm:h-5 sm:w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
-                                <span class="text-xs">RustiCoin</span>
-                                <span :class="['text-[10px] font-normal', rcDisponible >= totalFinal ? 'text-green-600 dark:text-green-400' : 'text-red-500']">
-                                    {{ Number(rcDisponible).toFixed(2) }} RC
+                                <span class="text-[10px] sm:text-xs leading-tight text-center">RustiCoin</span>
+                                <span :class="['text-[9px] sm:text-[10px] font-normal leading-none', rcDisponible >= totalFinal ? 'text-green-600 dark:text-green-400' : 'text-red-500']">
+                                    {{ Number(rcDisponible).toFixed(0) }} RC
                                 </span>
                             </button>
                             <!-- RC + Tarjeta (mixto) -->
@@ -621,15 +732,15 @@ const stepTitle = computed(() => ({
                                 type="button"
                                 @click="pagoForm.metodo = 'mixto'; pagoForm.rcACusar = Math.min(rcDisponible, rcMaxMixto)"
                                 :disabled="rcDisponible <= 0"
-                                :class="['flex flex-col items-center gap-1.5 rounded-xl border-2 p-3 text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed',
+                                :class="['flex flex-col items-center gap-1 rounded-xl border-2 p-2.5 sm:p-3 text-xs sm:text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed',
                                     pagoForm.metodo === 'mixto'
                                         ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300'
                                         : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300']"
                             >
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="h-4 w-4 sm:h-5 sm:w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
                                 </svg>
-                                <span class="text-xs">RC + Tarjeta</span>
+                                <span class="text-[10px] sm:text-xs leading-tight text-center">RC + Tarjeta</span>
                             </button>
                         </div>
                         <p v-if="pagoForm.metodo === 'rusticoin' && rcDisponible < totalFinal" class="text-xs text-red-500 text-center">

@@ -565,7 +565,7 @@ const initials = computed(() => {
             </div>
 
             <div class="py-8 text-center">
-                <Link href="/" class="text-sm text-gray-400 transition hover:text-gray-600">? Volver al inicio</Link>
+                <Link href="/" class="text-sm text-gray-400 transition hover:text-gray-600">← Volver al inicio</Link>
             </div>
         </div>
 

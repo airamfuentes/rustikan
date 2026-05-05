@@ -142,7 +142,8 @@
 
                 <!-- Tabla de Pedidos -->
                 <div class="overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-700/50"><tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">ID</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Usuario</th>
@@ -188,6 +189,7 @@
                             </tr>
                         </tbody>
                     </table>
+                    </div>
 
                     <!-- Paginación -->
                     <div class="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 sm:px-6">

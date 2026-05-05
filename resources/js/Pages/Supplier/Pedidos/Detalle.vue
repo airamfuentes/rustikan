@@ -154,11 +154,6 @@ const addToast = (type, title, message = '') => {
 };
 
 const page = usePage();
-watch(() => page.props.flash, (flash) => {
-    if (!flash) return;
-    if (flash.success) addToast('success', '¡Éxito!', flash.success);
-    if (flash.error)   addToast('error',   'Error',   flash.error);
-}, { deep: true });
 
 let pollInterval = null;
 onMounted(() => {

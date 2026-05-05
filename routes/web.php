@@ -236,6 +236,7 @@ Route::prefix('supplier')->name('supplier.')->middleware(['auth', 'supplier'])->
     Route::post('/pedidos/{pedido}/estado', [\App\Http\Controllers\Supplier\PedidoController::class, 'cambiarEstado'])->name('pedidos.estado');
     Route::get('/historial', [\App\Http\Controllers\Supplier\PedidoController::class, 'historial'])->name('historial');
     Route::get('/stock', [\App\Http\Controllers\Supplier\StockController::class, 'index'])->name('stock');
+    Route::get('/stock/{tienda}', [\App\Http\Controllers\Supplier\StockController::class, 'tienda'])->name('stock.tienda');
 });
 
 // ── Chat Admin-Supplier (JSON API) ────────────────────────────────────────────

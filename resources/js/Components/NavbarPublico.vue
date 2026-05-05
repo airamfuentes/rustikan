@@ -6,7 +6,7 @@ import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
 import DarkModeToggle from '@/Components/DarkModeToggle.vue';
 import CampanaNotificaciones from '@/Components/CampanaNotificaciones.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
-import { ShieldCheck, Store, Menu, X, Search } from 'lucide-vue-next';
+import { ShieldCheck, Store, Menu, X, Search, Wallet } from 'lucide-vue-next';
 
 const props = defineProps({
     tiendas: { type: Array, default: () => [] },
@@ -483,6 +483,12 @@ onUnmounted(() => {
                         >Acceder</Link>
                     </div>
 
+                    <!-- Notificaciones para admin/owner en móvil -->
+                    <div v-if="user && (user.role === 'admin' || user.role === 'owner')" class="border-b border-gray-100 dark:border-gray-800 px-4 py-3">
+                        <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Notificaciones</p>
+                        <CampanaNotificaciones />
+                    </div>
+
                     <!-- Links principales -->
                     <nav class="px-2 py-2">
                         <Link href="/" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
@@ -500,6 +506,15 @@ onUnmounted(() => {
                         <Link v-if="user" :href="route('profile.edit')" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
                             <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                             Mi perfil
+                        </Link>
+                        <Link v-if="user" :href="route('monedero.index')" class="flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
+                            <span class="flex items-center gap-3">
+                                <Wallet class="h-5 w-5 text-gray-400" />
+                                Mi monedero
+                            </span>
+                            <span class="rounded-full bg-orange-100 dark:bg-orange-900/40 px-2 py-0.5 text-xs font-bold text-orange-600 dark:text-orange-300">
+                                {{ Number(user.rusticoin_balance ?? 0).toFixed(2) }} RC
+                            </span>
                         </Link>
                         <Link :href="route('info.contacto')" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
                             <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>

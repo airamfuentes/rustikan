@@ -145,6 +145,7 @@ onUnmounted(() => document.removeEventListener('mousedown', cerrarSiClickFuera))
                                     <img
                                         :src="item.imagen || '/images/logo.png'"
                                         :alt="item.nombre"
+                                        loading="lazy"
                                         class="h-12 w-12 flex-shrink-0 rounded-lg object-cover"
                                     />
 
