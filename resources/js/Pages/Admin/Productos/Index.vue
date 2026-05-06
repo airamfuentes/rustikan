@@ -115,6 +115,8 @@
                                                     @blur="updateStock(producto)"
                                                     type="number"
                                                     min="0"
+                                                    inputmode="numeric"
+                                                    v-only-digits
                                                     class="w-20 rounded border-gray-300 text-sm"
                                                 />
                                                 <span v-if="producto.stock <= producto.stock_minimo" class="text-red-600" title="Stock bajo"><AlertTriangle class="inline h-4 w-4" /></span>

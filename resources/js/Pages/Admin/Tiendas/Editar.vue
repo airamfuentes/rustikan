@@ -22,7 +22,7 @@
                                 <!-- Nombre -->
                                 <div>
                                     <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre *</label>
-                                    <input v-model="form.nombre" type="text" required class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500" />
+                                    <input v-model="form.nombre" type="text" required minlength="2" maxlength="255" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500" />
                                     <p v-if="form.errors.nombre" class="mt-1 text-sm text-red-600">{{ form.errors.nombre }}</p>
                                 </div>
 
@@ -48,21 +48,21 @@
                                 <!-- Teléfono -->
                                 <div>
                                     <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Teléfono</label>
-                                    <input v-model="form.telefono" type="tel" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500" />
+                                    <input v-model="form.telefono" type="tel" inputmode="tel" maxlength="20" v-only-phone class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500" />
                                     <p v-if="form.errors.telefono" class="mt-1 text-sm text-red-600">{{ form.errors.telefono }}</p>
                                 </div>
 
                                 <!-- Email -->
                                 <div>
                                     <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-                                    <input v-model="form.email" type="email" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500" />
+                                    <input v-model="form.email" type="email" maxlength="255" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500" />
                                     <p v-if="form.errors.email" class="mt-1 text-sm text-red-600">{{ form.errors.email }}</p>
                                 </div>
 
                                 <!-- Dirección -->
                                 <div>
                                     <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Dirección</label>
-                                    <input v-model="form.direccion" type="text" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500" />
+                                    <input v-model="form.direccion" type="text" maxlength="500" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500" />
                                     <p v-if="form.errors.direccion" class="mt-1 text-sm text-red-600">{{ form.errors.direccion }}</p>
                                 </div>
 
@@ -75,6 +75,10 @@
                                                 v-model="form.latitud"
                                                 type="number"
                                                 step="0.0000001"
+                                                min="-90"
+                                                max="90"
+                                                inputmode="decimal"
+                                                v-only-signed-decimal
                                                 placeholder="Latitud"
                                                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                             />
@@ -85,6 +89,10 @@
                                                 v-model="form.longitud"
                                                 type="number"
                                                 step="0.0000001"
+                                                min="-180"
+                                                max="180"
+                                                inputmode="decimal"
+                                                v-only-signed-decimal
                                                 placeholder="Longitud"
                                                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                             />

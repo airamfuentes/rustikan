@@ -64,6 +64,8 @@
                                     v-model="form.name"
                                     type="text"
                                     required
+                                    maxlength="120"
+                                    v-only-letters
                                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                 />
                                 <p v-if="form.errors.name" class="mt-1 text-sm text-red-600">{{ form.errors.name }}</p>
@@ -76,6 +78,7 @@
                                     v-model="form.email"
                                     type="email"
                                     required
+                                    maxlength="255"
                                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                 />
                                 <p v-if="form.errors.email" class="mt-1 text-sm text-red-600">{{ form.errors.email }}</p>
@@ -110,6 +113,8 @@
                                             v-model="form.password"
                                             type="password"
                                             autocomplete="new-password"
+                                            minlength="8"
+                                            maxlength="128"
                                             class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                         />
                                         <p v-if="form.errors.password" class="mt-1 text-sm text-red-600">{{ form.errors.password }}</p>
@@ -121,6 +126,8 @@
                                             v-model="form.password_confirmation"
                                             type="password"
                                             autocomplete="new-password"
+                                            minlength="8"
+                                            maxlength="128"
                                             class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                         />
                                     </div>

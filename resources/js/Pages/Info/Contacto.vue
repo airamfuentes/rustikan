@@ -34,13 +34,13 @@
                         <form @submit.prevent="enviar" class="space-y-5">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('info.contact.name') }}</label>
-                                <input v-model="form.nombre" type="text" required :placeholder="t('info.contact.name_placeholder')"
+                                <input v-model="form.nombre" type="text" required minlength="2" maxlength="100" v-only-letters :placeholder="t('info.contact.name_placeholder')"
                                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500" />
                                 <p v-if="form.errors.nombre" class="mt-1 text-xs text-red-500">{{ form.errors.nombre }}</p>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('info.contact.email') }}</label>
-                                <input v-model="form.email" type="email" required placeholder="tu@email.com"
+                                <input v-model="form.email" type="email" required maxlength="150" placeholder="tu@email.com"
                                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500" />
                                 <p v-if="form.errors.email" class="mt-1 text-xs text-red-500">{{ form.errors.email }}</p>
                             </div>
@@ -58,9 +58,12 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('info.contact.message') }}</label>
-                                <textarea v-model="form.mensaje" required rows="5" :placeholder="t('info.contact.message_placeholder')"
+                                <textarea v-model="form.mensaje" required minlength="10" maxlength="2000" rows="5" :placeholder="t('info.contact.message_placeholder')"
                                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"></textarea>
-                                <p v-if="form.errors.mensaje" class="mt-1 text-xs text-red-500">{{ form.errors.mensaje }}</p>
+                                <div class="mt-1 flex items-center justify-between">
+                                    <p v-if="form.errors.mensaje" class="text-xs text-red-500">{{ form.errors.mensaje }}</p>
+                                    <p class="ml-auto text-xs text-gray-400">{{ form.mensaje.length }}/2000</p>
+                                </div>
                             </div>
                             <button type="submit" :disabled="form.processing"
                                 class="w-full rounded-lg bg-primary-600 px-6 py-3 font-semibold text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">

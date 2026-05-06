@@ -160,8 +160,16 @@
                                                 </button>
                                             </div>
                                         </td>
-                                        <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                            <Star class="inline h-3.5 w-3.5 fill-yellow-400 text-yellow-400" /> {{ tienda.valoracion }} ({{ tienda.total_resenas }})
+                                        <td class="whitespace-nowrap px-6 py-4 text-sm">
+                                            <Link
+                                                :href="route('admin.tiendas.resenas', tienda.id)"
+                                                class="group inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-gray-600 dark:text-gray-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-yellow-700 dark:hover:text-yellow-300 transition-colors"
+                                                :title="`Ver reseñas de ${tienda.nombre}`"
+                                            >
+                                                <Star class="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                                                <span class="font-semibold">{{ Number(tienda.valoracion).toFixed(1) }}</span>
+                                                <span class="text-gray-400 group-hover:text-yellow-600 dark:group-hover:text-yellow-400">({{ tienda.total_resenas }})</span>
+                                            </Link>
                                         </td>
                                         <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                                             <div class="flex justify-end gap-2">

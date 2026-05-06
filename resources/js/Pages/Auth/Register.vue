@@ -6,9 +6,14 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import Recaptcha from '@/Components/Recaptcha.vue';
+import PasswordStrength from '@/Components/PasswordStrength.vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from '@/Composables/useI18n';
+import {
+    validarNombre, validarEmail, validarTelefonoEs, validarDireccion,
+    evaluarPassword,
+} from '@/Composables/useValidaciones';
 
 const { t } = useI18n();
 const RECAPTCHA_SITE_KEY = usePage().props.recaptchaSiteKey;
@@ -67,7 +72,32 @@ const onTelefonoInput = (e) => {
 };
 watch(prefijo, () => { form.telefono = prefijo.value + telefonoNumero.value; });
 
+const erroresLocales = ref({});
+
+const validarLocal = () => {
+    const e = {};
+    const nombreErr = validarNombre(form.name, { min: 2, max: 60 });
+    if (nombreErr) e.name = nombreErr;
+    const apellidosErr = validarNombre(form.apellidos, { min: 2, max: 80 });
+    if (apellidosErr) e.apellidos = apellidosErr;
+    const telErr = validarTelefonoEs(telefonoNumero.value);
+    if (prefijo.value === '+34' && telErr) e.telefono = telErr;
+    else if (!telefonoNumero.value) e.telefono = 'El teléfono es obligatorio.';
+    const emailErr = validarEmail(form.email);
+    if (emailErr) e.email = emailErr;
+    const dirErr = validarDireccion(form.direccion);
+    if (dirErr) e.direccion = dirErr;
+    if (!form.fecha_nacimiento) e.fecha_nacimiento = 'La fecha de nacimiento es obligatoria.';
+    const pw = evaluarPassword(form.password);
+    if (!pw.valida) e.password = 'La contraseña debe tener 8+ caracteres, mayúsculas, minúsculas, números y símbolos.';
+    if (form.password !== form.password_confirmation) e.password_confirmation = 'Las contraseñas no coinciden.';
+    if (!form.accept_terms) e.accept_terms = 'Debes aceptar los términos.';
+    erroresLocales.value = e;
+    return Object.keys(e).length === 0;
+};
+
 const submit = () => {
+    if (!validarLocal()) return;
     form.post(route('register'), {
         onFinish: () => form.reset('password', 'password_confirmation'),
     });
@@ -95,9 +125,12 @@ const submit = () => {
                         required
                         autofocus
                         autocomplete="given-name"
+                        minlength="2"
+                        maxlength="60"
+                        v-only-letters
                     />
 
-                    <InputError class="mt-2" :message="form.errors.name" />
+                    <InputError class="mt-2" :message="erroresLocales.name || form.errors.name" />
                 </div>
 
                 <div>
@@ -110,9 +143,12 @@ const submit = () => {
                         v-model="form.apellidos"
                         required
                         autocomplete="family-name"
+                        minlength="2"
+                        maxlength="80"
+                        v-only-letters
                     />
 
-                    <InputError class="mt-2" :message="form.errors.apellidos" />
+                    <InputError class="mt-2" :message="erroresLocales.apellidos || form.errors.apellidos" />
                 </div>
             </div>
 
@@ -141,7 +177,8 @@ const submit = () => {
                         />
                     </div>
 
-                    <InputError class="mt-2" :message="form.errors.telefono" />
+                    <InputError class="mt-2" :message="erroresLocales.telefono || form.errors.telefono" />
+                    <p v-if="prefijo === '+34'" class="mt-1 text-xs text-gray-400">9 dígitos. Empieza por 6, 7, 8 o 9.</p>
                 </div>
 
                 <div>
@@ -170,9 +207,10 @@ const submit = () => {
                     v-model="form.email"
                     required
                     autocomplete="username"
+                    maxlength="255"
                     placeholder="ejemplo@gmail.com"
                 />
-                <InputError class="mt-2" :message="form.errors.email" />
+                <InputError class="mt-2" :message="erroresLocales.email || form.errors.email" />
             </div>
 
             <div>
@@ -185,10 +223,12 @@ const submit = () => {
                     v-model="form.direccion"
                     required
                     autocomplete="street-address"
+                    minlength="5"
+                    maxlength="500"
                     :placeholder="t('auth.address_placeholder')"
                 />
 
-                <InputError class="mt-2" :message="form.errors.direccion" />
+                <InputError class="mt-2" :message="erroresLocales.direccion || form.errors.direccion" />
             </div>
 
             <div>
@@ -201,9 +241,12 @@ const submit = () => {
                     v-model="form.password"
                     required
                     autocomplete="new-password"
+                    minlength="8"
+                    maxlength="128"
                 />
 
-                <InputError class="mt-2" :message="form.errors.password" />
+                <InputError class="mt-2" :message="erroresLocales.password || form.errors.password" />
+                <PasswordStrength :password="form.password" />
             </div>
 
             <div>
@@ -219,11 +262,13 @@ const submit = () => {
                     v-model="form.password_confirmation"
                     required
                     autocomplete="new-password"
+                    minlength="8"
+                    maxlength="128"
                 />
 
                 <InputError
                     class="mt-2"
-                    :message="form.errors.password_confirmation"
+                    :message="erroresLocales.password_confirmation || form.errors.password_confirmation"
                 />
             </div>
 
@@ -231,7 +276,7 @@ const submit = () => {
                 <Checkbox name="accept_terms" v-model:checked="form.accept_terms" />
                 <span class="text-sm text-tierra-700 dark:text-tierra-300">{{ t('auth.accept_terms') }}</span>
             </div>
-            <InputError :message="form.errors.accept_terms" />
+            <InputError :message="erroresLocales.accept_terms || form.errors.accept_terms" />
 
             <!-- reCAPTCHA -->
             <div>

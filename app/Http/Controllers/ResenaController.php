@@ -13,21 +13,23 @@ class ResenaController extends Controller
     {
         $user = auth()->user();
 
-        // Solo clientes pueden reseñar
-        if ($user->role !== 'user') {
+        // Solo clientes y admins pueden reseñar
+        if (!in_array($user->role, ['user', 'admin'])) {
             return back()->with('error', 'Solo los clientes pueden dejar reseñas.');
         }
 
-        // Verificar que el usuario tiene al menos un pedido (cualquier estado excepto cancelado)
-        $tienePedido = PedidoItem::where('tienda_id', $tienda->id)
-            ->whereHas('pedido', function ($q) use ($user) {
-                $q->where('user_id', $user->id)
-                  ->whereNotIn('estado', ['cancelado']);
-            })
-            ->exists();
+        // Verificar que el usuario tiene al menos un pedido (solo para role=user)
+        if ($user->role === 'user') {
+            $tienePedido = PedidoItem::where('tienda_id', $tienda->id)
+                ->whereHas('pedido', function ($q) use ($user) {
+                    $q->where('user_id', $user->id)
+                      ->whereNotIn('estado', ['cancelado']);
+                })
+                ->exists();
 
-        if (!$tienePedido) {
-            return back()->with('error', 'Solo puedes reseñar una tienda donde hayas realizado un pedido.');
+            if (!$tienePedido) {
+                return back()->with('error', 'Solo puedes reseñar una tienda donde hayas realizado un pedido.');
+            }
         }
 
         $validated = $request->validate([

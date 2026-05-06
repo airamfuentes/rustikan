@@ -27,6 +27,8 @@
                                     v-model="form.nombre"
                                     type="text"
                                     required
+                                    minlength="2"
+                                    maxlength="255"
                                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                 />
                                 <p v-if="errors.nombre" class="mt-1 text-sm text-red-600">{{ errors.nombre }}</p>
@@ -64,8 +66,10 @@
                                         type="number"
                                         step="0.01"
                                         min="0"
+                                        max="99999.99"
                                         required
                                         inputmode="decimal"
+                                        v-only-decimal
                                         class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     />
                                     <p v-if="errors.precio" class="mt-1 text-sm text-red-600">{{ errors.precio }}</p>
@@ -79,7 +83,9 @@
                                         type="number"
                                         step="0.01"
                                         min="0"
+                                        max="99999.99"
                                         inputmode="decimal"
+                                        v-only-decimal
                                         class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     />
                                     <p v-if="errors.precio_oferta" class="mt-1 text-sm text-red-600">{{ errors.precio_oferta }}</p>
@@ -116,9 +122,11 @@
                                         v-model.number="form.stock"
                                         type="number"
                                         min="0"
+                                        max="999999"
                                         required
                                         inputmode="numeric"
                                         step="1"
+                                        v-only-digits
                                         class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     />
                                     <p v-if="errors.stock" class="mt-1 text-sm text-red-600">{{ errors.stock }}</p>
@@ -131,9 +139,11 @@
                                         v-model.number="form.stock_minimo"
                                         type="number"
                                         min="0"
+                                        max="999999"
                                         required
                                         inputmode="numeric"
                                         step="1"
+                                        v-only-digits
                                         class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     />
                                     <p v-if="errors.stock_minimo" class="mt-1 text-sm text-red-600">{{ errors.stock_minimo }}</p>

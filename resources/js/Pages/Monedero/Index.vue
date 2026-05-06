@@ -51,6 +51,8 @@
                             <input
                                 v-model.number="recargaForm.cantidad"
                                 type="number" min="1" max="500" step="1"
+                                inputmode="numeric"
+                                v-only-digits
                                 placeholder="Otra cantidad..."
                                 :class="['w-full rounded-xl border px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400',
                                     isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400']"
@@ -143,6 +145,8 @@
                             <input
                                 v-model.number="retiradaForm.cantidad"
                                 type="number" :min="1" :max="saldo" step="1"
+                                inputmode="numeric"
+                                v-only-digits
                                 placeholder="Cantidad a retirar..."
                                 :class="['w-full rounded-xl border px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400',
                                     isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400']"

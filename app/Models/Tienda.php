@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Tienda extends Model
 {
@@ -80,6 +81,23 @@ class Tienda extends Model
     public function pedidoItems()
     {
         return $this->hasMany(PedidoItem::class);
+    }
+
+    /**
+     * Hooks Eloquent: al borrar la tienda, eliminar también su logo y portada
+     * del storage para no dejar archivos huérfanos.
+     * Solo borra rutas locales (no URLs http).
+     */
+    protected static function booted(): void
+    {
+        static::deleting(function (Tienda $tienda): void {
+            foreach (['logo', 'imagen_portada'] as $campo) {
+                $valor = $tienda->{$campo};
+                if ($valor && !str_starts_with($valor, 'http')) {
+                    Storage::disk('public')->delete($valor);
+                }
+            }
+        });
     }
 
     /**

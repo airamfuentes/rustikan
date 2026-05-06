@@ -36,7 +36,7 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre del Producto *</label>
-                                <input v-model="form.nombre" type="text" required
+                                <input v-model="form.nombre" type="text" required minlength="2" maxlength="255"
                                     class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition" />
                                 <p v-if="form.errors.nombre" class="mt-1 text-xs text-red-500">{{ form.errors.nombre }}</p>
                             </div>
@@ -57,7 +57,7 @@
                                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Precio (€) *</label>
                                 <div class="relative">
                                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 text-sm">€</span>
-                                    <input v-model.number="form.precio" type="number" step="0.01" min="0" required
+                                    <input v-model.number="form.precio" type="number" step="0.01" min="0" max="99999.99" required inputmode="decimal" v-only-decimal
                                         class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 pl-7 pr-4 py-2.5 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition" />
                                 </div>
                                 <p v-if="form.errors.precio" class="mt-1 text-xs text-red-500">{{ form.errors.precio }}</p>
@@ -66,7 +66,7 @@
                                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Precio Oferta (€)</label>
                                 <div class="relative">
                                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 text-sm">€</span>
-                                    <input v-model.number="form.precio_oferta" type="number" step="0.01" min="0"
+                                    <input v-model.number="form.precio_oferta" type="number" step="0.01" min="0" max="99999.99" inputmode="decimal" v-only-decimal
                                         class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 pl-7 pr-4 py-2.5 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition" />
                                 </div>
                                 <p v-if="form.errors.precio_oferta" class="mt-1 text-xs text-red-500">{{ form.errors.precio_oferta }}</p>
@@ -93,13 +93,13 @@
                         <div class="mt-4 grid gap-4 sm:grid-cols-2">
                             <div>
                                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Stock Inicial *</label>
-                                <input v-model.number="form.stock" type="number" min="0" required
+                                <input v-model.number="form.stock" type="number" min="0" max="999999" required inputmode="numeric" v-only-digits
                                     class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition" />
                                 <p v-if="form.errors.stock" class="mt-1 text-xs text-red-500">{{ form.errors.stock }}</p>
                             </div>
                             <div>
                                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Stock Mínimo *</label>
-                                <input v-model.number="form.stock_minimo" type="number" min="0" required
+                                <input v-model.number="form.stock_minimo" type="number" min="0" max="999999" required inputmode="numeric" v-only-digits
                                     class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition" />
                                 <p v-if="form.errors.stock_minimo" class="mt-1 text-xs text-red-500">{{ form.errors.stock_minimo }}</p>
                             </div>

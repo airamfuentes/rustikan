@@ -4,8 +4,11 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
+import PasswordStrength from '@/Components/PasswordStrength.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { useI18n } from '@/Composables/useI18n';
+import { ref } from 'vue';
+import { evaluarPassword } from '@/Composables/useValidaciones';
 
 const { t } = useI18n();
 
@@ -27,7 +30,16 @@ const form = useForm({
     password_confirmation: '',
 });
 
+const erroresLocales = ref({});
+
 const submit = () => {
+    const e = {};
+    const pw = evaluarPassword(form.password);
+    if (!pw.valida) e.password = 'La contraseña debe tener 8+ caracteres, mayúsculas, minúsculas, números y símbolos.';
+    if (form.password !== form.password_confirmation) e.password_confirmation = 'Las contraseñas no coinciden.';
+    erroresLocales.value = e;
+    if (Object.keys(e).length) return;
+
     form.post(route('password.store'), {
         onFinish: () => form.reset('password', 'password_confirmation'),
     });
@@ -65,9 +77,12 @@ const submit = () => {
                     v-model="form.password"
                     required
                     autocomplete="new-password"
+                    minlength="8"
+                    maxlength="128"
                 />
 
-                <InputError class="mt-2" :message="form.errors.password" />
+                <InputError class="mt-2" :message="erroresLocales.password || form.errors.password" />
+                <PasswordStrength :password="form.password" />
             </div>
 
             <div class="mt-4">
@@ -83,11 +98,13 @@ const submit = () => {
                     v-model="form.password_confirmation"
                     required
                     autocomplete="new-password"
+                    minlength="8"
+                    maxlength="128"
                 />
 
                 <InputError
                     class="mt-2"
-                    :message="form.errors.password_confirmation"
+                    :message="erroresLocales.password_confirmation || form.errors.password_confirmation"
                 />
             </div>
 

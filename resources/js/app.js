@@ -6,6 +6,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h, ref } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import { vReveal } from '@/Directives/reveal.js';
+import { vOnlyDigits, vOnlyDecimal, vOnlySignedDecimal, vOnlyLetters, vOnlyPhone } from '@/Directives/inputValidations.js';
 import ChatIA from '@/Components/ChatIA.vue';
 import ChatConSuppliers from '@/Components/ChatConSuppliers.vue';
 import { useChatState } from '@/Composables/useChatState';
@@ -55,6 +56,11 @@ createInertiaApp({
             .use(plugin)
             .use(ZiggyVue)
             .directive('reveal', vReveal)
+            .directive('only-digits', vOnlyDigits)
+            .directive('only-decimal', vOnlyDecimal)
+            .directive('only-signed-decimal', vOnlySignedDecimal)
+            .directive('only-letters', vOnlyLetters)
+            .directive('only-phone', vOnlyPhone)
             .mount(el);
     },
     progress: {

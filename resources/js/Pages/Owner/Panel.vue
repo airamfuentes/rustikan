@@ -795,7 +795,7 @@ const submitDeleteProducto = (producto) => {
                             <form @submit.prevent="submitAddProducto" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
                                     <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Nombre *</label>
-                                    <input v-model="addForm.nombre" type="text" required
+                                    <input v-model="addForm.nombre" type="text" required minlength="2" maxlength="255"
                                            class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400" />
                                     <p v-if="addForm.errors.nombre" class="mt-1 text-xs text-red-500">{{ addForm.errors.nombre }}</p>
                                 </div>
@@ -806,12 +806,12 @@ const submitDeleteProducto = (producto) => {
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Precio (€) *</label>
-                                    <input v-model="addForm.precio" type="number" step="0.01" min="0" required inputmode="decimal"
+                                    <input v-model="addForm.precio" type="number" step="0.01" min="0" max="99999.99" required inputmode="decimal" v-only-decimal
                                            class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400" />
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Precio oferta (€)</label>
-                                    <input v-model="addForm.precio_oferta" type="number" step="0.01" min="0" inputmode="decimal"
+                                    <input v-model="addForm.precio_oferta" type="number" step="0.01" min="0" max="99999.99" inputmode="decimal" v-only-decimal
                                            class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400" />
                                 </div>
                                 <div>
@@ -821,7 +821,7 @@ const submitDeleteProducto = (producto) => {
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Stock *</label>
-                                    <input v-model="addForm.stock" type="number" min="0" required inputmode="numeric" step="1"
+                                    <input v-model="addForm.stock" type="number" min="0" max="999999" required inputmode="numeric" step="1" v-only-digits
                                            class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-400" />
                                 </div>
                                 <div class="sm:col-span-2">
@@ -1030,7 +1030,7 @@ const submitDeleteProducto = (producto) => {
                                                 <form @submit.prevent="submitEditProducto" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                                     <div>
                                                         <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Nombre *</label>
-                                                        <input v-model="editForm.nombre" type="text" required
+                                                        <input v-model="editForm.nombre" type="text" required minlength="2" maxlength="255"
                                                                class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 text-gray-900 dark:text-white" />
                                                     </div>
                                                     <div>
@@ -1063,12 +1063,12 @@ const submitDeleteProducto = (producto) => {
                                                         <div class="grid grid-cols-2 gap-3">
                                                             <div>
                                                                 <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Precio base (€) *</label>
-                                                                <input v-model="editForm.precio" type="number" step="0.01" min="0" required inputmode="decimal"
+                                                                <input v-model="editForm.precio" type="number" step="0.01" min="0" max="99999.99" required inputmode="decimal" v-only-decimal
                                                                        class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 text-gray-900 dark:text-white" />
                                                             </div>
                                                             <div>
                                                                 <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Precio oferta (€) <span class="font-normal text-gray-400">(opcional)</span></label>
-                                                                <input v-model="editForm.precio_oferta" type="number" step="0.01" min="0" inputmode="decimal"
+                                                                <input v-model="editForm.precio_oferta" type="number" step="0.01" min="0" max="99999.99" inputmode="decimal" v-only-decimal
                                                                        :class="['w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 text-gray-900 dark:text-white',
                                                                            editForm.precio_oferta && +editForm.precio_oferta >= +editForm.precio
                                                                                ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20 focus:ring-red-400'
@@ -1097,7 +1097,7 @@ const submitDeleteProducto = (producto) => {
                                                     </div>
                                                     <div>
                                                         <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Stock *</label>
-                                                        <input v-model="editForm.stock" type="number" min="0" required inputmode="numeric" step="1"
+                                                        <input v-model="editForm.stock" type="number" min="0" max="999999" required inputmode="numeric" step="1" v-only-digits
                                                                class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 text-gray-900 dark:text-white" />
                                                     </div>
                                                     <div class="sm:col-span-2">

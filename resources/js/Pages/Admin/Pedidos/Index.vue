@@ -110,11 +110,14 @@
                         <!-- Precio Mínimo -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Precio mín.</label>
-                            <input 
-                                v-model="form.precio_min" 
+                            <input
+                                v-model="form.precio_min"
                                 @change="buscar"
-                                type="number" 
+                                type="number"
                                 step="0.01"
+                                min="0"
+                                inputmode="decimal"
+                                v-only-decimal
                                 placeholder="0.00"
                                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                             />
@@ -123,11 +126,14 @@
                         <!-- Precio Máximo -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Precio máx.</label>
-                            <input 
-                                v-model="form.precio_max" 
+                            <input
+                                v-model="form.precio_max"
                                 @change="buscar"
-                                type="number" 
+                                type="number"
                                 step="0.01"
+                                min="0"
+                                inputmode="decimal"
+                                v-only-decimal
                                 placeholder="999.99"
                                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                             />

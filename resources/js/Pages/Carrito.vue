@@ -5,6 +5,11 @@ import { useCarrito } from '@/Composables/useCarrito';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import { useI18n } from '@/Composables/useI18n';
 import { ChevronLeft } from 'lucide-vue-next';
+import {
+    validarTelefonoEs, validarCP, validarDireccion,
+    validarTarjeta, validarCaducidad, validarCVV,
+    validarNombre,
+} from '@/Composables/useValidaciones';
 
 const page  = usePage();
 const user  = computed(() => page.props.auth?.user);
@@ -116,31 +121,33 @@ const cerrarCheckout = () => { if (step.value !== 3) mostrarCheckout.value = fal
 
 // ── Step 1: validar datos de envío ───────────────────────────────────────────
 const siguientePaso = () => {
-    errores.value = {};
-    if (!envioForm.value.calle.trim()) {
-        errores.value.calle = t('checkout.street_required');
-        return;
+    const e = {};
+    if (!envioForm.value.calle.trim() || envioForm.value.calle.trim().length < 3) {
+        e.calle = t('checkout.street_required');
+    } else if (envioForm.value.calle.length > 100) {
+        e.calle = 'La calle es demasiado larga (máximo 100).';
     }
     if (!envioForm.value.numero.trim()) {
-        errores.value.numero = t('checkout.number_required');
-        return;
+        e.numero = t('checkout.number_required');
+    } else if (envioForm.value.numero.length > 10) {
+        e.numero = 'Número demasiado largo.';
     }
-    if (!envioForm.value.cp.trim() || !/^\d{5}$/.test(envioForm.value.cp)) {
-        errores.value.cp = t('checkout.cp_required');
-        return;
-    }
-    if (!isLanzaroteCP(envioForm.value.cp)) {
-        errores.value.cp = t('checkout.cp_not_lanzarote');
-        return;
-    }
+    const cpErr = validarCP(envioForm.value.cp, { soloLanzarote: true });
+    if (cpErr) e.cp = cpErr;
     if (!envioForm.value.localidad.trim()) {
-        errores.value.localidad = t('checkout.city_required');
-        return;
+        e.localidad = t('checkout.city_required');
     }
+    // Teléfono: si parece número español (9 dígitos solo) validamos formato estricto
+    const telLimpio = envioForm.value.telefono_contacto.replace(/\D/g, '');
     if (!envioForm.value.telefono_contacto.trim()) {
-        errores.value.telefono_contacto = t('checkout.phone_required');
-        return;
+        e.telefono_contacto = t('checkout.phone_required');
+    } else if (telLimpio.length === 9 && !/^[6-9]/.test(telLimpio)) {
+        e.telefono_contacto = 'Móvil español: empieza por 6, 7, 8 o 9.';
+    } else if (telLimpio.length < 9) {
+        e.telefono_contacto = 'Teléfono demasiado corto.';
     }
+    errores.value = e;
+    if (Object.keys(e).length) return;
     step.value = 2;
 };
 
@@ -215,23 +222,14 @@ const pagar = () => {
                 erroresPago.value.rcACusar = 'Usa la opción RustiCoin para pagar todo con RC.';
             }
         }
-        if (!pagoForm.value.titular.trim()) {
-            erroresPago.value.titular = 'El nombre del titular es obligatorio.';
-        }
-        const digits = pagoForm.value.numero.replace(/\D/g, '');
-        if (digits.length < 16 || !luhnCheck(digits)) {
-            erroresPago.value.numero = 'Número de tarjeta no válido.';
-        }
-        const [mes, anio] = pagoForm.value.expiry.split('/');
-        const ahora = new Date();
-        const mesN = parseInt(mes); const anioN = 2000 + parseInt(anio ?? '0');
-        if (!mes || !anio || mesN < 1 || mesN > 12 || anioN < ahora.getFullYear() ||
-            (anioN === ahora.getFullYear() && mesN < ahora.getMonth() + 1)) {
-            erroresPago.value.expiry = 'Fecha de caducidad no válida.';
-        }
-        if (!pagoForm.value.cvv || pagoForm.value.cvv.length < 3) {
-            erroresPago.value.cvv = 'CVV no válido.';
-        }
+        const titularErr = validarNombre(pagoForm.value.titular, { min: 3, max: 80 });
+        if (titularErr) erroresPago.value.titular = titularErr;
+        const numErr = validarTarjeta(pagoForm.value.numero);
+        if (numErr) erroresPago.value.numero = numErr;
+        const expErr = validarCaducidad(pagoForm.value.expiry);
+        if (expErr) erroresPago.value.expiry = expErr;
+        const cvvErr = validarCVV(pagoForm.value.cvv);
+        if (cvvErr) erroresPago.value.cvv = cvvErr;
         if (Object.keys(erroresPago.value).length) return;
     }
 
@@ -581,6 +579,7 @@ const stepTitle = computed(() => ({
                                     type="text"
                                     :placeholder="t('checkout.street')"
                                     autocomplete="street-address"
+                                    minlength="3"
                                     maxlength="100"
                                     :class="['w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2',
                                         errores.calle ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
@@ -625,7 +624,7 @@ const stepTitle = computed(() => ({
                                             inputmode="numeric"
                                             maxlength="5"
                                             pattern="[0-9]{5}"
-                                            @input="envioForm.cp = $event.target.value.replace(/\D/g, '').slice(0, 5)"
+                                            v-only-digits
                                             :placeholder="t('checkout.postal_code')"
                                             autocomplete="postal-code"
                                             :class="['w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2',
@@ -668,7 +667,7 @@ const stepTitle = computed(() => ({
                                 inputmode="tel"
                                 maxlength="20"
                                 placeholder="+34 600 000 000"
-                                @input="envioForm.telefono_contacto = $event.target.value.replace(/[^\d\s+\-().]/g, '').slice(0, 20)"
+                                v-only-phone
                                 :class="['w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2',
                                     errores.telefono_contacto ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
                                     'dark:bg-gray-700 dark:text-white dark:placeholder-gray-500']"
@@ -799,6 +798,8 @@ const stepTitle = computed(() => ({
                                 :min="1"
                                 :max="rcMaxMixto"
                                 step="0.01"
+                                inputmode="decimal"
+                                v-only-decimal
                                 class="w-full rounded-xl border border-indigo-300 dark:border-indigo-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-mono outline-none focus:ring-2 focus:ring-indigo-400 dark:text-white"
                                 placeholder="Cantidad de RC..."
                             />

@@ -71,7 +71,7 @@ Route::get('/tienda/{tienda:slug}', function (\App\Models\Tienda $tienda) {
     $canReview  = false;
     $userReview = null;
     $user = auth()->user();
-    if ($user && $user->role === 'user') {
+    if ($user && in_array($user->role, ['user', 'admin'])) {
         $userReview = $tienda->resenas()->where('user_id', $user->id)->first();
         // Cualquier usuario puede intentar escribir una reseña; la validación real está en el controller
         $canReview = !$userReview;
@@ -189,6 +189,10 @@ Route::middleware(['auth', 'admin', 'throttle:60,1'])->prefix('admin')->name('ad
     Route::resource('tiendas', \App\Http\Controllers\Admin\TiendaController::class);
     Route::post('/tiendas/{tienda}/toggle-visible', [\App\Http\Controllers\Admin\TiendaController::class, 'toggleVisible'])->name('tiendas.toggle-visible');
     Route::post('/tiendas/{tienda}/toggle-active', [\App\Http\Controllers\Admin\TiendaController::class, 'toggleActive'])->name('tiendas.toggle-active');
+
+    // Reseñas de una tienda (listado + moderación)
+    Route::get('/tiendas/{tienda}/resenas', [\App\Http\Controllers\Admin\TiendaController::class, 'resenas'])->name('tiendas.resenas');
+    Route::delete('/tiendas/{tienda}/resenas/{resena}', [\App\Http\Controllers\Admin\TiendaController::class, 'destroyResena'])->name('tiendas.resenas.destroy');
     
     // Productos (anidados bajo tiendas)
     Route::get('/tiendas/{tienda}/productos', [\App\Http\Controllers\Admin\ProductoController::class, 'tiendaProductos'])->name('tiendas.productos.index');

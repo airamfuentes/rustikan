@@ -128,7 +128,7 @@
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         {{ t('info.sell.contact_name') }} <span class="text-red-500">*</span>
                                     </label>
-                                    <input v-model="form.nombre_contacto" type="text" required maxlength="120"
+                                    <input v-model="form.nombre_contacto" type="text" required maxlength="120" v-only-letters
                                         :placeholder="t('info.sell.contact_name_placeholder')"
                                         :class="inputClass(form.errors.nombre_contacto)" />
                                     <p v-if="form.errors.nombre_contacto" class="mt-1 text-xs text-red-500">{{ form.errors.nombre_contacto }}</p>
@@ -150,7 +150,7 @@
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('info.sell.phone') }}</label>
                                     <input v-model="form.telefono" type="tel" maxlength="20"
                                         inputmode="tel"
-                                        @input="form.telefono = $event.target.value.replace(/[^\d\s+\-().]/g, '').slice(0, 20)"
+                                        v-only-phone
                                         :placeholder="t('info.sell.phone_placeholder')"
                                         :class="inputClass(form.errors.telefono)" />
                                 </div>

@@ -477,7 +477,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                     </div>
 
                     <!-- Botón "Escribir reseña" -->
-                    <div v-if="canReview && !showReviewForm && user?.role === 'user'">
+                    <div v-if="canReview && !showReviewForm && (user?.role === 'user' || user?.role === 'admin')">
                         <button
                             @click="showReviewForm = true"
                             class="group flex items-center gap-2 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-600 px-5 py-3 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"

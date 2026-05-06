@@ -5,8 +5,10 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
 import Toast from '@/Components/Toast.vue';
+import PasswordStrength from '@/Components/PasswordStrength.vue';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import { useI18n } from '@/Composables/useI18n';
+import { evaluarPassword, validarEdad, validarNombre, validarDireccion } from '@/Composables/useValidaciones';
 
 defineProps({
     mustVerifyEmail: { type: Boolean },
@@ -81,7 +83,28 @@ const profileForm = useForm({
     direccion: user.value?.direccion ?? '',
 });
 
+const erroresProfile = ref({});
+
 const saveProfile = () => {
+    const e = {};
+    const nameErr = validarNombre(profileForm.name, { min: 2, max: 60 });
+    if (nameErr) e.name = nameErr;
+    if (profileForm.apellidos) {
+        const apErr = validarNombre(profileForm.apellidos, { min: 2, max: 80 });
+        if (apErr) e.apellidos = apErr;
+    }
+    const edadErr = validarEdad(profileForm.edad);
+    if (edadErr) e.edad = edadErr;
+    if (profileForm.direccion) {
+        const dirErr = validarDireccion(profileForm.direccion);
+        if (dirErr) e.direccion = dirErr;
+    }
+    erroresProfile.value = e;
+    if (Object.keys(e).length) {
+        addToast('error', t('profile.save_error_title'), Object.values(e)[0]);
+        return;
+    }
+
     profileForm.patch(route('profile.update'), {
         onError: () => addToast('error', t('profile.save_error_title'), t('profile.save_error_msg')),
     });
@@ -94,11 +117,24 @@ const passwordForm = useForm({
     password_confirmation: '',
 });
 
+const erroresPassword = ref({});
+
 const updatePassword = () => {
+    const e = {};
+    if (!passwordForm.current_password) e.current_password = 'Introduce tu contraseña actual.';
+    const pw = evaluarPassword(passwordForm.password);
+    if (!pw.valida) e.password = 'Mínimo 8 caracteres con mayúsculas, minúsculas, números y símbolos.';
+    if (passwordForm.password !== passwordForm.password_confirmation) {
+        e.password_confirmation = 'Las contraseñas no coinciden.';
+    }
+    erroresPassword.value = e;
+    if (Object.keys(e).length) return;
+
     passwordForm.put(route('password.update'), {
         preserveScroll: true,
         onSuccess: () => {
             passwordForm.reset();
+            erroresPassword.value = {};
             addToast('success', t('profile.password_updated'));
         },
         onError: () => addToast('error', t('profile.password_error_title'), t('profile.password_error_msg')),
@@ -272,13 +308,13 @@ const initials = computed(() => {
                         <div class="grid gap-4 sm:grid-cols-2">
                             <div>
                                 <InputLabel for="p-name" :value="t('profile.name')" />
-                                <TextInput id="p-name" v-model="profileForm.name" type="text" class="mt-1 block w-full" required autocomplete="given-name" />
-                                <InputError class="mt-1" :message="profileForm.errors.name" />
+                                <TextInput id="p-name" v-model="profileForm.name" type="text" class="mt-1 block w-full" required autocomplete="given-name" minlength="2" maxlength="60" v-only-letters />
+                                <InputError class="mt-1" :message="erroresProfile.name || profileForm.errors.name" />
                             </div>
                             <div>
                                 <InputLabel for="p-apellidos" :value="t('profile.surname')" />
-                                <TextInput id="p-apellidos" v-model="profileForm.apellidos" type="text" class="mt-1 block w-full" autocomplete="family-name" />
-                                <InputError class="mt-1" :message="profileForm.errors.apellidos" />
+                                <TextInput id="p-apellidos" v-model="profileForm.apellidos" type="text" class="mt-1 block w-full" autocomplete="family-name" minlength="2" maxlength="80" v-only-letters />
+                                <InputError class="mt-1" :message="erroresProfile.apellidos || profileForm.errors.apellidos" />
                             </div>
                         </div>
 
@@ -331,13 +367,13 @@ const initials = computed(() => {
                         <div class="grid gap-4 sm:grid-cols-2">
                             <div>
                                 <InputLabel for="p-edad" :value="t('profile.age')" />
-                                <TextInput id="p-edad" v-model="profileForm.edad" type="number" min="14" max="120" class="mt-1 block w-full" />
-                                <InputError class="mt-1" :message="profileForm.errors.edad" />
+                                <TextInput id="p-edad" v-model="profileForm.edad" type="number" min="14" max="120" inputmode="numeric" v-only-digits class="mt-1 block w-full" />
+                                <InputError class="mt-1" :message="erroresProfile.edad || profileForm.errors.edad" />
                             </div>
                             <div>
                                 <InputLabel for="p-direccion" :value="t('profile.address')" />
-                                <TextInput id="p-direccion" v-model="profileForm.direccion" type="text" class="mt-1 block w-full" autocomplete="street-address" />
-                                <InputError class="mt-1" :message="profileForm.errors.direccion" />
+                                <TextInput id="p-direccion" v-model="profileForm.direccion" type="text" class="mt-1 block w-full" autocomplete="street-address" minlength="5" maxlength="500" />
+                                <InputError class="mt-1" :message="erroresProfile.direccion || profileForm.errors.direccion" />
                             </div>
                         </div>
 
@@ -414,18 +450,19 @@ const initials = computed(() => {
                             <form @submit.prevent="updatePassword" class="space-y-4">
                                 <div>
                                     <InputLabel for="s-current" :value="t('profile.current_password')" />
-                                    <TextInput id="s-current" v-model="passwordForm.current_password" type="password" class="mt-1 block w-full" autocomplete="current-password" />
-                                    <InputError class="mt-1" :message="passwordForm.errors.current_password" />
+                                    <TextInput id="s-current" v-model="passwordForm.current_password" type="password" class="mt-1 block w-full" autocomplete="current-password" maxlength="128" />
+                                    <InputError class="mt-1" :message="erroresPassword.current_password || passwordForm.errors.current_password" />
                                 </div>
                                 <div>
                                     <InputLabel for="s-new" :value="t('profile.new_password')" />
-                                    <TextInput id="s-new" v-model="passwordForm.password" type="password" class="mt-1 block w-full" autocomplete="new-password" />
-                                    <InputError class="mt-1" :message="passwordForm.errors.password" />
+                                    <TextInput id="s-new" v-model="passwordForm.password" type="password" class="mt-1 block w-full" autocomplete="new-password" minlength="8" maxlength="128" />
+                                    <InputError class="mt-1" :message="erroresPassword.password || passwordForm.errors.password" />
+                                    <PasswordStrength :password="passwordForm.password" />
                                 </div>
                                 <div>
                                     <InputLabel for="s-confirm" :value="t('profile.confirm_password')" />
-                                    <TextInput id="s-confirm" v-model="passwordForm.password_confirmation" type="password" class="mt-1 block w-full" autocomplete="new-password" />
-                                    <InputError class="mt-1" :message="passwordForm.errors.password_confirmation" />
+                                    <TextInput id="s-confirm" v-model="passwordForm.password_confirmation" type="password" class="mt-1 block w-full" autocomplete="new-password" minlength="8" maxlength="128" />
+                                    <InputError class="mt-1" :message="erroresPassword.password_confirmation || passwordForm.errors.password_confirmation" />
                                 </div>
                                 <div class="flex justify-end pt-1">
                                     <button

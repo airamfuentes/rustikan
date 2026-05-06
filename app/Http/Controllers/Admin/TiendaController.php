@@ -287,6 +287,86 @@ class TiendaController extends Controller
     }
 
     /**
+     * Listar reseñas de una tienda con estadísticas y filtros.
+     */
+    public function resenas(Request $request, Tienda $tienda)
+    {
+        $tienda->load(['categoria:id,nombre,slug,icono', 'user:id,name,avatar']);
+
+        $query = $tienda->resenas()->with('user:id,name,avatar');
+
+        // Filtro por puntuación
+        if ($request->filled('puntuacion')) {
+            $query->where('puntuacion', (int) $request->puntuacion);
+        }
+
+        // Búsqueda en título/comentario/usuario
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('titulo', 'like', "%{$search}%")
+                  ->orWhere('comentario', 'like', "%{$search}%")
+                  ->orWhereHas('user', fn ($u) => $u->where('name', 'like', "%{$search}%"));
+            });
+        }
+
+        // Ordenación: recientes (default) | antiguas | mejor | peor
+        $orden = $request->get('orden', 'recientes');
+        match ($orden) {
+            'antiguas' => $query->oldest(),
+            'mejor'    => $query->orderByDesc('puntuacion')->latest(),
+            'peor'     => $query->orderBy('puntuacion')->latest(),
+            default    => $query->latest(),
+        };
+
+        $resenas = $query->paginate(15)->withQueryString();
+
+        // Estadísticas: total y distribución por estrellas (1..5)
+        $distribucion = $tienda->resenas()
+            ->selectRaw('puntuacion, COUNT(*) as total')
+            ->groupBy('puntuacion')
+            ->pluck('total', 'puntuacion');
+
+        $stats = [
+            'total'        => (int) $tienda->total_resenas,
+            'promedio'     => (float) $tienda->valoracion,
+            'distribucion' => collect([1, 2, 3, 4, 5])->mapWithKeys(
+                fn ($n) => [$n => (int) ($distribucion[$n] ?? 0)]
+            ),
+        ];
+
+        return Inertia::render('Admin/Tiendas/Resenas', [
+            'tienda'  => $tienda,
+            'resenas' => $resenas,
+            'stats'   => $stats,
+            'filters' => $request->only(['puntuacion', 'search', 'orden']),
+        ]);
+    }
+
+    /**
+     * Eliminar una reseña concreta (moderación).
+     */
+    public function destroyResena(Tienda $tienda, \App\Models\Resena $resena)
+    {
+        abort_unless($resena->tienda_id === $tienda->id, 404);
+
+        $autor = $resena->user?->name ?? 'usuario';
+        $resena->delete();
+
+        $tienda->recalcularValoracion();
+
+        ActivityLog::log(
+            'eliminar_resena',
+            "Reseña eliminada de {$tienda->nombre} (autor: {$autor})",
+            'eliminar',
+            'red',
+            $tienda
+        );
+
+        return back()->with('success', 'Reseña eliminada correctamente');
+    }
+
+    /**
      * Toggle tienda visibility
      */
     public function toggleVisible(Tienda $tienda)

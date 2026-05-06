@@ -140,7 +140,7 @@ const submit = () => {
                             <!-- Nombre -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre de la tienda <span class="text-red-500">*</span></label>
-                                <input v-model="form.nombre" type="text" required
+                                <input v-model="form.nombre" type="text" required minlength="2" maxlength="255"
                                        class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition" />
                                 <p v-if="form.errors.nombre" class="mt-1 text-xs text-red-500">{{ form.errors.nombre }}</p>
                             </div>
@@ -161,8 +161,9 @@ const submit = () => {
                             <!-- Descripción -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción</label>
-                                <textarea v-model="form.descripcion" rows="4"
+                                <textarea v-model="form.descripcion" rows="4" maxlength="2000"
                                           class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition resize-none"></textarea>
+                                <p class="mt-1 text-xs text-right text-gray-400">{{ (form.descripcion || '').length }}/2000</p>
                             </div>
 
                             <!-- Contacto -->
@@ -171,12 +172,12 @@ const submit = () => {
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Teléfono</label>
                                     <input v-model="form.telefono" type="tel"
                                            inputmode="tel" maxlength="20"
-                                           @input="form.telefono = $event.target.value.replace(/[^\d\s+\-().]/g, '').slice(0, 20)"
+                                           v-only-phone
                                            class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition" />
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-                                    <input v-model="form.email" type="email"
+                                    <input v-model="form.email" type="email" maxlength="255"
                                            class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition" />
                                 </div>
                             </div>
@@ -184,7 +185,7 @@ const submit = () => {
                             <!-- Dirección -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dirección</label>
-                                <input v-model="form.direccion" type="text"
+                                <input v-model="form.direccion" type="text" maxlength="500"
                                        class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition" />
                             </div>
                         </div>

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Storage;
 
 class Producto extends Model
 {
@@ -96,5 +97,18 @@ class Producto extends Model
     public function scopeDestacado($query)
     {
         return $query->where('destacado', true);
+    }
+
+    /**
+     * Hooks Eloquent: al eliminar el producto, borrar su imagen del storage
+     * para no dejar archivos huérfanos.
+     */
+    protected static function booted(): void
+    {
+        static::deleting(function (Producto $producto): void {
+            if ($producto->imagen && !str_starts_with($producto->imagen, 'http')) {
+                Storage::disk('public')->delete($producto->imagen);
+            }
+        });
     }
 }
