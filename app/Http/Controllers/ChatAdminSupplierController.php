@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\MensajeChat;
-use App\Models\Notificacion;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -60,15 +59,6 @@ class ChatAdminSupplierController extends Controller
                 'leido_admin'    => false,
                 'leido_supplier' => true,
             ]);
-
-            Notificacion::enviarAdmins(
-                'chat_supplier',
-                'Mensaje de almacén',
-                "{$user->name} te ha enviado un mensaje.",
-                null,
-                'message-circle',
-                'blue'
-            );
         } elseif ($user->isAdmin()) {
             $request->validate(['supplier_id' => 'required|exists:users,id']);
             $msg = MensajeChat::create([
@@ -78,16 +68,6 @@ class ChatAdminSupplierController extends Controller
                 'leido_admin'    => true,
                 'leido_supplier' => false,
             ]);
-
-            Notificacion::enviar(
-                $request->supplier_id,
-                'chat_admin',
-                'Mensaje del equipo Rustikan',
-                'El equipo de administración te ha enviado un mensaje.',
-                null,
-                'message-circle',
-                'primary'
-            );
         } else {
             abort(403);
         }

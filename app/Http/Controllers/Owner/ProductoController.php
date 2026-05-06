@@ -95,11 +95,34 @@ class ProductoController extends Controller
             abort(403);
         }
 
-        $producto->update(['oferta_activa' => !$producto->oferta_activa]);
+        $nuevoEstado = !$producto->oferta_activa;
 
-        return back()->with('success', $producto->oferta_activa
-            ? "Oferta activada para «{$producto->nombre}»."
-            : "Oferta desactivada para «{$producto->nombre}».");
+        \App\Models\SolicitudCambio::where('tienda_id', $tienda->id)
+            ->where('producto_id', $producto->id)
+            ->where('campo', 'oferta_activa')
+            ->where('estado', 'pendiente')
+            ->delete();
+
+        \App\Models\SolicitudCambio::create([
+            'user_id'        => auth()->id(),
+            'tienda_id'      => $tienda->id,
+            'producto_id'    => $producto->id,
+            'tipo'           => 'update_producto',
+            'campo'          => 'oferta_activa',
+            'valor_anterior' => ['value' => $producto->oferta_activa],
+            'valor_nuevo'    => ['value' => $nuevoEstado],
+        ]);
+
+        \App\Models\Notificacion::enviarAdmins(
+            'nueva_solicitud_producto',
+            'Solicitud de cambio en producto',
+            "La tienda \"{$tienda->nombre}\" ha solicitado " . ($nuevoEstado ? 'activar' : 'desactivar') . " la oferta de «{$producto->nombre}».",
+            route('solicitudes.index'),
+            'tag',
+            'orange'
+        );
+
+        return back()->with('success', 'Solicitud enviada al administrador para su revisión.');
     }
 
     private function storeFromUrl(string $url): ?string

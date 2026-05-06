@@ -41,7 +41,7 @@
                         v-if="count > 0"
                         @click="marcarTodas"
                         class="text-xs text-primary-600 dark:text-primary-400 hover:underline"
-                    >Marcar todas como leídas</button>
+                    >Eliminar todas</button>
                 </div>
 
                 <!-- Lista -->

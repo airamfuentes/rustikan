@@ -57,6 +57,16 @@ const tiendasOrdenadas = computed(() => {
     }
 });
 
+const categoriaImagen = {
+    'frutas-y-verduras':   '/images/furtas_verduras.png',
+    'carnes':              '/images/carnes.png',
+    'pescados-y-mariscos': '/images/pescados_mariscos.png',
+    'panaderia':           '/images/panaderia.png',
+    'lacteos-y-quesos':    '/images/lacteos_quesos.png',
+    'vinoteca':            '/images/vinoteca.png',
+    'artesania':           '/images/artesania.png',
+};
+
 const tiendaDestacada = computed(() => tiendasOrdenadas.value[0] ?? null);
 const restoTiendas    = computed(() => tiendasOrdenadas.value.slice(1));
 
@@ -124,6 +134,12 @@ onUnmounted(() => {
 
         <NavbarPublico :tiendas="tiendas" />
         <div class="relative overflow-hidden bg-gray-900 pt-24 pb-0">
+            <!-- Imagen de fondo de categoría -->
+            <div
+                v-if="categoriaImagen[categoria.slug]"
+                class="absolute inset-0 bg-cover bg-center opacity-20"
+                :style="`background-image: url('${categoriaImagen[categoria.slug]}')`"
+            ></div>
             <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(249,115,22,0.18)_0%,_rgba(17,24,39,1)_70%)]"></div>
 
             <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14">
@@ -136,13 +152,19 @@ onUnmounted(() => {
                     <span class="text-gray-200">{{ categoria.nombre }}</span>
                 </nav>
 
-                <!-- Icono + título -->
+                <!-- Icono/imagen + título -->
                 <div class="flex flex-col items-center gap-5 text-center sm:flex-row sm:text-left">
                     <div class="relative flex-shrink-0">
                         <div class="absolute inset-0 animate-ping-slow rounded-full bg-primary-500/20"></div>
                         <div class="absolute -inset-3 animate-ping-slow rounded-full bg-primary-500/10" style="animation-delay:0.4s"></div>
-                        <div class="relative flex h-24 w-24 items-center justify-center rounded-full bg-white/10 shadow-2xl backdrop-blur-sm ring-1 ring-white/20">
-                            <CategoriaIcono :slug="categoria.slug" :icono="categoria.icono" class="h-12 w-12 text-white" />
+                        <div class="relative flex h-24 w-24 items-center justify-center rounded-full bg-white/10 shadow-2xl backdrop-blur-sm ring-1 ring-white/20 overflow-hidden">
+                            <img
+                                v-if="categoriaImagen[categoria.slug]"
+                                :src="categoriaImagen[categoria.slug]"
+                                :alt="categoria.nombre"
+                                class="h-full w-full object-cover"
+                            />
+                            <CategoriaIcono v-else :slug="categoria.slug" :icono="categoria.icono" class="h-12 w-12 text-white" />
                         </div>
                     </div>
                     <div>

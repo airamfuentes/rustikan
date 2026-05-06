@@ -16,14 +16,15 @@ class SolicitudController extends Controller
 {
     // ── Campos de tienda que requieren aprobación ─────────────────────────────
     private const CAMPOS_TIENDA = [
-        'nombre', 'descripcion', 'telefono', 'email',
+        'nombre', 'categoria_id', 'descripcion', 'telefono', 'email',
         'direccion', 'logo', 'imagen_portada',
     ];
 
-    // ── Campos de producto que requieren aprobación (precios excluidos: se guardan directamente) ──
+    // ── Todos los campos de producto requieren aprobación ─────────────────────
     private const CAMPOS_PRODUCTO = [
-        'nombre', 'descripcion',
-        'stock', 'unidad', 'imagen', 'categoria_id',
+        'nombre', 'descripcion', 'precio', 'precio_oferta',
+        'oferta_activa', 'unidad', 'stock', 'stock_minimo',
+        'disponible', 'destacado', 'imagen', 'categoria_id',
     ];
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -40,6 +41,7 @@ class SolicitudController extends Controller
 
         $validated = $request->validate([
             'nombre'         => 'required|string|max:255',
+            'categoria_id'   => 'required|exists:categorias,id',
             'descripcion'    => 'nullable|string|max:5000',
             'telefono'       => 'nullable|string|max:20',
             'email'          => 'nullable|email|max:255',
@@ -180,8 +182,12 @@ class SolicitudController extends Controller
             'descripcion'   => 'nullable|string|max:3000',
             'precio'        => 'required|numeric|min:0|max:99999',
             'precio_oferta' => 'nullable|numeric|min:0',
+            'oferta_activa' => 'nullable|boolean',
             'unidad'        => 'required|string|max:30',
             'stock'         => 'required|integer|min:0',
+            'stock_minimo'  => 'nullable|integer|min:0',
+            'disponible'    => 'nullable|boolean',
+            'destacado'     => 'nullable|boolean',
             'imagen'        => 'nullable|image|max:3072',
             'imagen_url'    => 'nullable|url|max:2048',
         ]);
@@ -192,31 +198,6 @@ class SolicitudController extends Controller
             $validated['imagen'] = $request->input('imagen_url');
         }
         unset($validated['imagen_url']);
-
-        // ── Precios: guardar directamente sin pasar por aprobación ───────────────
-        $preciosActualizados = false;
-        $actualizacionPrecios = [];
-
-        if (isset($validated['precio']) && (float)$validated['precio'] !== (float)$producto->precio) {
-            $actualizacionPrecios['precio'] = $validated['precio'];
-        }
-
-        $nuevoPrecioOferta = isset($validated['precio_oferta']) && $validated['precio_oferta'] !== null && $validated['precio_oferta'] !== ''
-            ? (float)$validated['precio_oferta']
-            : null;
-
-        if ($nuevoPrecioOferta !== ($producto->precio_oferta !== null ? (float)$producto->precio_oferta : null)) {
-            $actualizacionPrecios['precio_oferta'] = $nuevoPrecioOferta;
-            // Si se borra el precio de oferta, desactivar la oferta automáticamente
-            if ($nuevoPrecioOferta === null && $producto->oferta_activa) {
-                $actualizacionPrecios['oferta_activa'] = false;
-            }
-        }
-
-        if (!empty($actualizacionPrecios)) {
-            $producto->update($actualizacionPrecios);
-            $preciosActualizados = true;
-        }
 
         $cambiosCreados = 0;
 
@@ -253,15 +234,10 @@ class SolicitudController extends Controller
         }
 
         if ($cambiosCreados === 0) {
-            if ($preciosActualizados) {
-                return back()->with('success', "Precios de «{$producto->nombre}» actualizados correctamente.");
-            }
             return back()->with('info', 'No se detectaron cambios respecto al producto actual.');
         }
 
-        $msg = $preciosActualizados
-            ? "Precios guardados y solicitud enviada con {$cambiosCreados} " . ($cambiosCreados === 1 ? 'cambio' : 'cambios') . " para revisión del administrador."
-            : "Solicitud enviada con {$cambiosCreados} " . ($cambiosCreados === 1 ? 'cambio' : 'cambios') . " para revisión del administrador.";
+        $msg = "Solicitud enviada con {$cambiosCreados} " . ($cambiosCreados === 1 ? 'cambio' : 'cambios') . " para revisi\u00f3n del administrador.";
 
         return back()->with('success', $msg);
     }

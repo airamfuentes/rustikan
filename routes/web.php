@@ -167,10 +167,8 @@ Route::middleware(['auth', 'owner'])->prefix('mi-tienda')->name('owner.')->group
     Route::get('/panel', [\App\Http\Controllers\Owner\PanelController::class, 'index'])->name('panel');
     Route::get('/pedidos/{pedido}', [\App\Http\Controllers\Owner\PanelController::class, 'pedidoDetalle'])->name('pedido.show');
     Route::get('/editar', [\App\Http\Controllers\Owner\TiendaController::class, 'edit'])->name('tienda.edit');
-    Route::post('/editar', [\App\Http\Controllers\Owner\TiendaController::class, 'update'])->name('tienda.update');
-    // Productos (solo edición directa vía owner, sin aprobación — toggles rápidos)
+    // Productos (solo lectura para editar — cambios van por solicitud)
     Route::get('/productos/{producto}/editar', [\App\Http\Controllers\Owner\ProductoController::class, 'edit'])->name('producto.edit');
-    Route::post('/productos/{producto}', [\App\Http\Controllers\Owner\ProductoController::class, 'update'])->name('producto.update');
     Route::post('/productos/{producto}/oferta', [\App\Http\Controllers\Owner\ProductoController::class, 'toggleOferta'])->name('producto.oferta');
     // Solicitudes de cambio
     Route::post('/solicitar/tienda',                    [\App\Http\Controllers\Owner\SolicitudController::class, 'solicitarCambioTienda'])->name('solicitar.tienda');

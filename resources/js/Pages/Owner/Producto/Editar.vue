@@ -1,6 +1,6 @@
 ﻿<script setup>
 import { ref, computed, watch } from 'vue';
-import { Head, Link, useForm, usePage, router } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import Toast from '@/Components/Toast.vue';
 import { Star } from 'lucide-vue-next';
@@ -87,10 +87,6 @@ watch(tieneOferta, (val) => {
 const toggleOfertaActiva = () => {
     if (!tieneOferta.value) return;
     form.oferta_activa = !form.oferta_activa;
-    router.post(route('owner.producto.oferta', props.producto.id), {}, {
-        preserveScroll: true,
-        onError: () => { form.oferta_activa = !form.oferta_activa; }, // revert on error
-    });
 };
 </script>
 
