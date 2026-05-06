@@ -18,8 +18,8 @@
         <!-- Google structured data: Organization + Logo -->
         <script type="application/ld+json">
         {
-            "@context": "https://schema.org",
-            "@type": "Organization",
+            "@@context": "https://schema.org",
+            "@@type": "Organization",
             "name": "Rustikan",
             "url": "{{ url('/') }}",
             "logo": "{{ url('/images/logo_item.png') }}"
