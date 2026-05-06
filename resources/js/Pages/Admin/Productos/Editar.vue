@@ -65,6 +65,7 @@
                                         step="0.01"
                                         min="0"
                                         required
+                                        inputmode="decimal"
                                         class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     />
                                     <p v-if="errors.precio" class="mt-1 text-sm text-red-600">{{ errors.precio }}</p>
@@ -78,6 +79,7 @@
                                         type="number"
                                         step="0.01"
                                         min="0"
+                                        inputmode="decimal"
                                         class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     />
                                     <p v-if="errors.precio_oferta" class="mt-1 text-sm text-red-600">{{ errors.precio_oferta }}</p>
@@ -115,6 +117,8 @@
                                         type="number"
                                         min="0"
                                         required
+                                        inputmode="numeric"
+                                        step="1"
                                         class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     />
                                     <p v-if="errors.stock" class="mt-1 text-sm text-red-600">{{ errors.stock }}</p>
@@ -128,6 +132,8 @@
                                         type="number"
                                         min="0"
                                         required
+                                        inputmode="numeric"
+                                        step="1"
                                         class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     />
                                     <p v-if="errors.stock_minimo" class="mt-1 text-sm text-red-600">{{ errors.stock_minimo }}</p>

@@ -149,7 +149,7 @@ const toggleOfertaActiva = () => {
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Precio (€) <span class="text-red-500">*</span></label>
                                 <div class="relative">
                                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 text-sm">€</span>
-                                    <input v-model="form.precio" type="number" min="0" step="0.01" required
+                                    <input v-model="form.precio" type="number" min="0" step="0.01" required inputmode="decimal"
                                            class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 pl-7 pr-4 py-2.5 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition" />
                                 </div>
                                 <p v-if="form.errors.precio" class="mt-1 text-xs text-red-500">{{ form.errors.precio }}</p>
@@ -159,7 +159,7 @@ const toggleOfertaActiva = () => {
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Precio oferta (€)</label>
                                 <div class="relative">
                                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 text-sm">€</span>
-                                    <input v-model="form.precio_oferta" type="number" min="0" step="0.01"
+                                    <input v-model="form.precio_oferta" type="number" min="0" step="0.01" inputmode="decimal"
                                            class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 pl-7 pr-4 py-2.5 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition" />
                                 </div>
                                 <p class="mt-1 text-xs text-gray-400">Dejar vacío si no hay oferta</p>
@@ -184,13 +184,13 @@ const toggleOfertaActiva = () => {
 
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock <span class="text-red-500">*</span></label>
-                                <input v-model="form.stock" type="number" min="0" required
+                                <input v-model="form.stock" type="number" min="0" required inputmode="numeric" step="1"
                                        class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition" />
                             </div>
 
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock mínimo</label>
-                                <input v-model="form.stock_minimo" type="number" min="0"
+                                <input v-model="form.stock_minimo" type="number" min="0" inputmode="numeric" step="1"
                                        class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition" />
                                 <p class="mt-1 text-xs text-gray-400">Se mostrará "últimas unidades" al llegar a este nivel</p>
                             </div>

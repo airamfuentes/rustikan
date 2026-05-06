@@ -395,4 +395,35 @@ onUnmounted(() => {
 .mapa-popup-btn:hover {
     opacity: 0.9;
 }
+
+/* ── Dark mode popups ───────────────────────────────────────────────────────── */
+html.dark .mapa-popup-wrapper .leaflet-popup-content-wrapper {
+    background: #1f2937;
+    border: 1px solid #374151;
+    box-shadow: 0 10px 25px rgb(0 0 0 / 0.4);
+}
+
+html.dark .mapa-popup-wrapper .leaflet-popup-tip {
+    background: #1f2937;
+}
+
+html.dark .mapa-pin-bubble {
+    background: #1f2937;
+}
+
+html.dark .mapa-popup-body {
+    background: #1f2937;
+}
+
+html.dark .mapa-popup-title {
+    color: #f9fafb;
+}
+
+html.dark .mapa-popup-stars span {
+    color: #9ca3af;
+}
+
+html.dark .mapa-popup-addr {
+    color: #9ca3af;
+}
 </style>

@@ -169,7 +169,9 @@ const submit = () => {
                             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Teléfono</label>
-                                    <input v-model="form.telefono" type="text"
+                                    <input v-model="form.telefono" type="tel"
+                                           inputmode="tel" maxlength="20"
+                                           @input="form.telefono = $event.target.value.replace(/[^\d\s+\-().]/g, '').slice(0, 20)"
                                            class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition" />
                                 </div>
                                 <div>

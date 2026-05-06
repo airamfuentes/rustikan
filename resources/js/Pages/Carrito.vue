@@ -41,19 +41,41 @@ const envioForm = ref({
 });
 
 // CP auto-lookup (España)
+// Códigos postales válidos de Lanzarote (35500–35599)
+const isLanzaroteCP = (cp) => {
+    const n = parseInt(cp, 10);
+    return n >= 35500 && n <= 35599;
+};
+
 const buscandoLocalidad = ref(false);
 watch(() => envioForm.value.cp, async (cp) => {
-    if (!/^\d{5}$/.test(cp)) return;
+    if (!/^\d{5}$/.test(cp)) {
+        // Borrar error de CP inválido mientras el usuario escribe
+        if (errores.value.cp && errores.value.cp !== t('checkout.cp_required')) {
+            errores.value = { ...errores.value, cp: '' };
+        }
+        return;
+    }
+    // Validar que sea de Lanzarote
+    if (!isLanzaroteCP(cp)) {
+        errores.value = { ...errores.value, cp: t('checkout.cp_not_lanzarote') };
+        envioForm.value.localidad = '';
+        return;
+    }
+    // CP válido de Lanzarote → limpiar error y buscar localidad
+    errores.value = { ...errores.value, cp: '' };
     buscandoLocalidad.value = true;
     try {
-        const res  = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&country=es&postalcode=${cp}&limit=1`, {
+        const res  = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=es&postalcode=${cp}&limit=5`, {
             headers: { 'Accept-Language': 'es', 'User-Agent': 'Rustikan/1.0' },
         });
         const data = await res.json();
         if (data.length > 0) {
             const addr = data[0].address ?? {};
-            // Pick the most specific locality available
-            const localidad = addr.city || addr.town || addr.village || addr.municipality || addr.county || addr.state_district || '';
+            // Preferir el núcleo más específico antes que el municipio
+            const localidad = addr.village || addr.suburb || addr.quarter || addr.neighbourhood
+                || addr.hamlet || addr.city_district || addr.town
+                || addr.city || addr.municipality || addr.county || addr.state_district || '';
             if (localidad) envioForm.value.localidad = localidad;
         }
     } catch { /* silently fail */ } finally {
@@ -105,6 +127,10 @@ const siguientePaso = () => {
     }
     if (!envioForm.value.cp.trim() || !/^\d{5}$/.test(envioForm.value.cp)) {
         errores.value.cp = t('checkout.cp_required');
+        return;
+    }
+    if (!isLanzaroteCP(envioForm.value.cp)) {
+        errores.value.cp = t('checkout.cp_not_lanzarote');
         return;
     }
     if (!envioForm.value.localidad.trim()) {
@@ -642,6 +668,7 @@ const stepTitle = computed(() => ({
                                 inputmode="tel"
                                 maxlength="20"
                                 placeholder="+34 600 000 000"
+                                @input="envioForm.telefono_contacto = $event.target.value.replace(/[^\d\s+\-().]/g, '').slice(0, 20)"
                                 :class="['w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2',
                                     errores.telefono_contacto ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
                                     'dark:bg-gray-700 dark:text-white dark:placeholder-gray-500']"

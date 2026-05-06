@@ -149,6 +149,8 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('info.sell.phone') }}</label>
                                     <input v-model="form.telefono" type="tel" maxlength="20"
+                                        inputmode="tel"
+                                        @input="form.telefono = $event.target.value.replace(/[^\d\s+\-().]/g, '').slice(0, 20)"
                                         :placeholder="t('info.sell.phone_placeholder')"
                                         :class="inputClass(form.errors.telefono)" />
                                 </div>
