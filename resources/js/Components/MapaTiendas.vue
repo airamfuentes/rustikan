@@ -24,26 +24,27 @@ let clusterGroup = null;
 const tiendasConCoords = () =>
     props.tiendas.filter(t => t.latitud && t.longitud);
 
-// Mapa de iconos SVG (paths internos Lucide) por slug de categoría
-const CATEGORIA_ICONOS = {
-    'frutas-y-verduras':   '<path d="M12 6.528V3a1 1 0 0 1 1-1h0"/><path d="M18.237 21A15 15 0 0 0 22 11a6 6 0 0 0-10-4.472A6 6 0 0 0 2 11a15.1 15.1 0 0 0 3.763 10 3 3 0 0 0 3.648.648 5.5 5.5 0 0 1 5.178 0A3 3 0 0 0 18.237 21"/>',
-    'carnes':              '<path d="M16.4 13.7A6.5 6.5 0 1 0 6.28 6.6c-1.1 3.13-.78 3.9-3.18 6.08A3 3 0 0 0 5 18c4 0 8.4-1.8 11.4-4.3"/><path d="m18.5 6 2.19 4.5a6.48 6.48 0 0 1-2.29 7.2C15.4 20.2 11 22 7 22a3 3 0 0 1-2.68-1.66L2.4 16.5"/><circle cx="12.5" cy="8.5" r="2.5"/>',
-    'pescados-y-mariscos': '<path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.47-3.44 6-7 6s-7.56-2.53-8.5-6Z"/><path d="M18 12v.5"/><path d="M16 17.93a9.77 9.77 0 0 1 0-11.86"/><path d="M7 10.67C7 8 5.58 5.97 2.73 5.5c-1 1.5-1 5 .23 6.5-1.24 1.5-1.24 5-.23 6.5C5.58 18.03 7 16 7 13.33"/><path d="M10.46 7.26C10.2 5.88 9.17 4.24 8 3h5.8a2 2 0 0 1 1.98 1.67l.23 1.4"/><path d="m16.01 17.93-.23 1.4A2 2 0 0 1 13.8 21H9.5a5.96 5.96 0 0 0 1.49-3.98"/>',
-    'panaderia':           '<path d="M2 22 16 8"/><path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M7.47 8.53 9 7l1.53 1.53a3.5 3.5 0 0 1 0 4.94L9 15l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z"/><path d="M11.47 17.47 13 19l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L5 19l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/><path d="M15.47 13.47 17 15l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L9 15l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/><path d="M19.47 9.47 21 11l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L13 11l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/>',
-    'lacteos-y-quesos':    '<path d="M8 2h8"/><path d="M9 2v2.789a4 4 0 0 1-.672 2.219l-.656.984A4 4 0 0 0 7 10.212V20a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-9.789a4 4 0 0 0-.672-2.219l-.656-.984A4 4 0 0 1 15 4.788V2"/><path d="M7 15a6.472 6.472 0 0 1 5 0 6.47 6.47 0 0 0 5 0"/>',
-    'vinoteca':            '<path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"/>',
-    'artesania':           '<path d="m14.622 17.897-10.68-2.913"/><path d="M18.376 2.622a1 1 0 1 1 3.002 3.002L17.36 9.643a.5.5 0 0 0 0 .707l.944.944a2.41 2.41 0 0 1 0 3.408l-.944.944a.5.5 0 0 1-.707 0L8.354 7.348a.5.5 0 0 1 0-.707l.944-.944a2.41 2.41 0 0 1 3.408 0l.944.944a.5.5 0 0 0 .707 0z"/><path d="M9 8c-1.804 2.71-3.97 3.46-6.583 3.948a.507.507 0 0 0-.302.819l7.32 8.883a1 1 0 0 0 1.185.204C12.735 20.405 16 16.792 16 15"/>',
+// Mapa de imágenes (en /public/images) por slug de categoría
+const CATEGORIA_IMG = {
+    'frutas-y-verduras':   '/images/furtas_verduras.png',
+    'carnes':              '/images/carnes.png',
+    'pescados-y-mariscos': '/images/pescados_mariscos.png',
+    'panaderia':           '/images/panaderia.png',
+    'lacteos-y-quesos':    '/images/lacteos_quesos.png',
+    'vinoteca':            '/images/vinoteca.png',
+    'artesania':           '/images/artesania.png',
 };
-const ICONO_CASA = '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>';
+const IMG_FALLBACK = '/images/logo.png';
 
 const crearIcono = (tienda) => {
     const color = tienda.categoria?.color || '#f97316';
-    const iconInner = CATEGORIA_ICONOS[tienda.categoria?.slug] ?? ICONO_CASA;
+    const img = CATEGORIA_IMG[tienda.categoria?.slug] ?? IMG_FALLBACK;
+    const alt = escapeHtml(tienda.categoria?.nombre ?? 'Categoría');
     return L.divIcon({
         html: `
             <div class="mapa-pin">
                 <div class="mapa-pin-bubble" style="border-color:${color}">
-                    <svg class="mapa-pin-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${iconInner}</svg>
+                    <img src="${img}" alt="${alt}" class="mapa-pin-img" loading="lazy" />
                 </div>
                 <div class="mapa-pin-tail" style="border-top-color:${color}"></div>
             </div>
@@ -265,12 +266,16 @@ onUnmounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
 }
 
-.mapa-pin-svg {
-    width: 20px;
-    height: 20px;
-    color: #f97316;
+.mapa-pin-img {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    display: block;
+    pointer-events: none;
+    user-select: none;
 }
 
 /* Cola triangular del pin */
