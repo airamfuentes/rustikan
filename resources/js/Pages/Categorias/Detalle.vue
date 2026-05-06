@@ -157,12 +157,12 @@ onUnmounted(() => {
                     <div class="relative flex-shrink-0">
                         <div class="absolute inset-0 animate-ping-slow rounded-full bg-primary-500/20"></div>
                         <div class="absolute -inset-3 animate-ping-slow rounded-full bg-primary-500/10" style="animation-delay:0.4s"></div>
-                        <div class="relative flex h-24 w-24 items-center justify-center rounded-full bg-white/10 shadow-2xl backdrop-blur-sm ring-1 ring-white/20 overflow-hidden">
+                        <div class="relative flex h-24 w-24 items-center justify-center rounded-full bg-[#f0ddb8] shadow-2xl ring-1 ring-white/20 overflow-hidden">
                             <img
                                 v-if="categoriaImagen[categoria.slug]"
                                 :src="categoriaImagen[categoria.slug]"
                                 :alt="categoria.nombre"
-                                class="h-full w-full object-cover"
+                                class="h-full w-full object-cover scale-125"
                             />
                             <CategoriaIcono v-else :slug="categoria.slug" :icono="categoria.icono" class="h-12 w-12 text-white" />
                         </div>

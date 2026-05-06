@@ -90,7 +90,7 @@ onMounted(() => {
         <div class="relative h-[360px] sm:h-[460px] lg:h-[520px] overflow-hidden">
             <div
                 class="absolute inset-0 bg-cover bg-no-repeat"
-                style="background-image: url('/images/fondo_portada_home.png'); background-position: center 35%;"
+                style="background-image: url('/images/fondo_portada_home.png?v=2'); background-position: center 35%;"
             ></div>
             <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-transparent"></div>
 
@@ -120,12 +120,12 @@ onMounted(() => {
                         class="group flex flex-shrink-0 flex-col items-center w-20 sm:w-24"
                     >
                         <!-- Círculo -->
-                        <div class="flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm transition-all duration-300 group-hover:scale-105 group-hover:border-primary-400 group-hover:shadow-xl overflow-hidden">
+                        <div class="flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-600 bg-[#f0ddb8] shadow-sm transition-all duration-300 group-hover:scale-105 group-hover:border-primary-400 group-hover:shadow-xl overflow-hidden">
                             <img
                                 v-if="categoriaImagen[cat.slug]"
                                 :src="categoriaImagen[cat.slug]"
                                 :alt="cat.nombre"
-                                class="h-full w-full object-cover scale-110"
+                                class="h-full w-full object-cover scale-125"
                             />
                             <CategoriaIcono v-else :slug="cat.slug" :icono="cat.icono" class="h-7 w-7 sm:h-9 sm:w-9 text-gray-700 dark:text-gray-200 group-hover:text-primary-500 transition-colors" />
                         </div>
