@@ -152,4 +152,3 @@ class ExportController extends Controller
         return $this->csvResponse('pedidos_' . date('Y-m-d') . '.csv', $lines);
     }
 }
-}
