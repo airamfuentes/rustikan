@@ -10,25 +10,31 @@ return new class extends Migration
     {
         // Añadir saldo RustiCoin a users
         Schema::table('users', function (Blueprint $table) {
-            $table->decimal('rusticoin_balance', 10, 2)->default(0)->after('email_verified_at');
+            if (!Schema::hasColumn('users', 'rusticoin_balance')) {
+                $table->decimal('rusticoin_balance', 10, 2)->default(0)->after('email_verified_at');
+            }
         });
 
         // Añadir método de pago a pedidos
         Schema::table('pedidos', function (Blueprint $table) {
-            $table->string('metodo_pago', 20)->default('tarjeta')->after('notas');
+            if (!Schema::hasColumn('pedidos', 'metodo_pago')) {
+                $table->string('metodo_pago', 20)->default('tarjeta')->after('notas');
+            }
         });
 
         // Tabla de transacciones del monedero
-        Schema::create('rusticoin_transactions', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->enum('tipo', ['recarga', 'compra', 'reembolso', 'retiro']); // recarga=añadir dinero, compra=pago pedido, reembolso=cancelación, retiro=solicitud retirar
-            $table->decimal('cantidad', 10, 2); // positivo=entrada, negativo=salida
-            $table->decimal('saldo_despues', 10, 2);
-            $table->string('descripcion')->nullable();
-            $table->foreignId('pedido_id')->nullable()->constrained()->nullOnDelete();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('rusticoin_transactions')) {
+            Schema::create('rusticoin_transactions', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+                $table->enum('tipo', ['recarga', 'compra', 'reembolso', 'retiro']);
+                $table->decimal('cantidad', 10, 2);
+                $table->decimal('saldo_despues', 10, 2);
+                $table->string('descripcion')->nullable();
+                $table->foreignId('pedido_id')->nullable()->constrained()->nullOnDelete();
+                $table->timestamps();
+            });
+        }
     }
 
     public function down(): void

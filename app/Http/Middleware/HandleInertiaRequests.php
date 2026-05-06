@@ -51,24 +51,37 @@ class HandleInertiaRequests extends Middleware
             ],
             'recaptchaSiteKey'   => config('services.turnstile.site_key'),
             'notificacionesCount' => $user
-                ? Notificacion::where('user_id', $user->id)->where('leida', false)->count()
+                ? $this->notificacionesCount($user)
                 : 0,
             'chatNoLeidos' => $user ? $this->chatNoLeidos($user) : 0,
         ];
     }
 
+    private function notificacionesCount($user): int
+    {
+        try {
+            return Notificacion::where('user_id', $user->id)->where('leida', false)->count();
+        } catch (\Throwable) {
+            return 0;
+        }
+    }
+
     private function chatNoLeidos($user): int
     {
-        if ($user->isSupplier()) {
-            return MensajeChat::where('supplier_id', $user->id)
-                ->where('remitente_id', '!=', $user->id)
-                ->where('leido_supplier', false)
-                ->count();
-        }
-        if ($user->isAdmin()) {
-            return MensajeChat::whereColumn('remitente_id', 'supplier_id')
-                ->where('leido_admin', false)
-                ->count();
+        try {
+            if ($user->isSupplier()) {
+                return MensajeChat::where('supplier_id', $user->id)
+                    ->where('remitente_id', '!=', $user->id)
+                    ->where('leido_supplier', false)
+                    ->count();
+            }
+            if ($user->isAdmin()) {
+                return MensajeChat::whereColumn('remitente_id', 'supplier_id')
+                    ->where('leido_admin', false)
+                    ->count();
+            }
+        } catch (\Throwable) {
+            return 0;
         }
         return 0;
     }
