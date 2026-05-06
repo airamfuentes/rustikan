@@ -64,7 +64,7 @@ const submitResend = () => resendForm.post(route('verification.send'));
 
 <template>
     <GuestLayout>
-        <Head title="Verifica tu correo – Rustikan" />
+        <Head title="Verifica tu correo" />
 
         <div class="flex flex-col items-center text-center">
             <!-- Icono -->

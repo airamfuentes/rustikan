@@ -96,7 +96,7 @@ const submitRating = (tiendaId) => {
 </script>
 
 <template>
-    <Head title="Mis pedidos – Rustikan" />
+    <Head title="Mis pedidos" />
 
     <!-- Toasts -->
     <div class="pointer-events-none fixed top-20 right-4 z-[9999] flex flex-col items-end gap-3 max-w-sm w-full">

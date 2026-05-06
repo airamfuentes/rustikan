@@ -1,6 +1,6 @@
 ﻿<template>
     <div class="min-h-screen bg-white dark:bg-gray-900">
-        <Head title="Vende con nosotros - Rustikan" />
+        <Head title="Vende con nosotros" />
 
         <!-- Toast container -->
         <div class="pointer-events-none fixed top-20 right-4 z-[9999] flex flex-col items-end gap-3 max-w-sm w-full">

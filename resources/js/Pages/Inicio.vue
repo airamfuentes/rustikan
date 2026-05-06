@@ -68,7 +68,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <Head title="Tiendas - Rustikan" />
+    <Head title="" />
 
     <!-- Toast container -->
     <div class="pointer-events-none fixed top-20 right-4 z-[9999] flex flex-col items-end gap-3 max-w-sm w-full">
@@ -110,13 +110,14 @@ onMounted(() => {
                     <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">{{ t('home.categories_title') }}</h2>
                 </div>
 
-                <!-- Grid de categorías circulares -->
-                <div class="flex flex-wrap justify-center gap-5 sm:gap-8">
+                <!-- Fila única de categorías — scroll horizontal en móvil, centradas en desktop -->
+                <div class="overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    <div class="flex flex-nowrap justify-center gap-4 sm:gap-8 min-w-max sm:min-w-0 mx-auto">
                     <Link
                         v-for="(cat, index) in categorias"
                         :key="cat.id"
                         :href="route('categoria.tiendas', cat.slug)"
-                        class="group flex flex-col items-center"
+                        class="group flex flex-shrink-0 flex-col items-center w-20 sm:w-24"
                     >
                         <!-- Círculo -->
                         <div class="flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm transition-all duration-300 group-hover:scale-105 group-hover:border-primary-400 group-hover:shadow-xl overflow-hidden">
@@ -124,16 +125,17 @@ onMounted(() => {
                                 v-if="categoriaImagen[cat.slug]"
                                 :src="categoriaImagen[cat.slug]"
                                 :alt="cat.nombre"
-                                class="h-full w-full object-cover"
+                                class="h-full w-full object-cover scale-110"
                             />
                             <CategoriaIcono v-else :slug="cat.slug" :icono="cat.icono" class="h-7 w-7 sm:h-9 sm:w-9 text-gray-700 dark:text-gray-200 group-hover:text-primary-500 transition-colors" />
                         </div>
 
                         <!-- Etiqueta debajo -->
-                        <span class="mt-2 whitespace-nowrap text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300 transition-colors group-hover:text-primary-500">
+                        <span class="mt-2 text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300 transition-colors group-hover:text-primary-500 text-center leading-tight w-full">
                             {{ cat.nombre }}
                         </span>
                     </Link>
+                    </div>
                 </div>
 
                 <!-- Estado vacío -->

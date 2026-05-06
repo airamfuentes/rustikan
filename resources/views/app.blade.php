@@ -5,7 +5,26 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        <title inertia>{{ config('app.name', 'Rustikan') }}</title>
+
+        <!-- SEO / Open Graph -->
+        <meta name="description" content="Rustikan – Mercado local online. Compra productos frescos y artesanales directamente de productores de tu zona.">
+        <meta property="og:site_name" content="Rustikan">
+        <meta property="og:image" content="{{ url('/images/logo_item.png') }}">
+        <meta property="og:type" content="website">
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:image" content="{{ url('/images/logo_item.png') }}">
+
+        <!-- Google structured data: Organization + Logo -->
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Rustikan",
+            "url": "{{ url('/') }}",
+            "logo": "{{ url('/images/logo_item.png') }}"
+        }
+        </script>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

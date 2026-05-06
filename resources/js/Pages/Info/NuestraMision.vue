@@ -1,6 +1,6 @@
 <template>
     <div class="min-h-screen bg-white dark:bg-gray-900">
-        <Head title="Nuestra misión - Rustikan" />
+        <Head title="Nuestra misión" />
         <NavbarPublico />
 
         <!-- Hero -->

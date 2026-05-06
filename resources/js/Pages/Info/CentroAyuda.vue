@@ -1,6 +1,6 @@
 <template>
     <div :class="isDark ? 'dark' : ''">
-        <Head title="Centro de ayuda - Rustikan" />
+        <Head title="Centro de ayuda" />
         <NavbarPublico />
 
         <!-- Hero -->

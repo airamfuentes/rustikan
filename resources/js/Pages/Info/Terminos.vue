@@ -1,6 +1,6 @@
 <template>
     <div class="min-h-screen bg-white dark:bg-gray-900">
-        <Head title="Términos y condiciones - Rustikan" />
+        <Head title="Términos y condiciones" />
         <NavbarPublico />
 
         <!-- Hero -->

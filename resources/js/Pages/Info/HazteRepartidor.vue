@@ -1,6 +1,6 @@
 <template>
     <div :class="isDark ? 'dark' : ''">
-        <Head title="Hazte repartidor - Rustikan" />
+        <Head title="Hazte repartidor" />
         <NavbarPublico />
 
         <!-- Hero -->

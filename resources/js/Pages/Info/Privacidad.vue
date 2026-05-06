@@ -1,6 +1,6 @@
 <template>
     <div class="min-h-screen bg-white dark:bg-gray-900">
-        <Head title="Política de privacidad - Rustikan" />
+        <Head title="Política de privacidad" />
         <NavbarPublico />
 
         <!-- Hero -->

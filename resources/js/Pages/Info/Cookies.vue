@@ -1,6 +1,6 @@
 <template>
     <div class="min-h-screen bg-white dark:bg-gray-900">
-        <Head title="Política de cookies - Rustikan" />
+        <Head title="Política de cookies" />
         <NavbarPublico />
 
         <!-- Hero -->
