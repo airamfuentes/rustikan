@@ -12,6 +12,17 @@ const { t } = useI18n();
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 
+// Imágenes de categorías
+const categoriaImagen = {
+    'frutas-y-verduras':   '/images/furtas_verduras.png',
+    'carnes':              '/images/carnes.png',
+    'pescados-y-mariscos': '/images/pescados_mariscos.png',
+    'panaderia':           '/images/panaderia.png',
+    'lacteos-y-quesos':    '/images/lacteos_quesos.png',
+    'vinoteca':            '/images/vinoteca.png',
+    'artesania':           '/images/artesania.png',
+};
+
 // ── Toast system ─────────────────────────────────────────────────────────────
 const toasts = ref([]);
 const addToast = (type, title, message = '') => {
@@ -79,7 +90,7 @@ onMounted(() => {
         <div class="relative h-[360px] sm:h-[460px] lg:h-[520px] overflow-hidden">
             <div
                 class="absolute inset-0 bg-cover bg-no-repeat"
-                style="background-image: url('/images/fondo_1.png'); background-position: center 35%;"
+                style="background-image: url('/images/fondo_portada_home.png'); background-position: center 35%;"
             ></div>
             <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-transparent"></div>
 
@@ -108,8 +119,14 @@ onMounted(() => {
                         class="group flex flex-col items-center"
                     >
                         <!-- Círculo + etiqueta superpuesta -->
-                        <div class="relative flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm transition-all duration-300 group-hover:scale-105 group-hover:border-primary-400 group-hover:shadow-xl">
-                            <CategoriaIcono :slug="cat.slug" :icono="cat.icono" class="h-7 w-7 sm:h-9 sm:w-9 text-gray-700 dark:text-gray-200 group-hover:text-primary-500 transition-colors pb-2" />
+                        <div class="relative flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm transition-all duration-300 group-hover:scale-105 group-hover:border-primary-400 group-hover:shadow-xl overflow-hidden">
+                            <img
+                                v-if="categoriaImagen[cat.slug]"
+                                :src="categoriaImagen[cat.slug]"
+                                :alt="cat.nombre"
+                                class="h-full w-full object-cover"
+                            />
+                            <CategoriaIcono v-else :slug="cat.slug" :icono="cat.icono" class="h-7 w-7 sm:h-9 sm:w-9 text-gray-700 dark:text-gray-200 group-hover:text-primary-500 transition-colors pb-2" />
 
                             <!-- Etiqueta superpuesta abajo -->
                             <span class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 whitespace-nowrap rounded-full bg-white dark:bg-gray-700 px-2.5 sm:px-3 py-0.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wide text-gray-700 dark:text-gray-200 shadow ring-1 ring-gray-200 dark:ring-gray-600 transition-colors group-hover:bg-primary-500 group-hover:text-white group-hover:ring-primary-500">

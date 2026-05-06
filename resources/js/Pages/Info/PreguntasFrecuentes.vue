@@ -11,8 +11,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/>
                     </svg>
                 </div>
-                <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Preguntas frecuentes</h1>
-                <p class="mt-4 text-lg text-teal-100 max-w-2xl mx-auto">Todo lo que necesitas saber sobre Rustikan.</p>
+                <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">{{ t('info.faq.title') }}</h1>
+                <p class="mt-4 text-lg text-teal-100 max-w-2xl mx-auto">{{ t('info.faq.subtitle') }}</p>
             </div>
         </section>
 
@@ -51,17 +51,17 @@
 
                 <!-- CTA -->
                 <div class="mt-8 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 p-6 text-center">
-                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">¿No encuentras lo que buscas?</p>
+                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">{{ t('info.faq.no_answer') }}</p>
                     <div class="flex flex-wrap items-center justify-center gap-3">
                         <Link :href="route('info.contacto')" class="inline-flex items-center gap-2 rounded-full bg-indigo-600 text-white px-6 py-2.5 font-semibold text-sm hover:bg-indigo-700 transition-colors">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
-                            Escríbenos
+                            {{ t('info.faq.contact_us') }}
                         </Link>
                         <button @click="abrirRusti" class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 text-white px-6 py-2.5 font-semibold text-sm hover:from-orange-600 hover:to-pink-600 transition-colors shadow">
                             <span class="text-base">🤖</span>
-                            Pregunta a Rusti
+                            {{ t('info.faq.ask_rusti') }}
                         </button>
                     </div>
                     <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">Rusti es nuestro asistente IA disponible 24/7 para resolver tus dudas al instante.</p>
@@ -75,12 +75,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import FooterPublico from '@/Components/FooterPublico.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
+import { useI18n } from '@/Composables/useI18n';
 useDarkMode();
+
+const { t } = useI18n();
 
 const openItems = ref(new Set());
 
@@ -97,40 +100,40 @@ const abrirRusti = () => {
     window.dispatchEvent(new CustomEvent('rusti:open'));
 };
 
-const faqs = [
+const faqs = computed(() => [
     {
-        categoria: 'Compras y pedidos',
+        categoria: t('info.faq.cat_orders'),
         items: [
-            { q: '¿Cómo realizo un pedido?', a: 'Navega por las tiendas o categorías, añade productos al carrito y completa el proceso de pago. Recibirás una confirmación por email con los detalles de tu pedido.' },
-            { q: '¿Cuánto tarda en llegar mi pedido?', a: 'El tiempo de entrega depende de la tienda y tu ubicación dentro de Lanzarote. Normalmente entre 2 y 24 horas. Cada tienda indica sus plazos habituales.' },
-            { q: '¿Puedo cancelar un pedido?', a: 'Puedes cancelar un pedido siempre que no haya sido confirmado por el productor. Una vez confirmado, contacta directamente con la tienda o con nuestro soporte.' },
-            { q: '¿Cuáles son los métodos de pago?', a: 'Actualmente aceptamos pago con tarjeta de crédito/débito. Próximamente añadiremos más métodos de pago.' },
-            { q: '¿Puedo pedir a varias tiendas en un mismo pedido?', a: 'Sí, puedes añadir productos de varias tiendas en el mismo carrito. Se generará un pedido separado por cada tienda.' },
+            { q: t('info.faq.q1'), a: t('info.faq.a1') },
+            { q: t('info.faq.q2'), a: t('info.faq.a2') },
+            { q: t('info.faq.q3'), a: t('info.faq.a3') },
+            { q: t('info.faq.q4'), a: t('info.faq.a4') },
+            { q: t('info.faq.q5'), a: t('info.faq.a5') },
         ],
     },
     {
-        categoria: 'Cuenta y perfil',
+        categoria: t('info.faq.cat_account'),
         items: [
-            { q: '¿Es gratuito registrarse?', a: 'Sí, crear una cuenta en Rustikan como comprador es completamente gratuito.' },
-            { q: '¿Cómo cambio mi contraseña?', a: 'Desde tu perfil → Configuración → Cambiar contraseña. Si la olvidaste, usa la opción "¿Olvidaste tu contraseña?" en la pantalla de login.' },
-            { q: '¿Puedo eliminar mi cuenta?', a: 'Sí. Desde tu perfil puedes solicitar la eliminación de tu cuenta y todos tus datos personales conforme al RGPD.' },
+            { q: t('info.faq.q6'), a: t('info.faq.a6') },
+            { q: t('info.faq.q7'), a: t('info.faq.a7') },
+            { q: t('info.faq.q8'), a: t('info.faq.a8') },
         ],
     },
     {
-        categoria: 'Para productores',
+        categoria: t('info.faq.cat_producers'),
         items: [
-            { q: '¿Cómo puedo vender en Rustikan?', a: 'Contáctanos a través del formulario de "Vende con nosotros" o eschíbenos a info@rustikan.com. Revisaremos tu solicitud y te configuramos la tienda.' },
-            { q: '¿Tiene coste abrir una tienda?', a: 'El alta es gratuita. Rustikan aplica una pequeña comisión sobre cada venta para mantener la plataforma y los servicios de reparto.' },
-            { q: '¿Quién gestiona las entregas?', a: 'Rustikan cuenta con repartidores locales. También puedes gestionar tus propias entregas si lo prefieres.' },
+            { q: t('info.faq.q9'), a: t('info.faq.a9') },
+            { q: t('info.faq.q10'), a: t('info.faq.a10') },
+            { q: t('info.faq.q11'), a: t('info.faq.a11') },
         ],
     },
     {
-        categoria: 'Asistente IA',
+        categoria: t('info.faq.cat_ai'),
         items: [
-            { q: '¿Qué es Rusti, el asistente de Rustikan?', a: 'Rusti es nuestro asistente virtual potenciado por inteligencia artificial. Puedes acceder a él desde el botón naranja en la esquina inferior derecha de cualquier página. Está disponible 24/7 para ayudarte con dudas sobre productos, pedidos, tiendas y más.' },
-            { q: '¿Qué puede hacer el asistente IA?', a: 'Rusti puede responder preguntas sobre cómo comprar, cómo vender, información sobre categorías y productores locales, estado de pedidos y cualquier duda general sobre la plataforma.' },
-            { q: '¿Guarda el asistente mi conversación?', a: 'La conversación se guarda temporalmente en tu dispositivo para que puedas continuarla si cierras el chat. Al cerrar sesión, el historial se elimina automáticamente.' },
+            { q: t('info.faq.q12'), a: t('info.faq.a12') },
+            { q: t('info.faq.q13'), a: t('info.faq.a13') },
+            { q: t('info.faq.q14'), a: t('info.faq.a14') },
         ],
     },
-];
+]);
 </script>

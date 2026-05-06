@@ -159,20 +159,18 @@ const tabClass = (est) => props.estado === est
             </div>
 
             <!-- Paginación -->
-            <div v-if="solicitudes.last_page > 1" class="mt-6 flex justify-center gap-2">
-                <Link
-                    v-for="link in solicitudes.links.filter(l => !l.label.includes('&laquo;') && !l.label.includes('&raquo;'))"
-                    :key="link.label"
-                    :href="link.url ?? '#'"
-                    :class="['rounded-lg px-3 py-1.5 text-sm transition-colors',
-                        link.active
-                            ? 'bg-primary-500 text-white'
-                            : link.url
-                                ? 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50'
-                                : 'cursor-default opacity-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-400'
-                    ]"
-                    v-html="link.label"
-                />
+            <div v-if="solicitudes.last_page > 1" class="mt-6 flex items-center justify-center gap-4">
+                <Link v-if="solicitudes.prev_page_url" :href="solicitudes.prev_page_url"
+                    class="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                    Anterior
+                </Link>
+                <span v-else class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-400 dark:text-gray-600 cursor-not-allowed">Anterior</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">Pág. {{ solicitudes.current_page }} / {{ solicitudes.last_page }}</span>
+                <Link v-if="solicitudes.next_page_url" :href="solicitudes.next_page_url"
+                    class="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                    Siguiente
+                </Link>
+                <span v-else class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-400 dark:text-gray-600 cursor-not-allowed">Siguiente</span>
             </div>
         </div>
 

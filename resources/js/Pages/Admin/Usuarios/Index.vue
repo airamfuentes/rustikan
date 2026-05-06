@@ -162,24 +162,22 @@
 
                     <!-- Paginación -->
                     <div class="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 sm:px-6">
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between gap-3">
                             <div class="text-sm text-gray-700 dark:text-gray-300">
                                 Mostrando <span class="font-medium">{{ usuarios.from }}</span> a <span class="font-medium">{{ usuarios.to }}</span> de <span class="font-medium">{{ usuarios.total }}</span> resultados
                             </div>
-                            <div class="flex gap-2">
-                                <component
-                                    v-for="link in usuarios.links.filter(l => !l.label.includes('&laquo;') && !l.label.includes('&raquo;'))"
-                                    :key="link.label"
-                                    :is="link.url ? Link : 'span'"
-                                    :href="link.url"
-                                    :class="{
-                                        'bg-primary-600 text-white': link.active,
-                                        'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700': !link.active && link.url,
-                                        'cursor-not-allowed opacity-50': !link.url
-                                    }"
-                                    class="rounded-md border px-3 py-2 text-sm font-medium shadow-sm"
-                                    v-html="link.label"
-                                />
+                            <div class="flex items-center gap-2">
+                                <Link v-if="usuarios.prev_page_url" :href="usuarios.prev_page_url"
+                                    class="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                                    Anterior
+                                </Link>
+                                <span v-else class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-400 dark:text-gray-600 cursor-not-allowed">Anterior</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">Pág. {{ usuarios.current_page }} / {{ usuarios.last_page }}</span>
+                                <Link v-if="usuarios.next_page_url" :href="usuarios.next_page_url"
+                                    class="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                                    Siguiente
+                                </Link>
+                                <span v-else class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-400 dark:text-gray-600 cursor-not-allowed">Siguiente</span>
                             </div>
                         </div>
                     </div>

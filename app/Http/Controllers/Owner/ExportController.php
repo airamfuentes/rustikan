@@ -15,6 +15,26 @@ class ExportController extends Controller
         return auth()->user()->tiendas()->first();
     }
 
+    private function csvResponse(string $filename, array $lines): \Illuminate\Http\Response
+    {
+        $bom = "\xEF\xBB\xBF";
+        return response($bom . implode("\r\n", $lines), 200, [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Cache-Control'       => 'no-store',
+        ]);
+    }
+
+    private function num(float $value): string
+    {
+        return number_format($value, 2, ',', '.');
+    }
+
+    private function cell(string $value): string
+    {
+        return '"' . str_replace('"', '""', $value) . '"';
+    }
+
     /** Beneficios mensuales propietario → CSV */
     public function beneficiosCsv(Request $request)
     {
@@ -37,18 +57,28 @@ class ExportController extends Controller
             ->orderBy('mes')
             ->get();
 
-        $lines = ["Mes,Ingresos brutos (€),Comisión {$comisionPct}% (€),Neto (€),Pedidos"];
+        $lines   = [];
+        $lines[] = $this->cell('INFORME DE BENEFICIOS — ' . strtoupper($tienda->nombre));
+        $lines[] = 'Generado: ' . now()->format('d/m/Y H:i') . ';Comisión plataforma: ' . $comisionPct . '%';
+        $lines[] = '';
+        $lines[] = "Mes;Ingresos Brutos (€);Comisión {$comisionPct}% (€);Beneficio Neto (€);Nº Pedidos";
+
+        $totalBruto = 0; $totalPedidos = 0;
         foreach ($rows as $r) {
-            $bruto    = round((float) $r->bruto, 2);
+            $bruto    = (float) $r->bruto;
             $comision = round($bruto * $comisionPct / 100, 2);
             $neto     = round($bruto - $comision, 2);
-            $lines[]  = "{$r->mes},{$bruto},{$comision},{$neto},{$r->pedidos}";
+            $totalBruto   += $bruto;
+            $totalPedidos += (int) $r->pedidos;
+            $lines[] = "{$r->mes};{$this->num($bruto)};{$this->num($comision)};{$this->num($neto)};{$r->pedidos}";
         }
 
-        return response(implode("\n", $lines), 200, [
-            'Content-Type'        => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="beneficios_' . date('Y-m-d') . '.csv"',
-        ]);
+        $lines[] = '';
+        $totalCom = round($totalBruto * $comisionPct / 100, 2);
+        $totalNet = round($totalBruto - $totalCom, 2);
+        $lines[] = "TOTAL;{$this->num($totalBruto)};{$this->num($totalCom)};{$this->num($totalNet)};{$totalPedidos}";
+
+        return $this->csvResponse('beneficios_' . date('Y-m-d') . '.csv', $lines);
     }
 
     /** Pedidos del propietario → CSV */
@@ -62,19 +92,29 @@ class ExportController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        $lines = ["ID Pedido,Producto,Cliente,Estado,Cantidad,Precio unitario (€),Subtotal (€),Fecha"];
+        $lines   = [];
+        $lines[] = $this->cell('PEDIDOS — ' . strtoupper($tienda->nombre));
+        $lines[] = 'Generado: ' . now()->format('d/m/Y H:i') . ';Total registros: ' . $items->count();
+        $lines[] = '';
+        $lines[] = 'Nº Pedido;Producto;Cliente;Estado;Cantidad;Precio Unitario (€);Subtotal (€);Fecha';
+
+        $totalGeneral = 0;
         foreach ($items as $item) {
-            $producto = '"' . str_replace('"', '""', $item->producto_nombre ?? ($item->producto?->nombre ?? '')) . '"';
-            $cliente  = '"' . str_replace('"', '""', $item->pedido?->user?->name ?? 'Desconocido') . '"';
-            $lines[]  = "#{$item->pedido_id},{$producto},{$cliente},{$item->pedido?->estado},{$item->cantidad},"
-                . number_format((float) $item->precio_unitario, 2, '.', '') . ','
-                . number_format((float) $item->subtotal, 2, '.', '') . ','
+            $num = $item->pedido ? ($item->pedido->numero_pedido ?? ('#' . $item->pedido_id)) : ('#' . $item->pedido_id);
+            $totalGeneral += (float) $item->subtotal;
+            $lines[] = $this->cell($num) . ';'
+                . $this->cell($item->producto_nombre ?? ($item->producto?->nombre ?? '')) . ';'
+                . $this->cell($item->pedido?->user?->name ?? 'Desconocido') . ';'
+                . $this->cell(ucfirst($item->pedido?->estado ?? '')) . ';'
+                . $item->cantidad . ';'
+                . $this->num((float) $item->precio_unitario) . ';'
+                . $this->num((float) $item->subtotal) . ';'
                 . $item->created_at->format('d/m/Y H:i');
         }
 
-        return response(implode("\n", $lines), 200, [
-            'Content-Type'        => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="mis_pedidos_' . date('Y-m-d') . '.csv"',
-        ]);
+        $lines[] = '';
+        $lines[] = ';;TOTAL VENDIDO;;;;' . $this->num($totalGeneral) . ';';
+
+        return $this->csvResponse('mis_pedidos_' . date('Y-m-d') . '.csv', $lines);
     }
 }

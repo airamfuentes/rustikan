@@ -46,13 +46,15 @@ watch(() => envioForm.value.cp, async (cp) => {
     if (!/^\d{5}$/.test(cp)) return;
     buscandoLocalidad.value = true;
     try {
-        const res  = await fetch(`https://nominatim.openstreetmap.org/search?format=json&country=es&postalcode=${cp}&limit=1`, {
-            headers: { 'Accept-Language': 'es' },
+        const res  = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&country=es&postalcode=${cp}&limit=1`, {
+            headers: { 'Accept-Language': 'es', 'User-Agent': 'Rustikan/1.0' },
         });
         const data = await res.json();
         if (data.length > 0) {
-            const parts = data[0].display_name.split(',');
-            envioForm.value.localidad = parts[0]?.trim() ?? '';
+            const addr = data[0].address ?? {};
+            // Pick the most specific locality available
+            const localidad = addr.city || addr.town || addr.village || addr.municipality || addr.county || addr.state_district || '';
+            if (localidad) envioForm.value.localidad = localidad;
         }
     } catch { /* silently fail */ } finally {
         buscandoLocalidad.value = false;
@@ -553,6 +555,7 @@ const stepTitle = computed(() => ({
                                     type="text"
                                     :placeholder="t('checkout.street')"
                                     autocomplete="street-address"
+                                    maxlength="100"
                                     :class="['w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2',
                                         errores.calle ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
                                         'dark:bg-gray-700 dark:text-white dark:placeholder-gray-500']"
@@ -568,6 +571,7 @@ const stepTitle = computed(() => ({
                                         type="text"
                                         :placeholder="t('checkout.number')"
                                         autocomplete="address-line2"
+                                        maxlength="10"
                                         :class="['w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2',
                                             errores.numero ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
                                             'dark:bg-gray-700 dark:text-white dark:placeholder-gray-500']"
@@ -579,6 +583,7 @@ const stepTitle = computed(() => ({
                                         v-model="envioForm.puerta"
                                         type="text"
                                         :placeholder="t('checkout.door')"
+                                        maxlength="20"
                                         class="w-full rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500 px-4 py-3 text-sm outline-none transition focus:border-primary-400 focus:ring-2 focus:ring-primary-200"
                                     />
                                 </div>
@@ -593,6 +598,8 @@ const stepTitle = computed(() => ({
                                             type="text"
                                             inputmode="numeric"
                                             maxlength="5"
+                                            pattern="[0-9]{5}"
+                                            @input="envioForm.cp = $event.target.value.replace(/\D/g, '').slice(0, 5)"
                                             :placeholder="t('checkout.postal_code')"
                                             autocomplete="postal-code"
                                             :class="['w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2',
@@ -614,6 +621,7 @@ const stepTitle = computed(() => ({
                                         type="text"
                                         :placeholder="t('checkout.city')"
                                         autocomplete="address-level2"
+                                        maxlength="80"
                                         :class="['w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2',
                                             errores.localidad ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
                                             'dark:bg-gray-700 dark:text-white dark:placeholder-gray-500']"
@@ -631,6 +639,8 @@ const stepTitle = computed(() => ({
                             <input
                                 v-model="envioForm.telefono_contacto"
                                 type="tel"
+                                inputmode="tel"
+                                maxlength="20"
                                 placeholder="+34 600 000 000"
                                 :class="['w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2',
                                     errores.telefono_contacto ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
@@ -647,6 +657,7 @@ const stepTitle = computed(() => ({
                             <textarea
                                 v-model="envioForm.notas"
                                 rows="2"
+                                maxlength="500"
                                 placeholder="Instrucciones de entrega, alergias, preferencias…"
                                 class="w-full resize-none rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500 px-4 py-3 text-sm outline-none transition focus:border-primary-400 focus:ring-2 focus:ring-primary-200"
                             />

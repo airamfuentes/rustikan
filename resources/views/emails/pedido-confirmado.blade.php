@@ -152,4 +152,17 @@
             Tu compra hace posible que los productores de la isla sigan adelante.
         </p>
     </div>
+
+    <!-- Invoice button -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:28px;">
+        <tr>
+            <td align="center">
+                <a href="{{ route('factura.show', $pedido->id) }}"
+                   style="display:inline-block;background:linear-gradient(135deg,#ea580c,#f97316);color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;border-radius:10px;padding:14px 32px;letter-spacing:0.3px;">
+                    Ver / Descargar factura
+                </a>
+                <p style="margin:10px 0 0;font-size:11px;color:#9CA3AF;">Puedes imprimir o guardar la factura como PDF desde esa página.</p>
+            </td>
+        </tr>
+    </table>
 @endsection

@@ -196,55 +196,22 @@
                         </div>
 
                         <!-- Paginación -->
-                        <div v-if="tiendas.data.length > 0" class="mt-6 flex items-center justify-between border-t border-gray-200 pt-6">
-                            <div class="flex flex-1 justify-between sm:hidden">
-                                <Link
-                                    v-if="tiendas.prev_page_url"
-                                    :href="tiendas.prev_page_url"
-                                    class="relative inline-flex items-center rounded-md border border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                                >
+                        <div v-if="tiendas.last_page > 1" class="mt-6 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
+                            <p class="text-sm text-gray-700 dark:text-gray-300">
+                                Mostrando <span class="font-medium">{{ tiendas.from }}</span> a <span class="font-medium">{{ tiendas.to }}</span> de <span class="font-medium">{{ tiendas.total }}</span> resultados
+                            </p>
+                            <div class="flex items-center gap-2">
+                                <Link v-if="tiendas.prev_page_url" :href="tiendas.prev_page_url"
+                                    class="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                                     Anterior
                                 </Link>
-                                <Link
-                                    v-if="tiendas.next_page_url"
-                                    :href="tiendas.next_page_url"
-                                    class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                                >
+                                <span v-else class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-400 dark:text-gray-600 cursor-not-allowed">Anterior</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">Pág. {{ tiendas.current_page }} / {{ tiendas.last_page }}</span>
+                                <Link v-if="tiendas.next_page_url" :href="tiendas.next_page_url"
+                                    class="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                                     Siguiente
                                 </Link>
-                            </div>
-                            <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-                                <div>
-                                    <p class="text-sm text-gray-700 dark:text-gray-300">
-                                        Mostrando
-                                        <span class="font-medium">{{ tiendas.from }}</span>
-                                        a
-                                        <span class="font-medium">{{ tiendas.to }}</span>
-                                        de
-                                        <span class="font-medium">{{ tiendas.total }}</span>
-                                        resultados
-                                    </p>
-                                </div>
-                                <div>
-                                    <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-                                        <component
-                                            v-for="(link, index) in tiendas.links.filter(l => !l.label.includes('&laquo;') && !l.label.includes('&raquo;'))"
-                                            :key="index"
-                                            :is="link.url ? Link : 'span'"
-                                            :href="link.url"
-                                            v-html="link.label"
-                                            :class="[
-                                                'relative inline-flex items-center px-4 py-2 text-sm font-medium',
-                                                link.active
-                                                    ? 'z-10 bg-primary-600 text-white'
-                                                    : 'bg-white text-gray-700 hover:bg-gray-50',
-                                                index === 0 ? 'rounded-l-md' : '',
-                                                index === tiendas.links.length - 1 ? 'rounded-r-md' : '',
-                                                !link.url ? 'cursor-not-allowed opacity-50' : ''
-                                            ]"
-                                        />
-                                    </nav>
-                                </div>
+                                <span v-else class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-400 dark:text-gray-600 cursor-not-allowed">Siguiente</span>
                             </div>
                         </div>
                     </div>

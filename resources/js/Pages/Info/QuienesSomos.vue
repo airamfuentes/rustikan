@@ -11,9 +11,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
                     </svg>
                 </div>
-                <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Quiénes somos</h1>
+                <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">{{ t('info.about.title') }}</h1>
                 <p class="mx-auto mt-4 max-w-2xl text-lg text-primary-100">
-                    Somos un equipo apasionado por el comercio local y el bienestar de nuestra isla.
+                    {{ t('info.about.subtitle') }}
                 </p>
             </div>
         </section>
@@ -24,7 +24,7 @@
 
                 <!-- Historia -->
                 <div class="mb-16">
-                    <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Nuestra historia</h2>
+                    <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">{{ t('info.about.history') }}</h2>
                     <div class="space-y-4 text-base leading-relaxed text-gray-600 dark:text-gray-400">
                         <p>
                             Rustikan nació en Lanzarote con una idea sencilla pero poderosa: hacer que los productos locales lleguen más fácilmente a quienes los buscan. Vivimos en una isla con una riqueza agrícola y artesanal extraordinaria — viñedos en La Geria, quesos artesanales, miel de abeja, aloe vera, verduras de volcán — pero muchos de estos productores tenían dificultades para encontrar a sus clientes más allá del mercadillo del pueblo.
@@ -37,7 +37,7 @@
 
                 <!-- Valores -->
                 <div class="mb-16">
-                    <h2 class="mb-8 text-2xl font-bold text-gray-900 dark:text-white">Nuestros valores</h2>
+                    <h2 class="mb-8 text-2xl font-bold text-gray-900 dark:text-white">{{ t('info.about.values') }}</h2>
                     <div class="grid gap-6 sm:grid-cols-3">
                         <div class="rounded-2xl bg-primary-50 p-6 text-center dark:bg-primary-900/20">
                             <Sprout class="mx-auto mb-3 h-10 w-10 text-primary-600 dark:text-primary-400" />
@@ -59,7 +59,7 @@
 
                 <!-- Equipo -->
                 <div>
-                    <h2 class="mb-8 text-2xl font-bold text-gray-900 dark:text-white">El equipo</h2>
+                    <h2 class="mb-8 text-2xl font-bold text-gray-900 dark:text-white">{{ t('info.about.team') }}</h2>
                     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         <div class="flex flex-col items-center rounded-2xl border border-gray-100 bg-gray-50 p-6 text-center dark:border-gray-700 dark:bg-gray-800">
                             <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary-600 text-2xl font-bold text-white">A</div>
@@ -89,6 +89,9 @@ import { Head } from '@inertiajs/vue3';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import FooterPublico from '@/Components/FooterPublico.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
+import { useI18n } from '@/Composables/useI18n';
 import { Sprout, Handshake, Palmtree } from 'lucide-vue-next';
 useDarkMode();
+
+const { t } = useI18n();
 </script>

@@ -204,29 +204,25 @@
 
                     <!-- Paginación -->
                     <div class="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 sm:px-6">
-                        <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <div class="flex items-center justify-between gap-3">
                             <div class="text-sm text-gray-700 dark:text-gray-300">
                                 Mostrando
                                 <span class="font-medium">{{ pedidos.from ?? 0 }}</span> a
                                 <span class="font-medium">{{ pedidos.to ?? 0 }}</span> de
                                 <span class="font-medium">{{ pedidos.total }}</span> pedidos
                             </div>
-                            <div class="flex flex-wrap items-center gap-1">
-                                <template v-for="link in pedidos.links.filter(l => !l.label.includes('&laquo;') && !l.label.includes('&raquo;'))" :key="link.label">
-                                    <component
-                                        :is="link.url ? Link : 'span'"
-                                        :href="link.url ?? undefined"
-                                        v-html="link.label"
-                                        :class="[
-                                            'inline-flex items-center justify-center min-w-[2.2rem] h-9 px-3 rounded-lg text-sm font-medium transition-colors border',
-                                            link.active
-                                                ? 'bg-primary-600 text-white border-primary-600 shadow-sm'
-                                                : link.url
-                                                    ? 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
-                                                    : 'bg-gray-100 dark:bg-gray-700/50 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-700 cursor-not-allowed'
-                                        ]"
-                                    />
-                                </template>
+                            <div class="flex items-center gap-2">
+                                <Link v-if="pedidos.prev_page_url" :href="pedidos.prev_page_url"
+                                    class="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                                    Anterior
+                                </Link>
+                                <span v-else class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-400 dark:text-gray-600 cursor-not-allowed">Anterior</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">Pág. {{ pedidos.current_page }} / {{ pedidos.last_page }}</span>
+                                <Link v-if="pedidos.next_page_url" :href="pedidos.next_page_url"
+                                    class="rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                                    Siguiente
+                                </Link>
+                                <span v-else class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-400 dark:text-gray-600 cursor-not-allowed">Siguiente</span>
                             </div>
                         </div>
                     </div>

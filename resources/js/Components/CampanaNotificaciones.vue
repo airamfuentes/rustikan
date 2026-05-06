@@ -135,12 +135,14 @@ const getCsrfToken = () =>
     ?? document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('XSRF-TOKEN='))?.split('=')[1]
     ?? '';
 
+// Track whether notifications were loaded (even if already cleared locally)
+const notificacionesCargadas = ref(false);
+
 const toggle = async () => {
     abierto.value = !abierto.value;
     if (abierto.value) {
         await cargar();
     } else if (notificaciones.value.length > 0) {
-        // Al cerrar tras haber visto las notis: borrarlas todas
         await marcarTodas();
     }
 };
@@ -154,6 +156,7 @@ const cargar = async () => {
         const data = await res.json();
         notificaciones.value = data.notificaciones ?? [];
         count.value = data.no_leidas ?? 0;
+        if (notificaciones.value.length > 0) notificacionesCargadas.value = true;
     } catch (e) {
         // silently fail
     } finally {
@@ -161,35 +164,36 @@ const cargar = async () => {
     }
 };
 
+const notifHeaders = () => ({
+    'Accept': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
+    'X-CSRF-TOKEN': getCsrfToken(),
+});
+
 const abrirNotificacion = async (n) => {
-    // Marcar como leída → la borra del backend
-    await fetch(route('notificaciones.leer', n.id), {
+    fetch(route('notificaciones.leer', n.id), {
         method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': getCsrfToken(),
-        },
+        keepalive: true,
+        headers: notifHeaders(),
     });
     notificaciones.value = notificaciones.value.filter(x => x.id !== n.id);
     count.value = Math.max(0, count.value - 1);
     abierto.value = false;
+    notificacionesCargadas.value = notificaciones.value.length > 0;
     if (n.enlace) {
         router.visit(n.enlace);
     }
 };
 
 const marcarTodas = async () => {
-    await fetch(route('notificaciones.leer-todas'), {
+    fetch(route('notificaciones.leer-todas'), {
         method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': getCsrfToken(),
-        },
+        keepalive: true,
+        headers: notifHeaders(),
     });
     notificaciones.value = [];
     count.value = 0;
+    notificacionesCargadas.value = false;
 };
 
 const formatDate = (dateStr) => {
@@ -215,16 +219,12 @@ const handleOutsideClick = (e) => {
 onMounted(() => document.addEventListener('mousedown', handleOutsideClick));
 onBeforeUnmount(() => {
     document.removeEventListener('mousedown', handleOutsideClick);
-    if (abierto.value && notificaciones.value.length > 0) {
-        // keepalive ensures the request survives Inertia navigation
+    // Always fire if there are unread notifications (keepalive survives navigation)
+    if (count.value > 0) {
         fetch(route('notificaciones.leer-todas'), {
             method: 'POST',
             keepalive: true,
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': getCsrfToken(),
-            },
+            headers: notifHeaders(),
         });
     }
 });

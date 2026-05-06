@@ -18,16 +18,16 @@ class ResenaController extends Controller
             return back()->with('error', 'Solo los clientes pueden dejar reseñas.');
         }
 
-        // Verificar que el usuario tiene al menos un pedido entregado/completado en esta tienda
+        // Verificar que el usuario tiene al menos un pedido (cualquier estado excepto cancelado)
         $tienePedido = PedidoItem::where('tienda_id', $tienda->id)
             ->whereHas('pedido', function ($q) use ($user) {
                 $q->where('user_id', $user->id)
-                  ->whereIn('estado', ['entregado', 'completado']);
+                  ->whereNotIn('estado', ['cancelado']);
             })
             ->exists();
 
         if (!$tienePedido) {
-            return back()->with('error', 'Solo puedes reseñar una tienda donde hayas recibido un pedido completado.');
+            return back()->with('error', 'Solo puedes reseñar una tienda donde hayas realizado un pedido.');
         }
 
         $validated = $request->validate([

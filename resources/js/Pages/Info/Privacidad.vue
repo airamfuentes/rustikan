@@ -11,7 +11,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
                     </svg>
                 </div>
-                <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Política de privacidad</h1>
+                <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">{{ t('info.privacy.title') }}</h1>
                 <p class="mt-3 text-sm text-gray-400">Última actualización: {{ fechaActualizacion }}</p>
             </div>
         </section>
@@ -66,7 +66,10 @@ import { Head } from '@inertiajs/vue3';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import FooterPublico from '@/Components/FooterPublico.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
+import { useI18n } from '@/Composables/useI18n';
 useDarkMode();
+
+const { t } = useI18n();
 
 const fechaActualizacion = '30 de abril de 2025';
 

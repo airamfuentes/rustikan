@@ -11,9 +11,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
                     </svg>
                 </div>
-                <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Nuestra misión</h1>
+                <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">{{ t('info.mission.title') }}</h1>
                 <p class="mx-auto mt-4 max-w-2xl text-lg text-emerald-100">
-                    Impulsar el comercio local de Lanzarote conectando a productores y consumidores de forma directa, justa y sostenible.
+                    {{ t('info.mission.subtitle') }}
                 </p>
             </div>
         </section>
@@ -40,7 +40,7 @@
 
                 <!-- Compromisos -->
                 <div class="mb-16 mt-12">
-                    <h2 class="mb-8 text-2xl font-bold text-gray-900 dark:text-white">Nuestros compromisos</h2>
+                    <h2 class="mb-8 text-2xl font-bold text-gray-900 dark:text-white">{{ t('info.mission.commitments') }}</h2>
                     <div class="space-y-4">
                         <div v-for="item in compromisos" :key="item.titulo"
                              class="flex items-start gap-4 rounded-xl border border-gray-100 bg-gray-50 p-5 dark:border-gray-700 dark:bg-gray-800">
@@ -87,9 +87,12 @@ import { Head } from '@inertiajs/vue3';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import FooterPublico from '@/Components/FooterPublico.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
+import { useI18n } from '@/Composables/useI18n';
 import { useCountUp } from '@/Composables/useCountUp';
 import { Leaf, Coins, Search, Truck, Recycle, Palmtree } from 'lucide-vue-next';
 useDarkMode();
+
+const { t } = useI18n();
 
 const statRef = ref(null);
 const { count, observe } = useCountUp(100);

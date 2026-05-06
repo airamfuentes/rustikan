@@ -224,7 +224,7 @@
             ← Volver
         </a>
         <button class="btn-print" onclick="window.print()">
-            🖨️ Imprimir / Guardar PDF
+            Imprimir / Guardar como PDF
         </button>
     </div>
 
@@ -232,7 +232,7 @@
         <!-- Cabecera -->
         <div class="invoice-header">
             <div>
-                <div class="brand-name">🌿 Rustikan</div>
+                <div class="brand-name">Rustikan</div>
                 <div class="brand-tagline">Productos locales de Lanzarote</div>
             </div>
             <div class="invoice-meta">
@@ -319,10 +319,9 @@
         <div class="invoice-footer">
             <div>
                 <div class="footer-brand">Rustikan</div>
-                <div>Lanzarote, Islas Canarias — rustikan.local</div>
+                <div>Lanzarote, Islas Canarias</div>
             </div>
             <div style="text-align:right;">
-                <div>NIF: B-XXXXXXXX</div>
                 <div>Generado el {{ now()->format('d/m/Y') }}</div>
             </div>
         </div>

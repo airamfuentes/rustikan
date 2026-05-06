@@ -25,13 +25,13 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z"/>
                     </svg>
                 </div>
-                <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Vende con nosotros</h1>
+                <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">{{ t('info.sell.title') }}</h1>
                 <p class="mt-4 text-xl text-primary-100 max-w-2xl mx-auto">
-                    Abre tu tienda en Rustikan y lleva tus productos locales a más personas de Lanzarote.
+                    {{ t('info.sell.subtitle') }}
                 </p>
                 <a href="#solicitar"
                     class="mt-8 inline-block rounded-full bg-white text-primary-700 px-8 py-3 font-bold text-sm hover:bg-primary-50 transition-colors shadow-lg">
-                    Solicitar mi tienda →
+                    {{ t('info.sell.request_btn') }}
                 </a>
             </div>
         </section>
@@ -40,7 +40,7 @@
         <section class="py-16 bg-white dark:bg-gray-900">
             <div class="mx-auto max-w-5xl px-4 sm:px-6">
 
-                <h2 class="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">¿Por qué vender en Rustikan?</h2>
+                <h2 class="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">{{ t('info.sell.why_title') }}</h2>
                 <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-16">
                     <div v-for="b in beneficios" :key="b.titulo" class="rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-6">
                         <div class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400">
@@ -52,7 +52,7 @@
                 </div>
 
                 <!-- Proceso -->
-                <h2 class="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">¿Cómo funciona?</h2>
+                <h2 class="text-2xl font-bold text-center text-gray-900 dark:text-white mb-10">{{ t('info.sell.how_title') }}</h2>
                 <div class="relative mb-16">
                     <div class="absolute left-6 top-0 bottom-0 w-px bg-primary-200 dark:bg-primary-800 hidden sm:block"></div>
                     <div class="space-y-8">
@@ -77,45 +77,45 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-amber-800 dark:text-amber-200 mb-2">Inicia sesión para solicitar tu tienda</h3>
+                        <h3 class="text-xl font-bold text-amber-800 dark:text-amber-200 mb-2">{{ t('info.sell.login_required') }}</h3>
                         <p class="text-sm text-amber-700 dark:text-amber-300 mb-6">
-                            Necesitas una cuenta en Rustikan para enviar tu solicitud. Es rápido y gratuito.
+                            {{ t('info.sell.login_desc') }}
                         </p>
                         <div class="flex flex-wrap items-center justify-center gap-3">
                             <Link :href="route('login')"
                                   class="rounded-xl bg-primary-600 px-6 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-primary-700">
-                                Iniciar sesión
+                                {{ t('info.sell.login_btn') }}
                             </Link>
                             <Link :href="route('register')"
                                   class="rounded-xl border border-primary-300 dark:border-primary-700 bg-white dark:bg-gray-800 px-6 py-2.5 text-sm font-bold text-primary-700 dark:text-primary-300 shadow-sm transition hover:bg-primary-50 dark:hover:bg-gray-700">
-                                Crear cuenta gratis
+                                {{ t('info.sell.register_btn') }}
                             </Link>
                         </div>
                     </div>
 
                     <!-- Formulario (sesión activa) -->
                     <div v-if="user" class="rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-8">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1">Solicita tu tienda en Rustikan</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-8">Rellena el formulario y nos ponemos en contacto contigo en 48 horas.</p>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1">{{ t('info.sell.form_title') }}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-8">{{ t('info.sell.form_subtitle') }}</p>
 
                         <form @submit.prevent="enviar" class="space-y-6">
                             <!-- Fila 1: Nombre tienda + categoría -->
                             <div class="grid gap-4 sm:grid-cols-2">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        Nombre de la tienda <span class="text-red-500">*</span>
+                                        {{ t('info.sell.store_name') }} <span class="text-red-500">*</span>
                                     </label>
                                     <input v-model="form.nombre_tienda" type="text" required maxlength="120"
-                                        placeholder="Ej: Miel de Lanzarote"
+                                        :placeholder="t('info.sell.store_name_placeholder')"
                                         :class="inputClass(form.errors.nombre_tienda)" />
                                     <p v-if="form.errors.nombre_tienda" class="mt-1 text-xs text-red-500">{{ form.errors.nombre_tienda }}</p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        Categoría <span class="text-red-500">*</span>
+                                        {{ t('info.sell.category') }} <span class="text-red-500">*</span>
                                     </label>
                                     <select v-model="form.categoria" required :class="inputClass(form.errors.categoria)">
-                                        <option value="" disabled>Selecciona una categoría</option>
+                                        <option value="" disabled>{{ t('info.sell.category_placeholder') }}</option>
                                         <option v-for="c in categorias" :key="c" :value="c">{{ c }}</option>
                                     </select>
                                     <p v-if="form.errors.categoria" class="mt-1 text-xs text-red-500">{{ form.errors.categoria }}</p>
@@ -126,10 +126,10 @@
                             <div class="grid gap-4 sm:grid-cols-2">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        Nombre de contacto <span class="text-red-500">*</span>
+                                        {{ t('info.sell.contact_name') }} <span class="text-red-500">*</span>
                                     </label>
                                     <input v-model="form.nombre_contacto" type="text" required maxlength="120"
-                                        placeholder="Tu nombre y apellidos"
+                                        :placeholder="t('info.sell.contact_name_placeholder')"
                                         :class="inputClass(form.errors.nombre_contacto)" />
                                     <p v-if="form.errors.nombre_contacto" class="mt-1 text-xs text-red-500">{{ form.errors.nombre_contacto }}</p>
                                 </div>
@@ -147,15 +147,15 @@
                             <!-- Fila 3: Teléfono + municipio -->
                             <div class="grid gap-4 sm:grid-cols-2">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Teléfono</label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('info.sell.phone') }}</label>
                                     <input v-model="form.telefono" type="tel" maxlength="20"
-                                        placeholder="Ej: 628 000 000"
+                                        :placeholder="t('info.sell.phone_placeholder')"
                                         :class="inputClass(form.errors.telefono)" />
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Municipio</label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('info.sell.municipality') }}</label>
                                     <select v-model="form.municipio" :class="inputClass(form.errors.municipio)">
-                                        <option value="">-- Selecciona --</option>
+                                        <option value="">{{ t('info.sell.municipality_placeholder') }}</option>
                                         <option v-for="m in municipios" :key="m" :value="m">{{ m }}</option>
                                     </select>
                                 </div>
@@ -163,22 +163,22 @@
 
                             <!-- Dirección -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dirección</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('info.sell.address') }}</label>
                                 <input v-model="form.direccion" type="text" maxlength="200"
-                                    placeholder="Calle, número, localidad..."
+                                    :placeholder="t('info.sell.address_placeholder')"
                                     :class="inputClass(form.errors.direccion)" />
                             </div>
 
                             <!-- Fila: web + instagram -->
                             <div class="grid gap-4 sm:grid-cols-2">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Página web</label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('info.sell.website') }}</label>
                                     <input v-model="form.web" type="url" maxlength="200"
                                         placeholder="https://..."
                                         :class="inputClass(form.errors.web)" />
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Instagram</label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('info.sell.instagram') }}</label>
                                     <div class="flex">
                                         <span :class="['flex items-center rounded-l-xl border border-r-0 px-3 text-sm text-gray-500', isDark ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-200']">@</span>
                                         <input v-model="form.instagram" type="text" maxlength="80"
@@ -191,10 +191,10 @@
                             <!-- Descripción de la tienda -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Descripción de tu negocio <span class="text-red-500">*</span>
+                                    {{ t('info.sell.description') }} <span class="text-red-500">*</span>
                                 </label>
                                 <textarea v-model="form.descripcion" required rows="3" minlength="20" maxlength="1000"
-                                    placeholder="¿Qué haces? ¿De dónde eres? ¿Cuánto llevas en el sector?..."
+                                    :placeholder="t('info.sell.description_placeholder')"
                                     :class="['resize-none', inputClass(form.errors.descripcion)]"></textarea>
                                 <div class="flex justify-between mt-1">
                                     <p v-if="form.errors.descripcion" class="text-xs text-red-500">{{ form.errors.descripcion }}</p>
@@ -205,10 +205,10 @@
                             <!-- Productos que vende -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Productos que vendes <span class="text-red-500">*</span>
+                                    {{ t('info.sell.products_label') }} <span class="text-red-500">*</span>
                                 </label>
                                 <textarea v-model="form.productos_descripcion" required rows="3" minlength="20" maxlength="1000"
-                                    placeholder="Describe qué productos ofrecerías: tipos, formatos, precio aproximado, estacionalidad..."
+                                    :placeholder="t('info.sell.products_placeholder')"
                                     :class="['resize-none', inputClass(form.errors.productos_descripcion)]"></textarea>
                                 <div class="flex justify-between mt-1">
                                     <p v-if="form.errors.productos_descripcion" class="text-xs text-red-500">{{ form.errors.productos_descripcion }}</p>
@@ -219,7 +219,7 @@
                             <!-- Submit -->
                             <div class="flex items-center justify-end gap-3 pt-2">
                                 <p class="text-xs text-gray-400 flex-1">
-                                    Al enviar aceptas que procesemos tus datos para gestionar tu solicitud.
+                                    {{ t('info.sell.terms_note') }}
                                 </p>
                                 <button
                                     type="submit"
@@ -230,7 +230,7 @@
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                                     </svg>
-                                    {{ form.processing ? 'Enviando...' : 'Enviar solicitud' }}
+                                    {{ form.processing ? t('info.sell.submitting') : t('info.sell.submit') }}
                                 </button>
                             </div>
                         </form>
@@ -251,8 +251,10 @@ import NavbarPublico from '@/Components/NavbarPublico.vue';
 import FooterPublico from '@/Components/FooterPublico.vue';
 import Toast from '@/Components/Toast.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
+import { useI18n } from '@/Composables/useI18n';
 import { Gift, Smartphone, CreditCard, Package, BarChart3, Globe } from 'lucide-vue-next';
 
+const { t } = useI18n();
 const { isDark } = useDarkMode();
 const page = usePage();
 

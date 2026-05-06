@@ -73,12 +73,8 @@ Route::get('/tienda/{tienda:slug}', function (\App\Models\Tienda $tienda) {
     $user = auth()->user();
     if ($user && $user->role === 'user') {
         $userReview = $tienda->resenas()->where('user_id', $user->id)->first();
-        if (!$userReview) {
-            $canReview = \App\Models\PedidoItem::where('tienda_id', $tienda->id)
-                ->whereHas('pedido', fn($q) => $q->where('user_id', $user->id)
-                    ->whereIn('estado', ['entregado', 'completado']))
-                ->exists();
-        }
+        // Cualquier usuario puede intentar escribir una reseña; la validación real está en el controller
+        $canReview = !$userReview;
     }
 
     return Inertia::render('TiendaDetalle', [

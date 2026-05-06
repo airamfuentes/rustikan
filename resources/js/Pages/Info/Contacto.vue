@@ -16,9 +16,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>
                     </svg>
                 </div>
-                <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Contacto</h1>
+                <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">{{ t('info.contact.title') }}</h1>
                 <p class="mt-4 text-lg text-sky-100 max-w-2xl mx-auto">
-                    ¿Tienes alguna pregunta, sugerencia o quieres unirte al proyecto? Escríbenos.
+                    {{ t('info.contact.subtitle') }}
                 </p>
             </div>
         </section>
@@ -30,48 +30,48 @@
 
                     <!-- Formulario -->
                     <div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Envíanos un mensaje</h2>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">{{ t('info.contact.form_title') }}</h2>
                         <form @submit.prevent="enviar" class="space-y-5">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre *</label>
-                                <input v-model="form.nombre" type="text" required placeholder="Tu nombre completo"
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('info.contact.name') }}</label>
+                                <input v-model="form.nombre" type="text" required :placeholder="t('info.contact.name_placeholder')"
                                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500" />
                                 <p v-if="form.errors.nombre" class="mt-1 text-xs text-red-500">{{ form.errors.nombre }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email *</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('info.contact.email') }}</label>
                                 <input v-model="form.email" type="email" required placeholder="tu@email.com"
                                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500" />
                                 <p v-if="form.errors.email" class="mt-1 text-xs text-red-500">{{ form.errors.email }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Asunto *</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('info.contact.subject') }}</label>
                                 <select v-model="form.asunto" required class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                    <option value="">Selecciona un asunto</option>
-                                    <option value="productor">Quiero ser productor</option>
-                                    <option value="repartidor">Quiero ser repartidor</option>
-                                    <option value="soporte">Soporte técnico</option>
-                                    <option value="colaboracion">Colaboración</option>
-                                    <option value="otro">Otro</option>
+                                    <option value="">{{ t('info.contact.subject_placeholder') }}</option>
+                                    <option value="productor">{{ t('info.contact.subject_producer') }}</option>
+                                    <option value="repartidor">{{ t('info.contact.subject_delivery') }}</option>
+                                    <option value="soporte">{{ t('info.contact.subject_support') }}</option>
+                                    <option value="colaboracion">{{ t('info.contact.subject_collaboration') }}</option>
+                                    <option value="otro">{{ t('info.contact.subject_other') }}</option>
                                 </select>
                                 <p v-if="form.errors.asunto" class="mt-1 text-xs text-red-500">{{ form.errors.asunto }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mensaje *</label>
-                                <textarea v-model="form.mensaje" required rows="5" placeholder="Cuéntanos en qué podemos ayudarte..."
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ t('info.contact.message') }}</label>
+                                <textarea v-model="form.mensaje" required rows="5" :placeholder="t('info.contact.message_placeholder')"
                                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"></textarea>
                                 <p v-if="form.errors.mensaje" class="mt-1 text-xs text-red-500">{{ form.errors.mensaje }}</p>
                             </div>
                             <button type="submit" :disabled="form.processing"
                                 class="w-full rounded-lg bg-primary-600 px-6 py-3 font-semibold text-white hover:bg-primary-700 disabled:opacity-50 transition-colors">
-                                {{ form.processing ? 'Enviando...' : 'Enviar mensaje' }}
+                                {{ form.processing ? t('info.contact.sending') : t('info.contact.send') }}
                             </button>
                         </form>
                     </div>
 
                     <!-- Info de contacto -->
                     <div class="space-y-6">
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Información de contacto</h2>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">{{ t('info.contact.info_title') }}</h2>
 
                         <div class="flex gap-4 items-start p-5 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
                             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 flex-shrink-0">
@@ -93,8 +93,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="font-medium text-gray-900 dark:text-white">Ubicación</p>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">Lanzarote, Islas Canarias, España</p>
+                                <p class="font-medium text-gray-900 dark:text-white">{{ t('general.location', 'Ubicación') }}</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">{{ t('info.contact.location') }}</p>
                             </div>
                         </div>
 
@@ -111,13 +111,13 @@
                         </div>
 
                         <div class="mt-6 rounded-xl bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 p-5">
-                            <p class="text-sm font-semibold text-orange-900 dark:text-orange-300 mb-1">🤖 ¿Tienes una duda rápida?</p>
-                            <p class="text-sm text-orange-700 dark:text-orange-400">Prueba a preguntarle a <strong>Rusti</strong>, nuestro asistente IA disponible 24/7 en el botón naranja de la esquina inferior derecha.</p>
+                            <p class="text-sm font-semibold text-orange-900 dark:text-orange-300 mb-1">{{ t('info.contact.rusti_title') }}</p>
+                            <p class="text-sm text-orange-700 dark:text-orange-400">{{ t('info.contact.rusti_desc') }}</p>
                         </div>
 
                         <div class="mt-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-5">
-                            <p class="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-1">⏱️ Tiempo de respuesta</p>
-                            <p class="text-sm text-blue-700 dark:text-blue-400">Respondemos todos los mensajes en un plazo máximo de 48 horas hábiles.</p>
+                            <p class="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-1">{{ t('info.contact.response_time_title') }}</p>
+                            <p class="text-sm text-blue-700 dark:text-blue-400">{{ t('info.contact.response_time_desc') }}</p>
                         </div>
                     </div>
                 </div>
@@ -135,9 +135,11 @@ import NavbarPublico from '@/Components/NavbarPublico.vue';
 import FooterPublico from '@/Components/FooterPublico.vue';
 import Toast from '@/Components/Toast.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
+import { useI18n } from '@/Composables/useI18n';
 import { CheckCircle2 } from 'lucide-vue-next';
 useDarkMode();
 
+const { t } = useI18n();
 const page = usePage();
 
 const toasts = ref([]);

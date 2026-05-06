@@ -9,7 +9,7 @@
                 <div class="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm">
                     <Cookie class="h-8 w-8" />
                 </div>
-                <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Política de cookies</h1>
+                <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">{{ t('info.cookies.title') }}</h1>
                 <p class="mt-3 text-sm text-gray-400">Última actualización: {{ fechaActualizacion }}</p>
             </div>
         </section>
@@ -80,8 +80,11 @@ import { Head } from '@inertiajs/vue3';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import FooterPublico from '@/Components/FooterPublico.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
+import { useI18n } from '@/Composables/useI18n';
 import { Cookie } from 'lucide-vue-next';
 useDarkMode();
+
+const { t } = useI18n();
 
 const fechaActualizacion = '30 de abril de 2025';
 
