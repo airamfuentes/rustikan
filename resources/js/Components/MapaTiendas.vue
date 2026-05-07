@@ -270,9 +270,9 @@ onUnmounted(() => {
 }
 
 .mapa-pin-img {
-    width: 30px;
-    height: 30px;
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     display: block;
     pointer-events: none;
     user-select: none;

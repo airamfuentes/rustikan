@@ -112,7 +112,7 @@ onMounted(() => {
 
                 <!-- Fila única de categorías — scroll horizontal en móvil, centradas en desktop -->
                 <div class="overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                    <div class="flex flex-nowrap justify-center gap-4 sm:gap-8 min-w-max sm:min-w-0 mx-auto">
+                    <div class="flex flex-nowrap justify-start sm:justify-center gap-4 sm:gap-8 min-w-max sm:min-w-0 mx-auto px-4 sm:px-0">
                     <Link
                         v-for="(cat, index) in categorias"
                         :key="cat.id"
