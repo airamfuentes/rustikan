@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\EmpleoRechazada;
 use App\Models\ActivityLog;
 use App\Models\SolicitudEmpleo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -54,6 +56,8 @@ class SolicitudEmpleoController extends Controller
 
     /**
      * Cambiar el estado de una solicitud (revisada / contactada / rechazada / pendiente).
+     * Si la transición es a "rechazada", se envía email automático al candidato
+     * (solo la primera vez que pasa a rechazada, no en re-rechazos).
      */
     public function updateEstado(Request $request, SolicitudEmpleo $solicitud)
     {
@@ -72,7 +76,27 @@ class SolicitudEmpleoController extends Controller
             $solicitud
         );
 
-        return back()->with('success', 'Estado actualizado.');
+        $mailEnviado = false;
+
+        // Solo enviar email si el estado nuevo es "rechazada" Y antes NO lo era
+        if ($data['estado'] === 'rechazada' && $anterior !== 'rechazada') {
+            $puestoLabel = \App\Http\Controllers\TrabajaConNosotrosController::PUESTOS[$solicitud->puesto]
+                ?? $solicitud->puesto;
+            try {
+                Mail::to($solicitud->email)
+                    ->send(new EmpleoRechazada($solicitud, $puestoLabel));
+                $mailEnviado = true;
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+
+        $msg = 'Estado actualizado.';
+        if ($mailEnviado) {
+            $msg .= ' Se ha enviado el email de notificación al candidato.';
+        }
+
+        return back()->with('success', $msg);
     }
 
     /**

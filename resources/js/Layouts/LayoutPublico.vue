@@ -46,16 +46,16 @@ const { isDark, toggleDark } = useDarkMode();
         <LanguageSwitcher />
     </div>
 
-    <div class="flex min-h-screen flex-col items-center bg-gray-50 dark:bg-gray-950 pt-6 sm:justify-center sm:pt-0 transition-colors duration-300">
+    <div class="flex min-h-screen flex-col items-center bg-gray-50 dark:bg-gray-950 px-4 pt-20 sm:px-0 sm:justify-center sm:pt-0 pb-8 transition-colors duration-300">
         <!-- Logo -->
         <div>
             <Link href="/" class="flex items-center">
-                <img src="/images/logo.png" alt="Rustikan" class="h-16 w-auto brightness-0 dark:invert" />
+                <img src="/images/logo.png" alt="Rustikan" class="h-14 sm:h-16 w-auto brightness-0 dark:invert" />
             </Link>
         </div>
 
         <!-- Formulario -->
-        <div class="mt-8 w-full rounded-xl bg-white dark:bg-gray-800 px-8 py-8 shadow-md sm:max-w-md dark:shadow-gray-900/50">
+        <div class="mt-6 sm:mt-8 w-full rounded-xl bg-white dark:bg-gray-800 px-5 py-6 sm:px-8 sm:py-8 shadow-md sm:max-w-md dark:shadow-gray-900/50">
             <slot />
         </div>
 

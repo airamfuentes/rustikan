@@ -406,7 +406,7 @@ watch(() => props.estado, (v) => { estadoFiltro.value = v; });
         <div v-if="rechazando || rechazandoTodas"
              class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
              @click.self="cerrarModal">
-            <div class="w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-2xl">
+            <div class="w-full max-w-md max-h-[90vh] overflow-y-auto overscroll-contain rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-2xl">
                 <h3 class="text-lg font-bold text-gray-900 dark:text-white">
                     {{ rechazandoTodas ? `Rechazar todas las solicitudes de ${rechazandoTodas.nombre}` : `Rechazar: ${rechazando?.label_campo}` }}
                 </h3>

@@ -20,6 +20,16 @@ const abrirDetalle = (s) => { detalle.value = s; };
 const cerrarDetalle = () => { detalle.value = null; };
 
 const cambiarSituacion = (s, nuevoEstado) => {
+    // Si transitamos a "rechazada" desde otro estado, avisamos al admin que se enviará email
+    if (nuevoEstado === 'rechazada' && s.estado !== 'rechazada') {
+        const ok = confirm(
+            `Vas a marcar como RECHAZADA la candidatura de "${s.nombre} ${s.apellidos}".\n\n` +
+            `Se enviará automáticamente un email de notificación al candidato (${s.email}).\n\n` +
+            `¿Continuar?`
+        );
+        if (!ok) return;
+    }
+
     router.patch(route('admin.solicitudes-empleo.estado', s.id), { estado: nuevoEstado }, {
         preserveScroll: true,
         onSuccess: () => { if (detalle.value?.id === s.id) cerrarDetalle(); },
@@ -278,8 +288,10 @@ const initials = (s) => {
                             </button>
                             <button v-if="detalle.estado !== 'rechazada'"
                                 @click="cambiarSituacion(detalle, 'rechazada')"
-                                class="rounded-lg bg-red-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-600 transition-colors">
-                                Rechazar
+                                class="inline-flex items-center gap-1 rounded-lg bg-red-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-600 transition-colors"
+                                title="Marcar como rechazada — enviará email automático al candidato"
+                            >
+                                <Mail class="h-3.5 w-3.5" /> Rechazar
                             </button>
                             <button @click="eliminar(detalle)"
                                 class="ml-auto inline-flex items-center gap-1 rounded-lg border border-red-200 dark:border-red-900/40 bg-red-50 dark:bg-red-900/20 px-3 py-1.5 text-xs font-medium text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors">

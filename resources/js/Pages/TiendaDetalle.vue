@@ -799,7 +799,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                 leave-to-class="translate-y-full sm:translate-y-0 sm:scale-95 sm:opacity-0"
                 appear
             >
-                <div :class="['w-full max-w-lg overflow-hidden rounded-t-3xl shadow-2xl sm:rounded-3xl', isDark ? 'bg-gray-800' : 'bg-white']">
+                <div :class="['w-full max-w-lg max-h-[92vh] sm:max-h-[90vh] overflow-y-auto overscroll-contain rounded-t-3xl shadow-2xl sm:rounded-3xl pb-[env(safe-area-inset-bottom)]', isDark ? 'bg-gray-800' : 'bg-white']">
 
                     <!-- Imagen -->
                     <div class="relative aspect-video overflow-hidden">

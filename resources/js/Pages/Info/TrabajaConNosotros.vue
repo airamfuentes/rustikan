@@ -197,8 +197,109 @@
         </section>
 
         <FooterPublico />
+
+        <!-- ── Modal de confirmación tras envío ────────────────────────────── -->
+        <Transition
+            enter-active-class="transition duration-200 ease-out"
+            enter-from-class="opacity-0"
+            enter-to-class="opacity-100"
+            leave-active-class="transition duration-150 ease-in"
+            leave-from-class="opacity-100"
+            leave-to-class="opacity-0"
+        >
+            <div
+                v-if="showConfirmacion && ultimoEnvio"
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+                @click.self="cerrarConfirmacion"
+            >
+                <Transition
+                    enter-active-class="transition duration-300 ease-out"
+                    enter-from-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    enter-to-class="opacity-100 translate-y-0 sm:scale-100"
+                    appear
+                >
+                    <div class="w-full max-w-md max-h-[92vh] overflow-y-auto overscroll-contain rounded-3xl bg-white dark:bg-gray-800 shadow-2xl">
+
+                        <!-- Cabecera con check animado -->
+                        <div class="bg-gradient-to-br from-primary-500 to-tierra-600 px-6 pt-8 pb-6 text-center">
+                            <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm ring-4 ring-white/30 animate-pulse-once">
+                                <CheckCircle2 class="h-9 w-9 text-white" :stroke-width="2.5" />
+                            </div>
+                            <h3 class="text-xl font-extrabold text-white">¡Candidatura enviada!</h3>
+                            <p class="mt-1 text-sm text-white/90">Gracias por tu interés en Rustikan</p>
+                        </div>
+
+                        <!-- Cuerpo: resumen + email -->
+                        <div class="p-6 space-y-5">
+                            <!-- Bloque destacado de email -->
+                            <div class="flex items-start gap-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-4">
+                                <Mail class="h-5 w-5 flex-shrink-0 text-blue-600 dark:text-blue-400 mt-0.5" />
+                                <div class="text-sm">
+                                    <p class="font-semibold text-blue-900 dark:text-blue-200">Email de confirmación enviado</p>
+                                    <p class="mt-0.5 text-blue-700 dark:text-blue-300">
+                                        Te hemos escrito a <span class="font-semibold">{{ ultimoEnvio.email }}</span> con un resumen de tu candidatura.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Resumen -->
+                            <div class="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                                <div class="bg-gray-50 dark:bg-gray-700/50 px-4 py-2.5 border-b border-gray-200 dark:border-gray-700">
+                                    <p class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Resumen</p>
+                                </div>
+                                <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                                    <div class="flex items-center justify-between gap-4 px-4 py-2.5 text-sm">
+                                        <span class="text-gray-500 dark:text-gray-400">Candidato</span>
+                                        <span class="font-semibold text-gray-900 dark:text-white truncate">{{ ultimoEnvio.nombre }} {{ ultimoEnvio.apellidos }}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between gap-4 px-4 py-2.5 text-sm">
+                                        <span class="text-gray-500 dark:text-gray-400">Puesto</span>
+                                        <span class="font-semibold text-gray-900 dark:text-white truncate">{{ puestoLabel(ultimoEnvio.puesto) }}</span>
+                                    </div>
+                                    <div v-if="ultimoEnvio.cvNombre" class="flex items-center justify-between gap-4 px-4 py-2.5 text-sm">
+                                        <span class="text-gray-500 dark:text-gray-400">CV</span>
+                                        <span class="font-medium text-gray-700 dark:text-gray-300 truncate inline-flex items-center gap-1">
+                                            <FileText class="h-3.5 w-3.5 flex-shrink-0" />
+                                            {{ ultimoEnvio.cvNombre }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Próximos pasos -->
+                            <div class="rounded-xl bg-gray-50 dark:bg-gray-700/50 p-4 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                                <p class="font-semibold text-gray-700 dark:text-gray-300 mb-1">¿Qué pasa ahora?</p>
+                                Revisaremos tu CV con calma. Si tu perfil encaja con lo que buscamos te contactaremos por email o teléfono. Si no, también te avisaremos para que no quedes en espera.
+                            </div>
+                        </div>
+
+                        <!-- Footer del modal -->
+                        <div class="border-t border-gray-100 dark:border-gray-700 px-6 py-4 flex flex-col-reverse sm:flex-row gap-2 sm:justify-end">
+                            <button
+                                type="button"
+                                @click="cerrarConfirmacion"
+                                class="rounded-xl bg-primary-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-primary-700 transition-colors"
+                            >
+                                Entendido
+                            </button>
+                        </div>
+                    </div>
+                </Transition>
+            </div>
+        </Transition>
     </div>
 </template>
+
+<style scoped>
+@keyframes pulse-once {
+    0%   { transform: scale(0.8); opacity: 0; }
+    50%  { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1);   opacity: 1; }
+}
+.animate-pulse-once {
+    animation: pulse-once 0.5s ease-out;
+}
+</style>
 
 <script setup>
 import { ref } from 'vue';
@@ -208,7 +309,7 @@ import FooterPublico from '@/Components/FooterPublico.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
 import { useI18n } from '@/Composables/useI18n';
 import { useToasts } from '@/Composables/useToasts';
-import { Briefcase, Upload, FileText, X, Sparkles, Users, Rocket } from 'lucide-vue-next';
+import { Briefcase, Upload, FileText, X, Sparkles, Users, Rocket, CheckCircle2, Mail } from 'lucide-vue-next';
 
 const { isDark } = useDarkMode();
 const { t } = useI18n();
@@ -216,6 +317,10 @@ const { error: toastError } = useToasts();
 
 const cvFile = ref(null);
 const cvInput = ref(null);
+
+// Datos del último envío exitoso (para mostrar en el modal de confirmación)
+const showConfirmacion = ref(false);
+const ultimoEnvio = ref(null);
 
 const form = useForm({
     nombre:    '',
@@ -274,13 +379,41 @@ const formatBytes = (bytes) => {
 };
 
 const enviar = () => {
+    // Snapshot de los datos antes de resetear, para mostrar en el modal
+    const snapshot = {
+        nombre:     form.nombre,
+        apellidos:  form.apellidos,
+        email:      form.email,
+        telefono:   form.telefono,
+        puesto:     form.puesto,
+        cvNombre:   cvFile.value?.name ?? null,
+    };
+
     form.post(route('info.trabaja.store'), {
         forceFormData: true,
         preserveScroll: true,
         onSuccess: () => {
+            ultimoEnvio.value = snapshot;
+            showConfirmacion.value = true;
             form.reset();
             quitarCv();
         },
     });
 };
+
+const cerrarConfirmacion = () => {
+    showConfirmacion.value = false;
+    // Conservamos ultimoEnvio para no parpadear durante la animación de salida
+    setTimeout(() => { ultimoEnvio.value = null; }, 250);
+};
+
+// Mapeo de slugs de puesto a etiquetas legibles (para el modal)
+const puestoLabel = (key) => ({
+    'desarrollo':       t('info.work.pos_dev'),
+    'atencion-cliente': t('info.work.pos_support'),
+    'marketing':        t('info.work.pos_marketing'),
+    'logistica':        t('info.work.pos_logistics'),
+    'reparto':          t('info.work.pos_courier'),
+    'otro':             t('info.work.pos_other'),
+}[key] || key);
 </script>

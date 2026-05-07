@@ -209,7 +209,7 @@
     <!-- Modal cancelar pedido con reembolso -->
     <Transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in" leave-from-class="opacity-100" leave-to-class="opacity-0">
         <div v-if="mostrarModalCancelar" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div class="w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-2xl">
+            <div class="w-full max-w-md max-h-[90vh] overflow-y-auto overscroll-contain rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-2xl">
                 <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
                     <XCircle class="h-6 w-6 text-red-500" />
                 </div>

@@ -1151,7 +1151,7 @@ const submitDeleteProducto = (producto) => {
                     <div v-if="confirmDelete"
                          class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
                          @click.self="confirmDelete = null">
-                        <div class="w-full max-w-sm rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-2xl">
+                        <div class="w-full max-w-sm max-h-[90vh] overflow-y-auto overscroll-contain rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-2xl">
                             <h3 class="text-lg font-bold text-gray-900 dark:text-white">¿Solicitar eliminación?</h3>
                             <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                                 Se enviará una solicitud para eliminar <strong>{{ confirmDelete.nombre }}</strong>.

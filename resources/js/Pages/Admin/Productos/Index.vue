@@ -75,7 +75,7 @@
 
                 <div class="overflow-hidden bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
                     <div class="p-6">
-                        <div class="overflow-x-auto">
+                        <div class="overflow-x-auto -mx-6 px-6" style="-webkit-overflow-scrolling: touch;">
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead class="bg-gray-50 dark:bg-gray-700/50">
                                     <tr>

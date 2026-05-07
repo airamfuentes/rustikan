@@ -78,13 +78,27 @@ onMounted(() => {
                     <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">{{ t('home.categories_title') }}</h2>
                 </div>
 
-                <!-- Grid en móvil (3 por fila), fila única centrada en desktop -->
+                <!-- Grid en móvil (3 por fila), fila única centrada en desktop.
+                     Si la última fila tiene un solo huérfano, lo centramos saltando 1 columna. -->
                 <div class="grid grid-cols-3 gap-x-4 gap-y-6 sm:flex sm:flex-nowrap sm:justify-center sm:gap-8">
                     <Link
                         v-for="(cat, index) in categorias"
                         :key="cat.id"
                         :href="route('categoria.tiendas', cat.slug)"
-                        class="group flex flex-col items-center"
+                        :class="[
+                            'group flex flex-col items-center',
+                            // Centrar el último elemento si queda huérfano (resto = 1 al dividir entre 3) en móvil
+                            index === categorias.length - 1 && categorias.length % 3 === 1
+                                ? 'col-start-2 sm:col-auto'
+                                : '',
+                            // Si quedan dos huérfanos en la última fila, centrarlos como pareja en móvil
+                            index === categorias.length - 2 && categorias.length % 3 === 2
+                                ? 'col-start-1 col-end-2 justify-self-end sm:justify-self-auto sm:col-auto'
+                                : '',
+                            index === categorias.length - 1 && categorias.length % 3 === 2
+                                ? 'col-start-2 col-end-3 justify-self-start sm:justify-self-auto sm:col-auto'
+                                : '',
+                        ]"
                     >
                         <!-- Círculo -->
                         <div class="flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-600 bg-[#f0ddb8] shadow-sm transition-all duration-300 group-hover:scale-105 group-hover:border-primary-400 group-hover:shadow-xl overflow-hidden">

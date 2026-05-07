@@ -220,7 +220,7 @@ const tabClass = (est) => props.estado === est
         <Transition enter-active-class="transition duration-200" enter-from-class="opacity-0" enter-to-class="opacity-100"
             leave-active-class="transition duration-150" leave-from-class="opacity-100" leave-to-class="opacity-0">
             <div v-if="rechazando" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" @click.self="cerrarRechazar">
-                <div class="w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 shadow-2xl p-6">
+                <div class="w-full max-w-md max-h-[90vh] overflow-y-auto overscroll-contain rounded-2xl bg-white dark:bg-gray-800 shadow-2xl p-6">
                     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-4">Rechazar solicitud de "{{ rechazando.nombre_tienda }}"</h3>
                     <textarea
                         v-model="notasRechazo"

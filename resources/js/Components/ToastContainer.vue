@@ -34,12 +34,13 @@ watch(
 <template>
     <!--
         Posicionamiento:
-        - Móvil: ocupa todo el ancho con padding 1rem y se ancla abajo (más alcanzable con el pulgar).
+        - Móvil: ocupa todo el ancho con padding 0.75rem y se ancla abajo, pero
+          DEJANDO espacio para el botón flotante de chat (~5rem).
         - Desktop (sm+): esquina superior derecha como hasta ahora.
     -->
     <div
         class="pointer-events-none fixed z-[9999] flex flex-col gap-3
-               left-3 right-3 bottom-3
+               left-3 right-3 bottom-20
                sm:left-auto sm:right-4 sm:bottom-auto sm:top-20
                sm:w-full sm:max-w-sm
                items-stretch sm:items-end
