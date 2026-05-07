@@ -112,6 +112,10 @@ Route::prefix('')->name('info.')->group(function () {
     Route::get('/contacto',               fn() => Inertia::render('Info/Contacto'))->name('contacto');
     Route::post('/contacto',              [\App\Http\Controllers\ContactoController::class, 'store'])->name('contacto.store');
     Route::get('/vende-con-nosotros',     fn() => Inertia::render('Info/VendeConNosotros'))->name('vende');
+    Route::get('/trabaja-con-nosotros',   fn() => Inertia::render('Info/TrabajaConNosotros'))->name('trabaja');
+    Route::post('/trabaja-con-nosotros',  [\App\Http\Controllers\TrabajaConNosotrosController::class, 'store'])
+        ->middleware('throttle:5,10')
+        ->name('trabaja.store');
     Route::get('/preguntas-frecuentes',   fn() => Inertia::render('Info/PreguntasFrecuentes'))->name('faq');
     Route::get('/terminos-y-condiciones', fn() => Inertia::render('Info/Terminos'))->name('terminos');
     Route::get('/politica-de-privacidad', fn() => Inertia::render('Info/Privacidad'))->name('privacidad');

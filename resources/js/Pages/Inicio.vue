@@ -110,14 +110,13 @@ onMounted(() => {
                     <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">{{ t('home.categories_title') }}</h2>
                 </div>
 
-                <!-- Fila única de categorías — scroll horizontal en móvil, centradas en desktop -->
-                <div class="overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                    <div class="flex flex-nowrap justify-start sm:justify-center gap-4 sm:gap-8 min-w-max sm:min-w-0 mx-auto px-4 sm:px-0">
+                <!-- Grid en móvil (3 por fila), fila única centrada en desktop -->
+                <div class="grid grid-cols-3 gap-x-4 gap-y-6 sm:flex sm:flex-nowrap sm:justify-center sm:gap-8">
                     <Link
                         v-for="(cat, index) in categorias"
                         :key="cat.id"
                         :href="route('categoria.tiendas', cat.slug)"
-                        class="group flex flex-shrink-0 flex-col items-center w-20 sm:w-24"
+                        class="group flex flex-col items-center"
                     >
                         <!-- Círculo -->
                         <div class="flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-600 bg-[#f0ddb8] shadow-sm transition-all duration-300 group-hover:scale-105 group-hover:border-primary-400 group-hover:shadow-xl overflow-hidden">
@@ -135,7 +134,6 @@ onMounted(() => {
                             {{ cat.nombre }}
                         </span>
                     </Link>
-                    </div>
                 </div>
 
                 <!-- Estado vacío -->
@@ -195,40 +193,40 @@ onMounted(() => {
 
                 <!-- Grid de opciones -->
                 <div class="grid gap-12 sm:gap-8 sm:grid-cols-2 md:grid-cols-3">
-                    <!-- Hazte Repartidor -->
-                    <div class="flex flex-col items-center text-center">
+                    <!-- Conoce nuestra misión -->
+                    <Link :href="route('info.mision')" class="group flex flex-col items-center text-center">
                         <div class="relative mb-6">
                             <!-- Onda decorativa -->
-                            <svg class="absolute -inset-6 sm:-inset-8 h-52 w-52 sm:h-64 sm:w-64 text-white opacity-55" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="absolute -inset-6 sm:-inset-8 h-52 w-52 sm:h-64 sm:w-64 text-white opacity-55 transition-opacity group-hover:opacity-75" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
                                 <path fill="currentColor" d="M43.3,-72.8C54.5,-63.8,60.3,-47.5,65.9,-32.1C71.5,-16.7,76.9,-2.2,75.4,11.5C73.9,25.2,65.5,38.1,54.8,48.7C44.1,59.3,31.1,67.6,16.5,71.8C1.9,76,-14.3,76.1,-28.9,71.5C-43.5,66.9,-56.5,57.6,-65.8,45.2C-75.1,32.8,-80.7,17.3,-81.2,1.5C-81.7,-14.3,-77.1,-30.4,-68.3,-43.3C-59.5,-56.2,-46.5,-65.9,-32.8,-73.5C-19.1,-81.1,-4.7,-86.6,8.7,-84.3C22.1,-82,32.1,-81.8,43.3,-72.8Z" transform="translate(100 100)" />
                             </svg>
-                            <div class="relative h-40 w-40 sm:h-48 sm:w-48 overflow-hidden rounded-full border-4 border-white shadow-xl">
+                            <div class="relative h-40 w-40 sm:h-48 sm:w-48 overflow-hidden rounded-full border-4 border-white shadow-xl transition-transform group-hover:scale-105">
                                 <img
-                                    src="https://images.unsplash.com/photo-1574068468668-a05a11f871da?w=400&h=400&fit=crop"
-                                    alt="Repartidor"
+                                    src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop"
+                                    :alt="t('home.mission_alt')"
                                     class="h-full w-full object-cover"
                                 />
                             </div>
                         </div>
-                        <h3 class="mb-3 text-lg sm:text-xl font-bold text-white">{{ t('home.delivery_title') }}</h3>
+                        <h3 class="mb-3 text-lg sm:text-xl font-bold text-white">{{ t('home.mission_title') }}</h3>
                         <p class="mb-6 min-h-[3rem] text-sm text-white/90">
-                            {{ t('home.delivery_desc') }}
+                            {{ t('home.mission_desc') }}
                         </p>
-                        <button class="rounded-full bg-white px-6 sm:px-8 py-3 text-sm font-semibold text-primary-600 transition-colors hover:bg-gray-100">
-                            {{ t('home.register_here') }}
-                        </button>
-                    </div>
+                        <span class="rounded-full bg-white px-6 sm:px-8 py-3 text-sm font-semibold text-primary-600 transition-colors group-hover:bg-gray-100">
+                            {{ t('home.discover_more') }}
+                        </span>
+                    </Link>
 
                     <!-- Hazte Productor -->
-                    <div class="flex flex-col items-center text-center">
+                    <Link :href="route('info.vende')" class="group flex flex-col items-center text-center">
                         <div class="relative mb-6">
-                            <svg class="absolute -inset-6 sm:-inset-8 h-52 w-52 sm:h-64 sm:w-64 text-white opacity-50" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="absolute -inset-6 sm:-inset-8 h-52 w-52 sm:h-64 sm:w-64 text-white opacity-50 transition-opacity group-hover:opacity-75" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
                                 <path fill="currentColor" d="M40.9,-68.9C52.5,-60.5,60.9,-47.2,67.4,-32.7C73.9,-18.2,78.5,-2.5,77.1,13C75.7,28.5,68.3,43.8,57.7,55.5C47.1,67.2,33.3,75.3,17.8,79.8C2.3,84.3,-15,85.2,-29.5,79.6C-44,74,-55.7,62,-65.2,47.7C-74.7,33.4,-82,16.7,-82.3,-0.2C-82.6,-17.1,-75.9,-34.2,-65.6,-47.5C-55.3,-60.8,-41.4,-70.3,-27,-75.2C-12.6,-80.1,2.3,-80.4,16.3,-76.1C30.3,-71.8,29.3,-77.3,40.9,-68.9Z" transform="translate(100 100)" />
                             </svg>
-                            <div class="relative h-40 w-40 sm:h-48 sm:w-48 overflow-hidden rounded-full border-4 border-white shadow-xl">
+                            <div class="relative h-40 w-40 sm:h-48 sm:w-48 overflow-hidden rounded-full border-4 border-white shadow-xl transition-transform group-hover:scale-105">
                                 <img
-                                    src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&h=400&fit=crop"
-                                    alt="Productor"
+                                    src="https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=400&h=400&fit=crop"
+                                    :alt="t('home.producer_title')"
                                     class="h-full w-full object-cover"
                                 />
                             </div>
@@ -237,21 +235,21 @@ onMounted(() => {
                         <p class="mb-6 min-h-[3rem] text-sm text-white/90">
                             {{ t('home.producer_desc') }}
                         </p>
-                        <button class="rounded-full bg-white px-6 sm:px-8 py-3 text-sm font-semibold text-primary-600 transition-colors hover:bg-gray-100">
-                            {{ t('home.register_here') }}
-                        </button>
-                    </div>
+                        <span class="rounded-full bg-white px-6 sm:px-8 py-3 text-sm font-semibold text-primary-600 transition-colors group-hover:bg-gray-100">
+                            {{ t('home.open_store') }}
+                        </span>
+                    </Link>
 
                     <!-- Trabaja con nosotros -->
-                    <div class="flex flex-col items-center text-center sm:col-span-2 md:col-span-1">
+                    <Link :href="route('info.trabaja')" class="group flex flex-col items-center text-center sm:col-span-2 md:col-span-1">
                         <div class="relative mb-6">
-                            <svg class="absolute -inset-6 sm:-inset-8 h-52 w-52 sm:h-64 sm:w-64 text-white opacity-45" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="absolute -inset-6 sm:-inset-8 h-52 w-52 sm:h-64 sm:w-64 text-white opacity-45 transition-opacity group-hover:opacity-75" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
                                 <path fill="currentColor" d="M47.1,-78.5C60.9,-70.8,71.8,-57.1,78.3,-41.5C84.8,-25.9,86.9,-8.4,84.3,7.9C81.7,24.2,74.4,39.3,64.2,51.9C54,64.5,40.9,74.6,25.8,79.8C10.7,85,-6.4,85.3,-22.3,81.5C-38.2,77.7,-53,69.8,-64.5,58.3C-76,46.8,-84.2,31.7,-86.8,15.3C-89.4,-1.1,-86.4,-18.8,-78.8,-33.8C-71.2,-48.8,-59,-61.1,-44.5,-68.2C-30,-75.3,-13.2,-77.2,2.8,-81.7C18.8,-86.2,33.3,-86.2,47.1,-78.5Z" transform="translate(100 100)" />
                             </svg>
-                            <div class="relative h-40 w-40 sm:h-48 sm:w-48 overflow-hidden rounded-full border-4 border-white shadow-xl">
+                            <div class="relative h-40 w-40 sm:h-48 sm:w-48 overflow-hidden rounded-full border-4 border-white shadow-xl transition-transform group-hover:scale-105">
                                 <img
-                                    src="/images/camiseta.png"
-                                    alt="Equipo"
+                                    src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&h=400&fit=crop"
+                                    :alt="t('home.work_title')"
                                     class="h-full w-full object-cover"
                                 />
                             </div>
@@ -260,10 +258,10 @@ onMounted(() => {
                         <p class="mb-6 min-h-[3rem] text-sm text-white/90">
                             {{ t('home.work_desc') }}
                         </p>
-                        <button class="rounded-full bg-white px-6 sm:px-8 py-3 text-sm font-semibold text-primary-600 transition-colors hover:bg-gray-100">
-                            {{ t('home.register_here') }}
-                        </button>
-                    </div>
+                        <span class="rounded-full bg-white px-6 sm:px-8 py-3 text-sm font-semibold text-primary-600 transition-colors group-hover:bg-gray-100">
+                            {{ t('home.send_cv') }}
+                        </span>
+                    </Link>
                 </div>
             </div>
 

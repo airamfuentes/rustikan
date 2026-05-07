@@ -39,6 +39,7 @@
                     <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-white">{{ t('footer.producers_title') }}</h3>
                     <ul class="space-y-2 text-sm">
                         <li><Link :href="route('info.vende')" class="hover:text-primary-400 transition-colors">{{ t('footer.sell_with_us') }}</Link></li>
+                        <li><Link :href="route('info.trabaja')" class="hover:text-primary-400 transition-colors">{{ t('footer.work_with_us') }}</Link></li>
                         <li><Link :href="route('info.faq')" class="hover:text-primary-400 transition-colors">{{ t('footer.faq') }}</Link></li>
                     </ul>
                 </div>
