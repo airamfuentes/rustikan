@@ -1,8 +1,7 @@
 ﻿<script setup>
 import { ref, computed, watch } from 'vue';
-import { Head, Link, router, usePage, useForm } from '@inertiajs/vue3';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
-import Toast from '@/Components/Toast.vue';
 import { ArrowLeft } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -10,10 +9,6 @@ const props = defineProps({
     estado:  { type: String, default: 'pendiente' },
     counts:  { type: Object, default: () => ({}) },
 });
-
-const page = usePage();
-// Flash handled by LayoutAutenticado — no duplicate watcher needed
-const toasts = ref([]);
 
 // ── Filtro por estado (server-side) ──────────────────────────────────────
 const estadoFiltro = ref(props.estado);
@@ -168,12 +163,7 @@ watch(() => props.estado, (v) => { estadoFiltro.value = v; });
             </div>
         </template>
 
-        <!-- Toasts (local actions) -->
-        <div class="pointer-events-none fixed top-20 right-4 z-[9999] flex flex-col items-end gap-3 max-w-sm w-full">
-            <Toast v-for="(t, index) in toasts" :key="t.id" :type="t.type" :title="t.title" :message="t.message"
-                   :active="index === 0"
-                   @close="toasts = toasts.filter(x => x.id !== t.id)" />
-        </div>
+        <!-- Toasts via ToastContainer global -->
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">

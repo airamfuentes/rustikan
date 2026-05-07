@@ -70,6 +70,17 @@
                         <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Solicitudes de vendedores</p>
                     </Link>
 
+                    <!-- Solicitudes de empleo -->
+                    <Link :href="route('admin.solicitudes-empleo.index')" class="group relative rounded-xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 p-6 shadow-sm transition-all hover:shadow-md hover:border-purple-400 hover:-translate-y-1">
+                        <div class="mb-4 inline-flex rounded-lg bg-purple-100 p-3">
+                            <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m12 0H4a2 2 0 00-2 2v9a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2zm-4 4v6m-4-6v6m-4-6v6"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Empleo</h3>
+                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Candidaturas recibidas</p>
+                    </Link>
+
                     <!-- Incidencias supplier -->
                     <Link :href="route('admin.pedidos.index', { estado: 'incidencia' })" class="group relative rounded-xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 p-6 shadow-sm transition-all hover:shadow-md hover:border-red-400 hover:-translate-y-1">
                         <div class="mb-4 inline-flex rounded-lg bg-red-100 p-3">

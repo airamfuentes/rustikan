@@ -1,19 +1,13 @@
 <script setup>
 import { ref } from 'vue';
-import { Head, Link, router, usePage, useForm } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
-import Toast from '@/Components/Toast.vue';
 
 const props = defineProps({
     solicitudes: { type: Object, default: () => ({ data: [] }) },
     estado:      { type: String, default: 'pendiente' },
     counts:      { type: Object, default: () => ({}) },
 });
-
-const page = usePage();
-// Flash handled by LayoutAutenticado — no duplicate watcher needed
-
-const toasts = ref([]);
 
 const cambiarEstado = (est) => {
     router.get(route('admin.solicitudes-creacion.index'), { estado: est }, { preserveState: true });
@@ -57,10 +51,7 @@ const tabClass = (est) => props.estado === est
     <AuthenticatedLayout>
         <Head title="Solicitudes de nueva tienda" />
 
-        <!-- Toast -->
-        <div class="fixed right-4 top-20 z-[9999] space-y-2">
-            <Toast v-for="t in toasts" :key="t.id" :type="t.type" :title="t.title" :message="t.message" />
-        </div>
+        <!-- Toasts via ToastContainer global -->
 
         <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
 

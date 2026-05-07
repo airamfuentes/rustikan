@@ -9,6 +9,7 @@ import { vReveal } from '@/Directives/reveal.js';
 import { vOnlyDigits, vOnlyDecimal, vOnlySignedDecimal, vOnlyLetters, vOnlyPhone } from '@/Directives/inputValidations.js';
 import ChatIA from '@/Components/ChatIA.vue';
 import ChatConSuppliers from '@/Components/ChatConSuppliers.vue';
+import ToastContainer from '@/Components/ToastContainer.vue';
 import { useChatState } from '@/Composables/useChatState';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
@@ -47,6 +48,7 @@ createInertiaApp({
 
                     return [
                         h(App, props),
+                        h(ToastContainer),
                         showChatIA ? h(ChatIA) : null,
                         currentRole === 'admin' ? h(ChatConSuppliers) : null,
                     ];

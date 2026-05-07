@@ -235,6 +235,12 @@ Route::middleware(['auth', 'admin', 'throttle:60,1'])->prefix('admin')->name('ad
     Route::get('/solicitudes-creacion', [\App\Http\Controllers\Admin\SolicitudCreacionTiendaController::class, 'index'])->name('solicitudes-creacion.index');
     Route::post('/solicitudes-creacion/{solicitud}/aprobar', [\App\Http\Controllers\Admin\SolicitudCreacionTiendaController::class, 'aprobar'])->name('solicitudes-creacion.aprobar');
     Route::post('/solicitudes-creacion/{solicitud}/rechazar', [\App\Http\Controllers\Admin\SolicitudCreacionTiendaController::class, 'rechazar'])->name('solicitudes-creacion.rechazar');
+
+    // Solicitudes de empleo (formulario "Trabaja con nosotros")
+    Route::get('/solicitudes-empleo',                          [\App\Http\Controllers\Admin\SolicitudEmpleoController::class, 'index'])->name('solicitudes-empleo.index');
+    Route::patch('/solicitudes-empleo/{solicitud}/estado',     [\App\Http\Controllers\Admin\SolicitudEmpleoController::class, 'updateEstado'])->name('solicitudes-empleo.estado');
+    Route::get('/solicitudes-empleo/{solicitud}/cv',           [\App\Http\Controllers\Admin\SolicitudEmpleoController::class, 'downloadCv'])->name('solicitudes-empleo.cv');
+    Route::delete('/solicitudes-empleo/{solicitud}',           [\App\Http\Controllers\Admin\SolicitudEmpleoController::class, 'destroy'])->name('solicitudes-empleo.destroy');
 });
 
 // ── Panel Supplier (almacén) ──────────────────────────────────────────────────

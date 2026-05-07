@@ -22,10 +22,7 @@
             </div>
         </template>
 
-        <!-- Toast Notifications -->
-        <div class="pointer-events-none fixed top-20 right-4 z-[9999] flex flex-col items-end gap-3 max-w-sm w-full">
-            <Toast v-for="(toast, index) in toasts" :key="toast.id" :type="toast.type" :title="toast.title" :message="toast.message" :active="index === 0" @close="removeToast(toast.id)" />
-        </div>
+        <!-- Toasts via ToastContainer global -->
 
         <div class="py-12">
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
@@ -259,23 +256,19 @@
 
 <script setup>
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
-import Toast from '@/Components/Toast.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref, reactive } from 'vue';
 import { ArrowLeft, XCircle } from 'lucide-vue-next';
+import { useToasts } from '@/Composables/useToasts';
 
 const props = defineProps({
     pedido: { type: Object, required: true },
 });
 
-const toasts = ref([]);
+const { success: toastSuccess, error: toastError } = useToasts();
 const addToast = (type, title, message = '') => {
-    const id = Date.now();
-    toasts.value.push({ id, type, title, message });
-    setTimeout(() => removeToast(id), 5000);
-};
-const removeToast = (id) => {
-    toasts.value = toasts.value.filter(t => t.id !== id);
+    if (type === 'success') toastSuccess(title, message);
+    else toastError(title, message);
 };
 
 const procesando       = ref(false);

@@ -30,8 +30,11 @@
                                     <span class="text-sm text-gray-600 dark:text-gray-400">Rol:</span>
                                     <span :class="{
                                         'bg-purple-100 text-purple-800': usuario.role === 'admin',
+                                        'bg-amber-100 text-amber-800': usuario.role === 'owner',
+                                        'bg-indigo-100 text-indigo-800': usuario.role === 'supplier',
                                         'bg-blue-100 text-blue-800': usuario.role === 'user'
-                                    }" class="rounded-full px-3 py-1 text-xs font-semibold">
+                                    }" class="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold capitalize">
+                                        <Lock class="h-3 w-3" />
                                         {{ usuario.role }}
                                     </span>
                                 </div>
@@ -53,17 +56,14 @@
                                 </div>
                             </div>
 
-                            <!-- Cambiar Rol -->
+                            <!-- Acceso a edición -->
                             <div v-if="$page.props.auth.user.role === 'admin'" class="mt-6">
-                                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Cambiar Rol</label>
-                                <select
-                                    v-model="nuevoRol"
-                                    @change="cambiarRol"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                                >
-                                    <option value="user">Usuario</option>
-                                    <option value="admin">Administrador</option>
-                                </select>
+                                <p class="mb-2 text-xs text-gray-400 dark:text-gray-500 italic">Para modificar el rol, contraseña u otros datos del usuario, usa el formulario de edición.</p>
+                                <Link :href="route('admin.usuarios.edit', usuario.id)"
+                                    class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700 transition-colors">
+                                    <Pencil class="h-4 w-4" />
+                                    Editar usuario
+                                </Link>
                             </div>
                         </div>
                     </div>
@@ -144,25 +144,10 @@
 
 <script setup>
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
-import { Link, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
-import { Package } from 'lucide-vue-next';
+import { Link } from '@inertiajs/vue3';
+import { Package, Lock, Pencil } from 'lucide-vue-next';
 
-const props = defineProps({
+defineProps({
     usuario: Object,
 });
-
-const nuevoRol = ref(props.usuario.role);
-
-const cambiarRol = () => {
-    if (confirm(`¿Estás seguro de cambiar el rol de ${props.usuario.name} a ${nuevoRol.value}?`)) {
-        router.put(route('admin.usuarios.update', props.usuario.id), {
-            role: nuevoRol.value,
-        }, {
-            preserveScroll: true,
-        });
-    } else {
-        nuevoRol.value = props.usuario.role;
-    }
-};
 </script>

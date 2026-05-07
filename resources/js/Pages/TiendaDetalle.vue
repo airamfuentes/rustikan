@@ -9,6 +9,9 @@ import { useDarkMode } from '@/Composables/useDarkMode';
 import { useI18n } from '@/Composables/useI18n';
 import { Store, Package, Star, AlertTriangle, Check } from 'lucide-vue-next';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
+import { useToasts } from '@/Composables/useToasts';
+
+const { success: toastSuccess, error: toastError } = useToasts();
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
@@ -141,9 +144,14 @@ const deleteResena = (id) => {
 const copiado = ref(false);
 
 const copiarEnlace = async () => {
-    await navigator.clipboard.writeText(window.location.href);
-    copiado.value = true;
-    setTimeout(() => { copiado.value = false; }, 2000);
+    try {
+        await navigator.clipboard.writeText(window.location.href);
+        copiado.value = true;
+        toastSuccess('Enlace copiado', 'Ya puedes compartir esta tienda con quien quieras.');
+        setTimeout(() => { copiado.value = false; }, 2000);
+    } catch {
+        toastError('No se pudo copiar', 'Inténtalo manualmente desde la barra de direcciones.');
+    }
 };
 
 const formatPhone = (tel) => {

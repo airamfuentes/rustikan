@@ -257,7 +257,7 @@ const pagar = () => {
             rc_a_usar:         pagoForm.value.metodo === 'mixto' ? pagoForm.value.rcACusar : null,
         }, {
             onSuccess: () => {
-                vaciarCarrito();
+                vaciarCarrito({ silencioso: true });
                 mostrarCheckout.value = false;
             },
             onError: (e) => {

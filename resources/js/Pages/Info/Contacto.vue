@@ -3,10 +3,7 @@
         <Head title="Contacto" />
         <NavbarPublico />
 
-        <!-- Toasts -->
-        <div class="pointer-events-none fixed top-20 right-4 z-[9999] flex flex-col items-end gap-3 max-w-sm w-full">
-            <Toast v-for="(t, i) in toasts" :key="t.id" :type="t.type" :title="t.title" :message="t.message" :active="i === 0" @close="toasts = toasts.filter(x => x.id !== t.id)" />
-        </div>
+        <!-- Los toasts se muestran via ToastContainer global -->
 
         <!-- Hero -->
         <section class="bg-gradient-to-br from-sky-600 via-blue-700 to-indigo-800 pt-32 pb-20 text-white">
@@ -132,37 +129,24 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
-import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { Head, useForm } from '@inertiajs/vue3';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import FooterPublico from '@/Components/FooterPublico.vue';
-import Toast from '@/Components/Toast.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
 import { useI18n } from '@/Composables/useI18n';
+import { useToasts } from '@/Composables/useToasts';
 import { CheckCircle2 } from 'lucide-vue-next';
 useDarkMode();
 
 const { t } = useI18n();
-const page = usePage();
-
-const toasts = ref([]);
-const addToast = (type, title, msg = '') => {
-    const id = Date.now();
-    toasts.value.push({ id, type, title, message: msg });
-    setTimeout(() => { toasts.value = toasts.value.filter(t => t.id !== id); }, 5000);
-};
-
-watch(() => page.props.flash, (flash) => {
-    if (!flash) return;
-    if (flash.success) addToast('success', '¡Enviado!', flash.success);
-    if (flash.error)   addToast('error', 'Error', flash.error);
-}, { deep: true, immediate: true });
+const { error: toastError } = useToasts();
 
 const form = useForm({ nombre: '', email: '', asunto: '', mensaje: '' });
 
 const enviar = () => {
     form.post(route('info.contacto.store'), {
         onSuccess: () => form.reset(),
+        onError: () => toastError('Revisa los campos', 'Hay errores en el formulario.'),
     });
 };
 </script>

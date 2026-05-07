@@ -1,4 +1,5 @@
 import { ref, computed, watch } from 'vue';
+import { useToasts } from '@/Composables/useToasts';
 
 // ─── Estado singleton ───────────────────────────────────────────────────────
 // La instancia es única: todos los componentes comparten el mismo carrito.
@@ -59,10 +60,12 @@ export function useCarrito() {
      * @param {Object} tienda   – { id, nombre, slug }
      */
     const agregarItem = (producto, tienda) => {
+        const { success } = useToasts();
         const existente = items.value.find((i) => i.id === producto.id);
 
         if (existente) {
             existente.cantidad += 1;
+            success('Cantidad actualizada', `${producto.nombre} (×${existente.cantidad}) en tu carrito.`);
         } else {
             items.value.push({
                 id:            producto.id,
@@ -75,6 +78,7 @@ export function useCarrito() {
                 tienda_nombre: tienda.nombre,
                 tienda_slug:   tienda.slug,
             });
+            success('Añadido al carrito', `${producto.nombre} de ${tienda.nombre}.`);
         }
     };
 
@@ -84,7 +88,11 @@ export function useCarrito() {
      */
     const eliminarItem = (productoId) => {
         const idx = items.value.findIndex((i) => i.id === productoId);
-        if (idx !== -1) items.value.splice(idx, 1);
+        if (idx !== -1) {
+            const removed = items.value[idx];
+            items.value.splice(idx, 1);
+            useToasts().info('Producto eliminado', `Se ha quitado ${removed.nombre} del carrito.`);
+        }
     };
 
     /**
@@ -101,8 +109,12 @@ export function useCarrito() {
     };
 
     /** Vacía el carrito por completo */
-    const vaciarCarrito = () => {
+    const vaciarCarrito = ({ silencioso = false } = {}) => {
+        if (!items.value.length) return;
         items.value = [];
+        if (!silencioso) {
+            useToasts().info('Carrito vaciado', 'Se han quitado todos los productos.');
+        }
     };
 
     return {

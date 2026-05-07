@@ -1,16 +1,17 @@
 ﻿<script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import MapaTiendas from '@/Components/MapaTiendas.vue';
-import Toast from '@/Components/Toast.vue';
 import FooterPublico from '@/Components/FooterPublico.vue';
 import CategoriaIcono from '@/Components/CategoriaIcono.vue';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import { useI18n } from '@/Composables/useI18n';
+import { useToasts } from '@/Composables/useToasts';
 
 const { t } = useI18n();
 const page = usePage();
 const user = computed(() => page.props.auth.user);
+const { success } = useToasts();
 
 // Imágenes de categorías
 const categoriaImagen = {
@@ -22,27 +23,6 @@ const categoriaImagen = {
     'vinoteca':            '/images/vinoteca.png',
     'artesania':           '/images/artesania.png',
 };
-
-// ── Toast system ─────────────────────────────────────────────────────────────
-const toasts = ref([]);
-const addToast = (type, title, message = '') => {
-    const id = Date.now() + Math.random();
-    toasts.value.push({ id, type, title, message });
-};
-const removeToast = (id) => {
-    toasts.value = toasts.value.filter(t => t.id !== id);
-};
-watch(
-    () => page.props.flash,
-    (flash) => {
-        if (!flash) return;
-        if (flash.success) addToast('success', t('home.toast_success'), flash.success);
-        if (flash.error)   addToast('error',   t('home.toast_error'),   flash.error);
-        if (flash.info)    addToast('info',     t('home.toast_info'),    flash.info);
-        if (flash.warning) addToast('warning',  t('home.toast_warning'), flash.warning);
-    },
-    { deep: true, immediate: true },
-);
 
 const props = defineProps({
     tiendas: {
@@ -60,28 +40,16 @@ onMounted(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('verified') === '1' && !page.props.flash?.success) {
         const nombre = user.value?.name ?? '';
-        addToast('success',
+        success(
             t('home.verified_title'),
-            nombre ? t('home.verified_msg', { name: nombre }) : t('home.verified_msg_generic'));
+            nombre ? t('home.verified_msg', { name: nombre }) : t('home.verified_msg_generic'),
+        );
     }
 });
 </script>
 
 <template>
     <Head title="" />
-
-    <!-- Toast container -->
-    <div class="pointer-events-none fixed top-20 right-4 z-[9999] flex flex-col items-end gap-3 max-w-sm w-full">
-        <Toast
-            v-for="(toast, index) in toasts"
-            :key="toast.id"
-            :type="toast.type"
-            :title="toast.title"
-            :message="toast.message"
-            :active="index === 0"
-            @close="removeToast(toast.id)"
-        />
-    </div>
 
     <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
         <NavbarPublico :tiendas="tiendas" />

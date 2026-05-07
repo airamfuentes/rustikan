@@ -301,7 +301,7 @@ export default {
         about_us: 'Qui sommes-nous',
         mission: 'Notre mission',
         contact: 'Contact',
-        producers_title: 'Pour les producteurs',
+        producers_title: 'Collaborez avec Rustikan',
         sell_with_us: 'Vendre avec nous',
         work_with_us: 'Travailler avec nous',
         faq: 'FAQ',

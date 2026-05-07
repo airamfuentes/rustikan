@@ -1,8 +1,7 @@
 <script setup>
-import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { Link, usePage, router } from '@inertiajs/vue3';
 import { useDarkMode } from '@/Composables/useDarkMode';
-import Toast from '@/Components/Toast.vue';
 import ChatConAdmin from '@/Components/ChatConAdmin.vue';
 import ScrollToTop from '@/Components/ScrollToTop.vue';
 import {
@@ -14,7 +13,6 @@ import {
 const page      = usePage();
 const { isDark, toggleDark } = useDarkMode();
 const sidebarOpen = ref(false);
-const toasts    = ref([]);
 
 const user = computed(() => page.props.auth?.user);
 
@@ -49,27 +47,6 @@ const navItems = computed(() => [
     },
 ]);
 
-// Toasts
-const showToast = (type, title, message) => {
-    const id = Date.now();
-    toasts.value.push({ id, type, title, message });
-};
-const removeToast = (id) => {
-    toasts.value = toasts.value.filter(t => t.id !== id);
-};
-
-watch(
-    () => page.props.flash,
-    (flash) => {
-        if (!flash) return;
-        if (flash.success) showToast('success', 'Éxito', flash.success);
-        if (flash.error)   showToast('error', 'Error', flash.error);
-        if (flash.info)    showToast('info', 'Información', flash.info);
-        if (flash.warning) showToast('warning', 'Advertencia', flash.warning);
-    },
-    { deep: true }
-);
-
 // Cerrar sidebar en móvil al navegar
 router.on('navigate', () => { sidebarOpen.value = false; });
 </script>
@@ -77,18 +54,7 @@ router.on('navigate', () => { sidebarOpen.value = false; });
 <template>
     <div class="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
 
-        <!-- Toasts -->
-        <div class="pointer-events-none fixed top-4 right-4 z-[9999] flex flex-col items-end gap-3 max-w-sm w-full">
-            <Toast
-                v-for="(toast, index) in toasts"
-                :key="toast.id"
-                :type="toast.type"
-                :title="toast.title"
-                :message="toast.message"
-                :active="index === 0"
-                @close="removeToast(toast.id)"
-            />
-        </div>
+        <!-- ToastContainer está montado globalmente en app.js -->
 
         <!-- Overlay móvil -->
         <Transition

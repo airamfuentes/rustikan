@@ -1,49 +1,14 @@
 <script setup>
-import { ref, watch } from 'vue';
-import { Link, usePage } from '@inertiajs/vue3';
-import Toast from '@/Components/Toast.vue';
+import { Link } from '@inertiajs/vue3';
 import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
 import { ArrowLeft } from 'lucide-vue-next';
 import { useDarkMode } from '@/Composables/useDarkMode';
 
-const page   = usePage();
-const toasts = ref([]);
 const { isDark, toggleDark } = useDarkMode();
-
-const addToast = (type, title, message = '') => {
-    const id = Date.now() + Math.random();
-    toasts.value.push({ id, type, title, message });
-};
-const removeToast = (id) => {
-    toasts.value = toasts.value.filter(t => t.id !== id);
-};
-
-watch(
-    () => page.props.flash,
-    (flash) => {
-        if (!flash) return;
-        if (flash.success) addToast('success', '¡Éxito!', flash.success);
-        if (flash.error)   addToast('error',   'Error',   flash.error);
-        if (flash.info)    addToast('info',     'Info',    flash.info);
-        if (flash.warning) addToast('warning',  'Aviso',   flash.warning);
-    },
-    { deep: true, immediate: true },
-);
 </script>
 
 <template>
-    <!-- Toast container -->
-    <div class="pointer-events-none fixed top-20 right-4 z-[9999] flex flex-col items-end gap-3 max-w-sm w-full">
-        <Toast
-            v-for="(toast, index) in toasts"
-            :key="toast.id"
-            :type="toast.type"
-            :title="toast.title"
-            :message="toast.message"
-            :active="index === 0"
-            @close="removeToast(toast.id)"
-        />
-    </div>
+    <!-- ToastContainer está montado globalmente en app.js -->
 
     <!-- Dark/Light toggle + Idiomas -->
     <div class="fixed top-4 right-4 z-50 flex flex-col items-end gap-3">

@@ -2,18 +2,7 @@
     <div class="min-h-screen bg-white dark:bg-gray-900">
         <Head title="Vende con nosotros" />
 
-        <!-- Toast container -->
-        <div class="pointer-events-none fixed top-20 right-4 z-[9999] flex flex-col items-end gap-3 max-w-sm w-full">
-            <Toast
-                v-for="(toast, index) in toasts"
-                :key="toast.id"
-                :type="toast.type"
-                :title="toast.title"
-                :message="toast.message"
-                :active="index === 0"
-                @close="removeToast(toast.id)"
-            />
-        </div>
+        <!-- Toasts via ToastContainer global -->
 
         <NavbarPublico />
 
@@ -247,41 +236,21 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { computed } from 'vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import FooterPublico from '@/Components/FooterPublico.vue';
-import Toast from '@/Components/Toast.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
 import { useI18n } from '@/Composables/useI18n';
+import { useToasts } from '@/Composables/useToasts';
 import { Gift, Smartphone, CreditCard, Package, BarChart3, Globe } from 'lucide-vue-next';
 
 const { t } = useI18n();
 const { isDark } = useDarkMode();
 const page = usePage();
+const { success: toastSuccess, error: toastError } = useToasts();
 
-const user    = computed(() => page.props.auth?.user ?? null);
-
-// ── Toast ────────────────────────────────────────────────────────────────────
-const toasts = ref([]);
-const addToast    = (type, title, message = '') => {
-    toasts.value.push({ id: Date.now() + Math.random(), type, title, message });
-};
-const removeToast = (id) => {
-    toasts.value = toasts.value.filter(t => t.id !== id);
-};
-watch(
-    () => page.props.flash,
-    (flash) => {
-        if (!flash) return;
-        if (flash.success)          addToast('success', '¡Éxito!',  flash.success);
-        if (flash.solicitud_enviada) addToast('success', '¡Solicitud enviada!', 'Revisaremos tus datos y te contactaremos en menos de 48 horas.');
-        if (flash.error)            addToast('error',   'Error',    flash.error);
-        if (flash.info)             addToast('info',     'Info',     flash.info);
-        if (flash.warning)          addToast('warning',  'Aviso',   flash.warning);
-    },
-    { deep: true, immediate: true },
-);
+const user = computed(() => page.props.auth?.user ?? null);
 
 const form = useForm({
     nombre_tienda:         '',
@@ -306,10 +275,10 @@ const enviar = () => {
             // Restaurar valores del usuario autenticado
             form.nombre_contacto = page.props.auth?.user?.name  ?? '';
             form.email           = page.props.auth?.user?.email ?? '';
-            addToast('success', '¡Solicitud enviada!', 'Hemos recibido tu solicitud. Nos pondremos en contacto contigo en menos de 48 horas.');
+            toastSuccess('¡Solicitud enviada!', 'Hemos recibido tu solicitud. Nos pondremos en contacto contigo en menos de 48 horas.');
         },
         onError: () => {
-            addToast('error', 'Error al enviar', 'Revisa los campos e inténtalo de nuevo.');
+            toastError('Error al enviar', 'Revisa los campos e inténtalo de nuevo.');
         },
     });
 };

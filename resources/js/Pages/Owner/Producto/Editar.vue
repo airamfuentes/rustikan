@@ -1,25 +1,13 @@
 ﻿<script setup>
 import { ref, computed, watch } from 'vue';
-import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
-import Toast from '@/Components/Toast.vue';
 import { Star } from 'lucide-vue-next';
 
 const props = defineProps({
     producto:   { type: Object, required: true },
     tienda:     { type: Object, required: true },
 });
-
-const page = usePage();
-
-// ── Toasts ────────────────────────────────────────────────────────────────
-const toasts = ref([]);
-const addToast = (type, title, msg) => {
-    const id = Date.now();
-    toasts.value.push({ id, type, title, message: msg });
-    setTimeout(() => { toasts.value = toasts.value.filter(t => t.id !== id); }, 4000);
-};
-// Flash handled by LayoutAutenticado — no duplicate watcher needed
 
 const imgUrl = (path) => {
     if (!path) return null;
@@ -109,10 +97,7 @@ const toggleOfertaActiva = () => {
             </div>
         </template>
 
-        <!-- Toasts -->
-        <div class="pointer-events-none fixed top-20 right-4 z-[9999] flex flex-col items-end gap-3 max-w-sm w-full">
-            <Toast v-for="(t, index) in toasts" :key="t.id" :type="t.type" :title="t.title" :message="t.message" :active="index === 0" @close="toasts = toasts.filter(x => x.id !== t.id)" />
-        </div>
+        <!-- Toasts via ToastContainer global -->
 
         <div class="py-8">
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">

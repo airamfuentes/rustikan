@@ -1,13 +1,13 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
-import Toast from '@/Components/Toast.vue';
 import PasswordStrength from '@/Components/PasswordStrength.vue';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import { useI18n } from '@/Composables/useI18n';
+import { useToasts } from '@/Composables/useToasts';
 import { evaluarPassword, validarEdad, validarNombre, validarDireccion } from '@/Composables/useValidaciones';
 
 defineProps({
@@ -19,30 +19,15 @@ defineProps({
 const { t } = useI18n();
 const page = usePage();
 const user = computed(() => page.props.auth.user);
+const { success: toastSuccess, error: toastError } = useToasts();
 
-// -- Toast system --------------------------------------------------------------
-const toasts = ref([]);
-
+// Compatibilidad con código antiguo dentro del componente
 const addToast = (type, title, message = '') => {
-    const id = Date.now();
-    toasts.value.push({ id, type, title, message });
+    if (type === 'success') toastSuccess(title, message);
+    else if (type === 'error') toastError(title, message);
+    else if (type === 'info') useToasts().info(title, message);
+    else useToasts().warning(title, message);
 };
-
-const removeToast = (id) => {
-    toasts.value = toasts.value.filter(t => t.id !== id);
-};
-
-watch(
-    () => page.props.flash,
-    (flash) => {
-        if (!flash) return;
-        if (flash.success) addToast('success', flash.success);
-        if (flash.error)   addToast('error',   flash.error);
-        if (flash.info)    addToast('info',     flash.info);
-        if (flash.warning) addToast('warning',  flash.warning);
-    },
-    { deep: true, immediate: true },
-);
 
 const tabs = computed(() => [
     { id: 'perfil',    label: t('profile.tab_profile')  },
@@ -168,17 +153,7 @@ const initials = computed(() => {
 <template>
     <Head :title="t('profile.title')" />
 
-    <!-- Toasts -->
-    <div class="pointer-events-none fixed inset-0 z-50 flex flex-col items-end justify-start gap-3 p-6">
-        <Toast
-            v-for="toast in toasts"
-            :key="toast.id"
-            :type="toast.type"
-            :title="toast.title"
-            :message="toast.message"
-            @close="removeToast(toast.id)"
-        />
-    </div>
+    <!-- Los toasts se muestran via ToastContainer global montado en app.js -->
 
     <div class="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
 

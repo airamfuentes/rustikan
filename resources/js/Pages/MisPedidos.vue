@@ -1,9 +1,9 @@
 <script setup>
-import { ref, watch } from 'vue';
-import { Head, Link, usePage, useForm } from '@inertiajs/vue3';
-import Toast from '@/Components/Toast.vue';
+import { ref } from 'vue';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import { useI18n } from '@/Composables/useI18n';
+import { useToasts } from '@/Composables/useToasts';
 
 const props = defineProps({
     pedidosActivos:     { type: Array,  required: true },
@@ -11,28 +11,7 @@ const props = defineProps({
     reviewableStoreIds: { type: Array,  default: () => [] },
 });
 
-// -- Toast
-const toasts = ref([]);
-const addToast = (type, title, message = '') => {
-    const id = Date.now();
-    toasts.value.push({ id, type, title, message });
-    setTimeout(() => removeToast(id), 5000);
-};
-const removeToast = (id) => {
-    toasts.value = toasts.value.filter(t => t.id !== id);
-};
-const page = usePage();
-watch(
-    () => page.props.flash,
-    (flash) => {
-        if (!flash) return;
-        if (flash.success) addToast('success', '¡Éxito!',     flash.success);
-        if (flash.error)   addToast('error',   'Error',       flash.error);
-        if (flash.info)    addToast('info',     'Información', flash.info);
-        if (flash.warning) addToast('warning',  'Aviso',       flash.warning);
-    },
-    { deep: true, immediate: true },
-);
+const { success: toastSuccess } = useToasts();
 
 // -- Tabs
 const tabActivo = ref('activos');
@@ -89,7 +68,7 @@ const submitRating = (tiendaId) => {
         onSuccess: () => {
             pendingReviewableIds.value = pendingReviewableIds.value.filter(id => id !== tiendaId);
             closeRating();
-            addToast('success', '¡Gracias!', 'Tu valoración ha sido enviada.');
+            toastSuccess('¡Gracias!', 'Tu valoración ha sido enviada.');
         },
     });
 };
@@ -98,10 +77,7 @@ const submitRating = (tiendaId) => {
 <template>
     <Head title="Mis pedidos" />
 
-    <!-- Toasts -->
-    <div class="pointer-events-none fixed top-20 right-4 z-[9999] flex flex-col items-end gap-3 max-w-sm w-full">
-        <Toast v-for="(toast, index) in toasts" :key="toast.id" :type="toast.type" :title="toast.title" :message="toast.message" :active="index === 0" @close="removeToast(toast.id)" />
-    </div>
+    <!-- Toasts via ToastContainer global -->
 
     <div class="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
 
