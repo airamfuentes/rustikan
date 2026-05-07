@@ -465,6 +465,8 @@ export default {
             cv_remove: 'Quitar archivo',
             cv_invalid: 'El archivo debe ser PDF, DOC o DOCX.',
             cv_too_big: 'El archivo no puede superar los 5 MB.',
+            cv_required_title: 'Falta el CV',
+            cv_required_hint: 'Adjunta tu CV para poder enviar la candidatura.',
             send: 'Enviar candidatura',
             sending: 'Enviando...',
             why_title: '¿Por qué Rustikan?',

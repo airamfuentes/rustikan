@@ -107,7 +107,7 @@
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     {{ t('info.work.cv') }} <span class="text-red-500">*</span>
                                 </label>
-                                <div :class="[
+                                <div data-cv-dropzone :class="[
                                     'relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-8 cursor-pointer transition-colors',
                                     form.errors.cv
                                         ? 'border-red-300 bg-red-50 dark:bg-red-900/10'
@@ -140,9 +140,13 @@
                             </div>
 
                             <!-- Submit -->
-                            <div class="flex items-center justify-end pt-2">
-                                <button type="submit" :disabled="form.processing"
-                                    class="flex items-center gap-2 rounded-xl bg-primary-600 px-8 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow-md disabled:opacity-60">
+                            <div class="flex flex-col items-end gap-2 pt-2 sm:flex-row sm:items-center sm:justify-end">
+                                <p v-if="!cvFile" class="text-xs text-gray-400 dark:text-gray-500 sm:mr-auto">
+                                    {{ t('info.work.cv_required_hint') }}
+                                </p>
+                                <button type="submit" :disabled="form.processing || !cvFile"
+                                    :title="!cvFile ? t('info.work.cv_required_hint') : ''"
+                                    class="flex items-center gap-2 rounded-xl bg-primary-600 px-8 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
                                     <svg v-if="form.processing" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
@@ -379,6 +383,14 @@ const formatBytes = (bytes) => {
 };
 
 const enviar = () => {
+    // Defensa cliente: el botón ya está disabled, pero por si acaso
+    if (!cvFile.value) {
+        toastError(t('info.work.cv_required_title'), t('info.work.cv_required_hint'));
+        // Scroll al campo de CV para guiar al usuario
+        document.querySelector('[data-cv-dropzone]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+    }
+
     // Snapshot de los datos antes de resetear, para mostrar en el modal
     const snapshot = {
         nombre:     form.nombre,
