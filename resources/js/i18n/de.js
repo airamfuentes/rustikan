@@ -39,6 +39,8 @@ export default {
     favs: {
         title: 'Meine Favoriten',
         subtitle: 'Alle deine Lieblingsgeschäfte an einem Ort.',
+        map_title: 'Deine Favoriten auf der Karte',
+        map_subtitle: 'Finde schnell den Weg zu deinen Lieblingsgeschäften.',
         empty_title: 'Du hast noch keine Lieblingsgeschäfte',
         empty_sub: 'Tippe auf das Herz eines Geschäfts, um es hier zu speichern.',
         explore: 'Geschäfte entdecken',

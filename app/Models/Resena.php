@@ -12,6 +12,7 @@ class Resena extends Model
     protected $fillable = [
         'user_id',
         'tienda_id',
+        'pedido_id',
         'puntuacion',
         'titulo',
         'comentario',
@@ -29,5 +30,10 @@ class Resena extends Model
     public function tienda()
     {
         return $this->belongsTo(Tienda::class);
+    }
+
+    public function pedido()
+    {
+        return $this->belongsTo(Pedido::class);
     }
 }

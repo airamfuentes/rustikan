@@ -25,9 +25,9 @@ const { toggleFavorito, esFavorito } = useFavoritos();
 const props = defineProps({
     tienda:       { type: Object,  required: true },
     resenas:      { type: Array,   default: () => [] },
-    distribucion: { type: Object,  default: () => ({}) },
-    canReview:    { type: Boolean, default: false },
-    userReview:   { type: Object,  default: null },
+    distribucion:   { type: Object,  default: () => ({}) },
+    canReview:      { type: Boolean, default: false },
+    userReviewIds:  { type: Array,   default: () => [] },
 });
 
 // ─── Filtro de categorías ─────────────────────────────────────────────────────
@@ -119,12 +119,11 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown));
 // ─── Reseñas ──────────────────────────────────────────────────────────────────
 const showReviewForm = ref(false);
 const hoverStar      = ref(0);
-const editMode       = ref(!!props.userReview);
 
 const resenaForm = useForm({
-    puntuacion: props.userReview?.puntuacion ?? 0,
-    titulo:     props.userReview?.titulo     ?? '',
-    comentario: props.userReview?.comentario ?? '',
+    puntuacion: 0,
+    titulo:     '',
+    comentario: '',
 });
 
 const setRating = (n) => { resenaForm.puntuacion = n; };
@@ -134,10 +133,13 @@ const submitResena = () => {
         preserveScroll: true,
         onSuccess: () => {
             showReviewForm.value = false;
-            editMode.value = false;
+            resenaForm.reset();
         },
     });
 };
+
+// Marcar visualmente las reseñas del propio user dentro de la lista
+const esResenaPropia = (id) => props.userReviewIds.includes(id);
 
 const deleteResena = (id) => {
     if (!confirm('¿Eliminar tu reseña?')) return;
@@ -489,32 +491,17 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
             <div class="mx-auto max-w-7xl">
 
                 <!-- Cabecera -->
-                <div class="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-                    <div>
-                        <h2 :class="['text-2xl font-extrabold tracking-tight', isDark ? 'text-white' : 'text-gray-900']">
-                            {{ t('store.reviews_title') }}
-                        </h2>
-                        <p :class="['mt-1 text-sm', isDark ? 'text-gray-400' : 'text-gray-500']">
-                            {{ totalResenas }} {{ t('store.opinions') }}
-                        </p>
-                    </div>
-
-                    <!-- Botón "Escribir reseña" -->
-                    <div v-if="canReview && !showReviewForm && (user?.role === 'user' || user?.role === 'admin')">
-                        <button
-                            @click="showReviewForm = true"
-                            class="group flex items-center gap-2 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-600 px-5 py-3 text-sm font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl"
-                        >
-                            <svg class="h-5 w-5 transition-transform group-hover:rotate-12" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                            </svg>
-                            {{ t('store.write_review') }}
-                        </button>
-                    </div>
+                <div class="mb-10">
+                    <h2 :class="['text-2xl font-extrabold tracking-tight', isDark ? 'text-white' : 'text-gray-900']">
+                        {{ t('store.reviews_title') }}
+                    </h2>
+                    <p :class="['mt-1 text-sm', isDark ? 'text-gray-400' : 'text-gray-500']">
+                        {{ totalResenas }} {{ t('store.opinions') }}
+                    </p>
                 </div>
 
                 <!-- Panel resumen + cards -->
-                <div v-if="totalResenas > 0 || canReview || userReview || user" class="grid gap-8 lg:grid-cols-3">
+                <div v-if="totalResenas > 0 || canReview || user" class="grid gap-8 lg:grid-cols-3">
 
                     <!-- ── Panel resumen de puntuación ──────────────────────── -->
                     <div :class="['rounded-3xl p-7 shadow-sm', isDark ? 'bg-gray-800' : 'bg-white border border-gray-100']">
@@ -569,33 +556,6 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                     <!-- ── Lista de reseñas ──────────────────────────────────── -->
                     <div class="lg:col-span-2 space-y-4">
 
-                        <!-- Tu reseña (ya publicada) -->
-                        <div v-if="userReview && !editMode"
-                             :class="['relative rounded-2xl p-5 ring-2 ring-primary-400 shadow-sm', isDark ? 'bg-gray-800' : 'bg-primary-50']">
-                            <div class="mb-2 flex items-center justify-between">
-                                <span class="rounded-full bg-primary-500 px-3 py-0.5 text-xs font-bold text-white">{{ t('store.your_review') }}</span>
-                                <div class="flex gap-2">
-                                    <button @click="editMode = true; showReviewForm = true"
-                                            :class="['rounded-lg px-3 py-1 text-xs font-medium transition-colors', isDark ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-500 hover:bg-white']">
-                                        {{ t('store.edit') }}
-                                    </button>
-                                    <button @click="deleteResena(userReview.id)"
-                                            class="rounded-lg px-3 py-1 text-xs font-medium text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-red-900/30">
-                                        {{ t('store.delete') }}
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="flex gap-0.5 mb-1">
-                                <svg v-for="i in 5" :key="i"
-                                     :class="['h-4 w-4', i <= userReview.puntuacion ? 'text-yellow-400' : 'text-gray-300']"
-                                     fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                </svg>
-                            </div>
-                            <p v-if="userReview.titulo" :class="['font-semibold text-sm', isDark ? 'text-white' : 'text-gray-900']">{{ userReview.titulo }}</p>
-                            <p :class="['text-sm mt-1', isDark ? 'text-gray-300' : 'text-gray-700']">{{ userReview.comentario }}</p>
-                        </div>
-
                         <!-- Formulario de reseña -->
                         <Transition
                             enter-active-class="transition duration-300"
@@ -611,9 +571,9 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
 
                             <div class="mb-4 flex items-center justify-between">
                                 <h3 :class="['text-base font-bold', isDark ? 'text-white' : 'text-gray-900']">
-                                    {{ editMode ? t('store.edit_review') : t('store.write_opinion') }}
+                                    {{ t('store.write_opinion') }}
                                 </h3>
-                                <button type="button" @click="showReviewForm = false; editMode = false"
+                                <button type="button" @click="showReviewForm = false"
                                         :class="['rounded-full p-1 transition-colors', isDark ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-500']">
                                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -676,7 +636,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
 
                             <!-- Botón enviar -->
                             <div class="flex items-center justify-end gap-3">
-                                <button type="button" @click="showReviewForm = false; editMode = false"
+                                <button type="button" @click="showReviewForm = false"
                                         :class="['rounded-xl px-4 py-2 text-sm font-medium transition-colors', isDark ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-500 hover:bg-gray-100']">
                                     {{ t('store.cancel') }}
                                 </button>
@@ -686,14 +646,14 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                                     </svg>
-                                    {{ editMode ? t('store.update_review') : t('store.publish') }}
+                                    {{ t('store.publish') }}
                                 </button>
                             </div>
                         </form>
                         </Transition>
 
                         <!-- CTA para escribir reseña (usuario puede reseñar pero aún no ha abierto el form) -->
-                        <div v-if="canReview && !showReviewForm && !userReview"
+                        <div v-if="canReview && !showReviewForm"
                              @click="showReviewForm = true"
                              :class="['cursor-pointer rounded-3xl p-10 text-center transition-all hover:-translate-y-0.5 hover:shadow-md', isDark ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white border border-dashed border-primary-300 hover:border-primary-400 shadow-sm']">
                             <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary-100">
@@ -709,7 +669,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                         </div>
 
                         <!-- Estado vacío (sin reseñas, usuario no puede reseñar) -->
-                        <div v-if="totalResenas === 0 && !canReview && !userReview && !showReviewForm"
+                        <div v-if="totalResenas === 0 && !canReview && !showReviewForm"
                              :class="['rounded-3xl p-10 text-center', isDark ? 'bg-gray-800' : 'bg-white border border-gray-100 shadow-sm']">
                             <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100">
                                 <svg class="h-8 w-8 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
@@ -724,9 +684,21 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                         <div v-if="totalResenas > 0" class="grid gap-4 sm:grid-cols-2">
                             <div
                                 v-for="r in resenas" :key="r.id"
-                                :class="['rounded-2xl p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md',
-                                    isDark ? 'bg-gray-800' : 'bg-white border border-gray-100']"
+                                :class="['relative rounded-2xl p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md',
+                                    isDark ? 'bg-gray-800' : 'bg-white border border-gray-100',
+                                    esResenaPropia(r.id) ? 'ring-2 ring-primary-400' : '']"
                             >
+                                <!-- Badge "Tu reseña" + eliminar -->
+                                <div v-if="esResenaPropia(r.id)" class="mb-2 flex items-center justify-between">
+                                    <span class="rounded-full bg-primary-500 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                                        {{ t('store.your_review') }}
+                                    </span>
+                                    <button @click="deleteResena(r.id)" type="button"
+                                            class="rounded-lg px-2 py-0.5 text-[11px] font-medium text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-red-900/30">
+                                        {{ t('store.delete') }}
+                                    </button>
+                                </div>
+
                                 <div class="flex gap-4">
                                     <!-- ── Contenido de la reseña (izquierda) ── -->
                                     <div class="min-w-0 flex-1">
@@ -770,7 +742,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                         </div>
 
                         <!-- CTA para usuarios sin acceso a reseñar -->
-                        <div v-if="!canReview && !userReview && user && user.role === 'user' && totalResenas >= 0"
+                        <div v-if="!canReview && user && user.role === 'user' && totalResenas >= 0"
                              :class="['mt-2 rounded-2xl p-4 flex items-center gap-3', isDark ? 'bg-gray-700/50' : 'bg-gray-50 border border-dashed border-gray-200']">
                             <svg class="h-5 w-5 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>

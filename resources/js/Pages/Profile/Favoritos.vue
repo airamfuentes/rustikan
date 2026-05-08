@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import FooterPublico from '@/Components/FooterPublico.vue';
+import MapaTiendas from '@/Components/MapaTiendas.vue';
 import { useI18n } from '@/Composables/useI18n';
 import { useCategorias } from '@/Composables/useCategorias';
 import { useFavoritos } from '@/Composables/useFavoritos';
@@ -19,6 +20,9 @@ const props = defineProps({
 });
 
 const total = computed(() => props.tiendas.length);
+const tiendasConCoords = computed(() =>
+    props.tiendas.filter(t => t.latitud && t.longitud)
+);
 </script>
 
 <template>
@@ -111,6 +115,25 @@ const total = computed(() => props.tiendas.length);
                     </div>
                 </Link>
             </div>
+
+            <!-- Mapa de favoritas (solo si hay alguna con coordenadas) -->
+            <section v-if="tiendasConCoords.length > 0" class="mt-12">
+                <div class="mb-5 text-center">
+                    <h2 class="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-2xl">
+                        {{ t('favs.map_title') }}
+                    </h2>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        {{ t('favs.map_subtitle') }}
+                    </p>
+                </div>
+                <div class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                    <MapaTiendas
+                        :tiendas="tiendasConCoords"
+                        :categorias="[]"
+                        height="460px"
+                    />
+                </div>
+            </section>
         </main>
 
         <FooterPublico />

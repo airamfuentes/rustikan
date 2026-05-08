@@ -67,27 +67,46 @@ Route::get('/tienda/{tienda:slug}', function (\App\Models\Tienda $tienda) {
         $distribucion[$i] = $count;
     }
 
-    // Determinar si el usuario autenticado puede reseñar
-    $canReview  = false;
-    $userReview = null;
+    // Determinar si el usuario autenticado puede reseñar.
+    // Regla: 1 reseña por pedido. Mientras tenga pedidos sin reseñar en esta
+    // tienda, puede crear una nueva. No exponemos al user el contador.
+    $canReview    = false;
+    $userReviewIds = [];
     $user = auth()->user();
-    if ($user && in_array($user->role, ['user', 'admin'])) {
-        $userReview = $tienda->resenas()->where('user_id', $user->id)->first();
-        // Cualquier usuario puede intentar escribir una reseña; la validación real está en el controller
-        $canReview = !$userReview;
+    if ($user) {
+        // Las reseñas existentes del user en esta tienda (para que el front
+        // pueda marcarlas visualmente y mostrar botón de eliminar).
+        $userReviewIds = $tienda->resenas()
+            ->where('user_id', $user->id)
+            ->pluck('id')
+            ->all();
+
+        if ($user->role === 'admin') {
+            // Admin: siempre puede dejar/actualizar su reseña libre
+            $canReview = empty($userReviewIds);
+        } elseif ($user->role === 'user') {
+            // Pedidos del user en esta tienda (no cancelados)
+            $totalPedidos = \App\Models\Pedido::where('user_id', $user->id)
+                ->whereNotIn('estado', ['cancelado'])
+                ->whereHas('items', fn ($q) => $q->where('tienda_id', $tienda->id))
+                ->count();
+
+            // Reseñas del user asociadas a un pedido en esta tienda
+            $totalResenadas = $tienda->resenas()
+                ->where('user_id', $user->id)
+                ->whereNotNull('pedido_id')
+                ->count();
+
+            $canReview = $totalPedidos > $totalResenadas;
+        }
     }
 
     return Inertia::render('TiendaDetalle', [
-        'tienda'       => $tienda,
-        'resenas'      => $resenas,
-        'distribucion' => $distribucion,
-        'canReview'    => $canReview,
-        'userReview'   => $userReview ? [
-            'id'         => $userReview->id,
-            'puntuacion' => $userReview->puntuacion,
-            'titulo'     => $userReview->titulo,
-            'comentario' => $userReview->comentario,
-        ] : null,
+        'tienda'         => $tienda,
+        'resenas'        => $resenas,
+        'distribucion'   => $distribucion,
+        'canReview'      => $canReview,
+        'userReviewIds'  => $userReviewIds,
     ]);
 })->name('tienda.detalle');
 

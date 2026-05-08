@@ -39,6 +39,8 @@ export default {
     favs: {
         title: 'My favourites',
         subtitle: 'All your favourite stores in one place.',
+        map_title: 'Your favourites on the map',
+        map_subtitle: 'Quickly find how to reach your favourite stores.',
         empty_title: 'You don\'t have favourite stores yet',
         empty_sub: 'Tap the heart on any store to save it here.',
         explore: 'Browse stores',

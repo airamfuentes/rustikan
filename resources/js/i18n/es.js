@@ -41,6 +41,8 @@ export default {
     favs: {
         title: 'Mis favoritas',
         subtitle: 'Las tiendas que más te gustan, todo en un mismo sitio.',
+        map_title: 'Tus favoritas en el mapa',
+        map_subtitle: 'Encuentra rápido cómo llegar a tus tiendas favoritas.',
         empty_title: 'Aún no tienes tiendas favoritas',
         empty_sub: 'Pulsa el corazón en cualquier tienda para guardarla aquí.',
         explore: 'Explorar tiendas',

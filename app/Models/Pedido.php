@@ -47,6 +47,14 @@ class Pedido extends Model
     }
 
     /**
+     * Reseña asociada a este pedido (1:1 — un pedido como mucho una reseña).
+     */
+    public function resena()
+    {
+        return $this->hasOne(Resena::class);
+    }
+
+    /**
      * Generate unique order number
      */
     public static function generateOrderNumber(): string

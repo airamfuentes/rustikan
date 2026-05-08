@@ -39,6 +39,8 @@ export default {
     favs: {
         title: 'I miei preferiti',
         subtitle: 'Tutti i tuoi negozi preferiti in un unico posto.',
+        map_title: 'I tuoi preferiti sulla mappa',
+        map_subtitle: 'Trova rapidamente come raggiungere i tuoi negozi preferiti.',
         empty_title: 'Non hai ancora negozi preferiti',
         empty_sub: 'Tocca il cuore di un negozio per salvarlo qui.',
         explore: 'Esplora negozi',
