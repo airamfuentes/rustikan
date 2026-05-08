@@ -7,8 +7,10 @@ import CategoriaIcono from '@/Components/CategoriaIcono.vue';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import { useI18n } from '@/Composables/useI18n';
 import { useToasts } from '@/Composables/useToasts';
+import { useCategorias } from '@/Composables/useCategorias';
 
 const { t } = useI18n();
+const { nombre: categoriaNombre } = useCategorias();
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 const { success } = useToasts();
@@ -105,7 +107,7 @@ onMounted(() => {
                             <img
                                 v-if="categoriaImagen[cat.slug]"
                                 :src="categoriaImagen[cat.slug]"
-                                :alt="cat.nombre"
+                                :alt="categoriaNombre(cat)"
                                 class="h-full w-full object-cover scale-125"
                             />
                             <CategoriaIcono v-else :slug="cat.slug" :icono="cat.icono" class="h-7 w-7 sm:h-9 sm:w-9 text-gray-700 dark:text-gray-200 group-hover:text-primary-500 transition-colors" />
@@ -113,7 +115,7 @@ onMounted(() => {
 
                         <!-- Etiqueta debajo -->
                         <span class="mt-2 text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300 transition-colors group-hover:text-primary-500 text-center leading-tight w-full">
-                            {{ cat.nombre }}
+                            {{ categoriaNombre(cat) }}
                         </span>
                     </Link>
                 </div>

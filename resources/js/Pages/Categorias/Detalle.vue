@@ -8,6 +8,8 @@ import DarkModeToggle from '@/Components/DarkModeToggle.vue';
 import SkeletonTiendaCard from '@/Components/SkeletonTiendaCard.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
 import { useFavoritos } from '@/Composables/useFavoritos';
+import { useI18n } from '@/Composables/useI18n';
+import { useCategorias } from '@/Composables/useCategorias';
 import { ArrowLeft, Type } from 'lucide-vue-next';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import CategoriaIcono from '@/Components/CategoriaIcono.vue';
@@ -16,6 +18,8 @@ const page = usePage();
 const user = computed(() => page.props.auth.user);
 const { isDark, toggleDark } = useDarkMode();
 const { toggleFavorito, esFavorito } = useFavoritos();
+const { t } = useI18n();
+const { nombre: categoriaNombre, descripcion: categoriaDesc } = useCategorias();
 const isNavigating = ref(false);
 
 const props = defineProps({
@@ -30,12 +34,12 @@ const showSortMenu = ref(false);
 const sortMenuRef  = ref(null);
 const cardRefs    = ref([]);
 
-const sortOpciones = [
-    { key: 'valoracion', label: 'Valoración',  icon: 'M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z' },
-    { key: 'resenas',    label: 'Reseñas',     icon: 'M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97z' },
-    { key: 'productos',  label: 'Productos',   icon: 'M12.378 1.602a.75.75 0 00-.756 0L3 6.632l9 5.25 9-5.25-8.622-5.03zM21.75 7.93l-9 5.25v9l8.628-5.032a.75.75 0 00.372-.648V7.93zM11.25 22.18v-9l-9-5.25v8.57a.75.75 0 00.372.648l8.628 5.033z' },
-    { key: 'nombre',     label: 'Nombre',      icon: 'M4 6h16M4 12h8m-8 6h16', lucide: Type },
-];
+const sortOpciones = computed(() => [
+    { key: 'valoracion', label: t('cat_page.sort_rating'),   icon: 'M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z' },
+    { key: 'resenas',    label: t('cat_page.sort_reviews'),  icon: 'M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97z' },
+    { key: 'productos',  label: t('cat_page.sort_products'), icon: 'M12.378 1.602a.75.75 0 00-.756 0L3 6.632l9 5.25 9-5.25-8.622-5.03zM21.75 7.93l-9 5.25v9l8.628-5.032a.75.75 0 00.372-.648V7.93zM11.25 22.18v-9l-9-5.25v8.57a.75.75 0 00.372.648l8.628 5.033z' },
+    { key: 'nombre',     label: t('cat_page.sort_name'),     icon: 'M4 6h16M4 12h8m-8 6h16', lucide: Type },
+]);
 
 const normalizar = (str) =>
     (str ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -128,7 +132,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <Head :title="`${categoria.nombre} – Rustikan`" />
+    <Head :title="`${categoriaNombre(categoria)} – Rustikan`" />
 
     <div :class="['min-h-screen flex flex-col', isDark ? 'bg-gray-950' : 'bg-gray-50']">
 
@@ -145,11 +149,11 @@ onUnmounted(() => {
             <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14">
                 <!-- Miga de pan -->
                 <nav class="mb-6 flex items-center gap-2 text-sm text-gray-400">
-                    <Link href="/" class="transition-colors hover:text-primary-400">Inicio</Link>
+                    <Link href="/" class="transition-colors hover:text-primary-400">{{ t('cat_page.home') }}</Link>
                     <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
-                    <span class="text-gray-200">{{ categoria.nombre }}</span>
+                    <span class="text-gray-200">{{ categoriaNombre(categoria) }}</span>
                 </nav>
 
                 <!-- Icono/imagen + título -->
@@ -161,7 +165,7 @@ onUnmounted(() => {
                             <img
                                 v-if="categoriaImagen[categoria.slug]"
                                 :src="categoriaImagen[categoria.slug]"
-                                :alt="categoria.nombre"
+                                :alt="categoriaNombre(categoria)"
                                 class="h-full w-full object-cover scale-125"
                             />
                             <CategoriaIcono v-else :slug="categoria.slug" :icono="categoria.icono" class="h-12 w-12 text-white" />
@@ -169,10 +173,10 @@ onUnmounted(() => {
                     </div>
                     <div>
                         <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
-                            {{ categoria.nombre }}
+                            {{ categoriaNombre(categoria) }}
                         </h1>
-                        <p v-if="categoria.descripcion" class="mt-2 max-w-xl text-lg text-gray-300">
-                            {{ categoria.descripcion }}
+                        <p v-if="categoriaDesc(categoria)" class="mt-2 max-w-xl text-lg text-gray-300">
+                            {{ categoriaDesc(categoria) }}
                         </p>
                     </div>
                 </div>
@@ -181,11 +185,11 @@ onUnmounted(() => {
                 <div class="mt-10 grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10">
                     <div class="flex flex-col items-center bg-white/5 px-3 sm:px-6 py-4 sm:py-5">
                         <span class="text-xl sm:text-3xl font-extrabold text-white">{{ tiendas.length }}</span>
-                        <span class="mt-1 text-[10px] sm:text-xs font-medium uppercase tracking-widest text-gray-400">Tiendas</span>
+                        <span class="mt-1 text-[10px] sm:text-xs font-medium uppercase tracking-widest text-gray-400">{{ t('cat_page.stores') }}</span>
                     </div>
                     <div class="flex flex-col items-center bg-white/5 px-3 sm:px-6 py-4 sm:py-5">
                         <span class="text-xl sm:text-3xl font-extrabold text-white">{{ totalProductos }}</span>
-                        <span class="mt-1 text-[10px] sm:text-xs font-medium uppercase tracking-widest text-gray-400">Productos</span>
+                        <span class="mt-1 text-[10px] sm:text-xs font-medium uppercase tracking-widest text-gray-400">{{ t('cat_page.products') }}</span>
                     </div>
                     <div class="flex flex-col items-center bg-white/5 px-3 sm:px-6 py-4 sm:py-5">
                         <span class="flex items-center gap-1 text-xl sm:text-3xl font-extrabold text-white">
@@ -194,7 +198,7 @@ onUnmounted(() => {
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                             </svg>
                         </span>
-                        <span class="mt-1 text-[10px] sm:text-xs font-medium uppercase tracking-widest text-gray-400">Valoración media</span>
+                        <span class="mt-1 text-[10px] sm:text-xs font-medium uppercase tracking-widest text-gray-400">{{ t('cat_page.avg_rating') }}</span>
                     </div>
                 </div>
             </div>
@@ -237,7 +241,7 @@ onUnmounted(() => {
                     <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                     </svg>
-                    {{ showMap ? 'Ocultar mapa' : 'Ver mapa de tiendas' }}
+                    {{ showMap ? t('cat_page.hide_map') : t('cat_page.show_map') }}
                 </button>
             </div>
         </div>
@@ -258,7 +262,7 @@ onUnmounted(() => {
                             <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
                             </svg>
-                            <span class="hidden sm:inline">Ordenar: </span>{{ sortOpciones.find(o => o.key === ordenActivo)?.label }}
+                            <span class="hidden sm:inline">{{ t('cat_page.sort_label') }} </span>{{ sortOpciones.find(o => o.key === ordenActivo)?.label }}
                             <svg class="h-3 w-3 transition-transform" :class="showSortMenu ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
@@ -296,7 +300,7 @@ onUnmounted(() => {
                 <!-- Derecha: búsqueda compacta + contador -->
                 <div class="ml-auto flex items-center gap-3">
                     <span :class="['hidden text-xs sm:block', isDark ? 'text-gray-500' : 'text-gray-400']">
-                        {{ tiendasOrdenadas.length }} resultado{{ tiendasOrdenadas.length !== 1 ? 's' : '' }}
+                        {{ t(tiendasOrdenadas.length === 1 ? 'cat_page.results_one' : 'cat_page.results_other', { n: tiendasOrdenadas.length }) }}
                     </span>
                     <div class="relative flex shrink-0 items-center">
                         <div class="pointer-events-none absolute left-0 flex items-center pl-3">
@@ -308,7 +312,7 @@ onUnmounted(() => {
                             v-model="busqueda"
                             @input="observeCards"
                             type="search"
-                            :placeholder="`Buscar en ${categoria.nombre}...`"
+                            :placeholder="t('cat_page.search_in', { name: categoriaNombre(categoria) })"
                             :class="['w-44 rounded-full border py-2 pl-9 pr-3 text-xs transition-all focus:w-60 focus:outline-none focus:ring-1 focus:ring-primary-400',
                                 isDark ? 'bg-gray-800 border-gray-600 text-gray-100 placeholder-gray-500 focus:border-primary-400' : 'bg-gray-100 border-transparent text-gray-800 placeholder-gray-400 focus:border-gray-300 focus:bg-white']"
                         />
@@ -326,12 +330,12 @@ onUnmounted(() => {
                     <CategoriaIcono :slug="categoria.slug" :icono="categoria.icono" class="h-16 w-16 text-gray-400 dark:text-gray-500" />
                 </div>
                 <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-300">
-                    <template v-if="busqueda.trim()">Sin coincidencias para "{{ busqueda }}"</template>
-                    <template v-else>Aún no hay establecimientos en esta categoría</template>
+                    <template v-if="busqueda.trim()">{{ t('cat_page.no_match_for', { q: busqueda }) }}</template>
+                    <template v-else>{{ t('cat_page.no_stores_yet') }}</template>
                 </h2>
-                <p class="mt-2 text-sm text-gray-400 dark:text-gray-500">Pronto encontrarás productores locales de {{ categoria.nombre }} aquí.</p>
+                <p class="mt-2 text-sm text-gray-400 dark:text-gray-500">{{ t('cat_page.coming_soon', { name: categoriaNombre(categoria) }) }}</p>
                 <Link href="/" class="mt-6 inline-flex items-center gap-1 rounded-lg bg-primary-500 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-600">
-                    <ArrowLeft class="h-4 w-4" /> Volver al inicio
+                    <ArrowLeft class="h-4 w-4" /> {{ t('cat_page.back_home') }}
                 </Link>
             </div>
 
@@ -340,7 +344,7 @@ onUnmounted(() => {
                 <div class="mb-10 card-animate" style="--delay: 0ms">
                     <div class="mb-4 flex items-center gap-2">
                         <span class="inline-block h-1 w-8 rounded-full bg-primary-500"></span>
-                        <span class="text-xs font-bold uppercase tracking-widest text-primary-500">Destacada</span>
+                        <span class="text-xs font-bold uppercase tracking-widest text-primary-500">{{ t('cat_page.featured') }}</span>
                     </div>
 
                     <Link
@@ -355,6 +359,17 @@ onUnmounted(() => {
                             />
                             <div class="absolute inset-0 bg-gradient-to-r from-transparent to-white/50 dark:to-gray-800/50 hidden sm:block"></div>
                             <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent sm:hidden"></div>
+                            <!-- Botón favorito destacada -->
+                            <button
+                                @click.prevent.stop="toggleFavorito(tiendaDestacada.id, tiendaDestacada.nombre)"
+                                class="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-all hover:scale-110 shadow-sm"
+                                :title="esFavorito(tiendaDestacada.id) ? t('cat_page.fav_remove') : t('cat_page.fav_add')"
+                            >
+                                <svg class="h-4 w-4 transition-colors" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                     :class="esFavorito(tiendaDestacada.id) ? 'fill-red-500 stroke-red-500' : 'fill-none stroke-gray-500'">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                                </svg>
+                            </button>
                         </div>
 
                         <div class="flex flex-1 flex-col justify-between p-6 sm:p-8">
@@ -362,7 +377,7 @@ onUnmounted(() => {
                                 <div class="mb-3 flex flex-wrap items-center gap-2">
                                     <span class="inline-flex items-center gap-1.5 rounded-full bg-primary-100 dark:bg-primary-900/40 px-3 py-1 text-xs font-bold text-primary-700 dark:text-primary-300">
                                         <CategoriaIcono :slug="categoria.slug" :icono="categoria.icono" class="h-3.5 w-3.5" />
-                                        {{ categoria.nombre }}
+                                        {{ categoriaNombre(categoria) }}
                                     </span>
                                     <span class="flex items-center gap-1 rounded-full bg-yellow-50 dark:bg-yellow-900/30 px-3 py-1 text-xs font-bold text-yellow-700 dark:text-yellow-300">
                                         <svg class="h-3.5 w-3.5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
@@ -373,7 +388,7 @@ onUnmounted(() => {
                                     </span>
                                     <span v-if="tiendaDestacada.productos_count" class="inline-flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-700 px-3 py-1 text-xs font-semibold text-gray-600 dark:text-gray-300">
                                         <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.378 1.602a.75.75 0 00-.756 0L3 6.632l9 5.25 9-5.25-8.622-5.03zM21.75 7.93l-9 5.25v9l8.628-5.032a.75.75 0 00.372-.648V7.93zM11.25 22.18v-9l-9-5.25v8.57a.75.75 0 00.372.648l8.628 5.033z" /></svg>
-                                        {{ tiendaDestacada.productos_count }} productos
+                                        {{ t('cat_page.n_products', { n: tiendaDestacada.productos_count }) }}
                                     </span>
                                 </div>
                                 <h2 class="text-2xl font-extrabold text-gray-900 dark:text-white sm:text-3xl">{{ tiendaDestacada.nombre }}</h2>
@@ -389,7 +404,7 @@ onUnmounted(() => {
                                     {{ tiendaDestacada.direccion }}
                                 </div>
                                 <span class="inline-flex items-center gap-1.5 rounded-xl bg-primary-500 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all group-hover:bg-primary-600 group-hover:shadow-md">
-                                    Ver tienda
+                                    {{ t('cat_page.view_store') }}
                                     <svg class="h-4 w-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                     </svg>
@@ -408,7 +423,7 @@ onUnmounted(() => {
                 <div v-else-if="restoTiendas.length > 0">
                     <div class="mb-4 flex items-center gap-2">
                         <span class="inline-block h-1 w-8 rounded-full bg-gray-300"></span>
-                        <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Todas las tiendas</span>
+                        <span class="text-xs font-bold uppercase tracking-widest text-gray-400">{{ t('cat_page.all_stores') }}</span>
                     </div>
 
                     <!-- Vista Cuadrícula -->
@@ -441,9 +456,9 @@ onUnmounted(() => {
                                 </div>
                                 <!-- Botón favorito -->
                                 <button
-                                    @click.prevent.stop="toggleFavorito(tienda.id)"
+                                    @click.prevent.stop="toggleFavorito(tienda.id, tienda.nombre)"
                                     class="absolute bottom-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-all hover:scale-110 shadow-sm"
-                                    :title="esFavorito(tienda.id) ? 'Quitar de favoritos' : 'Añadir a favoritos'"
+                                    :title="esFavorito(tienda.id) ? t('cat_page.fav_remove') : t('cat_page.fav_add')"
                                 >
                                     <svg class="h-4 w-4 transition-colors" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
                                         :class="esFavorito(tienda.id) ? 'fill-red-500 stroke-red-500' : 'fill-none stroke-gray-400'"
@@ -483,7 +498,7 @@ onUnmounted(() => {
         </main>
 
         <footer :class="['mt-16 border-t py-8 text-center text-sm', isDark ? 'border-gray-800 bg-gray-950 text-gray-600' : 'border-gray-200 bg-white text-gray-400']">
-            <p>&copy; {{ new Date().getFullYear() }} Rustikan · Productos locales de Lanzarote</p>
+            <p>{{ t('cat_page.footer', { y: new Date().getFullYear() }) }}</p>
         </footer>
     </div>
 </template>

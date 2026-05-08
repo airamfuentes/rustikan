@@ -18,6 +18,27 @@
             </div>
         </section>
 
+        <!-- Impacto — visible nada más entrar -->
+        <section class="bg-gradient-to-b from-emerald-50 to-white py-10 dark:from-emerald-950/40 dark:to-gray-900">
+            <div class="mx-auto max-w-4xl px-4 sm:px-6">
+                <h2 class="mb-6 text-center text-xl font-bold text-gray-800 dark:text-white">Nuestro impacto</h2>
+                <div class="grid gap-4 text-center sm:grid-cols-3">
+                    <div ref="statRef" class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-sm dark:border-emerald-800/50 dark:bg-gray-800">
+                        <p class="text-4xl font-extrabold text-emerald-600 dark:text-emerald-400">{{ count }}%</p>
+                        <p class="mt-1 text-sm font-medium text-gray-600 dark:text-gray-300">Productores locales</p>
+                    </div>
+                    <div class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-sm dark:border-emerald-800/50 dark:bg-gray-800">
+                        <p class="text-4xl font-extrabold text-emerald-600 dark:text-emerald-400">0€</p>
+                        <p class="mt-1 text-sm font-medium text-gray-600 dark:text-gray-300">Comisión de alta para productores</p>
+                    </div>
+                    <div class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-sm dark:border-emerald-800/50 dark:bg-gray-800">
+                        <Palmtree class="mx-auto mb-1 h-9 w-9 text-emerald-600 dark:text-emerald-400" />
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-300">Hecho en Lanzarote</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Contenido -->
         <section class="py-16">
             <div class="mx-auto max-w-4xl px-4 sm:px-6">
@@ -39,7 +60,7 @@
                 </div>
 
                 <!-- Compromisos -->
-                <div class="mb-16 mt-12">
+                <div class="mt-12">
                     <h2 class="mb-8 text-2xl font-bold text-gray-900 dark:text-white">{{ t('info.mission.commitments') }}</h2>
                     <div class="space-y-4">
                         <div v-for="item in compromisos" :key="item.titulo"
@@ -51,25 +72,6 @@
                                 <h3 class="font-semibold text-gray-900 dark:text-white">{{ item.titulo }}</h3>
                                 <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ item.desc }}</p>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Impacto -->
-                <div v-reveal>
-                    <h2 class="mb-8 text-center text-2xl font-bold text-gray-900 dark:text-white">Nuestro impacto</h2>
-                    <div class="grid gap-6 text-center sm:grid-cols-3">
-                        <div ref="statRef" class="rounded-2xl border border-gray-100 bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-800">
-                            <p class="text-3xl font-bold text-primary-600 dark:text-primary-400">{{ count }}%</p>
-                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Productores locales</p>
-                        </div>
-                        <div class="rounded-2xl border border-gray-100 bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-800">
-                            <p class="text-3xl font-bold text-primary-600 dark:text-primary-400">0€</p>
-                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Comisión de alta para productores</p>
-                        </div>
-                        <div class="rounded-2xl border border-gray-100 bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-800">
-                            <Palmtree class="mx-auto h-9 w-9 text-primary-600 dark:text-primary-400" />
-                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Hecho en Lanzarote</p>
                         </div>
                     </div>
                 </div>

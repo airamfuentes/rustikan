@@ -54,7 +54,17 @@ class HandleInertiaRequests extends Middleware
                 ? $this->notificacionesCount($user)
                 : 0,
             'chatNoLeidos' => $user ? $this->chatNoLeidos($user) : 0,
+            'tiendasFavoritasIds' => $user ? $this->tiendasFavoritasIds($user) : [],
         ];
+    }
+
+    private function tiendasFavoritasIds($user): array
+    {
+        try {
+            return $user->tiendasFavoritas()->pluck('tiendas.id')->all();
+        } catch (\Throwable) {
+            return [];
+        }
     }
 
     private function notificacionesCount($user): int

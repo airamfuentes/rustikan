@@ -17,6 +17,7 @@ const props = defineProps({
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
+const favoritosCount = computed(() => (page.props.tiendasFavoritasIds ?? []).length);
 const { isDark, toggleDark } = useDarkMode();
 
 const scrolled           = ref(false);
@@ -348,6 +349,17 @@ onUnmounted(() => {
                                     </svg>
                                     {{ t('nav.my_orders') }}
                                 </Link>
+                                <Link :href="route('favoritos.index')" class="flex items-center justify-between gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700" @click="showProfileMenu = false">
+                                    <span class="flex items-center gap-3">
+                                        <svg class="h-4 w-4 text-rose-500" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                                        </svg>
+                                        {{ t('favs.nav_link') }}
+                                    </span>
+                                    <span v-if="favoritosCount > 0" class="rounded-full bg-rose-100 dark:bg-rose-900/40 px-2 py-0.5 text-xs font-bold text-rose-600 dark:text-rose-300">
+                                        {{ favoritosCount }}
+                                    </span>
+                                </Link>
                                 <Link :href="route('profile.edit')" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700" @click="showProfileMenu = false">
                                     <svg class="h-4 w-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -572,6 +584,17 @@ onUnmounted(() => {
                         <Link v-if="user" :href="route('pedidos.index')" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
                             <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                             {{ t('nav.my_orders') }}
+                        </Link>
+                        <Link v-if="user" :href="route('favoritos.index')" class="flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
+                            <span class="flex items-center gap-3">
+                                <svg class="h-5 w-5 text-rose-500" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                                </svg>
+                                {{ t('favs.nav_link') }}
+                            </span>
+                            <span v-if="favoritosCount > 0" class="rounded-full bg-rose-100 dark:bg-rose-900/40 px-2 py-0.5 text-xs font-bold text-rose-600 dark:text-rose-300">
+                                {{ favoritosCount }}
+                            </span>
                         </Link>
                         <Link v-if="user" :href="route('profile.edit')" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
                             <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>

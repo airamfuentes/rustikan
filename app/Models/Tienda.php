@@ -84,6 +84,15 @@ class Tienda extends Model
     }
 
     /**
+     * Usuarios que han marcado esta tienda como favorita.
+     */
+    public function favoritaPor()
+    {
+        return $this->belongsToMany(User::class, 'tienda_favoritas')
+            ->withTimestamps();
+    }
+
+    /**
      * Hooks Eloquent: al borrar la tienda, eliminar también su logo y portada
      * del storage para no dejar archivos huérfanos.
      * Solo borra rutas locales (no URLs http).

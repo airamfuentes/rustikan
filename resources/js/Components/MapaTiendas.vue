@@ -6,6 +6,11 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import { useI18n } from '@/Composables/useI18n';
+import { useCategorias } from '@/Composables/useCategorias';
+
+const { t } = useI18n();
+const { nombre: categoriaNombre } = useCategorias();
 
 const props = defineProps({
     tiendas:    { type: Array, default: () => [] },
@@ -39,7 +44,7 @@ const IMG_FALLBACK = '/images/logo.png';
 const crearIcono = (tienda) => {
     const color = tienda.categoria?.color || '#f97316';
     const img = CATEGORIA_IMG[tienda.categoria?.slug] ?? IMG_FALLBACK;
-    const alt = escapeHtml(tienda.categoria?.nombre ?? 'Categoría');
+    const alt = escapeHtml(categoriaNombre(tienda.categoria) || t('cat_page.stores'));
     return L.divIcon({
         html: `
             <div class="mapa-pin">
@@ -75,7 +80,7 @@ const crearPopup = (tienda) => {
                 <div class="mapa-popup-stars">${starsHtml} <span>${rating}</span></div>
                 <p class="mapa-popup-addr">${direccion}</p>
                 <button class="mapa-popup-btn" onclick="window.__mapaNavegar('${escapeHtml(tienda.slug)}')">
-                    Ver tienda &rarr;
+                    ${escapeHtml(t('cat_page.view_store'))} &rarr;
                 </button>
             </div>
         </div>

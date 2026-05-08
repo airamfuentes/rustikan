@@ -119,6 +119,15 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Tiendas marcadas como favoritas por este usuario.
+     */
+    public function tiendasFavoritas()
+    {
+        return $this->belongsToMany(Tienda::class, 'tienda_favoritas')
+            ->withTimestamps();
+    }
+
+    /**
      * Send the email verification notification using a 6-digit code.
      */
     public function sendEmailVerificationNotification(): void

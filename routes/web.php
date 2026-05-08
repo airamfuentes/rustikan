@@ -143,6 +143,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/notificaciones', [\App\Http\Controllers\NotificacionController::class, 'index'])->name('notificaciones.index');
     Route::post('/notificaciones/{notificacion}/leer', [\App\Http\Controllers\NotificacionController::class, 'marcarLeida'])->name('notificaciones.leer');
     Route::post('/notificaciones/leer-todas', [\App\Http\Controllers\NotificacionController::class, 'marcarTodasLeidas'])->name('notificaciones.leer-todas');
+
+    // Tiendas favoritas
+    Route::get('/mis-favoritas', [\App\Http\Controllers\FavoritoController::class, 'index'])->name('favoritos.index');
+    Route::post('/favoritos/{tienda}/toggle', [\App\Http\Controllers\FavoritoController::class, 'toggle'])->name('favoritos.toggle');
 });
 
 Route::middleware('auth')->group(function () {

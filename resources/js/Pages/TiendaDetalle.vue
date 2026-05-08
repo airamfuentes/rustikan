@@ -7,6 +7,8 @@ import DarkModeToggle from '@/Components/DarkModeToggle.vue';
 import { useCarrito } from '@/Composables/useCarrito';
 import { useDarkMode } from '@/Composables/useDarkMode';
 import { useI18n } from '@/Composables/useI18n';
+import { useCategorias } from '@/Composables/useCategorias';
+import { useFavoritos } from '@/Composables/useFavoritos';
 import { Store, Package, Star, AlertTriangle, Check } from 'lucide-vue-next';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import { useToasts } from '@/Composables/useToasts';
@@ -17,6 +19,8 @@ const page = usePage();
 const user = computed(() => page.props.auth.user);
 const { isDark, toggleDark } = useDarkMode();
 const { t } = useI18n();
+const { nombre: categoriaNombre } = useCategorias();
+const { toggleFavorito, esFavorito } = useFavoritos();
 
 const props = defineProps({
     tienda:       { type: Object,  required: true },
@@ -205,7 +209,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
                     <Link v-if="tienda.categoria" :href="`/categoria/${tienda.categoria.slug}`" class="transition-colors hover:text-primary-400">
-                        {{ tienda.categoria.nombre }}
+                        {{ categoriaNombre(tienda.categoria) }}
                     </Link>
                     <svg v-if="tienda.categoria" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -225,7 +229,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                         <div>
                             <div class="mb-2 flex flex-wrap items-center gap-2">
                                 <span v-if="tienda.categoria" class="rounded-full bg-primary-500/20 px-3 py-1 text-xs font-bold text-primary-300">
-                                    {{ tienda.categoria?.nombre ?? '—' }}
+                                    {{ categoriaNombre(tienda.categoria) }}
                                 </span>
                                 <span class="flex items-center gap-1 rounded-full bg-yellow-500/20 px-3 py-1 text-xs font-bold text-yellow-300">
                                     <svg class="h-3.5 w-3.5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
@@ -300,6 +304,17 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                     >
                         <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                    </button>
+                    <button
+                        @click="toggleFavorito(tienda.id, tienda.nombre)"
+                        :title="esFavorito(tienda.id) ? t('cat_page.fav_remove') : t('cat_page.fav_add')"
+                        :class="['flex h-9 w-9 items-center justify-center rounded-full text-white transition-all hover:scale-105',
+                                  esFavorito(tienda.id) ? 'bg-red-500/90 hover:bg-red-500' : 'bg-white/10 hover:bg-white/20']"
+                    >
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                             :class="esFavorito(tienda.id) ? 'fill-white' : 'fill-none'">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                         </svg>
                     </button>
                 </div>
