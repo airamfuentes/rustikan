@@ -40,5 +40,26 @@ export function useI18n() {
         );
     };
 
-    return { t, locale };
+    /**
+     * Translate that returns raw values (strings, arrays, objects).
+     * Falls back to ES, then to provided fallback, then to {} when nothing matches.
+     * Use this when the translation is structured (e.g. an array of sections).
+     */
+    const tr = (key, fallback = null) => {
+        const parts = key.split('.');
+        let value = translations.value;
+        for (const part of parts) {
+            value = value?.[part];
+            if (value === undefined) break;
+        }
+        if (value !== undefined) return value;
+        let es = TRANSLATIONS.es;
+        for (const part of parts) {
+            es = es?.[part];
+            if (es === undefined) break;
+        }
+        return es !== undefined ? es : fallback;
+    };
+
+    return { t, tr, locale };
 }

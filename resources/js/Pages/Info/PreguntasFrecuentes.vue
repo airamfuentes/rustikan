@@ -1,6 +1,6 @@
 <template>
     <div class="min-h-screen bg-white dark:bg-gray-900">
-        <Head title="Preguntas frecuentes" />
+        <Head :title="t('info.faq.title')" />
         <NavbarPublico />
 
         <!-- Hero -->

@@ -1,6 +1,6 @@
 <template>
     <div class="min-h-screen bg-white dark:bg-gray-900">
-        <Head title="Trabaja con nosotros" />
+        <Head :title="t('info.work.title')" />
         <NavbarPublico />
 
         <!-- Toasts via ToastContainer global -->

@@ -1,6 +1,6 @@
 ﻿<template>
     <div class="min-h-screen bg-white dark:bg-gray-900">
-        <Head title="Vende con nosotros" />
+        <Head :title="t('info.sell.title')" />
 
         <!-- Toasts via ToastContainer global -->
 

@@ -1,6 +1,6 @@
 ﻿<template>
     <div class="min-h-screen bg-white dark:bg-gray-900">
-        <Head title="Contacto" />
+        <Head :title="t('info.contact.title')" />
         <NavbarPublico />
 
         <!-- Los toasts se muestran via ToastContainer global -->
@@ -146,7 +146,7 @@ const form = useForm({ nombre: '', email: '', asunto: '', mensaje: '' });
 const enviar = () => {
     form.post(route('info.contacto.store'), {
         onSuccess: () => form.reset(),
-        onError: () => toastError('Revisa los campos', 'Hay errores en el formulario.'),
+        onError: () => toastError(t('general.form_errors_title'), t('general.form_errors_msg')),
     });
 };
 </script>

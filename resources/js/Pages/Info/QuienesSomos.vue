@@ -1,6 +1,6 @@
 <template>
     <div class="min-h-screen bg-white dark:bg-gray-900">
-        <Head title="Quiénes somos" />
+        <Head :title="t('info.about.title')" />
         <NavbarPublico />
 
         <!-- Hero -->
@@ -26,12 +26,8 @@
                 <div class="mb-16">
                     <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">{{ t('info.about.history') }}</h2>
                     <div class="space-y-4 text-base leading-relaxed text-gray-600 dark:text-gray-400">
-                        <p>
-                            Rustikan nació en Lanzarote con una idea sencilla pero poderosa: hacer que los productos locales lleguen más fácilmente a quienes los buscan. Vivimos en una isla con una riqueza agrícola y artesanal extraordinaria — viñedos en La Geria, quesos artesanales, miel de abeja, aloe vera, verduras de volcán — pero muchos de estos productores tenían dificultades para encontrar a sus clientes más allá del mercadillo del pueblo.
-                        </p>
-                        <p>
-                            Creamos esta plataforma para tender ese puente digital entre el productor que trabaja la tierra y el consumidor que quiere saber de dónde viene lo que come.
-                        </p>
+                        <p>{{ t('info.about.history_p1') }}</p>
+                        <p>{{ t('info.about.history_p2') }}</p>
                     </div>
                 </div>
 
@@ -41,18 +37,18 @@
                     <div class="grid gap-6 sm:grid-cols-3">
                         <div class="rounded-2xl bg-primary-50 p-6 text-center dark:bg-primary-900/20">
                             <Sprout class="mx-auto mb-3 h-10 w-10 text-primary-600 dark:text-primary-400" />
-                            <h3 class="mb-2 font-semibold text-gray-900 dark:text-white">Sostenibilidad</h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400">Promovemos prácticas que cuidan el medioambiente y preservan el paisaje único de Lanzarote.</p>
+                            <h3 class="mb-2 font-semibold text-gray-900 dark:text-white">{{ t('info.about.value_sustainability_title') }}</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ t('info.about.value_sustainability_desc') }}</p>
                         </div>
                         <div class="rounded-2xl bg-amber-50 p-6 text-center dark:bg-amber-900/20">
                             <Handshake class="mx-auto mb-3 h-10 w-10 text-amber-600 dark:text-amber-400" />
-                            <h3 class="mb-2 font-semibold text-gray-900 dark:text-white">Comercio justo</h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400">El productor recibe un precio justo por su trabajo y el cliente accede a productos de calidad real.</p>
+                            <h3 class="mb-2 font-semibold text-gray-900 dark:text-white">{{ t('info.about.value_fair_title') }}</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ t('info.about.value_fair_desc') }}</p>
                         </div>
                         <div class="rounded-2xl bg-green-50 p-6 text-center dark:bg-green-900/20">
                             <Palmtree class="mx-auto mb-3 h-10 w-10 text-green-600 dark:text-green-400" />
-                            <h3 class="mb-2 font-semibold text-gray-900 dark:text-white">Identidad local</h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400">Celebramos la cultura y los sabores de Lanzarote, apoyando a quienes hacen isla con sus manos.</p>
+                            <h3 class="mb-2 font-semibold text-gray-900 dark:text-white">{{ t('info.about.value_local_title') }}</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ t('info.about.value_local_desc') }}</p>
                         </div>
                     </div>
                 </div>
@@ -64,8 +60,8 @@
                         <div class="flex flex-col items-center rounded-2xl border border-gray-100 bg-gray-50 p-6 text-center dark:border-gray-700 dark:bg-gray-800">
                             <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary-600 text-2xl font-bold text-white">A</div>
                             <h3 class="font-semibold text-gray-900 dark:text-white">Airam Fuentes</h3>
-                            <p class="mb-2 text-sm text-primary-600 dark:text-primary-400">Fundador &amp; Desarrollador</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Lanzaroteño de corazón, apasionado por la tecnología y el desarrollo local.</p>
+                            <p class="mb-2 text-sm text-primary-600 dark:text-primary-400">{{ t('info.about.team_role') }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ t('info.about.team_bio') }}</p>
                             <a href="https://github.com/airamfuentes" target="_blank" rel="noopener noreferrer"
                                class="mt-3 inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">
                                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">

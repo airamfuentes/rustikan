@@ -1,6 +1,6 @@
 <template>
     <div class="min-h-screen bg-white dark:bg-gray-900">
-        <Head title="Nuestra misión" />
+        <Head :title="t('info.mission.title')" />
         <NavbarPublico />
 
         <!-- Hero -->
@@ -21,19 +21,19 @@
         <!-- Impacto — visible nada más entrar -->
         <section class="bg-gradient-to-b from-emerald-50 to-white py-10 dark:from-emerald-950/40 dark:to-gray-900">
             <div class="mx-auto max-w-4xl px-4 sm:px-6">
-                <h2 class="mb-6 text-center text-xl font-bold text-gray-800 dark:text-white">Nuestro impacto</h2>
+                <h2 class="mb-6 text-center text-xl font-bold text-gray-800 dark:text-white">{{ t('info.mission.impact_title') }}</h2>
                 <div class="grid gap-4 text-center sm:grid-cols-3">
                     <div ref="statRef" class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-sm dark:border-emerald-800/50 dark:bg-gray-800">
                         <p class="text-4xl font-extrabold text-emerald-600 dark:text-emerald-400">{{ count }}%</p>
-                        <p class="mt-1 text-sm font-medium text-gray-600 dark:text-gray-300">Productores locales</p>
+                        <p class="mt-1 text-sm font-medium text-gray-600 dark:text-gray-300">{{ t('info.mission.impact_local') }}</p>
                     </div>
                     <div class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-sm dark:border-emerald-800/50 dark:bg-gray-800">
                         <p class="text-4xl font-extrabold text-emerald-600 dark:text-emerald-400">0€</p>
-                        <p class="mt-1 text-sm font-medium text-gray-600 dark:text-gray-300">Comisión de alta para productores</p>
+                        <p class="mt-1 text-sm font-medium text-gray-600 dark:text-gray-300">{{ t('info.mission.impact_fee') }}</p>
                     </div>
                     <div class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-sm dark:border-emerald-800/50 dark:bg-gray-800">
                         <Palmtree class="mx-auto mb-1 h-9 w-9 text-emerald-600 dark:text-emerald-400" />
-                        <p class="text-sm font-medium text-gray-600 dark:text-gray-300">Hecho en Lanzarote</p>
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-300">{{ t('info.mission.impact_made') }}</p>
                     </div>
                 </div>
             </div>
@@ -45,17 +45,17 @@
 
                 <!-- Misión -->
                 <div class="mb-8 rounded-2xl border border-emerald-100 bg-emerald-50 p-8 dark:border-emerald-800/60 dark:bg-emerald-900/20">
-                    <h2 class="mb-3 text-xl font-bold text-gray-900 dark:text-white">Misión</h2>
+                    <h2 class="mb-3 text-xl font-bold text-gray-900 dark:text-white">{{ t('info.mission.mission_label') }}</h2>
                     <p class="leading-relaxed text-gray-700 dark:text-gray-300">
-                        Facilitar el acceso al mercado local a pequeños y medianos productores de Lanzarote, ofreciéndoles una plataforma digital donde puedan vender sus productos de forma directa, sin intermediarios y con total transparencia para el consumidor.
+                        {{ t('info.mission.mission_text') }}
                     </p>
                 </div>
 
                 <!-- Visión -->
                 <div class="mb-8 rounded-2xl border border-primary-100 bg-primary-50 p-8 dark:border-primary-800/60 dark:bg-primary-900/20">
-                    <h2 class="mb-3 text-xl font-bold text-gray-900 dark:text-white">Visión</h2>
+                    <h2 class="mb-3 text-xl font-bold text-gray-900 dark:text-white">{{ t('info.mission.vision_label') }}</h2>
                     <p class="leading-relaxed text-gray-700 dark:text-gray-300">
-                        Convertirnos en la plataforma de referencia para el comercio local en Canarias, donde cada compra impulse la economía circular de la isla y contribuya a preservar la identidad cultural y agrícola del archipiélago.
+                        {{ t('info.mission.vision_text') }}
                     </p>
                 </div>
 
@@ -84,7 +84,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { Head } from '@inertiajs/vue3';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import FooterPublico from '@/Components/FooterPublico.vue';
@@ -100,11 +100,11 @@ const statRef = ref(null);
 const { count, observe } = useCountUp(100);
 onMounted(() => observe(statRef.value));
 
-const compromisos = [
-    { icon: Leaf,    titulo: 'Producto fresco y de temporada', desc: 'Trabajamos con productores que respetan los ciclos naturales y la estacionalidad de sus cultivos.' },
-    { icon: Coins,   titulo: 'Precio justo para todos',         desc: 'El productor fija su precio y recibe el pago íntegro. Nuestra sostenibilidad no depende de quitar a los pequeños.' },
-    { icon: Search,  titulo: 'Transparencia total',             desc: 'Sabes quién produce lo que compras, dónde está su tienda y cómo trabaja.' },
-    { icon: Truck,   titulo: 'Entrega rápida en Lanzarote',     desc: 'Todos los pedidos se entregan dentro de la isla, minimizando la huella de carbono del transporte.' },
-    { icon: Recycle, titulo: 'Economía circular',               desc: 'Fomentamos el uso de embalajes reutilizables y prácticas de producción responsables con el entorno.' },
-];
+const compromisos = computed(() => [
+    { icon: Leaf,    titulo: t('info.mission.commitment_fresh_title'),        desc: t('info.mission.commitment_fresh_desc') },
+    { icon: Coins,   titulo: t('info.mission.commitment_fair_title'),         desc: t('info.mission.commitment_fair_desc') },
+    { icon: Search,  titulo: t('info.mission.commitment_transparency_title'), desc: t('info.mission.commitment_transparency_desc') },
+    { icon: Truck,   titulo: t('info.mission.commitment_delivery_title'),     desc: t('info.mission.commitment_delivery_desc') },
+    { icon: Recycle, titulo: t('info.mission.commitment_circular_title'),     desc: t('info.mission.commitment_circular_desc') },
+]);
 </script>
