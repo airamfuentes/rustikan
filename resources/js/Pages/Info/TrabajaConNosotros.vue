@@ -229,8 +229,8 @@
                             <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm ring-4 ring-white/30 animate-pulse-once">
                                 <CheckCircle2 class="h-9 w-9 text-white" :stroke-width="2.5" />
                             </div>
-                            <h3 class="text-xl font-extrabold text-white">¡Candidatura enviada!</h3>
-                            <p class="mt-1 text-sm text-white/90">Gracias por tu interés en Rustikan</p>
+                            <h3 class="text-xl font-extrabold text-white">{{ t('info.work.modal_title') }}</h3>
+                            <p class="mt-1 text-sm text-white/90">{{ t('info.work.modal_subtitle') }}</p>
                         </div>
 
                         <!-- Cuerpo: resumen + email -->
@@ -239,9 +239,9 @@
                             <div class="flex items-start gap-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-4">
                                 <Mail class="h-5 w-5 flex-shrink-0 text-blue-600 dark:text-blue-400 mt-0.5" />
                                 <div class="text-sm">
-                                    <p class="font-semibold text-blue-900 dark:text-blue-200">Email de confirmación enviado</p>
+                                    <p class="font-semibold text-blue-900 dark:text-blue-200">{{ t('info.work.modal_email_title') }}</p>
                                     <p class="mt-0.5 text-blue-700 dark:text-blue-300">
-                                        Te hemos escrito a <span class="font-semibold">{{ ultimoEnvio.email }}</span> con un resumen de tu candidatura.
+                                        {{ t('info.work.modal_email_desc_pre') }} <span class="font-semibold">{{ ultimoEnvio.email }}</span> {{ t('info.work.modal_email_desc_post') }}
                                     </p>
                                 </div>
                             </div>
@@ -249,19 +249,19 @@
                             <!-- Resumen -->
                             <div class="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                                 <div class="bg-gray-50 dark:bg-gray-700/50 px-4 py-2.5 border-b border-gray-200 dark:border-gray-700">
-                                    <p class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Resumen</p>
+                                    <p class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ t('info.work.modal_summary') }}</p>
                                 </div>
                                 <div class="divide-y divide-gray-100 dark:divide-gray-700">
                                     <div class="flex items-center justify-between gap-4 px-4 py-2.5 text-sm">
-                                        <span class="text-gray-500 dark:text-gray-400">Candidato</span>
+                                        <span class="text-gray-500 dark:text-gray-400">{{ t('info.work.modal_candidate') }}</span>
                                         <span class="font-semibold text-gray-900 dark:text-white truncate">{{ ultimoEnvio.nombre }} {{ ultimoEnvio.apellidos }}</span>
                                     </div>
                                     <div class="flex items-center justify-between gap-4 px-4 py-2.5 text-sm">
-                                        <span class="text-gray-500 dark:text-gray-400">Puesto</span>
+                                        <span class="text-gray-500 dark:text-gray-400">{{ t('info.work.modal_position') }}</span>
                                         <span class="font-semibold text-gray-900 dark:text-white truncate">{{ puestoLabel(ultimoEnvio.puesto) }}</span>
                                     </div>
                                     <div v-if="ultimoEnvio.cvNombre" class="flex items-center justify-between gap-4 px-4 py-2.5 text-sm">
-                                        <span class="text-gray-500 dark:text-gray-400">CV</span>
+                                        <span class="text-gray-500 dark:text-gray-400">{{ t('info.work.modal_cv') }}</span>
                                         <span class="font-medium text-gray-700 dark:text-gray-300 truncate inline-flex items-center gap-1">
                                             <FileText class="h-3.5 w-3.5 flex-shrink-0" />
                                             {{ ultimoEnvio.cvNombre }}
@@ -272,8 +272,8 @@
 
                             <!-- Próximos pasos -->
                             <div class="rounded-xl bg-gray-50 dark:bg-gray-700/50 p-4 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-                                <p class="font-semibold text-gray-700 dark:text-gray-300 mb-1">¿Qué pasa ahora?</p>
-                                Revisaremos tu CV con calma. Si tu perfil encaja con lo que buscamos te contactaremos por email o teléfono. Si no, también te avisaremos para que no quedes en espera.
+                                <p class="font-semibold text-gray-700 dark:text-gray-300 mb-1">{{ t('info.work.modal_next_title') }}</p>
+                                {{ t('info.work.modal_next_desc') }}
                             </div>
                         </div>
 
@@ -284,7 +284,7 @@
                                 @click="cerrarConfirmacion"
                                 class="rounded-xl bg-primary-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-primary-700 transition-colors"
                             >
-                                Entendido
+                                {{ t('info.work.modal_ok') }}
                             </button>
                         </div>
                     </div>

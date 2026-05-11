@@ -15,9 +15,14 @@ const toasts = ref([]);
 let nextId = 1;
 
 const DEFAULT_DURATION = 5000;
+const MAX_TOASTS = 3;
 
 const push = (type, title, message = '', duration = DEFAULT_DURATION) => {
     const id = nextId++;
+    // Si ya hay MAX_TOASTS visibles, expulsamos el más antiguo (FIFO).
+    if (toasts.value.length >= MAX_TOASTS) {
+        toasts.value = toasts.value.slice(toasts.value.length - (MAX_TOASTS - 1));
+    }
     toasts.value.push({ id, type, title, message, duration });
     return id;
 };

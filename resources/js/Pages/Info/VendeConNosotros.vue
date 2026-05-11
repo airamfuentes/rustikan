@@ -245,7 +245,7 @@ import { useI18n } from '@/Composables/useI18n';
 import { useToasts } from '@/Composables/useToasts';
 import { Gift, Smartphone, CreditCard, Package, BarChart3, Globe } from 'lucide-vue-next';
 
-const { t } = useI18n();
+const { t, tr } = useI18n();
 const { isDark } = useDarkMode();
 const page = usePage();
 const { success: toastSuccess, error: toastError } = useToasts();
@@ -275,10 +275,10 @@ const enviar = () => {
             // Restaurar valores del usuario autenticado
             form.nombre_contacto = page.props.auth?.user?.name  ?? '';
             form.email           = page.props.auth?.user?.email ?? '';
-            toastSuccess('¡Solicitud enviada!', 'Hemos recibido tu solicitud. Nos pondremos en contacto contigo en menos de 48 horas.');
+            toastSuccess(t('info.sell.success_title'), t('info.sell.success_msg'));
         },
         onError: () => {
-            toastError('Error al enviar', 'Revisa los campos e inténtalo de nuevo.');
+            toastError(t('info.sell.error_title'), t('info.sell.error_msg'));
         },
     });
 };
@@ -291,24 +291,11 @@ const inputClass = (error) => [
     error ? 'border-red-400' : '',
 ];
 
-const categorias = [
-    'Alimentación y bebidas',
-    'Aceites y conservas',
-    'Vinos y licores',
-    'Miel y apicultura',
-    'Quesos y lácteos',
-    'Carnes y embutidos',
-    'Frutas y verduras',
-    'Panadería y repostería',
-    'Artesanía',
-    'Cosmética natural',
-    'Plantas y flores',
-    'Textil y ropa',
-    'Madera y decoración',
-    'Cerámica y alfarería',
-    'Otra',
-];
+// Listas traducidas (las que vienen del i18n son arrays de objetos sin icono;
+// para los beneficios mantenemos el icono lucide aquí y mezclamos con el texto traducido).
+const categorias = computed(() => tr('info.sell.categories_list', []));
 
+// Los municipios son nombres propios geográficos; no se traducen.
 const municipios = [
     'Arrecife',
     'Teguise',
@@ -319,19 +306,14 @@ const municipios = [
     'Haría',
 ];
 
-const beneficios = [
-    { icon: Gift,       titulo: 'Alta gratuita',              desc: 'Crear tu tienda en Rustikan no tiene ningún coste de entrada. Solo pagas cuando vendes.' },
-    { icon: Smartphone, titulo: 'Panel de gestión fácil',     desc: 'Gestiona tus productos, pedidos y stock desde un panel intuitivo, sin conocimientos técnicos.' },
-    { icon: CreditCard, titulo: 'Cobro rápido y seguro',      desc: 'Recibes el importe de cada venta directamente, con pagos seguros y trazables.' },
-    { icon: Package,    titulo: 'Logística integrada',        desc: 'Trabajamos con repartidores locales para que tus pedidos lleguen frescos y a tiempo.' },
-    { icon: BarChart3,  titulo: 'Estadísticas en tiempo real', desc: 'Consulta ventas, productos más vendidos y comportamiento de tus clientes.' },
-    { icon: Globe,      titulo: 'Más visibilidad',            desc: 'Aparece en el mapa de tiendas de Rustikan y llega a clientes que buscan productos como los tuyos.' },
-];
+const BENEFIT_ICONS = [Gift, Smartphone, CreditCard, Package, BarChart3, Globe];
+const beneficios = computed(() =>
+    (tr('info.sell.benefits', []) || []).map((b, i) => ({
+        icon:   BENEFIT_ICONS[i] ?? Gift,
+        titulo: b.titulo,
+        desc:   b.desc,
+    }))
+);
 
-const pasos = [
-    { titulo: 'Rellena el formulario',    desc: 'Cuéntanos qué produces, dónde estás y cómo contactarte. Solo tardas 2 minutos.' },
-    { titulo: 'Revisamos tu solicitud',   desc: 'En menos de 48 horas revisamos tu perfil y te informamos de los próximos pasos.' },
-    { titulo: 'Creamos tu tienda',        desc: 'Configuramos tu tienda y te damos acceso al panel de gestión para que subas tus productos.' },
-    { titulo: 'Empieza a vender',         desc: 'Tu tienda aparece en Rustikan y empieza a recibir pedidos de clientes de toda la isla.' },
-];
+const pasos = computed(() => tr('info.sell.steps', []));
 </script>

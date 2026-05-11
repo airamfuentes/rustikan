@@ -166,13 +166,13 @@
                                     {{ index + 1 }}
                                 </div>
                                 <div class="h-10 w-10 flex-shrink-0">
-                                    <img v-if="tienda.logo" :src="`/storage/${tienda.logo}`" :alt="tienda.nombre" class="h-10 w-10 rounded-full object-cover">
+                                    <img v-if="tienda.logo" :src="`/storage/${tienda.logo}`" :alt="sinEmojis(tienda.nombre)" class="h-10 w-10 rounded-full object-cover">
                                     <div v-else class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 font-semibold">
-                                        {{ tienda.nombre.charAt(0) }}
+                                        {{ sinEmojis(tienda.nombre).charAt(0) }}
                                     </div>
                                 </div>
                                 <div class="flex-1">
-                                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ tienda.nombre }}</p>
+                                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ sinEmojis(tienda.nombre) }}</p>
                                     <p class="text-xs text-gray-500 dark:text-gray-400">{{ tienda.total_pedidos }} pedidos</p>
                                 </div>
                                 <div class="text-right">
@@ -226,11 +226,11 @@
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
-                                            <img v-if="producto.imagen" :src="producto.imagen" :alt="producto.nombre" class="h-10 w-10 rounded object-cover">
+                                            <img v-if="producto.imagen" :src="producto.imagen" :alt="sinEmojis(producto.nombre)" class="h-10 w-10 rounded object-cover">
                                             <div v-else class="flex h-10 w-10 items-center justify-center rounded bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500">
                                                 <Package class="h-5 w-5" />
                                             </div>
-                                            <span class="text-sm font-medium text-gray-900 dark:text-white">{{ producto.nombre }}</span>
+                                            <span class="text-sm font-medium text-gray-900 dark:text-white">{{ sinEmojis(producto.nombre) }}</span>
                                         </div>
                                     </td>
                                     <td class="whitespace-nowrap px-6 py-4 text-right text-sm">
@@ -265,6 +265,11 @@ const props = defineProps({
     productos_top: Array,
     filters: Object,
 });
+
+// Elimina emojis / pictogramas que algún productor pudiera haber metido en
+// el nombre del producto en BD. La UI debe mostrar siempre texto limpio.
+const sinEmojis = (str) =>
+    (str ?? '').replace(/\p{Extended_Pictographic}/gu, '').replace(/\s+/g, ' ').trim();
 
 const form = reactive({
     fecha_desde: props.filters.fecha_desde,
