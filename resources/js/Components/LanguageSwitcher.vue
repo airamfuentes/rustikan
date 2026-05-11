@@ -1,8 +1,12 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { useLocale } from '@/Composables/useLocale';
+import { useI18n } from '@/Composables/useI18n';
+import { useToasts } from '@/Composables/useToasts';
 
 const { locale, setLocale, initLocale, currentLocale, availableLocales } = useLocale();
+const { t } = useI18n();
+const { success } = useToasts();
 
 const isOpen   = ref(false);
 const rootRef  = ref(null);
@@ -27,8 +31,20 @@ const toggle = () => {
 };
 
 const select = (code) => {
+    if (code === locale.value) {
+        isOpen.value = false;
+        return;
+    }
+    const lang = availableLocales.find((l) => l.code === code);
     setLocale(code);
     isOpen.value = false;
+    // Tras el cambio reactivo del locale, t() ya resuelve en el nuevo idioma.
+    nextTick(() => {
+        success(
+            t('nav.language_changed'),
+            t('nav.language_changed_to', { lang: lang?.label ?? code }),
+        );
+    });
 };
 </script>
 

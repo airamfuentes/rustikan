@@ -8,7 +8,7 @@ import { useDarkMode } from '@/Composables/useDarkMode';
 import { useI18n } from '@/Composables/useI18n';
 import { useCategorias } from '@/Composables/useCategorias';
 import { useFavoritos } from '@/Composables/useFavoritos';
-import { Search, ArrowLeft, Store, Package, Star, X } from 'lucide-vue-next';
+import { Search, ArrowLeft, Store, Package, Star, X, Home, ChevronRight } from 'lucide-vue-next';
 
 useDarkMode();
 const { t } = useI18n();
@@ -54,73 +54,76 @@ const tiendaImagen = (t) =>
     <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
         <NavbarPublico />
 
-        <!-- Hero limpio: solo título + chip con la query actual -->
-        <section class="relative overflow-hidden bg-gradient-to-br from-primary-500 via-primary-600 to-primary-800 pb-24 pt-28 text-white sm:pt-32">
-            <!-- Decoración sutil -->
-            <div class="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/10 blur-3xl"></div>
-            <div class="pointer-events-none absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-tierra-500/30 blur-3xl"></div>
+        <!-- Cabecera de búsqueda: estilo limpio sobre fondo neutro -->
+        <section class="border-b border-gray-100 bg-white pt-28 pb-10 dark:border-gray-800 dark:bg-gray-950 sm:pt-32">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6">
 
-            <div class="relative mx-auto max-w-5xl px-4 sm:px-6">
-                <div class="flex items-center justify-center gap-3 text-xs font-bold uppercase tracking-[0.2em] text-primary-100/90">
-                    <Search class="h-4 w-4" />
-                    <span>{{ t('search_page.section_stores') }} · {{ t('search_page.section_products') }}</span>
-                </div>
+                <!-- Breadcrumb -->
+                <nav class="mb-6 flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+                    <Link href="/" class="inline-flex items-center gap-1 transition-colors hover:text-primary-600">
+                        <Home class="h-3.5 w-3.5" />
+                        {{ t('cat_page.home') }}
+                    </Link>
+                    <ChevronRight class="h-3.5 w-3.5 text-gray-300 dark:text-gray-600" />
+                    <span class="font-medium text-gray-700 dark:text-gray-300">{{ t('nav.search_placeholder_mobile').replace('...','') }}</span>
+                </nav>
 
-                <h1 class="mt-4 text-center text-3xl font-extrabold leading-tight sm:text-4xl">
-                    <template v-if="hayResultados">
-                        {{ t('search_page.title_with_query', { q }) }}
-                    </template>
-                    <template v-else>
-                        {{ t('search_page.no_match_title', { q }) }}
-                    </template>
-                </h1>
-
-                <!-- Chip con la query actual: clic = volver al inicio -->
-                <div class="mt-4 flex justify-center">
-                    <Link
-                        href="/"
-                        class="group inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-sm font-medium text-white ring-1 ring-white/20 backdrop-blur-sm transition-colors hover:bg-white/25"
+                <!-- Buscador grande -->
+                <form @submit.prevent="enviarRefinado"
+                      class="group relative mx-auto flex max-w-3xl items-center overflow-hidden rounded-2xl border-2 border-gray-100 bg-gray-50 transition-all focus-within:border-primary-400 focus-within:bg-white focus-within:shadow-lg dark:border-gray-800 dark:bg-gray-900 dark:focus-within:border-primary-500 dark:focus-within:bg-gray-800">
+                    <Search class="ml-5 h-5 w-5 shrink-0 text-gray-400 transition-colors group-focus-within:text-primary-500" />
+                    <input
+                        v-model="refinado"
+                        type="search"
+                        :placeholder="t('search_page.refine_placeholder')"
+                        maxlength="100"
+                        autofocus
+                        class="min-w-0 flex-1 border-0 bg-transparent px-4 py-4 text-base text-gray-900 outline-none placeholder:text-gray-400 dark:text-white sm:text-lg"
+                    />
+                    <button
+                        v-if="refinado && refinado !== q"
+                        type="button"
+                        @click="refinado = q"
+                        class="mr-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-600 dark:hover:bg-gray-700"
                         :title="t('search_page.back_home')"
                     >
-                        <span class="opacity-80">"{{ q }}"</span>
-                        <X class="h-3.5 w-3.5 opacity-70 transition-opacity group-hover:opacity-100" />
-                    </Link>
-                </div>
+                        <X class="h-4 w-4" />
+                    </button>
+                    <button
+                        type="submit"
+                        class="m-1.5 inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow disabled:opacity-50 sm:px-6 sm:py-3"
+                        :disabled="refinado.trim().length < 2 || refinado.trim() === q"
+                    >
+                        {{ t('home.search_button') }}
+                    </button>
+                </form>
 
-                <p class="mx-auto mt-3 max-w-xl text-center text-sm text-primary-50/90 sm:text-base">
-                    <template v-if="hayResultados">
-                        {{ t('search_page.subtitle_results', { n_t: tiendas.length, n_p: productos.length }) }}
-                    </template>
-                    <template v-else>
-                        {{ t('search_page.subtitle_empty') }}
-                    </template>
-                </p>
+                <!-- Resumen de resultados con chips de conteo -->
+                <div class="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm">
+                    <p class="text-gray-600 dark:text-gray-300">
+                        <template v-if="hayResultados">
+                            {{ t('search_page.subtitle_results', { n_t: tiendas.length, n_p: productos.length }) }}
+                        </template>
+                        <template v-else>
+                            {{ t('search_page.no_match_sub') }}
+                        </template>
+                    </p>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span v-if="tiendas.length > 0"
+                              class="inline-flex items-center gap-1.5 rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-300">
+                            <Store class="h-3.5 w-3.5" />
+                            {{ t(tiendas.length === 1 ? 'search_page.count_one_t' : 'search_page.count_other_t', { n: tiendas.length }) }}
+                        </span>
+                        <span v-if="productos.length > 0"
+                              class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                            <Package class="h-3.5 w-3.5" />
+                            {{ t(productos.length === 1 ? 'search_page.count_one_p' : 'search_page.count_other_p', { n: productos.length }) }}
+                        </span>
+                    </div>
+                </div>
             </div>
         </section>
-
-        <!-- Barra de búsqueda flotante que se solapa con el hero -->
-        <div class="relative z-10 -mt-10 px-4 sm:px-6">
-            <form @submit.prevent="enviarRefinado"
-                  class="mx-auto flex max-w-3xl items-center gap-2 rounded-2xl bg-white p-2 shadow-xl ring-1 ring-gray-200/60 dark:bg-gray-800 dark:ring-gray-700">
-                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400">
-                    <Search class="h-5 w-5" />
-                </div>
-                <input
-                    v-model="refinado"
-                    type="search"
-                    :placeholder="t('search_page.refine_placeholder')"
-                    maxlength="100"
-                    class="min-w-0 flex-1 border-0 bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-white"
-                />
-                <button
-                    type="submit"
-                    class="inline-flex items-center gap-1.5 rounded-xl bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow-md disabled:opacity-50"
-                    :disabled="refinado.trim().length < 2 || refinado.trim() === q"
-                >
-                    {{ t('home.search_button') }}
-                </button>
-            </form>
-        </div>
 
         <main class="mx-auto w-full max-w-7xl flex-1 px-4 py-12 sm:px-6 lg:px-8">
 

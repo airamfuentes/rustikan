@@ -98,6 +98,8 @@ export default {
         light_mode: 'Modo claro',
         logout: 'Cerrar sesión',
         language: 'Idioma',
+        language_changed: 'Idioma cambiado',
+        language_changed_to: 'Idioma cambiado a {lang}',
         home: 'Inicio',
         preferences: 'Preferencias',
     },

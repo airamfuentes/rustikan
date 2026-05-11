@@ -94,6 +94,8 @@ export default {
         light_mode: 'Modalità chiara',
         logout: 'Disconnetti',
         language: 'Lingua',
+        language_changed: 'Lingua cambiata',
+        language_changed_to: 'Lingua cambiata in {lang}',
         home: 'Home',
         preferences: 'Preferenze',
     },

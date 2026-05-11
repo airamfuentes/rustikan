@@ -94,6 +94,8 @@ export default {
         light_mode: 'Hellmodus',
         logout: 'Abmelden',
         language: 'Sprache',
+        language_changed: 'Sprache geändert',
+        language_changed_to: 'Sprache zu {lang} geändert',
         home: 'Startseite',
         preferences: 'Einstellungen',
     },
