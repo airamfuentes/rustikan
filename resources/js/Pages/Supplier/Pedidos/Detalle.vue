@@ -4,17 +4,23 @@
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 space-y-6">
 
                 <!-- Cabecera -->
-                <div class="flex items-center gap-4">
-                    <Link :href="route('supplier.pedidos.index')"
-                        class="inline-flex items-center gap-1.5 rounded-lg bg-gray-200 dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600">
-                        <ArrowLeft class="h-4 w-4" /> Volver
-                    </Link>
-                    <div>
-                        <h1 class="text-xl font-bold text-gray-900 dark:text-white">Pedido #{{ pedido.numero_pedido }}</h1>
-                        <span :class="estadoBadgeClass(pedido.estado)" class="rounded-full px-2.5 py-0.5 text-xs font-semibold">
-                            {{ estadoLabel(pedido.estado) }}
-                        </span>
+                <div class="flex items-center justify-between gap-4 flex-wrap">
+                    <div class="flex items-center gap-4">
+                        <Link :href="route('supplier.pedidos.index')"
+                            class="inline-flex items-center gap-1.5 rounded-lg bg-gray-200 dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600">
+                            <ArrowLeft class="h-4 w-4" /> Volver
+                        </Link>
+                        <div>
+                            <h1 class="text-xl font-bold text-gray-900 dark:text-white">Pedido #{{ pedido.numero_pedido }}</h1>
+                            <span :class="estadoBadgeClass(pedido.estado)" class="rounded-full px-2.5 py-0.5 text-xs font-semibold">
+                                {{ estadoLabel(pedido.estado) }}
+                            </span>
+                        </div>
                     </div>
+                    <a :href="route('supplier.exportar.pedido', pedido.id)" target="_blank"
+                       class="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20 px-3 py-2 text-sm font-medium text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-colors">
+                        <FileText class="h-4 w-4" /> Hoja de preparación (PDF)
+                    </a>
                 </div>
 
                 <!-- Toast -->
@@ -63,8 +69,9 @@
                             <div class="px-6 py-4 space-y-2 text-sm text-gray-700 dark:text-gray-300">
                                 <p>{{ pedido.direccion_envio }}</p>
                                 <p v-if="pedido.telefono_contacto" class="text-gray-500 dark:text-gray-400">Tel: {{ pedido.telefono_contacto }}</p>
-                                <p v-if="pedido.notas" class="mt-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-3 py-2 text-amber-700 dark:text-amber-300">
-                                    📝 {{ pedido.notas }}
+                                <p v-if="pedido.notas" class="mt-2 flex items-start gap-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-3 py-2 text-amber-700 dark:text-amber-300">
+                                    <StickyNote class="h-4 w-4 mt-0.5 shrink-0" />
+                                    <span>{{ pedido.notas }}</span>
                                 </p>
                             </div>
                         </div>
@@ -138,7 +145,7 @@
 import LayoutSupplier from '@/Layouts/LayoutSupplier.vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import { ref, watch, onMounted, onUnmounted } from 'vue';
-import { ArrowLeft } from 'lucide-vue-next';
+import { ArrowLeft, StickyNote, FileText } from 'lucide-vue-next';
 
 const props = defineProps({
     pedido: { type: Object, required: true },

@@ -4,6 +4,7 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import confetti from 'canvas-confetti';
 import { useI18n } from '@/Composables/useI18n';
+import { Wallet } from 'lucide-vue-next';
 
 const { t } = useI18n();
 const props = defineProps({
@@ -242,7 +243,7 @@ const puedeCancelar = ['pendiente', 'confirmado'].includes(props.pedido.estado);
                                 ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
                                 : 'border-gray-200 dark:border-gray-600 hover:border-gray-300']"
                     >
-                        <span class="text-2xl">🪙</span>
+                        <Wallet class="h-6 w-6 text-orange-500" />
                         <span class="text-sm font-semibold text-gray-800 dark:text-white">{{ t('confirmation.refund_rc') }}</span>
                         <span class="text-xs text-gray-500 dark:text-gray-400">{{ t('confirmation.refund_rc_desc') }}</span>
                     </button>

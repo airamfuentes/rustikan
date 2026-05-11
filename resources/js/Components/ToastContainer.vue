@@ -1,34 +1,44 @@
+<script>
+// Estado y listener a nivel de módulo (sobreviven a re-montajes del
+// componente). Esto evita que un re-render del root (por ejemplo, cuando
+// cambia el rol o se muestra/oculta ChatIA) vuelva a procesar el mismo flash.
+let inicialProcesado = false;
+let listenerRegistrado = false;
+</script>
+
 <script setup>
-import { watch } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+import { usePage, router } from '@inertiajs/vue3';
 import Toast from '@/Components/Toast.vue';
 import { useToasts } from '@/Composables/useToasts';
 
 const { toasts, remove, success, error, info, warning } = useToasts();
-
-// Procesar flash messages globales una sola vez por valor único.
-// Usamos una huella concatenando los 4 tipos para detectar cambios reales.
 const page = usePage();
-let lastFingerprint = '';
 
-const fingerprintFlash = (flash) => {
-    if (!flash) return '';
-    return [flash.success, flash.error, flash.info, flash.warning].map((v) => v ?? '').join('|');
+const procesarFlash = (flash) => {
+    if (!flash) return;
+    if (flash.success) success('Éxito',        flash.success);
+    if (flash.error)   error('Error',          flash.error);
+    if (flash.info)    info('Información',     flash.info);
+    if (flash.warning) warning('Advertencia',  flash.warning);
 };
 
-watch(
-    () => page.props.flash,
-    (flash) => {
-        const fp = fingerprintFlash(flash);
-        if (!fp || fp === lastFingerprint) return;
-        lastFingerprint = fp;
-        if (flash.success) success('Éxito',         flash.success);
-        if (flash.error)   error('Error',           flash.error);
-        if (flash.info)    info('Información',      flash.info);
-        if (flash.warning) warning('Advertencia',   flash.warning);
-    },
-    { deep: true, immediate: true }
-);
+// 1) Flash inicial (de la primera carga): se procesa una sola vez en toda
+// la vida de la app. Las posteriores navegaciones de back/forward no
+// disparan el evento `success` de Inertia, por lo que el flash restaurado
+// del cache de historial NO genera toasts duplicados.
+if (!inicialProcesado) {
+    inicialProcesado = true;
+    procesarFlash(page.props.flash);
+}
+
+// 2) Listener global de navegaciones de Inertia exitosas. Solo se registra
+// una vez a nivel de módulo, pase lo que pase con el montaje del componente.
+if (!listenerRegistrado) {
+    listenerRegistrado = true;
+    router.on('success', (event) => {
+        procesarFlash(event.detail?.page?.props?.flash ?? null);
+    });
+}
 </script>
 
 <template>
@@ -41,7 +51,7 @@ watch(
     <div
         class="pointer-events-none fixed z-[9999] flex flex-col gap-3
                left-3 right-3 bottom-20
-               sm:left-auto sm:right-4 sm:bottom-auto sm:top-20
+               sm:left-auto sm:right-4 sm:bottom-auto sm:top-24
                sm:w-full sm:max-w-sm
                items-stretch sm:items-end
                pb-[env(safe-area-inset-bottom)]"

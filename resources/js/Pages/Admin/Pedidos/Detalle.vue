@@ -13,7 +13,7 @@
                 <div class="flex items-center gap-2">
                     <a :href="route('factura.show', pedido.id)" target="_blank"
                        class="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20 px-3 py-2 text-sm font-medium text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-colors">
-                        🧾 Ver factura
+                        <FileText class="h-4 w-4" /> Ver factura
                     </a>
                     <span :class="estadoBadgeClass(pedido.estado)" class="rounded-full px-3 py-1 text-sm font-semibold">
                         {{ estadoLabel(pedido.estado) }}
@@ -79,11 +79,18 @@
                         <div class="overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow">
                             <div class="border-b border-gray-100 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
                                 <h3 class="font-semibold text-gray-900 dark:text-white">Editar datos del pedido</h3>
-                                <button @click="mostrarEdit = !mostrarEdit" class="text-sm text-primary-600 dark:text-primary-400 hover:underline">
+                                <button v-if="puedeEditar" @click="mostrarEdit = !mostrarEdit" class="text-sm text-primary-600 dark:text-primary-400 hover:underline">
                                     {{ mostrarEdit ? 'Ocultar' : 'Editar' }}
                                 </button>
+                                <span v-else class="inline-flex items-center gap-1.5 rounded-full bg-gray-100 dark:bg-gray-700 px-3 py-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+                                    <Lock class="h-3.5 w-3.5" />
+                                    Bloqueado
+                                </span>
                             </div>
-                            <div v-if="mostrarEdit" class="px-6 py-4">
+                            <div v-if="!puedeEditar" class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                Este pedido ya está {{ pedido.estado === 'entregado' ? 'entregado' : 'cancelado' }} y sus datos no pueden modificarse.
+                            </div>
+                            <div v-else-if="mostrarEdit" class="px-6 py-4">
                                 <form @submit.prevent="guardarEdicion" class="space-y-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Teléfono de contacto</label>
@@ -189,7 +196,7 @@
                         <!-- Cancelar pedido -->
                         <div v-if="!['cancelado', 'entregado'].includes(pedido.estado)" class="rounded-2xl bg-white dark:bg-gray-800 shadow overflow-hidden">
                             <div class="border-b border-gray-100 dark:border-gray-700 px-6 py-4">
-                                <h3 class="font-semibold text-gray-900 dark:text-white">Acciones de emergencia</h3>
+                                <h3 class="font-semibold text-gray-900 dark:text-white">Acciones</h3>
                             </div>
                             <div class="px-6 py-4">
                                 <button @click="mostrarModalCancelar = true" :disabled="procesando"
@@ -257,8 +264,8 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import { Link, router } from '@inertiajs/vue3';
-import { ref, reactive } from 'vue';
-import { ArrowLeft, XCircle } from 'lucide-vue-next';
+import { ref, reactive, computed } from 'vue';
+import { ArrowLeft, XCircle, FileText, Lock } from 'lucide-vue-next';
 import { useToasts } from '@/Composables/useToasts';
 
 const props = defineProps({
@@ -277,6 +284,9 @@ const mostrarModalCancelar = ref(false);
 const mostrarEdit      = ref(false);
 const tipoReembolso    = ref('ninguno');
 
+// Un pedido entregado o cancelado no permite editar sus datos.
+const puedeEditar = computed(() => !['entregado', 'cancelado'].includes(props.pedido.estado));
+
 const reembolsoOpciones = [
     { value: 'ninguno',   label: 'Sin reembolso',        desc: 'No se realiza ningún reembolso automático' },
     { value: 'tarjeta',   label: 'Reembolso a tarjeta',  desc: 'Se procesará en 5-7 días hábiles' },
@@ -290,6 +300,10 @@ const editForm = reactive({
 });
 
 const guardarEdicion = () => {
+    if (!puedeEditar.value) {
+        addToast('error', 'No se puede editar', 'Este pedido ya está finalizado o cancelado.');
+        return;
+    }
     procesandoEdit.value = true;
     router.patch(
         route('admin.pedidos.update', props.pedido.id),

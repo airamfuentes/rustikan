@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue';
 import { Head, Link, router, usePage, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
-import { ChevronLeft, ChevronRight, Download } from 'lucide-vue-next';
+import { ChevronLeft, ChevronRight, Download, FileText } from 'lucide-vue-next';
 import { useToasts } from '@/Composables/useToasts';
 
 const props = defineProps({
@@ -614,9 +614,9 @@ const submitDeleteProducto = (producto) => {
                                     {{ pedidosFiltrados.length }} de {{ pedidosRecientes.length }} pedidos · Mostrando {{ pedidosPaginados.length }} en esta página
                                 </p>
                             </div>
-                            <a :href="route('owner.exportar.pedidos')"
-                               class="inline-flex items-center gap-1.5 rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 text-xs font-medium text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors">
-                                <Download class="h-3.5 w-3.5" /> Exportar pedidos (.csv)
+                            <a :href="route('owner.exportar.pedidos')" target="_blank"
+                               class="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20 px-3 py-1.5 text-xs font-medium text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-colors">
+                                <FileText class="h-3.5 w-3.5" /> Exportar pedidos (PDF)
                             </a>
                         </div>
 
@@ -716,7 +716,7 @@ const submitDeleteProducto = (producto) => {
                                             <div class="flex items-center justify-end gap-2">
                                                 <a :href="route('factura.show', p.id)" target="_blank"
                                                    class="text-xs font-medium text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" title="Ver factura">
-                                                    🧾
+                                                    <FileText class="h-4 w-4" />
                                                 </a>
                                                 <Link :href="route('owner.pedido.show', p.id)" class="text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300">
                                                     Ver detalle →
@@ -1350,9 +1350,9 @@ const submitDeleteProducto = (producto) => {
                                         {{ fila.mes }}
                                     </option>
                                 </select>
-                                <a :href="route('owner.exportar.beneficios')"
-                                   class="inline-flex items-center gap-1.5 rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 px-2.5 py-1.5 text-xs font-medium text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors">
-                                    <Download class="h-3.5 w-3.5" /> CSV
+                                <a :href="route('owner.exportar.beneficios')" target="_blank"
+                                   class="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20 px-2.5 py-1.5 text-xs font-medium text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-colors">
+                                    <FileText class="h-3.5 w-3.5" /> PDF
                                 </a>
                             </div>
                         </div>

@@ -24,6 +24,9 @@ Route::get('/', function () {
 Route::get('/categoria/{categoria:slug}', [CategoriaController::class, 'show'])
     ->name('categoria.tiendas');
 
+Route::get('/buscar', [\App\Http\Controllers\BusquedaController::class, 'index'])
+    ->name('buscar');
+
 Route::get('/tienda/{tienda:slug}', function (\App\Models\Tienda $tienda) {
     $tienda->load(['categoria', 'user', 'productos' => function ($query) {
         $query->with('categoria')->where('disponible', true)->orderBy('destacado', 'desc');
@@ -203,9 +206,9 @@ Route::middleware(['auth', 'owner'])->prefix('mi-tienda')->name('owner.')->group
     Route::post('/solicitar/productos/{producto}',      [\App\Http\Controllers\Owner\SolicitudController::class, 'solicitarEditarProducto'])->name('solicitar.producto.editar');
     Route::delete('/solicitar/productos/{producto}',    [\App\Http\Controllers\Owner\SolicitudController::class, 'solicitarEliminarProducto'])->name('solicitar.producto.eliminar');
     Route::get('/mis-solicitudes',                      [\App\Http\Controllers\Owner\SolicitudController::class, 'misSolicitudes'])->name('mis.solicitudes');
-    // Exportaciones
-    Route::get('/exportar/beneficios-csv',  [\App\Http\Controllers\Owner\ExportController::class, 'beneficiosCsv'])->name('exportar.beneficios');
-    Route::get('/exportar/pedidos-csv',     [\App\Http\Controllers\Owner\ExportController::class, 'pedidosCsv'])->name('exportar.pedidos');
+    // Exportaciones (PDF imprimible)
+    Route::get('/exportar/beneficios',  [\App\Http\Controllers\Owner\ExportController::class, 'beneficiosPdf'])->name('exportar.beneficios');
+    Route::get('/exportar/pedidos',     [\App\Http\Controllers\Owner\ExportController::class, 'pedidosPdf'])->name('exportar.pedidos');
 });
 
 // Admin Routes
@@ -239,10 +242,10 @@ Route::middleware(['auth', 'admin', 'throttle:60,1'])->prefix('admin')->name('ad
     
     // Ingresos
     Route::get('/ingresos', [\App\Http\Controllers\Admin\IngresoController::class, 'index'])->name('ingresos.index');
-    // Exportaciones admin
-    Route::get('/exportar/ingresos-csv',        [\App\Http\Controllers\Admin\ExportController::class, 'ingresosCsv'])->name('exportar.ingresos');
-    Route::get('/exportar/ingresos-tiendas-csv',[\App\Http\Controllers\Admin\ExportController::class, 'ingresosPorTiendaCsv'])->name('exportar.ingresos-tiendas');
-    Route::get('/exportar/pedidos-csv',         [\App\Http\Controllers\Admin\ExportController::class, 'pedidosCsv'])->name('exportar.pedidos');
+    // Exportaciones admin (PDF imprimible)
+    Route::get('/exportar/ingresos',         [\App\Http\Controllers\Admin\ExportController::class, 'ingresosPdf'])->name('exportar.ingresos');
+    Route::get('/exportar/ingresos-tiendas', [\App\Http\Controllers\Admin\ExportController::class, 'ingresosPorTiendaPdf'])->name('exportar.ingresos-tiendas');
+    Route::get('/exportar/pedidos',          [\App\Http\Controllers\Admin\ExportController::class, 'pedidosPdf'])->name('exportar.pedidos');
     
     // Categorías
     Route::resource('categorias', \App\Http\Controllers\Admin\CategoriaController::class);
@@ -275,6 +278,11 @@ Route::prefix('supplier')->name('supplier.')->middleware(['auth', 'supplier'])->
     Route::get('/historial', [\App\Http\Controllers\Supplier\PedidoController::class, 'historial'])->name('historial');
     Route::get('/stock', [\App\Http\Controllers\Supplier\StockController::class, 'index'])->name('stock');
     Route::get('/stock/{tienda}', [\App\Http\Controllers\Supplier\StockController::class, 'tienda'])->name('stock.tienda');
+
+    // Exportaciones supplier (PDF imprimible)
+    Route::get('/exportar/pedidos',           [\App\Http\Controllers\Supplier\ExportController::class, 'pedidosPdf'])->name('exportar.pedidos');
+    Route::get('/exportar/historial',         [\App\Http\Controllers\Supplier\ExportController::class, 'historialPdf'])->name('exportar.historial');
+    Route::get('/exportar/pedidos/{pedido}',  [\App\Http\Controllers\Supplier\ExportController::class, 'pedidoPdf'])->name('exportar.pedido');
 });
 
 // ── Chat Admin-Supplier (JSON API) ────────────────────────────────────────────

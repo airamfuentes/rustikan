@@ -62,7 +62,7 @@ onUnmounted(() => document.removeEventListener('mousedown', cerrarSiClickFuera))
             </Transition>
         </button>
 
-        <!-- ── Dropdown ────────────────────────────────────────────────────── -->
+        
         <Transition
             enter-active-class="transition ease-out duration-200"
             enter-from-class="opacity-0 scale-95 translate-y-1"
@@ -75,7 +75,7 @@ onUnmounted(() => document.removeEventListener('mousedown', cerrarSiClickFuera))
                 v-if="abierto"
                 class="fixed sm:absolute right-2 sm:right-0 top-16 sm:top-12 z-50 w-[calc(100vw-1rem)] max-w-sm sm:w-96 origin-top-right overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-2xl"
             >
-                <!-- Cabecera del dropdown -->
+                
                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 px-5 py-4">
                     <div class="flex items-center gap-2">
                         <svg class="h-5 w-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

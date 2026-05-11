@@ -1,8 +1,8 @@
 <script setup>
 import LayoutSupplier from '@/Layouts/LayoutSupplier.vue';
 import { Link, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
-import { ClipboardList, ChevronLeft, ChevronRight } from 'lucide-vue-next';
+import { ref, computed } from 'vue';
+import { ClipboardList, ChevronLeft, ChevronRight, FileText } from 'lucide-vue-next';
 
 const props = defineProps({
     pedidos: { type: Object, required: true },
@@ -64,6 +64,17 @@ const estadoLabel = (estado) => ({
 }[estado] ?? estado.replace('_', ' '));
 
 const formatFecha = (d) => new Date(d).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+
+// URL del PDF de historial reflejando los filtros actuales.
+const urlExportar = computed(() => {
+    const base = route('supplier.exportar.historial');
+    const params = new URLSearchParams();
+    if (form.value.estado)      params.set('estado', form.value.estado);
+    if (form.value.fecha_desde) params.set('fecha_desde', form.value.fecha_desde);
+    if (form.value.fecha_hasta) params.set('fecha_hasta', form.value.fecha_hasta);
+    const qs = params.toString();
+    return qs ? `${base}?${qs}` : base;
+});
 </script>
 
 <template>
@@ -71,9 +82,15 @@ const formatFecha = (d) => new Date(d).toLocaleDateString('es-ES', { day: '2-dig
         <div class="p-4 sm:p-6 lg:p-8 space-y-6">
 
             <!-- Cabecera -->
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Historial de pedidos</h1>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Todos los pedidos registrados en el sistema</p>
+            <div class="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Historial de pedidos</h1>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Todos los pedidos registrados en el sistema</p>
+                </div>
+                <a :href="urlExportar" target="_blank"
+                   class="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20 px-3 py-2 text-sm font-medium text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-colors">
+                    <FileText class="h-4 w-4" /> Exportar PDF
+                </a>
             </div>
 
             <!-- Filtros -->

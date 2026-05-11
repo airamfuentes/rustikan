@@ -4,14 +4,20 @@
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
 
                 <!-- Cabecera -->
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between flex-wrap gap-3">
                     <div>
                         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Panel de Almacén</h1>
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Gestiona y actualiza el estado de los pedidos</p>
                     </div>
-                    <div class="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
-                        <span :class="pulsing ? 'text-green-500' : 'text-gray-400'" class="transition-colors">●</span>
-                        <span>Actualiza cada 30s</span>
+                    <div class="flex items-center gap-3">
+                        <a :href="urlExportar" target="_blank"
+                           class="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20 px-3 py-2 text-sm font-medium text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-colors">
+                            <FileText class="h-4 w-4" /> Exportar PDF
+                        </a>
+                        <div class="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
+                            <span :class="pulsing ? 'text-green-500' : 'text-gray-400'" class="transition-colors">●</span>
+                            <span>Actualiza cada 30s</span>
+                        </div>
                     </div>
                 </div>
 
@@ -124,8 +130,8 @@
 <script setup>
 import LayoutSupplier from '@/Layouts/LayoutSupplier.vue';
 import { Link, router } from '@inertiajs/vue3';
-import { ref, onMounted, onUnmounted } from 'vue';
-import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ChevronLeft, ChevronRight, FileText } from 'lucide-vue-next';
 
 const props = defineProps({
     pedidos: { type: Object, required: true },
@@ -174,6 +180,12 @@ const estadosFiltro = [
 const buscar = () => {
     router.get(route('supplier.pedidos.index'), { search: form.value.search, estado: form.value.estado }, { preserveState: true });
 };
+
+// URL del PDF reflejando el filtro de estado actual.
+const urlExportar = computed(() => {
+    const base = route('supplier.exportar.pedidos');
+    return form.value.estado ? `${base}?estado=${encodeURIComponent(form.value.estado)}` : base;
+});
 
 const filtrarPor = (value) => {
     form.value.estado = form.value.estado === value ? '' : value;

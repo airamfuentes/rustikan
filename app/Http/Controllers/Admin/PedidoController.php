@@ -81,6 +81,11 @@ class PedidoController extends Controller
 
     public function update(Request $request, Pedido $pedido)
     {
+        if (in_array($pedido->estado, ['entregado', 'cancelado'], true)) {
+            return back()->with('error', 'No se pueden editar los datos de un pedido ya '
+                . ($pedido->estado === 'entregado' ? 'entregado' : 'cancelado') . '.');
+        }
+
         $validated = $request->validate([
             'telefono_contacto' => 'nullable|string|max:30',
             'direccion_envio'   => 'nullable|string|max:500',

@@ -101,11 +101,12 @@ const buscarTiendas = () => {
 
 const buscarEnHome = () => {
     const q = busqueda.value.trim();
-    if (q) {
-        saveToHistory(q);
-        showMobileMenu.value = false;
-        router.visit(`/?busqueda=${encodeURIComponent(q)}`);
-    }
+    if (q.length < 2) return;
+    saveToHistory(q);
+    showMobileMenu.value = false;
+    showDropdown.value = false;
+    showHistory.value = false;
+    router.visit(`/buscar?q=${encodeURIComponent(q)}`);
 };
 
 const selectHistory = (query) => {
@@ -113,7 +114,7 @@ const selectHistory = (query) => {
     showHistory.value = false;
     showMobileMenu.value = false;
     saveToHistory(query);
-    router.visit(`/?busqueda=${encodeURIComponent(query)}`);
+    router.visit(`/buscar?q=${encodeURIComponent(query)}`);
 };
 
 // Bloquear scroll del body cuando el menú móvil está abierto
@@ -330,7 +331,7 @@ onUnmounted(() => {
                                 </div>
                                 <Link :href="route('monedero.index')" class="flex items-center justify-between gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700" @click="showProfileMenu = false">
                                     <span class="flex items-center gap-3">
-                                        <span class="text-base">🪙</span>
+                                        <Wallet class="h-4 w-4 text-orange-500" />
                                         {{ t('nav.my_wallet') }}
                                     </span>
                                     <span class="rounded-full bg-orange-100 dark:bg-orange-900/40 px-2 py-0.5 text-xs font-bold text-orange-600 dark:text-orange-300">

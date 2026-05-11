@@ -4,8 +4,8 @@
             <div class="flex items-center justify-between gap-3">
                 <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Gestionar Pedidos</h2>
                 <div class="flex items-center gap-2">
-                    <a :href="route('admin.exportar.pedidos')" class="inline-flex items-center gap-1.5 rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 px-3 py-2 text-sm font-medium text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors">
-                        <Download class="h-4 w-4" /> CSV
+                    <a :href="route('admin.exportar.pedidos')" target="_blank" class="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20 px-3 py-2 text-sm font-medium text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-colors">
+                        <FileText class="h-4 w-4" /> PDF
                     </a>
                     <Link :href="route('admin.dashboard')" class="inline-flex items-center gap-1.5 rounded-lg bg-gray-200 dark:bg-gray-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600">
                         <ArrowLeft class="h-4 w-4" /> Volver
@@ -40,7 +40,7 @@
                         <p class="text-2xl font-bold text-red-900">{{ stats.cancelados }}</p>
                     </div>
                     <div class="rounded-lg bg-orange-100 p-4 shadow cursor-pointer hover:bg-orange-200 transition-colors" @click="filtrarIncidencias">
-                        <p class="text-sm text-orange-800 font-medium">⚠ Incidencias</p>
+                        <p class="flex items-center gap-1.5 text-sm text-orange-800 font-medium"><AlertTriangle class="h-4 w-4" /> Incidencias</p>
                         <p class="text-2xl font-bold text-orange-900">{{ stats.incidencias ?? 0 }}</p>
                     </div>
                     <div class="rounded-lg bg-emerald-100 p-4 shadow">
@@ -196,7 +196,7 @@
                                     <div class="flex items-center justify-end gap-3">
                                         <a :href="route('factura.show', pedido.id)" target="_blank"
                                            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" title="Ver factura">
-                                            🧾
+                                            <FileText class="h-4 w-4" />
                                         </a>
                                         <Link :href="route('admin.pedidos.show', pedido.id)" class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300">
                                             Ver detalles
@@ -242,7 +242,7 @@
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
-import { ArrowLeft, Clock, RefreshCw, DollarSign, Download } from 'lucide-vue-next';
+import { ArrowLeft, Clock, RefreshCw, DollarSign, Download, AlertTriangle, FileText } from 'lucide-vue-next';
 
 const props = defineProps({
     pedidos: Object,

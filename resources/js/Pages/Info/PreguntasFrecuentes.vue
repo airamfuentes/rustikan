@@ -60,7 +60,7 @@
                             {{ t('info.faq.contact_us') }}
                         </Link>
                         <button @click="abrirRusti" class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 text-white px-6 py-2.5 font-semibold text-sm hover:from-orange-600 hover:to-pink-600 transition-colors shadow">
-                            <span class="text-base">🤖</span>
+                            <Bot class="h-4 w-4" />
                             {{ t('info.faq.ask_rusti') }}
                         </button>
                     </div>
@@ -81,6 +81,7 @@ import NavbarPublico from '@/Components/NavbarPublico.vue';
 import FooterPublico from '@/Components/FooterPublico.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
 import { useI18n } from '@/Composables/useI18n';
+import { Bot } from 'lucide-vue-next';
 useDarkMode();
 
 const { t } = useI18n();

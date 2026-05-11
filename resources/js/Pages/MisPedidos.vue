@@ -4,6 +4,7 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import { useI18n } from '@/Composables/useI18n';
 import { useToasts } from '@/Composables/useToasts';
+import { FileText } from 'lucide-vue-next';
 
 const props = defineProps({
     pedidosActivos:     { type: Array,  required: true },
@@ -159,7 +160,7 @@ const submitRating = (tiendaId) => {
                                         </div>
                                         <div class="flex items-center gap-3">
                                             <a :href="route('factura.show', pedido.id)" target="_blank"
-                                               class="font-medium text-orange-600 dark:text-orange-400 hover:underline whitespace-nowrap">🧾 Ver factura</a>
+                                               class="inline-flex items-center gap-1.5 font-medium text-orange-600 dark:text-orange-400 hover:underline whitespace-nowrap"><FileText class="h-3.5 w-3.5" /> {{ t('orders.view_invoice') }}</a>
                                             <span class="text-right">{{ t('orders.subtotal') }} {{ Number(pedido.subtotal).toFixed(2) }}€ + {{ t('orders.shipping') }} {{ pedido.gastos_envio == 0 ? t('orders.free') : Number(pedido.gastos_envio).toFixed(2) + '€' }}</span>
                                         </div>
                                     </div>
