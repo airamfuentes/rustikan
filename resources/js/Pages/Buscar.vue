@@ -78,20 +78,20 @@ const tiendaImagen = (t) =>
                         :placeholder="t('search_page.refine_placeholder')"
                         maxlength="100"
                         autofocus
-                        class="min-w-0 flex-1 border-0 bg-transparent px-4 py-4 text-base text-gray-900 outline-none placeholder:text-gray-400 dark:text-white sm:text-lg"
+                        class="min-w-0 flex-1 border-0 bg-transparent px-4 py-4 text-base text-gray-900 outline-none ring-0 placeholder:text-gray-400 focus:border-0 focus:outline-none focus:ring-0 focus-visible:outline-none dark:text-white sm:text-lg"
                     />
                     <button
                         v-if="refinado && refinado !== q"
                         type="button"
                         @click="refinado = q"
-                        class="mr-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-600 dark:hover:bg-gray-700"
+                        class="mr-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 dark:hover:bg-gray-700"
                         :title="t('search_page.back_home')"
                     >
                         <X class="h-4 w-4" />
                     </button>
                     <button
                         type="submit"
-                        class="m-1.5 inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow disabled:opacity-50 sm:px-6 sm:py-3"
+                        class="m-1.5 inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 disabled:opacity-50 sm:px-6 sm:py-3"
                         :disabled="refinado.trim().length < 2 || refinado.trim() === q"
                     >
                         {{ t('home.search_button') }}
