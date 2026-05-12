@@ -288,30 +288,19 @@ const openEdit = (p) => {
     editImagePreview.value = null;
 };
 
-const editPriceChanged = computed(() => {
+// Cualquier cambio (precio, oferta, nombre, descripción, stock, imagen, etc.)
+// requiere aprobación del administrador. Aquí sólo detectamos si hay algo
+// distinto respecto al producto original para habilitar/deshabilitar el botón.
+const editHasAnyChange = computed(() => {
     if (!editProducto.value) return false;
     return String(editForm.precio) !== editOriginal.value.precio ||
-           String(editForm.precio_oferta ?? '') !== editOriginal.value.precio_oferta;
-});
-
-const editOtherChanged = computed(() => {
-    if (!editProducto.value) return false;
-    return editForm.nombre !== editOriginal.value.nombre ||
+           String(editForm.precio_oferta ?? '') !== editOriginal.value.precio_oferta ||
+           editForm.nombre !== editOriginal.value.nombre ||
            editForm.descripcion !== editOriginal.value.descripcion ||
            editForm.unidad !== editOriginal.value.unidad ||
            String(editForm.stock) !== editOriginal.value.stock ||
            editForm.imagen !== null ||
            editForm.imagen_url !== '';
-});
-
-const editHasAnyChange = computed(() => editPriceChanged.value || editOtherChanged.value);
-
-const editBtnLabel = computed(() => {
-    if (editForm.processing) return 'Guardando...';
-    if (!editPriceChanged.value && !editOtherChanged.value) return 'Sin cambios';
-    if (editPriceChanged.value && !editOtherChanged.value) return 'Guardar precios';
-    if (!editPriceChanged.value && editOtherChanged.value) return 'Enviar solicitud';
-    return 'Guardar precios + Enviar solicitud';
 });
 
 const onEditImagen = (e) => {
@@ -1033,16 +1022,9 @@ const submitOferta = () => {
                                             <td colspan="5" class="px-6 py-5">
                                                 <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                                     <h4 class="text-sm font-semibold text-gray-800 dark:text-gray-200">Editar "{{ p.nombre }}"</h4>
-                                    <div class="flex flex-wrap items-center gap-1.5">
-                                        <span v-if="editPriceChanged" class="inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-                                            <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M5.25 2.25a3 3 0 00-3 3v4.318a3 3 0 00.879 2.121l9.58 9.581c.92.92 2.39 1.186 3.548.428a18.849 18.849 0 005.441-5.44c.758-1.16.492-2.629-.428-3.548l-9.58-9.581a3 3 0 00-2.121-.879H5.25zM6.375 7.5a1.125 1.125 0 100-2.25 1.125 1.125 0 000 2.25z" clip-rule="evenodd" /></svg>
-                                            Precio → guardado directo
-                                        </span>
-                                        <span v-if="editOtherChanged" class="inline-flex items-center gap-1 rounded-full bg-blue-100 dark:bg-blue-900/40 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-400">
-                                            <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 24 24"><path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0016.5 9h-1.875a1.875 1.875 0 01-1.875-1.875V5.25A3.75 3.75 0 009 1.5H5.625z" /><path d="M12.971 1.816A5.23 5.23 0 0114.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 013.434 1.279 9.768 9.768 0 00-6.963-6.963z" /></svg>
-                                            Otros cambios → solicitud
-                                        </span>
-                                    </div>
+                                    <span v-if="editHasAnyChange" class="inline-flex items-center gap-1 rounded-full bg-primary-100 dark:bg-primary-900/40 px-2 py-0.5 text-xs font-medium text-primary-700 dark:text-primary-400">
+                                        Pendiente de enviar
+                                    </span>
                                 </div>
                                                 <form @submit.prevent="submitEditProducto" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                                     <div>
@@ -1070,18 +1052,13 @@ const submitOferta = () => {
                                                         <textarea v-model="editForm.descripcion" rows="2"
                                                                   class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 text-gray-900 dark:text-white"></textarea>
                                                     </div>
-                                                    <!-- Sección precios: guardado directo sin aprobación -->
-                                                    <div class="sm:col-span-2 rounded-xl border-2 border-emerald-200 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 p-4">
-                                                        <div class="mb-3 flex items-center gap-2">
-                                                            <svg class="h-4 w-4 flex-shrink-0 text-emerald-600 dark:text-emerald-400" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M5.25 2.25a3 3 0 00-3 3v4.318a3 3 0 00.879 2.121l9.58 9.581c.92.92 2.39 1.186 3.548.428a18.849 18.849 0 005.441-5.44c.758-1.16.492-2.629-.428-3.548l-9.58-9.581a3 3 0 00-2.121-.879H5.25zM6.375 7.5a1.125 1.125 0 100-2.25 1.125 1.125 0 000 2.25z" clip-rule="evenodd" /></svg>
-                                                            <span class="text-xs font-semibold text-emerald-700 dark:text-emerald-400">Precios</span>
-                                                            <span class="ml-auto rounded-full bg-emerald-100 dark:bg-emerald-800 px-2 py-0.5 text-xs text-emerald-600 dark:text-emerald-300">Se guardan directamente · sin aprobación</span>
-                                                        </div>
+                                                    <!-- Sección precios: requiere aprobación como el resto de campos -->
+                                                    <div class="sm:col-span-2">
                                                         <div class="grid grid-cols-2 gap-3">
                                                             <div>
                                                                 <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Precio base (€) *</label>
                                                                 <input v-model="editForm.precio" type="number" step="0.01" min="0" max="99999.99" required inputmode="decimal" v-only-decimal
-                                                                       class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 text-gray-900 dark:text-white" />
+                                                                       class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 text-gray-900 dark:text-white" />
                                                             </div>
                                                             <div>
                                                                 <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Precio oferta (€) <span class="font-normal text-gray-400">(opcional)</span></label>
@@ -1089,23 +1066,20 @@ const submitOferta = () => {
                                                                        :class="['w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 text-gray-900 dark:text-white',
                                                                            editForm.precio_oferta && +editForm.precio_oferta >= +editForm.precio
                                                                                ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20 focus:ring-red-400'
-                                                                               : editForm.precio_oferta && +editForm.precio_oferta < +editForm.precio
-                                                                                   ? 'border-emerald-300 dark:border-emerald-600 bg-white dark:bg-gray-700 focus:ring-emerald-400'
-                                                                                   : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-emerald-400']" />
+                                                                               : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-primary-400']" />
                                                             </div>
                                                         </div>
                                                         <!-- Feedback oferta -->
-                                                        <div v-if="editForm.precio_oferta && +editForm.precio_oferta > 0 && +editForm.precio > 0" class="mt-3">
+                                                        <div v-if="editForm.precio_oferta && +editForm.precio_oferta > 0 && +editForm.precio > 0" class="mt-2">
                                                             <div v-if="+editForm.precio_oferta < +editForm.precio" class="flex flex-wrap items-center gap-2 text-sm">
                                                                 <span class="text-gray-500 dark:text-gray-400">Vista previa:</span>
                                                                 <span class="line-through text-gray-400">{{ editForm.precio }}€</span>
                                                                 <svg class="h-3.5 w-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                                                                <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ editForm.precio_oferta }}€</span>
-                                                                <span class="rounded-full bg-emerald-500 px-2 py-0.5 text-xs font-bold text-white">-{{ Math.round((1 - editForm.precio_oferta / editForm.precio) * 100) }}%</span>
+                                                                <span class="font-bold text-primary-600 dark:text-primary-400">{{ editForm.precio_oferta }}€</span>
+                                                                <span class="rounded-full bg-primary-500 px-2 py-0.5 text-xs font-bold text-white">-{{ Math.round((1 - editForm.precio_oferta / editForm.precio) * 100) }}%</span>
                                                             </div>
                                                             <p v-else class="text-xs text-red-600 dark:text-red-400">El precio de oferta debe ser menor que el precio base.</p>
                                                         </div>
-                                                        <p v-else-if="!editForm.precio_oferta" class="mt-2 text-xs text-gray-400">Deja vacío si no hay oferta. Puedes activar/desactivar la oferta con el botón de la tabla.</p>
                                                     </div>
                                                     <div>
                                                         <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Unidad *</label>
@@ -1127,6 +1101,13 @@ const submitOferta = () => {
                                                         <input v-model="editForm.imagen_url" type="url" placeholder="O pega una URL de imagen..."
                                                                class="mt-2 w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 text-gray-900 dark:text-white" />
                                                     </div>
+                                                    <!-- Aviso de aprobación -->
+                                                    <div class="sm:col-span-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-3 py-2 text-xs text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                                        <svg class="h-4 w-4 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
+                                                        </svg>
+                                                        <span>Cualquier cambio (incluido el precio) requiere la aprobación del administrador antes de aplicarse.</span>
+                                                    </div>
                                                     <div class="sm:col-span-2 flex justify-end gap-3">
                                                         <button type="button" @click="editProducto = null"
                                                                 class="rounded-xl border border-gray-200 dark:border-gray-600 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
@@ -1134,16 +1115,12 @@ const submitOferta = () => {
                                                         </button>
                                                         <button type="submit"
                                                                 :disabled="editForm.processing || !editHasAnyChange"
-                                                                :class="[
-                                                                    'inline-flex items-center gap-2 rounded-xl px-5 py-2 text-sm font-semibold text-white transition-colors disabled:opacity-50',
-                                                                    editPriceChanged && !editOtherChanged ? 'bg-emerald-500 hover:bg-emerald-600' :
-                                                                    editOtherChanged ? 'bg-primary-500 hover:bg-primary-600' :
-                                                                    'bg-gray-400 cursor-not-allowed'
-                                                                ]"
-                                                        >
-                                                            <svg v-if="editPriceChanged && !editOtherChanged" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M5.25 2.25a3 3 0 00-3 3v4.318a3 3 0 00.879 2.121l9.58 9.581c.92.92 2.39 1.186 3.548.428a18.849 18.849 0 005.441-5.44c.758-1.16.492-2.629-.428-3.548l-9.58-9.581a3 3 0 00-2.121-.879H5.25zM6.375 7.5a1.125 1.125 0 100-2.25 1.125 1.125 0 000 2.25z" clip-rule="evenodd" /></svg>
-                                                            <svg v-else-if="editOtherChanged" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" /></svg>
-                                                            {{ editBtnLabel }}
+                                                                class="inline-flex items-center gap-2 rounded-xl bg-primary-500 hover:bg-primary-600 px-5 py-2 text-sm font-semibold text-white transition-colors disabled:opacity-50">
+                                                            <svg v-if="editForm.processing" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                                            </svg>
+                                                            {{ editForm.processing ? 'Enviando...' : 'Enviar solicitud' }}
                                                         </button>
                                                     </div>
                                                 </form>

@@ -56,7 +56,7 @@ const onUrlInput = () => {
 };
 
 const submit = () => {
-    form.post(route('solicitar.producto.editar', props.producto.id), {
+    form.post(route('owner.solicitar.producto.editar', props.producto.id), {
         forceFormData: true,
     });
 };
@@ -278,6 +278,19 @@ const toggleOfertaActiva = () => {
                         </div>
                     </div>
 
+                    <!-- ── Aviso de aprobación ──────────────────────────────── -->
+                    <div class="rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 text-sm text-amber-800 dark:text-amber-200">
+                        <div class="flex items-start gap-3">
+                            <svg class="h-5 w-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                <path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
+                            </svg>
+                            <div>
+                                <p class="font-semibold">Los cambios requieren aprobación</p>
+                                <p class="mt-0.5 text-xs">Ningún dato del producto se modificará hasta que un administrador revise y apruebe la solicitud.</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- ── Acciones ──────────────────────────────────────────── -->
                     <div class="flex items-center justify-between">
                         <Link :href="route('owner.panel')"
@@ -290,7 +303,7 @@ const toggleOfertaActiva = () => {
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                             </svg>
-                            {{ form.processing ? 'Guardando...' : 'Guardar cambios' }}
+                            {{ form.processing ? 'Enviando...' : 'Enviar solicitud' }}
                         </button>
                     </div>
 
