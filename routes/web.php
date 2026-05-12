@@ -199,7 +199,7 @@ Route::middleware(['auth', 'owner'])->prefix('mi-tienda')->name('owner.')->group
     Route::get('/editar', [\App\Http\Controllers\Owner\TiendaController::class, 'edit'])->name('tienda.edit');
     // Productos (solo lectura para editar — cambios van por solicitud)
     Route::get('/productos/{producto}/editar', [\App\Http\Controllers\Owner\ProductoController::class, 'edit'])->name('producto.edit');
-    Route::post('/productos/{producto}/oferta', [\App\Http\Controllers\Owner\ProductoController::class, 'toggleOferta'])->name('producto.oferta');
+    Route::post('/productos/{producto}/oferta', [\App\Http\Controllers\Owner\ProductoController::class, 'solicitarOferta'])->name('producto.oferta');
     // Solicitudes de cambio
     Route::post('/solicitar/tienda',                    [\App\Http\Controllers\Owner\SolicitudController::class, 'solicitarCambioTienda'])->name('solicitar.tienda');
     Route::post('/solicitar/productos',                 [\App\Http\Controllers\Owner\SolicitudController::class, 'solicitarCrearProducto'])->name('solicitar.producto.crear');

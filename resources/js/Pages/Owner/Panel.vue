@@ -341,6 +341,38 @@ const submitDeleteProducto = (producto) => {
         onSuccess: () => { confirmDelete.value = null; },
     });
 };
+
+// ── Producto: oferta (solicitud) ─────────────────────────────────────────────
+const ofertaProducto = ref(null);
+const ofertaForm = useForm({
+    activar: true,
+    precio_oferta: '',
+});
+
+const abrirOferta = (p) => {
+    ofertaProducto.value = p;
+    ofertaForm.activar = !p.oferta_activa;
+    // Sugerencia: precio actual con un 10 % de descuento, redondeado a 2 decimales.
+    const sugerido = p.precio_oferta && p.precio_oferta > 0
+        ? Number(p.precio_oferta)
+        : Math.max(0.01, Math.round((Number(p.precio) * 0.9) * 100) / 100);
+    ofertaForm.precio_oferta = ofertaForm.activar ? String(sugerido) : '';
+    ofertaForm.clearErrors();
+};
+
+const cerrarOferta = () => {
+    ofertaProducto.value = null;
+    ofertaForm.reset();
+    ofertaForm.clearErrors();
+};
+
+const submitOferta = () => {
+    if (!ofertaProducto.value) return;
+    ofertaForm.post(route('owner.producto.oferta', ofertaProducto.value.id), {
+        preserveScroll: true,
+        onSuccess: () => { cerrarOferta(); },
+    });
+};
 </script>
 
 <template>
@@ -965,9 +997,8 @@ const submitDeleteProducto = (producto) => {
                                                     <div class="flex items-center gap-2">
                                                     <!-- Toggle oferta -->
                                                     <button
-                                                        v-if="p.precio_oferta"
-                                                        @click="router.post(route('owner.producto.oferta', p.id))"
-                                                        :title="p.oferta_activa ? 'Desactivar oferta' : 'Activar oferta'"
+                                                        @click="abrirOferta(p)"
+                                                        :title="p.oferta_activa ? 'Solicitar desactivar oferta' : 'Solicitar activar oferta'"
                                                         :class="['inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-bold transition-all',
                                                             p.oferta_activa
                                                                 ? 'border-green-500 bg-green-500 text-white shadow-sm shadow-green-200 dark:shadow-green-900/40 hover:bg-green-600 hover:border-green-600'
@@ -1165,6 +1196,79 @@ const submitDeleteProducto = (producto) => {
                                 <button @click="submitDeleteProducto(confirmDelete)"
                                         class="rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 transition-colors">
                                     Solicitar eliminación
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal solicitar oferta -->
+                    <div v-if="ofertaProducto"
+                         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+                         @click.self="cerrarOferta">
+                        <div class="w-full max-w-md max-h-[90vh] overflow-y-auto overscroll-contain rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-2xl">
+                            <div class="mb-4 flex items-center gap-3">
+                                <span class="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-300">
+                                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                                        <path fill-rule="evenodd" d="M5.25 2.25a3 3 0 00-3 3v4.318a3 3 0 00.879 2.121l9.58 9.581c.92.92 2.39 1.186 3.548.428a18.849 18.849 0 005.441-5.44c.758-1.16.492-2.629-.428-3.548l-9.58-9.581a3 3 0 00-2.121-.879H5.25zM6.375 7.5a1.125 1.125 0 100-2.25 1.125 1.125 0 000 2.25z" clip-rule="evenodd" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                                        {{ ofertaForm.activar ? 'Activar oferta' : 'Desactivar oferta' }}
+                                    </h3>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ ofertaProducto.nombre }}</p>
+                                </div>
+                            </div>
+
+                            <div class="rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-700 p-4 mb-4">
+                                <p class="text-xs uppercase tracking-wider font-semibold text-gray-500 dark:text-gray-400 mb-2">Estado actual</p>
+                                <div class="flex items-center justify-between text-sm">
+                                    <span class="text-gray-700 dark:text-gray-300">Precio normal</span>
+                                    <span class="font-bold text-gray-900 dark:text-white">{{ Number(ofertaProducto.precio).toFixed(2) }} €</span>
+                                </div>
+                                <div v-if="ofertaProducto.precio_oferta" class="flex items-center justify-between text-sm mt-1">
+                                    <span class="text-gray-700 dark:text-gray-300">Precio en oferta vigente</span>
+                                    <span class="font-bold text-amber-600 dark:text-amber-400">{{ Number(ofertaProducto.precio_oferta).toFixed(2) }} €</span>
+                                </div>
+                                <div class="flex items-center justify-between text-sm mt-1">
+                                    <span class="text-gray-700 dark:text-gray-300">Oferta</span>
+                                    <span :class="ofertaProducto.oferta_activa ? 'text-green-600 dark:text-green-400 font-semibold' : 'text-gray-500'">
+                                        {{ ofertaProducto.oferta_activa ? 'Activa' : 'Inactiva' }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div v-if="ofertaForm.activar">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Nuevo precio de oferta (€) <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                    v-model="ofertaForm.precio_oferta"
+                                    type="number" step="0.01" min="0.01"
+                                    :max="ofertaProducto.precio"
+                                    v-only-decimal
+                                    class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition"
+                                />
+                                <p v-if="ofertaForm.errors.precio_oferta" class="mt-1 text-xs text-red-500">
+                                    {{ ofertaForm.errors.precio_oferta }}
+                                </p>
+                                <p v-else class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                    Debe ser menor que el precio normal ({{ Number(ofertaProducto.precio).toFixed(2) }} €).
+                                </p>
+                            </div>
+
+                            <div v-else class="rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 p-3 text-sm text-amber-800 dark:text-amber-200">
+                                Se enviará una solicitud para desactivar la oferta de este producto.
+                            </div>
+
+                            <div class="mt-5 flex justify-end gap-3">
+                                <button type="button" @click="cerrarOferta"
+                                        class="rounded-xl border border-gray-200 dark:border-gray-600 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                    Cancelar
+                                </button>
+                                <button type="button" @click="submitOferta" :disabled="ofertaForm.processing"
+                                        class="rounded-xl bg-primary-600 px-5 py-2 text-sm font-semibold text-white hover:bg-primary-700 disabled:opacity-60 transition-colors">
+                                    {{ ofertaForm.processing ? 'Enviando...' : 'Enviar solicitud' }}
                                 </button>
                             </div>
                         </div>

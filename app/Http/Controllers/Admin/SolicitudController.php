@@ -266,6 +266,18 @@ class SolicitudController extends Controller
                 $producto = $solicitud->producto;
                 if (!$producto) return;
 
+                // Campo compuesto: solicitud de oferta (oferta_activa + precio_oferta).
+                if ($solicitud->campo === '_oferta') {
+                    $nuevo = $solicitud->valor_nuevo ?? [];
+                    $activa = (bool) ($nuevo['oferta_activa'] ?? false);
+                    $producto->update([
+                        'oferta_activa' => $activa,
+                        // Al desactivar la oferta limpiamos el precio especial.
+                        'precio_oferta' => $activa ? ($nuevo['precio_oferta'] ?? null) : null,
+                    ]);
+                    break;
+                }
+
                 $anteriorValor = $solicitud->valor_anterior['value'] ?? null;
                 if ($solicitud->campo === 'imagen'
                     && $anteriorValor
