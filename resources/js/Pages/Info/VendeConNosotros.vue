@@ -1,6 +1,11 @@
 ﻿<template>
     <div class="min-h-screen bg-white dark:bg-gray-900">
-        <Head :title="t('info.sell.title')" />
+        <Head>
+            <title>Vende con nosotros – Rustikan · Abre tu tienda local en Lanzarote</title>
+            <meta name="description" content="¿Eres productor en Lanzarote? Abre tu tienda online en Rustikan sin coste de alta y vende tus productos km0 a clientes de toda la isla. Gestión sencilla, cobros seguros y logística integrada.">
+            <meta property="og:title" content="Vende con nosotros · Rustikan">
+            <meta property="og:description" content="Abre tu tienda online en Rustikan sin coste de alta. Llega a clientes de toda Lanzarote con entrega a domicilio.">
+        </Head>
 
         <!-- Toasts via ToastContainer global -->
 

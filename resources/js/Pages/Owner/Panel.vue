@@ -1,5 +1,5 @@
 ﻿<script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Head, Link, router, usePage, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import { ChevronLeft, ChevronRight, Download, FileText } from 'lucide-vue-next';

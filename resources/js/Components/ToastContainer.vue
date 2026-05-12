@@ -7,12 +7,21 @@ let listenerRegistrado = false;
 </script>
 
 <script setup>
+import { computed } from 'vue';
 import { usePage, router } from '@inertiajs/vue3';
 import Toast from '@/Components/Toast.vue';
 import { useToasts } from '@/Composables/useToasts';
 
 const { toasts, remove, success, error, info, warning } = useToasts();
 const page = usePage();
+
+// En páginas de auth (login/register/forgot/reset/verify) no hay navbar y el
+// LanguageSwitcher está fijo arriba-derecha. Para que el toast no choque con
+// el dropdown de banderas, bajamos su posición vertical solo en esas rutas.
+const esPaginaAuth = computed(() => {
+    const url = page.url ?? '';
+    return /^\/(login|register|forgot-password|reset-password|verify-email|confirm-password)/.test(url);
+});
 
 const procesarFlash = (flash) => {
     if (!flash) return;
@@ -51,10 +60,11 @@ if (!listenerRegistrado) {
     <div
         class="pointer-events-none fixed z-[9999] flex flex-col gap-3
                left-3 right-3 bottom-20
-               sm:left-auto sm:right-4 sm:bottom-auto sm:top-24
+               sm:left-auto sm:right-4 sm:bottom-auto
                sm:w-full sm:max-w-sm
                items-stretch sm:items-end
                pb-[env(safe-area-inset-bottom)]"
+        :class="esPaginaAuth ? 'sm:top-48' : 'sm:top-24'"
     >
         <Toast
             v-for="(toast, index) in toasts"

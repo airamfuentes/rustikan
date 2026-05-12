@@ -1,6 +1,9 @@
 <template>
     <div class="min-h-screen bg-white dark:bg-gray-900">
-        <Head :title="t('info.faq.title')" />
+        <Head>
+            <title>Preguntas frecuentes – Rustikan · Pedidos, envíos y cuentas</title>
+            <meta name="description" content="Respuestas a las dudas más frecuentes sobre cómo comprar en Rustikan, plazos de entrega en Lanzarote, métodos de pago, cómo vender en la plataforma y el asistente Rusti.">
+        </Head>
         <NavbarPublico />
 
         <!-- Hero -->

@@ -1,6 +1,9 @@
 <template>
     <div class="min-h-screen bg-white dark:bg-gray-900">
-        <Head :title="t('info.terms.title')" />
+        <Head>
+            <title>{{ t('info.terms.title') }} – Rustikan</title>
+            <meta name="robots" content="noindex,follow">
+        </Head>
         <NavbarPublico />
 
         <!-- Hero -->

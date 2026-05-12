@@ -1,6 +1,9 @@
 <template>
     <div class="min-h-screen bg-white dark:bg-gray-900">
-        <Head :title="t('info.about.title')" />
+        <Head>
+            <title>Quiénes somos – Rustikan · Conectamos Lanzarote con sus productores</title>
+            <meta name="description" content="Conoce a Rustikan: la plataforma que conecta a productores locales de Lanzarote con clientes que valoran lo artesanal, lo cercano y el km0. Sostenibilidad, comercio justo e identidad canaria.">
+        </Head>
         <NavbarPublico />
 
         <!-- Hero -->

@@ -14,7 +14,8 @@ import { ref } from 'vue';
 const toasts = ref([]);
 let nextId = 1;
 
-const DEFAULT_DURATION = 5000;
+// Duraciones por defecto (acortadas para que no resulten pesados en pantalla).
+const DEFAULT_DURATION = 3200;
 const MAX_TOASTS = 3;
 
 const push = (type, title, message = '', duration = DEFAULT_DURATION) => {
@@ -40,9 +41,9 @@ export function useToasts() {
         toasts,
         // Métodos abreviados
         success: (title, message = '', duration) => push('success', title, message, duration),
-        error:   (title, message = '', duration) => push('error',   title, message, duration ?? 7000),
+        error:   (title, message = '', duration) => push('error',   title, message, duration ?? 4500),
         info:    (title, message = '', duration) => push('info',    title, message, duration),
-        warning: (title, message = '', duration) => push('warning', title, message, duration ?? 6000),
+        warning: (title, message = '', duration) => push('warning', title, message, duration ?? 4000),
         // Genérico + control
         push,
         remove,

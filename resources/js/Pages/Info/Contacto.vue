@@ -1,6 +1,9 @@
 ﻿<template>
     <div class="min-h-screen bg-white dark:bg-gray-900">
-        <Head :title="t('info.contact.title')" />
+        <Head>
+            <title>Contacto – Rustikan · Hablemos sobre productos locales de Lanzarote</title>
+            <meta name="description" content="¿Tienes una duda o quieres colaborar con Rustikan? Escríbenos a info@rustikan.com o usa el formulario. Respondemos en menos de 48 horas hábiles.">
+        </Head>
         <NavbarPublico />
 
         <!-- Los toasts se muestran via ToastContainer global -->

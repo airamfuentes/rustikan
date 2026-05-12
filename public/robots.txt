@@ -1,2 +1,22 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /mi-tienda
+Disallow: /supplier
+Disallow: /carrito
+Disallow: /mis-pedidos
+Disallow: /mis-favoritas
+Disallow: /monedero
+Disallow: /notificaciones
+Disallow: /profile
+Disallow: /factura
+Disallow: /buscar
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /confirm-password
+
+Sitemap: https://rustikan.com/sitemap.xml

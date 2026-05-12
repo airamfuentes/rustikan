@@ -1,6 +1,9 @@
 <template>
     <div class="min-h-screen bg-white dark:bg-gray-900">
-        <Head :title="t('info.mission.title')" />
+        <Head>
+            <title>Nuestra misión – Rustikan · Producto local, justo y sostenible</title>
+            <meta name="description" content="100% productores locales, 0€ de comisión de alta y hecho en Lanzarote. Apostamos por un modelo de consumo justo, de proximidad y respetuoso con la isla.">
+        </Head>
         <NavbarPublico />
 
         <!-- Hero -->

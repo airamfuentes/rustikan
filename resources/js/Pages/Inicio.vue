@@ -51,7 +51,12 @@ onMounted(() => {
 </script>
 
 <template>
-    <Head title="" />
+    <Head>
+        <title>Rustikan – Mercado local de Lanzarote · Productos km0 a domicilio</title>
+        <meta name="description" content="Descubre productores artesanales de Lanzarote y compra online: vinos de La Geria, quesos canarios, miel, aloe vera, frutas y verduras km0. Entrega a domicilio en toda la isla.">
+        <meta property="og:title" content="Rustikan – Mercado local de Lanzarote">
+        <meta property="og:description" content="Productos frescos km0 directos de productores locales de Lanzarote, con entrega a domicilio en la isla.">
+    </Head>
 
     <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
         <NavbarPublico :tiendas="tiendas" />

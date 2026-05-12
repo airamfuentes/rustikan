@@ -7,13 +7,33 @@
 
         <title inertia>{{ config('app.name', 'Rustikan') }}</title>
 
-        <!-- SEO / Open Graph -->
-        <meta name="description" content="Rustikan – Mercado local online. Compra productos frescos y artesanales directamente de productores de tu zona.">
+        <!-- Favicon (logo_item.png) -->
+        <link rel="icon" type="image/png" sizes="any" href="{{ asset('images/logo_item.png') }}">
+        <link rel="shortcut icon" type="image/png" href="{{ asset('images/logo_item.png') }}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/logo_item.png') }}">
+        <meta name="theme-color" content="#ea580c">
+
+        <!-- Canonical -->
+        <link rel="canonical" href="{{ url()->current() }}">
+
+        <!-- Meta description por defecto (cada página puede sobrescribirla con <Head> de Inertia) -->
+        <meta name="description" content="Rustikan – Mercado local online de Lanzarote. Compra productos frescos km0 directamente a productores artesanales con entrega a domicilio en la isla.">
+        <meta name="keywords" content="Lanzarote, productos locales, km0, mercado online, productores Lanzarote, frutas, vinos La Geria, queso majorero, artesanía Canarias, entrega a domicilio">
+
+        <!-- Open Graph / Facebook -->
         <meta property="og:site_name" content="Rustikan">
-        <meta property="og:image" content="{{ url('/images/logo_item.png') }}">
         <meta property="og:type" content="website">
+        <meta property="og:title" content="Rustikan – Mercado local de Lanzarote">
+        <meta property="og:description" content="Productos frescos km0 de productores de Lanzarote, con entrega a domicilio. Vinos de La Geria, quesos artesanales, miel, aloe vera y mucho más.">
+        <meta property="og:image" content="{{ asset('images/logo_item.png') }}">
+        <meta property="og:url" content="{{ url()->current() }}">
+        <meta property="og:locale" content="es_ES">
+
+        <!-- Twitter -->
         <meta name="twitter:card" content="summary">
-        <meta name="twitter:image" content="{{ url('/images/logo_item.png') }}">
+        <meta name="twitter:title" content="Rustikan – Mercado local de Lanzarote">
+        <meta name="twitter:description" content="Productos frescos km0 de productores de Lanzarote, con entrega a domicilio.">
+        <meta name="twitter:image" content="{{ asset('images/logo_item.png') }}">
 
         <!-- Google structured data: Organization + Logo -->
         <script type="application/ld+json">
@@ -22,7 +42,18 @@
             "@@type": "Organization",
             "name": "Rustikan",
             "url": "{{ url('/') }}",
-            "logo": "{{ url('/images/logo_item.png') }}"
+            "logo": "{{ asset('images/logo_item.png') }}",
+            "description": "Mercado local online de Lanzarote: productos frescos km0 con entrega a domicilio.",
+            "areaServed": {
+                "@@type": "Place",
+                "name": "Lanzarote, Islas Canarias, España"
+            },
+            "contactPoint": {
+                "@@type": "ContactPoint",
+                "email": "info@rustikan.com",
+                "contactType": "customer support",
+                "availableLanguage": ["Spanish", "English"]
+            }
         }
         </script>
 
