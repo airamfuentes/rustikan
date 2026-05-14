@@ -462,6 +462,23 @@ export default {
         subtitle: '¿Tienes alguna duda? Aquí encontrarás las respuestas más comunes.',
     },
     // General
+    // Subidas de archivos
+    // Chat IA Rusti
+    rusti: {
+        greeting: '¡Hola! Soy Rusti, el asistente de Rustikan. ¿En qué puedo ayudarte? Puedo contarte sobre productos locales, cómo hacer un pedido, vender en la plataforma…',
+        title: 'Rusti — Asistente IA',
+        subtitle: 'En línea · responde al instante',
+        placeholder: 'Escribe tu pregunta...',
+        send: 'Enviar',
+        new_chat: 'Nuevo chat',
+        thinking: 'Rusti está pensando...',
+    },
+    upload: {
+        too_big_title: 'Archivo demasiado grande',
+        too_big_msg: 'El archivo supera los {max} MB permitidos (pesa {actual} MB). Reduce su tamaño e inténtalo de nuevo.',
+        invalid_title: 'Formato no admitido',
+        invalid_msg: 'Solo se permiten archivos {exts}.',
+    },
     general: {
         loading: 'Cargando...',
         error: 'Error',

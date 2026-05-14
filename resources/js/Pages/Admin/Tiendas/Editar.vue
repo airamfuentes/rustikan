@@ -312,6 +312,9 @@ import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import ImageCropper from '@/Components/ImageCropper.vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
+import { useFileUpload } from '@/Composables/useFileUpload';
+
+const { validate: validateFile } = useFileUpload();
 const props = defineProps({
     tienda: Object,
     categorias: Array,
@@ -378,6 +381,10 @@ const cropperSrc         = ref(null);
 const onLogoSelected = (event) => {
     const file = event.target.files[0];
     if (!file) return;
+    if (!validateFile(file, { accept: ['jpg', 'jpeg', 'png', 'webp', 'gif'] })) {
+        event.target.value = '';
+        return;
+    }
     cropperSrc.value = URL.createObjectURL(file);
     showLogoCropper.value = true;
 };
@@ -414,6 +421,10 @@ const restaurarLogo = () => { form.delete_logo = false; };
 const onPortadaSelected = (event) => {
     const file = event.target.files[0];
     if (!file) return;
+    if (!validateFile(file, { accept: ['jpg', 'jpeg', 'png', 'webp', 'gif'] })) {
+        event.target.value = '';
+        return;
+    }
     cropperSrc.value = URL.createObjectURL(file);
     showPortadaCropper.value = true;
 };

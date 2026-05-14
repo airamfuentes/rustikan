@@ -2,6 +2,9 @@
 import { ref, computed } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
+import { useFileUpload } from '@/Composables/useFileUpload';
+
+const { validate: validateFile } = useFileUpload();
 
 const props = defineProps({
     tienda:     { type: Object, required: true },
@@ -45,6 +48,10 @@ const portadaPreview = ref(imgUrl(props.tienda.imagen_portada));
 const onLogoChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (!validateFile(file, { accept: ['jpg', 'jpeg', 'png', 'webp', 'gif'] })) {
+        e.target.value = '';
+        return;
+    }
     form.logo = file;
     form.delete_logo = false;
     logoPreview.value = URL.createObjectURL(file);
@@ -53,6 +60,10 @@ const onLogoChange = (e) => {
 const onPortadaChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (!validateFile(file, { accept: ['jpg', 'jpeg', 'png', 'webp', 'gif'] })) {
+        e.target.value = '';
+        return;
+    }
     form.imagen_portada = file;
     form.delete_imagen_portada = false;
     portadaPreview.value = URL.createObjectURL(file);

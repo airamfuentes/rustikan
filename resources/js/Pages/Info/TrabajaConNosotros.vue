@@ -316,7 +316,10 @@ import FooterPublico from '@/Components/FooterPublico.vue';
 import { useDarkMode } from '@/Composables/useDarkMode';
 import { useI18n } from '@/Composables/useI18n';
 import { useToasts } from '@/Composables/useToasts';
+import { useFileUpload } from '@/Composables/useFileUpload';
 import { Briefcase, Upload, FileText, X, Sparkles, Users, Rocket, CheckCircle2, Mail } from 'lucide-vue-next';
+
+const { validate: validateCvFile } = useFileUpload();
 
 const { isDark } = useDarkMode();
 const { t } = useI18n();
@@ -360,13 +363,7 @@ const onDrop = (e) => {
 };
 
 const setCv = (file) => {
-    const validas = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-    if (!validas.includes(file.type) && !/\.(pdf|doc|docx)$/i.test(file.name)) {
-        toastError(t('info.work.cv_invalid'));
-        return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-        toastError(t('info.work.cv_too_big'));
+    if (!validateCvFile(file, { accept: ['pdf', 'doc', 'docx'], maxMb: 5 })) {
         return;
     }
     cvFile.value = file;

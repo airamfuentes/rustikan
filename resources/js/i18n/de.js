@@ -445,6 +445,21 @@ export default {
         title: 'Häufig gestellte Fragen',
         subtitle: 'Haben Sie eine Frage? Finden Sie hier die häufigsten Antworten.',
     },
+    rusti: {
+        greeting: 'Hallo! Ich bin Rusti, der Rustikan-Assistent. Wie kann ich dir helfen? Ich kann dir von lokalen Produkten erzählen, wie du bestellst, wie du auf der Plattform verkaufst…',
+        title: 'Rusti — KI-Assistent',
+        subtitle: 'Online · Sofort-Antworten',
+        placeholder: 'Schreib deine Frage...',
+        send: 'Senden',
+        new_chat: 'Neuer Chat',
+        thinking: 'Rusti denkt nach...',
+    },
+    upload: {
+        too_big_title: 'Datei zu groß',
+        too_big_msg: 'Die Datei überschreitet das Limit von {max} MB (sie wiegt {actual} MB). Reduziere ihre Größe und versuche es erneut.',
+        invalid_title: 'Format nicht unterstützt',
+        invalid_msg: 'Es sind nur {exts}-Dateien erlaubt.',
+    },
     general: {
         loading: 'Laden...',
         error: 'Fehler',

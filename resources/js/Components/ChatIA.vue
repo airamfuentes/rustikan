@@ -3,8 +3,13 @@ import { ref, nextTick, watch, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { MessageCircle, X, Send, Sparkles } from 'lucide-vue-next';
 import { usePage } from '@inertiajs/vue3';
+import { useI18n } from '@/Composables/useI18n';
+import { useLocale } from '@/Composables/useLocale';
 
 const STORAGE_KEY = 'rustikan_chat_ia';
+
+const { t } = useI18n();
+const { locale } = useLocale();
 
 const open       = ref(false);
 const sending    = ref(false);
@@ -12,12 +17,13 @@ const userInput  = ref('');
 const messagesEl = ref(null);
 const inputEl    = ref(null);
 
-const initialGreeting = {
+// Saludo reactivo: cambia al idioma actual.
+const initialGreeting = computed(() => ({
     role: 'assistant',
-    text: '¡Hola! Soy Rusti, el asistente de Rustikan. ¿En qué puedo ayudarte? Puedo contarte sobre productos locales, cómo hacer un pedido, vender en la plataforma…',
-};
+    text: t('rusti.greeting'),
+}));
 
-const messages = ref([initialGreeting]);
+const messages = ref([initialGreeting.value]);
 
 // Restaurar conversación previa (si existe)
 onMounted(() => {
@@ -46,6 +52,14 @@ watch(messages, (val) => {
     } catch (_) { /* ignore */ }
 }, { deep: true });
 
+// Si solo está el saludo inicial y se cambia el idioma, lo refrescamos al
+// idioma activo. Si ya hay conversación, no la sobreescribimos.
+watch(locale, () => {
+    if (messages.value.length === 1 && messages.value[0].role === 'assistant') {
+        messages.value = [initialGreeting.value];
+    }
+});
+
 const scrollToBottom = async () => {
     await nextTick();
     if (messagesEl.value) {
@@ -63,7 +77,7 @@ const toggleOpen = async () => {
 };
 
 const resetChat = () => {
-    messages.value = [initialGreeting];
+    messages.value = [initialGreeting.value];
     open.value = false;
     localStorage.removeItem(STORAGE_KEY);
 };

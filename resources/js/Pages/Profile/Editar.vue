@@ -9,6 +9,9 @@ import NavbarPublico from '@/Components/NavbarPublico.vue';
 import { useI18n } from '@/Composables/useI18n';
 import { useToasts } from '@/Composables/useToasts';
 import { evaluarPassword, validarEdad, validarNombre, validarDireccion } from '@/Composables/useValidaciones';
+import { useFileUpload } from '@/Composables/useFileUpload';
+
+const { validate: validateFile } = useFileUpload();
 
 defineProps({
     mustVerifyEmail: { type: Boolean },
@@ -44,6 +47,10 @@ const avatarForm    = useForm({ avatar: null });
 const onAvatarChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (!validateFile(file, { accept: ['jpg', 'jpeg', 'png', 'webp', 'gif'] })) {
+        e.target.value = '';
+        return;
+    }
     avatarForm.avatar   = file;
     avatarPreview.value = URL.createObjectURL(file);
 };

@@ -99,7 +99,7 @@ class ProductoController extends Controller
             'nueva_solicitud_producto',
             'Solicitud de oferta en producto',
             "La tienda «{$tienda->nombre}» ha solicitado " . ($activar ? "activar una oferta a {$precioOferta} €" : 'desactivar la oferta') . " para «{$producto->nombre}».",
-            route('solicitudes.index'),
+            route('admin.solicitudes.index'),
             'tag',
             'orange'
         );

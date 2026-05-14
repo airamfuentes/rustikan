@@ -42,9 +42,21 @@ if (!inicialProcesado) {
 
 // 2) Listener global de navegaciones de Inertia exitosas. Solo se registra
 // una vez a nivel de módulo, pase lo que pase con el montaje del componente.
+//
+// IMPORTANTE: cuando Inertia hace un partial reload (`router.reload({ only: [..] })`
+// o `router.get(url, params, { only: [..] })`), el servidor NO incluye los
+// shared props (entre ellos `flash`), pero Inertia fusiona la respuesta con
+// el cache anterior. Por eso `event.detail.page.props.flash` viene del cache
+// y dispararía un toast duplicado en pantalla.
+//
+// Para evitarlo, ignoramos las navegaciones partial salvo que `flash` se haya
+// pedido explícitamente.
 if (!listenerRegistrado) {
     listenerRegistrado = true;
     router.on('success', (event) => {
+        const only = event.detail?.visit?.only ?? [];
+        const esPartial = Array.isArray(only) && only.length > 0;
+        if (esPartial && !only.includes('flash')) return;
         procesarFlash(event.detail?.page?.props?.flash ?? null);
     });
 }

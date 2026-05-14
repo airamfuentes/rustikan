@@ -112,7 +112,7 @@ class SolicitudController extends Controller
             'nueva_solicitud_tienda',
             'Nueva solicitud de cambio en tienda',
             "La tienda \"{$tienda->nombre}\" ha enviado {$cambiosCreados} solicitud(es) de cambio.",
-            route('solicitudes.index'),
+            route('admin.solicitudes.index'),
             'store',
             'orange'
         );

@@ -38,10 +38,7 @@
                                 {{ tipo.requerida ? t('info.cookies.required_label') : t('info.cookies.optional_label') }}
                             </span>
                         </div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">{{ tipo.desc }}</p>
-                        <div class="text-xs text-gray-500 dark:text-gray-500">
-                            <span class="font-medium">{{ t('info.cookies.examples_label') }}</span> {{ tipo.ejemplos }}
-                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ tipo.desc }}</p>
                     </div>
                 </div>
 

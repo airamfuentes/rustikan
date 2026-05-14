@@ -76,6 +76,28 @@ const tipoCls = (tipo) => ({
 
 const isImage = (campo) => ['logo', 'imagen_portada', 'imagen'].includes(campo);
 
+// Helper para formatear precios numéricos desde el template.
+const eur = (v) => {
+    const n = Number(v ?? 0);
+    return Number.isFinite(n) ? n.toFixed(2) : '0.00';
+};
+
+// Formatea el valor de un diff según el tipo de campo para que sea legible
+// (booleanos, precios, etc.). Si el valor es null/undefined devuelve "—".
+const formatValor = (campo, valor) => {
+    if (valor === null || valor === undefined || valor === '') return '—';
+    if (typeof valor === 'boolean') return valor ? 'Sí' : 'No';
+    if (['precio', 'precio_oferta'].includes(campo)) {
+        const n = Number(valor);
+        return Number.isFinite(n) ? `${n.toFixed(2)} €` : String(valor);
+    }
+    if (['disponible', 'destacado', 'oferta_activa'].includes(campo)) {
+        return valor ? 'Sí' : 'No';
+    }
+    return String(valor);
+};
+
+
 // ── Filtros y paginación ─────────────────────────────────────────────────
 const filtros = ref({
     busqueda: '',
@@ -295,8 +317,29 @@ watch(() => props.estado, (v) => { estadoFiltro.value = v; });
 
                                     <!-- Diff para update_tienda / update_producto -->
                                     <template v-if="s.tipo === 'update_tienda' || s.tipo === 'update_producto'">
+
+                                        <!-- Caso especial: solicitud combinada de OFERTA (_oferta) -->
+                                        <div v-if="s.campo === '_oferta'" class="mt-2 grid gap-3 sm:grid-cols-2">
+                                            <!-- Estado anterior -->
+                                            <div class="rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-xs text-red-800 dark:text-red-300">
+                                                <p class="font-semibold mb-1.5">Antes</p>
+                                                <p>Oferta: <strong>{{ s.valor_anterior?.oferta_activa ? 'Activa' : 'Inactiva' }}</strong></p>
+                                                <p>Precio normal: <strong>{{ eur(s.valor_anterior?.precio) }} €</strong></p>
+                                                <p>Precio en oferta: <strong>{{ s.valor_anterior?.precio_oferta != null ? eur(s.valor_anterior.precio_oferta) + ' €' : '—' }}</strong></p>
+                                            </div>
+                                            <!-- Estado solicitado -->
+                                            <div class="rounded-lg bg-green-50 dark:bg-green-900/20 p-3 text-xs text-green-800 dark:text-green-300">
+                                                <p class="font-semibold mb-1.5">Solicitado</p>
+                                                <p>Oferta: <strong>{{ s.valor_nuevo?.oferta_activa ? 'Activar' : 'Desactivar' }}</strong></p>
+                                                <p v-if="s.valor_nuevo?.oferta_activa">
+                                                    Nuevo precio en oferta: <strong>{{ s.valor_nuevo?.precio_oferta != null ? eur(s.valor_nuevo.precio_oferta) + ' €' : '—' }}</strong>
+                                                </p>
+                                                <p v-else class="italic">Se desactivará la oferta y se limpiará el precio en oferta.</p>
+                                            </div>
+                                        </div>
+
                                         <!-- Imagen diff -->
-                                        <div v-if="isImage(s.campo)" class="flex flex-wrap gap-4 mt-2">
+                                        <div v-else-if="isImage(s.campo)" class="flex flex-wrap gap-4 mt-2">
                                             <div>
                                                 <p class="text-xs text-gray-400 mb-1">Actual</p>
                                                 <img v-if="imgUrl(s.valor_anterior?.value)"
@@ -315,11 +358,11 @@ watch(() => props.estado, (v) => { estadoFiltro.value = v; });
                                         <div v-else class="flex flex-wrap gap-3 text-xs mt-2">
                                             <div class="flex items-center gap-1 rounded-lg bg-red-50 dark:bg-red-900/20 px-3 py-2 text-red-700 dark:text-red-300 max-w-sm">
                                                 <span class="font-semibold shrink-0">Antes:</span>
-                                                <span class="truncate">{{ s.valor_anterior?.value ?? '—' }}</span>
+                                                <span class="truncate">{{ formatValor(s.campo, s.valor_anterior?.value) }}</span>
                                             </div>
                                             <div class="flex items-center gap-1 rounded-lg bg-green-50 dark:bg-green-900/20 px-3 py-2 text-green-700 dark:text-green-300 max-w-sm">
                                                 <span class="font-semibold shrink-0">Nuevo:</span>
-                                                <span class="truncate">{{ s.valor_nuevo?.value ?? '—' }}</span>
+                                                <span class="truncate">{{ formatValor(s.campo, s.valor_nuevo?.value) }}</span>
                                             </div>
                                         </div>
                                     </template>

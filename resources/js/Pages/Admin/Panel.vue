@@ -202,6 +202,9 @@ import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref, reactive } from 'vue';
 import { Clock } from 'lucide-vue-next';
+import { useToasts } from '@/Composables/useToasts';
+
+const { info: toastInfo, success: toastSuccess } = useToasts();
 import ActivityIcono from '@/Components/ActivityIcono.vue';
 
 const props = defineProps({
@@ -224,10 +227,11 @@ const filtros = reactive({
 
 const refrescarActividad = () => {
     cargandoActividad.value = true;
-    router.reload({ 
+    router.reload({
         only: ['actividad_reciente'],
         onFinish: () => {
             cargandoActividad.value = false;
+            toastSuccess('Actividad actualizada', 'La lista se ha refrescado correctamente.');
         }
     });
 };
@@ -253,6 +257,7 @@ const limpiarFiltros = () => {
     filtros.fecha_desde = '';
     filtros.fecha_hasta = '';
     aplicarFiltros();
+    toastInfo('Filtros limpiados', 'Mostrando toda la actividad reciente.');
 };
 
 const actividadClasses = (color) => {

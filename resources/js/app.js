@@ -14,8 +14,12 @@ import { useChatState } from '@/Composables/useChatState';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
-// Rutas donde NO queremos mostrar el chat IA (paneles internos)
-const CHAT_IA_HIDDEN_PREFIXES = ['/mi-tienda', '/dashboard', '/supplier'];
+// Rutas donde NO queremos mostrar el chat IA (paneles internos y auth)
+const CHAT_IA_HIDDEN_PREFIXES = [
+    '/mi-tienda', '/dashboard', '/supplier', '/admin',
+    '/login', '/register', '/forgot-password', '/reset-password',
+    '/verify-email', '/confirm-password',
+];
 
 createInertiaApp({
     title: (title) => title ? `${title} – ${appName}` : appName,
@@ -25,11 +29,20 @@ createInertiaApp({
             import.meta.glob('./Pages/**/*.vue'),
         ),
     setup({ el, App, props, plugin }) {
-        // Reactive role that updates on every Inertia navigation
+        // Reactive state que se actualiza en cada navegación de Inertia.
         const role = ref(props.initialPage?.props?.auth?.user?.role ?? null);
+        const currentUrl = ref(
+            typeof window !== 'undefined' ? window.location.pathname : '/'
+        );
 
         router.on('navigate', (event) => {
             role.value = event.detail.page.props?.auth?.user?.role ?? null;
+            // Inertia expone la URL completa con query; nos quedamos con la path.
+            try {
+                currentUrl.value = new URL(event.detail.page.url, window.location.origin).pathname;
+            } catch (_) {
+                currentUrl.value = window.location.pathname;
+            }
         });
 
         const { suppliersOpen } = useChatState();
@@ -38,7 +51,7 @@ createInertiaApp({
             setup() {
                 return () => {
                     const currentRole = role.value;
-                    const url = typeof window !== 'undefined' ? window.location.pathname : '/';
+                    const url = currentUrl.value;
 
                     const showChatIA = currentRole !== 'supplier'
                         && !suppliersOpen.value

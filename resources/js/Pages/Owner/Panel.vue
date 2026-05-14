@@ -4,6 +4,9 @@ import { Head, Link, router, usePage, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import { ChevronLeft, ChevronRight, Download, FileText } from 'lucide-vue-next';
 import { useToasts } from '@/Composables/useToasts';
+import { useFileUpload } from '@/Composables/useFileUpload';
+
+const { validate: validateFile } = useFileUpload();
 
 const props = defineProps({
     tienda:            { type: Object,  required: true },
@@ -235,6 +238,10 @@ const addImagePreview = ref(null);
 const onAddImagen = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (!validateFile(file, { accept: ['jpg', 'jpeg', 'png', 'webp', 'gif'] })) {
+        e.target.value = '';
+        return;
+    }
     addForm.imagen = file;
     addForm.imagen_url = '';
     addImagePreview.value = URL.createObjectURL(file);
@@ -306,6 +313,10 @@ const editHasAnyChange = computed(() => {
 const onEditImagen = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (!validateFile(file, { accept: ['jpg', 'jpeg', 'png', 'webp', 'gif'] })) {
+        e.target.value = '';
+        return;
+    }
     editForm.imagen = file;
     editForm.imagen_url = '';
     editImagePreview.value = URL.createObjectURL(file);
@@ -1100,13 +1111,6 @@ const submitOferta = () => {
                                                         </div>
                                                         <input v-model="editForm.imagen_url" type="url" placeholder="O pega una URL de imagen..."
                                                                class="mt-2 w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 text-gray-900 dark:text-white" />
-                                                    </div>
-                                                    <!-- Aviso de aprobación -->
-                                                    <div class="sm:col-span-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-3 py-2 text-xs text-amber-800 dark:text-amber-200 flex items-start gap-2">
-                                                        <svg class="h-4 w-4 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                                                            <path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
-                                                        </svg>
-                                                        <span>Cualquier cambio (incluido el precio) requiere la aprobación del administrador antes de aplicarse.</span>
                                                     </div>
                                                     <div class="sm:col-span-2 flex justify-end gap-3">
                                                         <button type="button" @click="editProducto = null"

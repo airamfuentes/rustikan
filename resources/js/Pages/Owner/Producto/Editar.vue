@@ -3,6 +3,9 @@ import { ref, computed, watch } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import { Star } from 'lucide-vue-next';
+import { useFileUpload } from '@/Composables/useFileUpload';
+
+const { validate: validateFile } = useFileUpload();
 
 const props = defineProps({
     producto:   { type: Object, required: true },
@@ -39,6 +42,10 @@ const imagenPreview = ref(imgUrl(props.producto.imagen));
 const onImagenChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (!validateFile(file, { accept: ['jpg', 'jpeg', 'png', 'webp', 'gif'] })) {
+        e.target.value = '';
+        return;
+    }
     form.imagen = file;
     form.delete_imagen = false;
     imagenPreview.value = URL.createObjectURL(file);
@@ -274,19 +281,6 @@ const toggleOfertaActiva = () => {
                                            class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition" />
                                     <p class="mt-1.5 text-xs text-gray-400">La imagen se descargará y guardará automáticamente.</p>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ── Aviso de aprobación ──────────────────────────────── -->
-                    <div class="rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 text-sm text-amber-800 dark:text-amber-200">
-                        <div class="flex items-start gap-3">
-                            <svg class="h-5 w-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                                <path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
-                            </svg>
-                            <div>
-                                <p class="font-semibold">Los cambios requieren aprobación</p>
-                                <p class="mt-0.5 text-xs">Ningún dato del producto se modificará hasta que un administrador revise y apruebe la solicitud.</p>
                             </div>
                         </div>
                     </div>

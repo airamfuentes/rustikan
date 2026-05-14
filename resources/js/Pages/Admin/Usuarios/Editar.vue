@@ -177,6 +177,9 @@
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { useFileUpload } from '@/Composables/useFileUpload';
+
+const { validate: validateFile } = useFileUpload();
 
 const props = defineProps({
     usuario: Object,
@@ -198,6 +201,10 @@ const form = useForm({
 const onAvatarChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (!validateFile(file, { accept: ['jpg', 'jpeg', 'png', 'webp', 'gif'] })) {
+        e.target.value = '';
+        return;
+    }
     form.avatar = file;
     form.delete_avatar = false;
     avatarPreview.value = URL.createObjectURL(file);
