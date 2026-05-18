@@ -69,14 +69,23 @@ if (!listenerRegistrado) {
           DEJANDO espacio para el botón flotante de chat (~5rem).
         - Desktop (sm+): esquina superior derecha como hasta ahora.
     -->
+    <!--
+        Posicionamiento:
+        - Móvil: ocupa todo el ancho con padding 0.75rem y se ancla abajo, pero
+          DEJANDO espacio para el botón flotante de chat (~5rem).
+        - Desktop normal: esquina superior derecha (sm:top-24 sm:right-4).
+        - Desktop en páginas de auth: a la IZQUIERDA del bloque de botones
+          (tema + idioma), alineado verticalmente con ellos. Así el toast
+          no aparece debajo cubriendo el dropdown de idiomas.
+    -->
     <div
         class="pointer-events-none fixed z-[9999] flex flex-col gap-3
                left-3 right-3 bottom-20
-               sm:left-auto sm:right-4 sm:bottom-auto
+               sm:left-auto sm:bottom-auto
                sm:w-full sm:max-w-sm
                items-stretch sm:items-end
                pb-[env(safe-area-inset-bottom)]"
-        :class="esPaginaAuth ? 'sm:top-48' : 'sm:top-24'"
+        :class="esPaginaAuth ? 'sm:top-4 sm:right-20' : 'sm:top-24 sm:right-4'"
     >
         <Toast
             v-for="(toast, index) in toasts"

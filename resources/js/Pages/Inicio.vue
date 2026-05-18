@@ -198,12 +198,9 @@ onMounted(() => {
                             </div>
                         </div>
                         <h3 class="mb-3 text-lg sm:text-xl font-bold text-white">{{ t('home.mission_title') }}</h3>
-                        <p class="mb-6 min-h-[3rem] text-sm text-white/90">
+                        <p class="min-h-[3rem] text-sm text-white/90">
                             {{ t('home.mission_desc') }}
                         </p>
-                        <span class="rounded-full bg-white px-6 sm:px-8 py-3 text-sm font-semibold text-primary-600 transition-colors group-hover:bg-gray-100">
-                            {{ t('home.discover_more') }}
-                        </span>
                     </Link>
 
                     <!-- Hazte Productor -->
@@ -221,12 +218,9 @@ onMounted(() => {
                             </div>
                         </div>
                         <h3 class="mb-3 text-lg sm:text-xl font-bold text-white">{{ t('home.producer_title') }}</h3>
-                        <p class="mb-6 min-h-[3rem] text-sm text-white/90">
+                        <p class="min-h-[3rem] text-sm text-white/90">
                             {{ t('home.producer_desc') }}
                         </p>
-                        <span class="rounded-full bg-white px-6 sm:px-8 py-3 text-sm font-semibold text-primary-600 transition-colors group-hover:bg-gray-100">
-                            {{ t('home.open_store') }}
-                        </span>
                     </Link>
 
                     <!-- Trabaja con nosotros -->
@@ -244,12 +238,9 @@ onMounted(() => {
                             </div>
                         </div>
                         <h3 class="mb-3 text-lg sm:text-xl font-bold text-white">{{ t('home.work_title') }}</h3>
-                        <p class="mb-6 min-h-[3rem] text-sm text-white/90">
+                        <p class="min-h-[3rem] text-sm text-white/90">
                             {{ t('home.work_desc') }}
                         </p>
-                        <span class="rounded-full bg-white px-6 sm:px-8 py-3 text-sm font-semibold text-primary-600 transition-colors group-hover:bg-gray-100">
-                            {{ t('home.send_cv') }}
-                        </span>
                     </Link>
                 </div>
             </div>
