@@ -80,9 +80,12 @@ const validarLocal = () => {
     if (nombreErr) e.name = nombreErr;
     const apellidosErr = validarNombre(form.apellidos, { min: 2, max: 80 });
     if (apellidosErr) e.apellidos = apellidosErr;
-    const telErr = validarTelefonoEs(telefonoNumero.value);
-    if (prefijo.value === '+34' && telErr) e.telefono = telErr;
-    else if (!telefonoNumero.value) e.telefono = 'El teléfono es obligatorio.';
+    if (!telefonoNumero.value) {
+        e.telefono = 'El teléfono es obligatorio.';
+    } else if (prefijo.value === '+34') {
+        const digits = telefonoNumero.value.replace(/\D/g, '');
+        if (!/^[6-9]\d{8}$/.test(digits)) e.telefono = 'El teléfono debe tener 9 dígitos y empezar por 6, 7, 8 o 9.';
+    }
     const emailErr = validarEmail(form.email);
     if (emailErr) e.email = emailErr;
     const dirErr = validarDireccion(form.direccion);
