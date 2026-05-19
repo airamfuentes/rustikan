@@ -109,18 +109,6 @@
                     </div>
                 </div>
 
-                <!-- Beneficio íntegro Rustikan -->
-                <div class="mb-6 rounded-lg bg-gradient-to-r from-emerald-500 to-green-600 p-5 shadow text-white flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-medium uppercase tracking-wide opacity-80">Beneficio íntegro Rustikan ({{ stats.comision_pct }}% comisión)</p>
-                        <p class="mt-1 text-3xl font-bold">{{ formatPrice(stats.beneficio_total) }}€</p>
-                        <p class="mt-1 text-xs opacity-75">En el periodo seleccionado: {{ formatPrice(stats.beneficio_periodo) }}€</p>
-                    </div>
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
-                        <DollarSign class="h-6 w-6" />
-                    </div>
-                </div>
-
                 <!-- Ingresos Mensuales (Gráfico de Tabla) -->
                 <div class="mb-6 rounded-lg bg-white dark:bg-gray-800 p-6 shadow">
                     <h3 class="mb-4 text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2"><BarChart2 class="h-5 w-5 text-gray-500" /> Ingresos por Mes (Últimos 12 meses)</h3>
@@ -189,6 +177,8 @@
                             <div v-for="categoria in ingresos_por_categoria" :key="categoria.categoria" class="rounded-lg border dark:border-gray-700 p-4">
                                 <div class="flex items-center justify-between mb-2">
                                     <div class="flex items-center gap-2">
+                                        <img v-if="categoria.imagen" :src="`/storage/${categoria.imagen}`" :alt="categoria.categoria" class="h-8 w-8 rounded-full object-cover" />
+                                        <div v-else class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-sm">{{ categoria.icono || '🏷️' }}</div>
                                         <span class="font-medium text-gray-900 dark:text-white">{{ categoria.categoria }}</span>
                                     </div>
                                     <span class="text-lg font-bold text-green-600 dark:text-green-400">{{ formatPrice(categoria.total_ingresos) }}€</span>
@@ -226,11 +216,14 @@
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
-                                            <img v-if="producto.imagen" :src="producto.imagen" :alt="sinEmojis(producto.nombre)" class="h-10 w-10 rounded object-cover">
+                                            <img v-if="producto.imagen" :src="`/storage/${producto.imagen}`" :alt="sinEmojis(producto.nombre)" class="h-10 w-10 rounded object-cover">
                                             <div v-else class="flex h-10 w-10 items-center justify-center rounded bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500">
                                                 <Package class="h-5 w-5" />
                                             </div>
-                                            <span class="text-sm font-medium text-gray-900 dark:text-white">{{ sinEmojis(producto.nombre) }}</span>
+                                            <div>
+                                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ sinEmojis(producto.nombre) }}</span>
+                                                <p v-if="producto.tienda_nombre" class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ sinEmojis(producto.tienda_nombre) }}</p>
+                                            </div>
                                         </div>
                                     </td>
                                     <td class="whitespace-nowrap px-6 py-4 text-right text-sm">

@@ -63,7 +63,7 @@ createInertiaApp({
                         h(App, props),
                         h(ToastContainer),
                         showChatIA ? h(ChatIA) : null,
-                        currentRole === 'admin' ? h(ChatConSuppliers) : null,
+                        currentRole === 'admin' ? h(ChatConSuppliers, { chatIaVisible: showChatIA }) : null,
                     ];
                 };
             },

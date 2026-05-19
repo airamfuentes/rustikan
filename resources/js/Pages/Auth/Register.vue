@@ -342,7 +342,12 @@ const submit = () => {
 
             <div class="flex items-center gap-2">
                 <Checkbox name="accept_terms" v-model:checked="form.accept_terms" />
-                <span class="text-sm text-tierra-700 dark:text-tierra-300">{{ t('auth.accept_terms') }}</span>
+                <span class="text-sm text-tierra-700 dark:text-tierra-300">
+                    Acepto los
+                    <Link :href="route('info.terminos')" target="_blank" class="underline font-medium hover:text-tierra-900 dark:hover:text-tierra-200">
+                        términos y condiciones
+                    </Link>
+                </span>
             </div>
             <InputError :message="erroresLocales.accept_terms || form.errors.accept_terms" />
 

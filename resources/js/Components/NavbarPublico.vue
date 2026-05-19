@@ -163,7 +163,7 @@ onUnmounted(() => {
                 </div>
 
                 <!-- Buscador central (solo desktop) -->
-                <div class="hidden flex-1 max-w-2xl md:flex">
+                <div class="hidden flex-1 md:flex">
                     <div ref="searchRef" class="relative w-full">
                         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
                             <Search class="h-5 w-5 text-gray-400" />

@@ -13,6 +13,7 @@ class Categoria extends Model
         'nombre',
         'slug',
         'icono',
+        'imagen',
         'descripcion',
     ];
 
