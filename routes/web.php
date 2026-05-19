@@ -149,6 +149,10 @@ Route::post('/checkout/intent', [\App\Http\Controllers\StripeController::class, 
     ->middleware(['auth', 'throttle:10,1'])
     ->name('checkout.intent');
 
+Route::post('/checkout/confirm', [\App\Http\Controllers\StripeController::class, 'confirm'])
+    ->middleware(['auth', 'throttle:10,1'])
+    ->name('checkout.confirm');
+
 Route::post('/stripe/webhook', [\App\Http\Controllers\StripeController::class, 'webhook'])
     ->name('stripe.webhook');
 

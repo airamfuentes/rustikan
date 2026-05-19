@@ -329,6 +329,13 @@ const pagarConStripe = async () => {
 
         if (paymentIntent && paymentIntent.status === 'succeeded') {
             totalPagado.value = totalFinal.value;
+            // Confirmar en backend para crear pedido y enviar correo (fallback al webhook)
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            fetch(route('checkout.confirm'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                body: JSON.stringify({ payment_intent_id: paymentIntent.id }),
+            }).catch(() => {}); // silencioso — el webhook también lo procesa
             vaciarCarrito({ silencioso: true });
             step.value = 4;
             procesando.value = false;
@@ -606,7 +613,7 @@ const stepTitle = computed(() => ({
                             </div>
                             <div>
                                 <h2 class="text-lg font-extrabold text-gray-900 dark:text-white leading-tight">{{ stepTitle }}</h2>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                <p v-if="step < 4" class="text-xs text-gray-500 dark:text-gray-400">
                                     {{ totalItems }} producto{{ totalItems !== 1 ? 's' : '' }} ·
                                     <span class="font-semibold text-primary-600">{{ totalFinal.toFixed(2) }}€</span>
                                 </p>

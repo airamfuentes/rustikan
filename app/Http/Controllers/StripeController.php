@@ -82,6 +82,32 @@ class StripeController extends Controller
     }
 
     /**
+     * Llamado por el frontend tras confirmPayment exitoso.
+     * Crea el pedido si el webhook aún no lo ha creado (idempotente).
+     */
+    public function confirm(Request $request)
+    {
+        $request->validate(['payment_intent_id' => 'required|string']);
+
+        Stripe::setApiKey(config('services.stripe.secret'));
+
+        try {
+            $intent = PaymentIntent::retrieve($request->payment_intent_id);
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            return response()->json(['error' => 'No se pudo verificar el pago.'], 502);
+        }
+
+        if ($intent->status !== 'succeeded') {
+            return response()->json(['error' => 'El pago no está confirmado.'], 422);
+        }
+
+        // Crear pedido si no existe aún (el webhook puede llegar después)
+        $this->crearPedidoDesdeIntent($intent);
+
+        return response()->json(['ok' => true]);
+    }
+
+    /**
      * Webhook de Stripe: recibe payment_intent.succeeded y crea el pedido.
      * Esta ruta está excluida del middleware CSRF.
      */
