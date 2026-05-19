@@ -174,7 +174,7 @@
                                     <div class="text-sm font-medium text-gray-900 dark:text-white">{{ pedido.user?.name ?? '—' }}</div>
                                     <div class="text-sm text-gray-500 dark:text-gray-400">{{ pedido.user?.email ?? '' }}</div>
                                 </td>
-                                <td class="whitespace-nowrap px-6 py-4">
+                                <td class="px-6 py-4">
                                     <span :class="{
                                         'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300': pedido.estado === 'pendiente',
                                         'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300': ['confirmado','en_preparacion'].includes(pedido.estado),
@@ -185,6 +185,9 @@
                                     }" class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize">
                                         {{ pedido.estado.replace(/_/g, ' ') }}
                                     </span>
+                                    <p v-if="pedido.estado === 'incidencia' && pedido.motivo_incidencia" class="mt-1 max-w-[180px] truncate text-xs text-red-600 dark:text-red-400" :title="pedido.motivo_incidencia">
+                                        {{ pedido.motivo_incidencia }}
+                                    </p>
                                 </td>
                                 <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-white">{{ pedido.items?.length ?? 0 }}</td>
                                 <td class="whitespace-nowrap px-6 py-4 text-sm font-bold text-gray-900 dark:text-white">{{ Number(pedido.total ?? 0).toFixed(2) }}€</td>

@@ -104,6 +104,16 @@
                             </div>
                         </div>
 
+                        <!-- Motivo incidencia -->
+                        <div v-if="pedido.estado === 'incidencia' && pedido.motivo_incidencia"
+                            class="rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 shadow overflow-hidden">
+                            <div class="border-b border-red-200 dark:border-red-800 px-6 py-4 flex items-center gap-2">
+                                <AlertTriangle class="h-4 w-4 text-red-600 dark:text-red-400" />
+                                <h3 class="font-semibold text-red-800 dark:text-red-300">Motivo incidencia</h3>
+                            </div>
+                            <div class="px-6 py-4 text-sm text-red-700 dark:text-red-300">{{ pedido.motivo_incidencia }}</div>
+                        </div>
+
                         <!-- Total -->
                         <div class="rounded-2xl bg-white dark:bg-gray-800 shadow overflow-hidden">
                             <div class="px-6 py-4 space-y-2 text-sm">
@@ -126,14 +136,54 @@
 
             </div>
         </div>
+        <!-- Modal incidencia -->
+        <Teleport to="body">
+            <Transition name="fade">
+                <div v-if="incidenciaModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div class="w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 shadow-xl p-6 space-y-4">
+                        <div class="flex items-center gap-3">
+                            <div class="rounded-xl bg-red-100 dark:bg-red-900/30 p-2">
+                                <AlertTriangle class="h-5 w-5 text-red-600 dark:text-red-400" />
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">Registrar incidencia</h3>
+                        </div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Explica brevemente el motivo de la incidencia. Esta información quedará registrada y será visible para el administrador.</p>
+                        <textarea
+                            v-model="motivoIncidencia"
+                            rows="4"
+                            maxlength="500"
+                            placeholder="Describe el motivo de la incidencia..."
+                            class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-400 resize-none"
+                        ></textarea>
+                        <p class="text-right text-xs text-gray-400">{{ motivoIncidencia.length }}/500</p>
+                        <div class="flex gap-3 justify-end">
+                            <button @click="incidenciaModal = false"
+                                class="rounded-xl border border-gray-200 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                Cancelar
+                            </button>
+                            <button @click="confirmarIncidencia"
+                                :disabled="!motivoIncidencia.trim()"
+                                class="rounded-xl bg-red-600 px-5 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                                Confirmar incidencia
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </Transition>
+        </Teleport>
     </LayoutSupplier>
 </template>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity 0.2s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+</style>
 
 <script setup>
 import LayoutSupplier from '@/Layouts/LayoutSupplier.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref, onMounted, onUnmounted } from 'vue';
-import { ArrowLeft, StickyNote, FileText } from 'lucide-vue-next';
+import { ArrowLeft, StickyNote, FileText, AlertTriangle } from 'lucide-vue-next';
 import { useToasts } from '@/Composables/useToasts';
 
 const props = defineProps({
@@ -142,6 +192,30 @@ const props = defineProps({
 
 const { success: toastSuccess, error: toastError } = useToasts();
 const procesando = ref(false);
+
+const incidenciaModal = ref(false);
+const motivoIncidencia = ref('');
+
+const abrirIncidenciaModal = () => {
+    motivoIncidencia.value = '';
+    incidenciaModal.value = true;
+};
+
+const confirmarIncidencia = () => {
+    if (!motivoIncidencia.value.trim()) return;
+    incidenciaModal.value = false;
+    procesando.value = true;
+    router.post(
+        route('supplier.pedidos.estado', props.pedido.id),
+        { estado: 'incidencia', motivo_incidencia: motivoIncidencia.value.trim() },
+        {
+            preserveScroll: true,
+            onSuccess: () => toastSuccess('Incidencia registrada', 'El motivo ha quedado guardado.'),
+            onError:   () => toastError('Error', 'No se pudo registrar la incidencia.'),
+            onFinish:  () => { procesando.value = false; },
+        }
+    );
+};
 
 let pollInterval = null;
 onMounted(() => {
@@ -160,6 +234,10 @@ const estadosAccion = [
 
 const cambiarEstado = (nuevoEstado) => {
     if (procesando.value || props.pedido.estado === nuevoEstado) return;
+    if (nuevoEstado === 'incidencia') {
+        abrirIncidenciaModal();
+        return;
+    }
     procesando.value = true;
     router.post(
         route('supplier.pedidos.estado', props.pedido.id),

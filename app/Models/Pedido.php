@@ -22,6 +22,7 @@ class Pedido extends Model
         'fecha_entrega',
         'metodo_pago',
         'stripe_payment_intent_id',
+        'motivo_incidencia',
     ];
 
     protected $casts = [

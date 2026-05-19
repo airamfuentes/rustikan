@@ -159,6 +159,10 @@
                                 <div v-if="pedido.notas" class="rounded-lg bg-gray-50 dark:bg-gray-700/50 p-3 text-xs text-gray-600 dark:text-gray-400 italic">
                                     "{{ pedido.notas }}"
                                 </div>
+                                <div v-if="pedido.motivo_incidencia" class="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 text-xs text-red-700 dark:text-red-300">
+                                    <p class="font-semibold mb-1">⚠ Motivo incidencia (almacén):</p>
+                                    <p>{{ pedido.motivo_incidencia }}</p>
+                                </div>
                             </div>
                         </div>
 

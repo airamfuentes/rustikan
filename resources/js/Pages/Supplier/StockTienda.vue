@@ -1,7 +1,7 @@
 <script setup>
 import LayoutSupplier from '@/Layouts/LayoutSupplier.vue';
 import { Link, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { Package, AlertTriangle, XCircle, ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -31,6 +31,12 @@ const limpiar = () => {
 };
 
 const hayFiltros = () => form.value.search || form.value.bajo_stock || form.value.sin_stock;
+
+let searchDebounce = null;
+watch(() => form.value.search, () => {
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(buscar, 300);
+});
 
 const stockClass = (prod) => {
     if (prod.stock === 0) return 'text-red-600 dark:text-red-400 font-bold';
@@ -82,7 +88,6 @@ const stockClass = (prod) => {
                 <div class="flex-1 min-w-48">
                     <input
                         v-model="form.search"
-                        @keyup.enter="buscar"
                         type="text"
                         placeholder="Buscar producto..."
                         class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"

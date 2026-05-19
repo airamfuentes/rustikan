@@ -16,7 +16,7 @@
                         </a>
                         <div class="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
                             <span :class="pulsing ? 'text-green-500' : 'text-gray-400'" class="transition-colors">●</span>
-                            <span>Actualiza cada 30s</span>
+                            <span>Actualiza cada 5s</span>
                         </div>
                     </div>
                 </div>
@@ -35,7 +35,7 @@
                 <!-- Filtros -->
                 <div class="flex flex-wrap gap-3 items-end">
                     <div class="flex-1 min-w-48">
-                        <input v-model="form.search" @keyup.enter="buscar" type="text"
+                        <input v-model="form.search" type="text"
                             placeholder="Buscar por nº pedido o cliente..."
                             class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500" />
                     </div>
@@ -130,7 +130,7 @@
 <script setup>
 import LayoutSupplier from '@/Layouts/LayoutSupplier.vue';
 import { Link, router } from '@inertiajs/vue3';
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { ChevronLeft, ChevronRight, FileText } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -153,7 +153,7 @@ const poll = () => {
 };
 
 onMounted(() => {
-    pollInterval = setInterval(poll, 30000);
+    pollInterval = setInterval(poll, 5000);
 });
 
 onUnmounted(() => {
@@ -180,6 +180,12 @@ const estadosFiltro = [
 const buscar = () => {
     router.get(route('supplier.pedidos.index'), { search: form.value.search, estado: form.value.estado }, { preserveState: true });
 };
+
+let searchDebounce = null;
+watch(() => form.value.search, () => {
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(buscar, 300);
+});
 
 // URL del PDF reflejando el filtro de estado actual.
 const urlExportar = computed(() => {

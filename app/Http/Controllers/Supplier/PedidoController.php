@@ -93,7 +93,8 @@ class PedidoController extends Controller
     public function cambiarEstado(Request $request, Pedido $pedido)
     {
         $request->validate([
-            'estado' => 'required|in:' . implode(',', self::ESTADOS_PERMITIDOS),
+            'estado'            => 'required|in:' . implode(',', self::ESTADOS_PERMITIDOS),
+            'motivo_incidencia' => 'required_if:estado,incidencia|nullable|string|max:500',
         ]);
 
         if ($pedido->estado === 'cancelado') {
@@ -103,7 +104,11 @@ class PedidoController extends Controller
         $estadoAnterior = $pedido->estado;
         $nuevoEstado    = $request->estado;
 
-        $pedido->update(['estado' => $nuevoEstado]);
+        $updateData = ['estado' => $nuevoEstado];
+        if ($nuevoEstado === 'incidencia') {
+            $updateData['motivo_incidencia'] = $request->motivo_incidencia;
+        }
+        $pedido->update($updateData);
 
         ActivityLog::log(
             'supplier_cambiar_estado',
