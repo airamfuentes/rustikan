@@ -54,6 +54,9 @@ class DatabaseSeeder extends Seeder
             CategoriaSeeder::class,
             TiendaSeeder::class,
             ProductoSeeder::class,
+            DemoUsersSeeder::class,
+            DemoTiendasSeeder::class,
+            DemoProductosSeeder::class,
         ]);
     }
 }
