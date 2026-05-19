@@ -146,7 +146,7 @@ class StripeController extends Controller
         $userId = (int) $meta->user_id;
         $items  = json_decode($meta->items_json, true);
 
-        DB::transaction(function () use ($intent, $meta, $userId, $items) {
+        $pedido = DB::transaction(function () use ($intent, $meta, $userId, $items) {
             $subtotal = 0;
             $itemsConPrecio = [];
 
@@ -195,31 +195,35 @@ class StripeController extends Controller
                 $producto->decrement('stock', $item['cantidad']);
             }
 
-            // Email al comprador
-            $pedido->load(['items.tienda.user', 'user']);
-            try {
-                Mail::to($pedido->user->email)->send(new PedidoConfirmado($pedido));
-            } catch (\Throwable) {}
-
-            // Notificar owners
-            $notificados = [];
-            foreach ($pedido->items as $item) {
-                $ownerId = $item->tienda?->user_id;
-                if ($ownerId && !in_array($ownerId, $notificados)) {
-                    $notificados[] = $ownerId;
-                    Notificacion::enviar(
-                        $ownerId, 'nuevo_pedido', 'Nuevo pedido recibido',
-                        "Has recibido el pedido #{$pedido->numero_pedido} por " . number_format($pedido->total, 2) . '€',
-                        route('owner.panel'), 'cart', 'green'
-                    );
-                }
-            }
-
-            Notificacion::enviarAdmins(
-                'nuevo_pedido', 'Nuevo pedido en la plataforma',
-                "Pedido #{$pedido->numero_pedido} por " . number_format($pedido->total, 2) . '€',
-                route('admin.pedidos.index'), 'cart', 'primary'
-            );
+            return $pedido;
         });
+
+        // Email fuera de la transacción para no bloquearla
+        $pedido->load(['items.tienda.user', 'user']);
+        try {
+            Mail::to($pedido->user->email)->send(new PedidoConfirmado($pedido));
+        } catch (\Throwable $e) {
+            Log::error('[PedidoConfirmado email] ' . $e->getMessage(), ['pedido_id' => $pedido->id]);
+        }
+
+        // Notificar owners
+        $notificados = [];
+        foreach ($pedido->items as $item) {
+            $ownerId = $item->tienda?->user_id;
+            if ($ownerId && !in_array($ownerId, $notificados)) {
+                $notificados[] = $ownerId;
+                Notificacion::enviar(
+                    $ownerId, 'nuevo_pedido', 'Nuevo pedido recibido',
+                    "Has recibido el pedido #{$pedido->numero_pedido} por " . number_format($pedido->total, 2) . '€',
+                    route('owner.panel'), 'cart', 'green'
+                );
+            }
+        }
+
+        Notificacion::enviarAdmins(
+            'nuevo_pedido', 'Nuevo pedido en la plataforma',
+            "Pedido #{$pedido->numero_pedido} por " . number_format($pedido->total, 2) . '€',
+            route('admin.pedidos.index'), 'cart', 'primary'
+        );
     }
 }
