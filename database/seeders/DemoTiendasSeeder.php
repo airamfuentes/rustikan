@@ -197,7 +197,7 @@ class DemoTiendasSeeder extends Seeder
             $catId  = $cats[$t['cat']] ?? null;
             if (!$userId || !$catId) continue;
 
-            Tienda::firstOrCreate(
+            Tienda::updateOrCreate(
                 ['slug' => $t['slug']],
                 [
                     'user_id'        => $userId,
@@ -211,8 +211,6 @@ class DemoTiendasSeeder extends Seeder
                     'direccion'      => $t['direccion'],
                     'latitud'        => $t['latitud'],
                     'longitud'       => $t['longitud'],
-                    'valoracion'     => 0,
-                    'total_resenas'  => 0,
                     'activa'         => true,
                     'visible'        => true,
                 ]

@@ -38,8 +38,8 @@
                         <span v-if="count > 0" class="ml-1.5 rounded-full bg-red-100 dark:bg-red-900/30 px-1.5 py-0.5 text-xs font-bold text-red-600 dark:text-red-400">{{ count }}</span>
                     </h3>
                     <button
-                        v-if="count > 0"
-                        @click="marcarTodas"
+                        v-if="notificaciones.length > 0"
+                        @click="limpiarTodas"
                         class="text-xs text-primary-600 dark:text-primary-400 hover:underline"
                     >Eliminar todas</button>
                 </div>
@@ -122,12 +122,19 @@ const page    = usePage();
 const abierto = ref(false);
 const cargando = ref(false);
 const notificaciones = ref([]);
-const count   = ref(page.props.notificacionesCount ?? 0);
 const menuRef = ref(null);
 
-// Sync count when Inertia shared props update
+// El count local arranca desde el prop del servidor.
+// Una vez que el usuario abre la campana lo gestionamos solo localmente
+// para que las navegaciones de Inertia no lo reactiven.
+const yaVistas = ref(false);
+const count = ref(page.props.notificacionesCount ?? 0);
+
+// Solo sincronizamos con el servidor si el usuario aún no ha abierto la campana.
 watch(() => page.props.notificacionesCount, (val) => {
-    count.value = val ?? 0;
+    if (!yaVistas.value) {
+        count.value = val ?? 0;
+    }
 });
 
 const getCsrfToken = () =>
@@ -135,15 +142,35 @@ const getCsrfToken = () =>
     ?? document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('XSRF-TOKEN='))?.split('=')[1]
     ?? '';
 
-// Track whether notifications were loaded (even if already cleared locally)
-const notificacionesCargadas = ref(false);
+const notifHeaders = () => ({
+    'Accept': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
+    'X-CSRF-TOKEN': getCsrfToken(),
+});
+
+const limpiarTodas = () => {
+    fetch(route('notificaciones.leer-todas'), {
+        method: 'POST',
+        keepalive: true,
+        headers: notifHeaders(),
+    });
+    notificaciones.value = [];
+    count.value = 0;
+    yaVistas.value = true;
+};
 
 const toggle = async () => {
-    abierto.value = !abierto.value;
-    if (abierto.value) {
+    if (!abierto.value) {
+        abierto.value = true;
         await cargar();
-    } else if (notificaciones.value.length > 0) {
-        await marcarTodas();
+        // En cuanto se muestran, las eliminamos del servidor
+        if (notificaciones.value.length > 0) {
+            limpiarTodas();
+        } else {
+            yaVistas.value = true;
+        }
+    } else {
+        abierto.value = false;
     }
 };
 
@@ -155,8 +182,6 @@ const cargar = async () => {
         });
         const data = await res.json();
         notificaciones.value = data.notificaciones ?? [];
-        count.value = data.no_leidas ?? 0;
-        if (notificaciones.value.length > 0) notificacionesCargadas.value = true;
     } catch (e) {
         // silently fail
     } finally {
@@ -164,36 +189,12 @@ const cargar = async () => {
     }
 };
 
-const notifHeaders = () => ({
-    'Accept': 'application/json',
-    'X-Requested-With': 'XMLHttpRequest',
-    'X-CSRF-TOKEN': getCsrfToken(),
-});
-
-const abrirNotificacion = async (n) => {
-    fetch(route('notificaciones.leer', n.id), {
-        method: 'POST',
-        keepalive: true,
-        headers: notifHeaders(),
-    });
+const abrirNotificacion = (n) => {
     notificaciones.value = notificaciones.value.filter(x => x.id !== n.id);
-    count.value = Math.max(0, count.value - 1);
     abierto.value = false;
-    notificacionesCargadas.value = notificaciones.value.length > 0;
     if (n.enlace) {
         router.visit(n.enlace);
     }
-};
-
-const marcarTodas = async () => {
-    fetch(route('notificaciones.leer-todas'), {
-        method: 'POST',
-        keepalive: true,
-        headers: notifHeaders(),
-    });
-    notificaciones.value = [];
-    count.value = 0;
-    notificacionesCargadas.value = false;
 };
 
 const formatDate = (dateStr) => {
@@ -206,12 +207,8 @@ const formatDate = (dateStr) => {
     return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
 };
 
-// Cerrar al hacer click fuera
 const handleOutsideClick = (e) => {
     if (menuRef.value && !menuRef.value.contains(e.target)) {
-        if (abierto.value && notificaciones.value.length > 0) {
-            marcarTodas();
-        }
         abierto.value = false;
     }
 };
@@ -219,13 +216,15 @@ const handleOutsideClick = (e) => {
 onMounted(() => document.addEventListener('mousedown', handleOutsideClick));
 onBeforeUnmount(() => {
     document.removeEventListener('mousedown', handleOutsideClick);
-    // Always fire if there are unread notifications (keepalive survives navigation)
-    if (count.value > 0) {
+    // Si quedaban notificaciones sin limpiar (p.ej. navegó sin abrir campana)
+    // las eliminamos igualmente con keepalive para que sobreviva la navegación.
+    if (!yaVistas.value && count.value > 0) {
         fetch(route('notificaciones.leer-todas'), {
             method: 'POST',
             keepalive: true,
             headers: notifHeaders(),
         });
+        yaVistas.value = true;
     }
 });
 </script>

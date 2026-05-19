@@ -650,8 +650,25 @@ class TiendaSeeder extends Seeder
             ],
         ];
 
+        $logosPorCategoria = [
+            'frutas-y-verduras'  => 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&h=300&fit=crop',
+            'carnes'             => 'https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=300&h=300&fit=crop',
+            'pescados-y-mariscos'=> 'https://images.unsplash.com/photo-1535398089889-dd807df1dfaa?w=300&h=300&fit=crop',
+            'panaderia'          => 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=300&h=300&fit=crop',
+            'lacteos-y-quesos'   => 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=300&h=300&fit=crop',
+            'vinoteca'           => 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=300&h=300&fit=crop',
+            'artesania'          => 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=300&h=300&fit=crop',
+        ];
+
         foreach ($tiendas as $datos) {
-            Tienda::firstOrCreate(['slug' => $datos['slug']], array_merge($datos, ['logo' => '/images/logo.png']));
+            // Resolver logo por categoría a partir del categoria_id
+            $catSlug = collect($cats)->search($datos['categoria_id']);
+            $logo    = $logosPorCategoria[$catSlug] ?? 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&h=300&fit=crop';
+
+            Tienda::updateOrCreate(
+                ['slug' => $datos['slug']],
+                array_merge($datos, ['logo' => $logo])
+            );
         }
     }
 }

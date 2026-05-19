@@ -178,7 +178,7 @@ class ProductoSeeder extends Seeder
             $catId    = $cats[$data['cat']] ?? null;
             if (!$tiendaId || !$catId) continue;
 
-            Producto::firstOrCreate(
+            Producto::updateOrCreate(
                 ['slug' => $data['slug']],
                 array_merge(
                     collect($data)->except(['tienda', 'cat'])->toArray(),

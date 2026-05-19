@@ -137,12 +137,12 @@ class DemoUsersSeeder extends Seeder
     }
 
     /**
-     * Genera URL del servicio gratuito UI Avatars (no requiere descargar nada).
-     * https://ui-avatars.com/api/?name=Domingo+Perdomo&background=ea580c&color=fff&size=256&bold=true
+     * Genera URL de DiceBear Avataaars (avatares tipo bitmoji, sin descarga).
+     * Seed determinista por nombre → mismo nombre = mismo avatar siempre.
      */
     private function avatarUrl(string $name, string $bg = 'ea580c'): string
     {
-        $clean = urlencode(trim($name));
-        return "https://ui-avatars.com/api/?name={$clean}&background={$bg}&color=ffffff&size=256&bold=true&font-size=0.5";
+        $seed = urlencode(str_replace(' ', '', $name));
+        return "https://api.dicebear.com/7.x/avataaars/svg?seed={$seed}&backgroundColor={$bg}&radius=50";
     }
 }
