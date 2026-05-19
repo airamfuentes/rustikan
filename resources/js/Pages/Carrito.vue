@@ -303,6 +303,11 @@ const pagarConRusticoin = () => {
 const pagarConStripe = async () => {
     erroresPago.value = {};
 
+    if (!stripe || !elements || !paymentElement) {
+        stripeError.value = 'El formulario de pago no está listo. Espera un momento.';
+        return;
+    }
+
     if (!stripeReady.value || !cardCompleto.value) {
         stripeError.value = 'Completa los datos de la tarjeta.';
         return;
@@ -845,7 +850,7 @@ const stepTitle = computed(() => ({
                         </p>
 
                         <!-- Stripe Card Element -->
-                        <div v-if="pagoForm.metodo === 'tarjeta'" class="space-y-3">
+                        <div v-show="pagoForm.metodo === 'tarjeta'" class="space-y-3">
                             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                                 Datos de la tarjeta <span class="text-red-500">*</span>
                             </label>
