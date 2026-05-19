@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
@@ -8,7 +8,7 @@ import PasswordStrength from '@/Components/PasswordStrength.vue';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import { useI18n } from '@/Composables/useI18n';
 import { useToasts } from '@/Composables/useToasts';
-import { evaluarPassword, validarEdad, validarNombre, validarDireccion } from '@/Composables/useValidaciones';
+import { evaluarPassword, validarNombre, validarCP } from '@/Composables/useValidaciones';
 import { useFileUpload } from '@/Composables/useFileUpload';
 
 const { validate: validateFile } = useFileUpload();
@@ -66,13 +66,49 @@ const uploadAvatar = () => {
     });
 };
 
-// -- Información personal (-----------------------------------------------------
+// -- Información personal ------------------------------------------------------
+const today = new Date();
+const maxFechaNacimiento = computed(() => {
+    const d = new Date(today.getFullYear() - 14, today.getMonth(), today.getDate());
+    return d.toISOString().split('T')[0];
+});
+const minFechaNacimiento = computed(() => {
+    const d = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate());
+    return d.toISOString().split('T')[0];
+});
+
 const profileForm = useForm({
-    name:      user.value?.name      ?? '',
-    apellidos: user.value?.apellidos ?? '',
-    telefono:  user.value?.telefono  ?? '',
-    edad:      user.value?.edad      ?? '',
-    direccion: user.value?.direccion ?? '',
+    name:             user.value?.name             ?? '',
+    apellidos:        user.value?.apellidos        ?? '',
+    telefono:         user.value?.telefono         ?? '',
+    fecha_nacimiento: user.value?.fecha_nacimiento ? user.value.fecha_nacimiento.split('T')[0] : '',
+    calle:            user.value?.calle            ?? '',
+    numero:           user.value?.numero           ?? '',
+    puerta:           user.value?.puerta           ?? '',
+    cp:               user.value?.cp               ?? '',
+    localidad:        user.value?.localidad        ?? '',
+});
+
+const buscandoLocalidad = ref(false);
+const isLanzaroteCP = (cp) => { const n = parseInt(cp, 10); return n >= 35500 && n <= 35599; };
+watch(() => profileForm.cp, async (cp) => {
+    if (!/^\d{5}$/.test(cp) || !isLanzaroteCP(cp)) return;
+    buscandoLocalidad.value = true;
+    try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=es&postalcode=${cp}&limit=5`, {
+            headers: { 'Accept-Language': 'es', 'User-Agent': 'Rustikan/1.0' },
+        });
+        const data = await res.json();
+        if (data.length > 0) {
+            const addr = data[0].address ?? {};
+            const localidad = addr.village || addr.suburb || addr.quarter || addr.neighbourhood
+                || addr.hamlet || addr.city_district || addr.town
+                || addr.city || addr.municipality || addr.county || '';
+            if (localidad) profileForm.localidad = localidad;
+        }
+    } catch { /* silently fail */ } finally {
+        buscandoLocalidad.value = false;
+    }
 });
 
 const erroresProfile = ref({});
@@ -85,11 +121,9 @@ const saveProfile = () => {
         const apErr = validarNombre(profileForm.apellidos, { min: 2, max: 80 });
         if (apErr) e.apellidos = apErr;
     }
-    const edadErr = validarEdad(profileForm.edad);
-    if (edadErr) e.edad = edadErr;
-    if (profileForm.direccion) {
-        const dirErr = validarDireccion(profileForm.direccion);
-        if (dirErr) e.direccion = dirErr;
+    if (profileForm.cp) {
+        const cpErr = validarCP(profileForm.cp, { soloLanzarote: true });
+        if (cpErr) e.cp = cpErr;
     }
     erroresProfile.value = e;
     if (Object.keys(e).length) {
@@ -98,6 +132,7 @@ const saveProfile = () => {
     }
 
     profileForm.patch(route('profile.update'), {
+        onSuccess: () => addToast('success', t('profile.save'), 'Perfil actualizado correctamente.'),
         onError: () => addToast('error', t('profile.save_error_title'), t('profile.save_error_msg')),
     });
 };
@@ -346,16 +381,55 @@ const initials = computed(() => {
                             <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ t('profile.phone_locked') }}</p>
                         </div>
 
-                        <div class="grid gap-4 sm:grid-cols-2">
-                            <div>
-                                <InputLabel for="p-edad" :value="t('profile.age')" />
-                                <TextInput id="p-edad" v-model="profileForm.edad" type="number" min="14" max="120" inputmode="numeric" v-only-digits class="mt-1 block w-full" />
-                                <InputError class="mt-1" :message="erroresProfile.edad || profileForm.errors.edad" />
+                        <div>
+                            <InputLabel for="p-fnac" value="Fecha de nacimiento" />
+                            <TextInput id="p-fnac" v-model="profileForm.fecha_nacimiento" type="date"
+                                class="mt-1 block w-full" :max="maxFechaNacimiento" :min="minFechaNacimiento" />
+                            <InputError class="mt-1" :message="erroresProfile.fecha_nacimiento || profileForm.errors.fecha_nacimiento" />
+                        </div>
+
+                        <!-- Dirección separada -->
+                        <div class="grid gap-4 sm:grid-cols-3">
+                            <div class="sm:col-span-2">
+                                <InputLabel for="p-calle" value="Calle / Avenida" />
+                                <TextInput id="p-calle" v-model="profileForm.calle" type="text"
+                                    class="mt-1 block w-full" autocomplete="address-line1" maxlength="100" placeholder="Calle Ejemplo" />
+                                <InputError class="mt-1" :message="erroresProfile.calle || profileForm.errors.calle" />
                             </div>
                             <div>
-                                <InputLabel for="p-direccion" :value="t('profile.address')" />
-                                <TextInput id="p-direccion" v-model="profileForm.direccion" type="text" class="mt-1 block w-full" autocomplete="street-address" minlength="5" maxlength="500" />
-                                <InputError class="mt-1" :message="erroresProfile.direccion || profileForm.errors.direccion" />
+                                <InputLabel for="p-numero" value="Número" />
+                                <TextInput id="p-numero" v-model="profileForm.numero" type="text"
+                                    class="mt-1 block w-full" maxlength="10" placeholder="12" />
+                                <InputError class="mt-1" :message="profileForm.errors.numero" />
+                            </div>
+                        </div>
+
+                        <div class="grid gap-4 sm:grid-cols-3">
+                            <div>
+                                <InputLabel for="p-puerta" value="Piso / Puerta" />
+                                <TextInput id="p-puerta" v-model="profileForm.puerta" type="text"
+                                    class="mt-1 block w-full" maxlength="20" placeholder="2ºA" />
+                                <InputError class="mt-1" :message="profileForm.errors.puerta" />
+                            </div>
+                            <div>
+                                <InputLabel for="p-cp" value="Código postal" />
+                                <div class="relative mt-1">
+                                    <TextInput id="p-cp" v-model="profileForm.cp" type="text"
+                                        class="block w-full" maxlength="5" inputmode="numeric" placeholder="35500" />
+                                    <span v-if="buscandoLocalidad" class="absolute right-2 top-1/2 -translate-y-1/2">
+                                        <svg class="animate-spin h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                                        </svg>
+                                    </span>
+                                </div>
+                                <InputError class="mt-1" :message="erroresProfile.cp || profileForm.errors.cp" />
+                            </div>
+                            <div>
+                                <InputLabel for="p-localidad" value="Localidad" />
+                                <TextInput id="p-localidad" v-model="profileForm.localidad" type="text"
+                                    class="mt-1 block w-full" maxlength="100" placeholder="Arrecife" />
+                                <InputError class="mt-1" :message="profileForm.errors.localidad" />
                             </div>
                         </div>
 

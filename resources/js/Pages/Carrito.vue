@@ -88,14 +88,13 @@ const pagoForm = ref({
 
 const abrirCheckout = () => {
     if (!user.value) { router.visit(route('login')); return; }
-    const dir = user.value?.direccion || '';
     envioForm.value = {
-        calle:             dir,
-        numero:            '',
-        puerta:            '',
-        cp:                '',
-        localidad:         '',
-        telefono_contacto: user.value?.telefono || '',
+        calle:             user.value?.calle     || '',
+        numero:            user.value?.numero    || '',
+        puerta:            user.value?.puerta    || '',
+        cp:                user.value?.cp        || '',
+        localidad:         user.value?.localidad || '',
+        telefono_contacto: user.value?.telefono  || '',
         notas:             '',
     };
     pagoForm.value = { metodo: 'tarjeta', rcACusar: 0 };

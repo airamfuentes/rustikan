@@ -63,7 +63,11 @@ class RegisteredUserController extends Controller
                 'before_or_equal:' . now()->subYears(14)->format('Y-m-d'),
                 'after_or_equal:' . now()->subYears(120)->format('Y-m-d'),
             ],
-            'direccion'        => 'required|string|min:5|max:500',
+            'calle'            => 'required|string|min:3|max:100',
+            'numero'           => 'required|string|max:10',
+            'puerta'           => 'nullable|string|max:20',
+            'cp'               => 'required|string|regex:/^\d{5}$/',
+            'localidad'        => 'required|string|max:100',
             'accept_terms'     => 'accepted',
             'password'         => ['required', 'confirmed', Rules\Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
             'turnstile_token'  => 'required|string',
@@ -73,6 +77,7 @@ class RegisteredUserController extends Controller
             'apellidos.regex'             => 'Los apellidos solo pueden contener letras.',
             'fecha_nacimiento.before_or_equal' => 'Debes tener al menos 14 años.',
             'fecha_nacimiento.after_or_equal'  => 'Fecha de nacimiento no válida.',
+            'cp.regex'                    => 'El código postal debe tener 5 dígitos.',
         ]);
 
         // Verify Turnstile with Cloudflare
@@ -90,6 +95,12 @@ class RegisteredUserController extends Controller
 
         $edad = \Carbon\Carbon::parse($request->fecha_nacimiento)->age;
 
+        $direccion = implode(', ', array_filter([
+            $request->calle,
+            $request->numero,
+            $request->puerta,
+        ])) . ", {$request->cp} {$request->localidad}";
+
         $user = User::create([
             'name'             => $request->name,
             'apellidos'        => $request->apellidos,
@@ -97,7 +108,12 @@ class RegisteredUserController extends Controller
             'email'            => $request->email,
             'fecha_nacimiento' => $request->fecha_nacimiento,
             'edad'             => $edad,
-            'direccion'        => $request->direccion,
+            'calle'            => $request->calle,
+            'numero'           => $request->numero,
+            'puerta'           => $request->puerta,
+            'cp'               => $request->cp,
+            'localidad'        => $request->localidad,
+            'direccion'        => $direccion,
             'password'         => Hash::make($request->password),
         ]);
 

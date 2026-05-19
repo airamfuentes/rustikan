@@ -231,7 +231,6 @@ const refrescarActividad = () => {
         only: ['actividad_reciente'],
         onFinish: () => {
             cargandoActividad.value = false;
-            toastSuccess('Actividad actualizada', 'La lista se ha refrescado correctamente.');
         }
     });
 };

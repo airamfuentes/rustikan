@@ -127,11 +127,17 @@ class StripeController extends Controller
             return redirect()->route('carrito')->with('error', 'El pago no se completó.');
         }
 
-        $pedido = $this->crearPedidoDesdeSession($session);
+        try {
+            $pedido = $this->crearPedidoDesdeSession($session);
+        } catch (\Throwable $e) {
+            Log::error('[Stripe success] crearPedido excepción: ' . $e->getMessage() . ' ' . $e->getTraceAsString());
+            $pedido = null;
+            $debugError = $e->getMessage();
+        }
 
         // Loguear al usuario si su sesión sigue activa (puede haberse perdido en redirect externo)
         if (!auth()->check() && $pedido) {
-            auth()->loginUsingId($pedido->user_id);
+            auth()->login(\App\Models\User::find($pedido->user_id));
         }
 
         return inertia('CheckoutSuccess', [
@@ -139,6 +145,7 @@ class StripeController extends Controller
                 'numero_pedido' => $pedido->numero_pedido,
                 'total'         => $pedido->total,
             ] : null,
+            'debug_error' => config('app.debug') ? ($debugError ?? null) : null,
         ]);
     }
 

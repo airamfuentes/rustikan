@@ -11,7 +11,7 @@ import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from '@/Composables/useI18n';
 import {
-    validarNombre, validarEmail, validarTelefonoEs, validarDireccion,
+    validarNombre, validarEmail, validarCP,
     evaluarPassword,
 } from '@/Composables/useValidaciones';
 
@@ -24,7 +24,11 @@ const form = useForm({
     telefono: '',
     email: '',
     fecha_nacimiento: '',
-    direccion: '',
+    calle: '',
+    numero: '',
+    puerta: '',
+    cp: '',
+    localidad: '',
     accept_terms: false,
     password: '',
     password_confirmation: '',
@@ -79,6 +83,30 @@ watch(prefijo, () => {
         : prefijo.value + telefonoNumero.value;
 });
 
+// CP auto-lookup
+const buscandoLocalidad = ref(false);
+const isLanzaroteCP = (cp) => { const n = parseInt(cp, 10); return n >= 35500 && n <= 35599; };
+watch(() => form.cp, async (cp) => {
+    if (!/^\d{5}$/.test(cp)) { form.localidad = ''; return; }
+    if (!isLanzaroteCP(cp)) { form.localidad = ''; return; }
+    buscandoLocalidad.value = true;
+    try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=es&postalcode=${cp}&limit=5`, {
+            headers: { 'Accept-Language': 'es', 'User-Agent': 'Rustikan/1.0' },
+        });
+        const data = await res.json();
+        if (data.length > 0) {
+            const addr = data[0].address ?? {};
+            const localidad = addr.village || addr.suburb || addr.quarter || addr.neighbourhood
+                || addr.hamlet || addr.city_district || addr.town
+                || addr.city || addr.municipality || addr.county || '';
+            if (localidad) form.localidad = localidad;
+        }
+    } catch { /* silently fail */ } finally {
+        buscandoLocalidad.value = false;
+    }
+});
+
 const erroresLocales = ref({});
 
 const validarLocal = () => {
@@ -95,9 +123,12 @@ const validarLocal = () => {
     }
     const emailErr = validarEmail(form.email);
     if (emailErr) e.email = emailErr;
-    const dirErr = validarDireccion(form.direccion);
-    if (dirErr) e.direccion = dirErr;
     if (!form.fecha_nacimiento) e.fecha_nacimiento = 'La fecha de nacimiento es obligatoria.';
+    if (!form.calle.trim() || form.calle.trim().length < 3) e.calle = 'La calle es obligatoria (mínimo 3 caracteres).';
+    if (!form.numero.trim()) e.numero = 'El número es obligatorio.';
+    const cpErr = validarCP(form.cp, { soloLanzarote: true });
+    if (cpErr) e.cp = cpErr;
+    if (!form.localidad.trim()) e.localidad = 'La localidad es obligatoria.';
     const pw = evaluarPassword(form.password);
     if (!pw.valida) e.password = 'La contraseña debe tener 8+ caracteres, mayúsculas, minúsculas, números y símbolos.';
     if (form.password !== form.password_confirmation) e.password_confirmation = 'Las contraseñas no coinciden.';
@@ -223,22 +254,49 @@ const submit = () => {
                 <InputError class="mt-2" :message="erroresLocales.email || form.errors.email" />
             </div>
 
-            <div>
-                <InputLabel for="direccion" :value="t('auth.address_label') + ' *'" />
+            <!-- Dirección -->
+            <div class="grid gap-4 sm:grid-cols-3">
+                <div class="sm:col-span-2">
+                    <InputLabel for="calle" value="Calle / Avenida *" />
+                    <TextInput id="calle" type="text" class="mt-1 block w-full" v-model="form.calle"
+                        required autocomplete="address-line1" maxlength="100" placeholder="Calle Ejemplo" />
+                    <InputError class="mt-2" :message="erroresLocales.calle || form.errors.calle" />
+                </div>
+                <div>
+                    <InputLabel for="numero" value="Número *" />
+                    <TextInput id="numero" type="text" class="mt-1 block w-full" v-model="form.numero"
+                        required maxlength="10" placeholder="12" />
+                    <InputError class="mt-2" :message="erroresLocales.numero || form.errors.numero" />
+                </div>
+            </div>
 
-                <TextInput
-                    id="direccion"
-                    type="text"
-                    class="mt-1 block w-full"
-                    v-model="form.direccion"
-                    required
-                    autocomplete="street-address"
-                    minlength="5"
-                    maxlength="500"
-                    :placeholder="t('auth.address_placeholder')"
-                />
-
-                <InputError class="mt-2" :message="erroresLocales.direccion || form.errors.direccion" />
+            <div class="grid gap-4 sm:grid-cols-3">
+                <div>
+                    <InputLabel for="puerta" value="Piso / Puerta" />
+                    <TextInput id="puerta" type="text" class="mt-1 block w-full" v-model="form.puerta"
+                        maxlength="20" placeholder="2ºA" />
+                    <InputError class="mt-2" :message="form.errors.puerta" />
+                </div>
+                <div>
+                    <InputLabel for="cp" value="Código postal *" />
+                    <div class="relative mt-1">
+                        <TextInput id="cp" type="text" class="block w-full" v-model="form.cp"
+                            required maxlength="5" inputmode="numeric" placeholder="35500" />
+                        <span v-if="buscandoLocalidad" class="absolute right-2 top-1/2 -translate-y-1/2">
+                            <svg class="animate-spin h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <InputError class="mt-2" :message="erroresLocales.cp || form.errors.cp" />
+                </div>
+                <div>
+                    <InputLabel for="localidad" value="Localidad *" />
+                    <TextInput id="localidad" type="text" class="mt-1 block w-full" v-model="form.localidad"
+                        required maxlength="100" placeholder="Arrecife" />
+                    <InputError class="mt-2" :message="erroresLocales.localidad || form.errors.localidad" />
+                </div>
             </div>
 
             <div>

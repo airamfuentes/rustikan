@@ -23,6 +23,10 @@
                 Recibirás un correo de confirmación en breve.
             </p>
 
+            <div v-if="debug_error" class="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-left text-xs text-red-700 font-mono break-all">
+                <strong>Error (debug):</strong> {{ debug_error }}
+            </div>
+
             <Link
                 :href="route('pedidos.index')"
                 class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-500 px-8 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-primary-600"
@@ -41,6 +45,7 @@ import { useCarrito } from '@/Composables/useCarrito';
 
 defineProps({
     pedido: Object,
+    debug_error: String,
 });
 
 const { vaciarCarrito } = useCarrito();

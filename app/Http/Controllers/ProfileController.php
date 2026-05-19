@@ -35,6 +35,22 @@ class ProfileController extends Controller
         // Email and phone are locked once set — never overwrite them.
         unset($validated['email'], $validated['telefono']);
 
+        // Recalculate edad from fecha_nacimiento if provided
+        if (!empty($validated['fecha_nacimiento'])) {
+            $validated['edad'] = \Carbon\Carbon::parse($validated['fecha_nacimiento'])->age;
+        }
+
+        // Rebuild direccion from parts if address fields are present
+        $calle = $validated['calle'] ?? $request->user()->calle;
+        $numero = $validated['numero'] ?? $request->user()->numero;
+        $puerta = $validated['puerta'] ?? $request->user()->puerta;
+        $cp = $validated['cp'] ?? $request->user()->cp;
+        $localidad = $validated['localidad'] ?? $request->user()->localidad;
+        if ($calle && $numero && $cp && $localidad) {
+            $validated['direccion'] = implode(', ', array_filter([$calle, $numero, $puerta]))
+                . ", {$cp} {$localidad}";
+        }
+
         $request->user()->fill($validated);
         $request->user()->save();
 
