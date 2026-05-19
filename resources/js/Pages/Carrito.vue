@@ -145,11 +145,12 @@ let stripe        = null;
 let elements      = null;
 let paymentElement = null;
 
-const stripeReady   = ref(false);
-const stripeError   = ref('');
-const cardCompleto  = ref(false);
-const clientSecret  = ref('');
+const stripeReady    = ref(false);
+const stripeError    = ref('');
+const cardCompleto   = ref(false);
+const clientSecret   = ref('');
 const cargandoIntent = ref(false);
+const totalPagado    = ref(0);
 
 const direccionEnvioComputed = computed(() =>
     [envioForm.value.calle.trim(), envioForm.value.numero.trim(), envioForm.value.puerta.trim()]
@@ -327,6 +328,7 @@ const pagarConStripe = async () => {
         }
 
         if (paymentIntent && paymentIntent.status === 'succeeded') {
+            totalPagado.value = totalFinal.value;
             vaciarCarrito({ silencioso: true });
             step.value = 4;
             procesando.value = false;
@@ -934,6 +936,7 @@ const stepTitle = computed(() => ({
                             </svg>
                         </div>
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">¡Pago completado!</h3>
+                        <p class="text-2xl font-extrabold text-primary-600 mb-2">{{ totalPagado.toFixed(2) }}€</p>
                         <p class="text-sm text-gray-500 dark:text-gray-400 max-w-xs mb-6">
                             Tu pedido ha sido confirmado. Recibirás un correo de confirmación en breve.
                         </p>
