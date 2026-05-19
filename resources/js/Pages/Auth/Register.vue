@@ -193,7 +193,7 @@ const submit = () => {
                         :max="maxFechaNacimiento"
                         :min="minFechaNacimiento"
                     />
-                    <InputError class="mt-2" :message="form.errors.fecha_nacimiento" />
+                    <InputError class="mt-2" :message="erroresLocales.fecha_nacimiento || form.errors.fecha_nacimiento" />
                 </div>
             </div>
 
