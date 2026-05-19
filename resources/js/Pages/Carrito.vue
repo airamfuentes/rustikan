@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { useCarrito } from '@/Composables/useCarrito';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
@@ -8,7 +8,6 @@ import { ChevronLeft } from 'lucide-vue-next';
 import {
     validarTelefonoEs, validarCP, validarDireccion,
 } from '@/Composables/useValidaciones';
-import { loadStripe } from '@stripe/stripe-js';
 
 const page  = usePage();
 const user  = computed(() => page.props.auth?.user);
@@ -30,7 +29,7 @@ const handleVaciar = () => vaciarCarrito();
 
 // ─── Checkout multi-step ──────────────────────────────────────────────────────
 const mostrarCheckout = ref(false);
-const step            = ref(1); // 1: envío, 2: pago, 3: procesando, 4: éxito stripe
+const step            = ref(1); // 1: envío, 2: pago, 3: procesando
 const errores         = ref({});
 const erroresPago     = ref({});
 
@@ -137,123 +136,16 @@ const siguientePaso = () => {
     errores.value = e;
     if (Object.keys(e).length) return;
     step.value = 2;
-    nextTick(() => crearIntentYMontar());
 };
 
-// ── Stripe Elements ──────────────────────────────────────────────────────────
-let stripe        = null;
-let elements      = null;
-let paymentElement = null;
-
-const stripeReady    = ref(false);
-const stripeError    = ref('');
-const cardCompleto   = ref(false);
-const clientSecret   = ref('');
-const cargandoIntent = ref(false);
-const totalPagado    = ref(0);
+const stripeError = ref('');
+const csrfToken   = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 
 const direccionEnvioComputed = computed(() =>
     [envioForm.value.calle.trim(), envioForm.value.numero.trim(), envioForm.value.puerta.trim()]
         .filter(Boolean).join(', ')
     + `, ${envioForm.value.cp} ${envioForm.value.localidad}`.trim()
 );
-
-const crearIntentYMontar = async () => {
-    if (pagoForm.value.metodo === 'rusticoin') return;
-    if (clientSecret.value) return; // ya creado
-
-    stripeError.value   = '';
-    stripeReady.value   = false;
-    cardCompleto.value  = false;
-    cargandoIntent.value = true;
-
-    try {
-        if (!stripe) {
-            stripe = await loadStripe(import.meta.env.VITE_STRIPE_KEY);
-        }
-
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-        const res = await fetch(route('checkout.intent'), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
-            },
-            body: JSON.stringify({
-                items: items.value.map(i => ({ id: i.id, cantidad: i.cantidad })),
-                direccion_envio:   direccionEnvioComputed.value,
-                telefono_contacto: envioForm.value.telefono_contacto.trim(),
-                notas:             envioForm.value.notas.trim(),
-            }),
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            stripeError.value = data.error || 'Error al preparar el pago.';
-            cargandoIntent.value = false;
-            return;
-        }
-
-        clientSecret.value = data.client_secret;
-
-        elements = stripe.elements({ clientSecret: data.client_secret, locale: 'es' });
-        paymentElement = elements.create('payment', { layout: 'tabs' });
-
-        // Esperar DOM
-        let container = null;
-        for (let i = 0; i < 30; i++) {
-            await nextTick();
-            container = document.getElementById('stripe-card-element');
-            if (container) break;
-            await new Promise(r => setTimeout(r, 50));
-        }
-
-        if (container) {
-            paymentElement.mount(container);
-            paymentElement.on('ready', () => {
-                stripeReady.value = true;
-                cargandoIntent.value = false;
-            });
-            paymentElement.on('change', (e) => {
-                cardCompleto.value = e.complete;
-                stripeError.value  = e.error ? e.error.message : '';
-            });
-            paymentElement.on('loaderror', (e) => {
-                stripeError.value = e.error?.message || 'Error al cargar el formulario de pago.';
-                cargandoIntent.value = false;
-                console.error('[Stripe loaderror]', e.error);
-            });
-        }
-    } catch (e) {
-        stripeError.value = 'Error al conectar con el servidor de pagos.';
-        cargandoIntent.value = false;
-    }
-};
-
-const desmontarStripeElement = () => {
-    if (paymentElement) {
-        paymentElement.destroy();
-        paymentElement = null;
-    }
-    elements       = null;
-    clientSecret.value  = '';
-    stripeReady.value   = false;
-    cardCompleto.value  = false;
-    stripeError.value   = '';
-    cargandoIntent.value = false;
-};
-
-watch(() => pagoForm.value.metodo, (metodo) => {
-    if (metodo === 'rusticoin') {
-        desmontarStripeElement();
-    } else if (step.value === 2) {
-        nextTick(() => crearIntentYMontar());
-    }
-});
-
-onBeforeUnmount(() => desmontarStripeElement());
 
 // ── RustiCoin ────────────────────────────────────────────────────────────────
 const rcDisponible    = computed(() => user.value?.rusticoin_balance ?? 0);
@@ -300,59 +192,14 @@ const pagarConRusticoin = () => {
     });
 };
 
-const pagarConStripe = async () => {
-    erroresPago.value = {};
-
-    if (!stripe || !elements || !paymentElement) {
-        stripeError.value = 'El formulario de pago no está listo. Espera un momento.';
-        return;
-    }
-
-    if (!stripeReady.value || !cardCompleto.value) {
-        stripeError.value = 'Completa los datos de la tarjeta.';
-        return;
-    }
-
+const pagarConStripe = () => {
+    stripeError.value = '';
     step.value = 3;
     procesando.value = true;
 
-    try {
-        const { error, paymentIntent } = await stripe.confirmPayment({
-            elements,
-            confirmParams: {
-                return_url: window.location.origin + '/mis-pedidos',
-            },
-            redirect: 'if_required',
-        });
-
-        if (error) {
-            stripeError.value = error.message;
-            step.value = 2;
-            procesando.value = false;
-            return;
-        }
-
-        if (paymentIntent && paymentIntent.status === 'succeeded') {
-            totalPagado.value = totalFinal.value;
-            // Confirmar en backend para crear pedido y enviar correo (fallback al webhook)
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-            fetch(route('checkout.confirm'), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                body: JSON.stringify({ payment_intent_id: paymentIntent.id }),
-            }).then(r => r.json()).then(d => {
-                if (!d.ok) console.error('[checkout.confirm]', d);
-            }).catch(e => console.error('[checkout.confirm error]', e));
-            vaciarCarrito({ silencioso: true });
-            step.value = 4;
-            procesando.value = false;
-        }
-
-    } catch {
-        stripeError.value = 'Error de conexión. Inténtalo de nuevo.';
-        step.value = 2;
-        procesando.value = false;
-    }
+    // Envío de formulario nativo — el backend redirige a Stripe Checkout
+    const form = document.getElementById('stripe-checkout-form');
+    form.submit();
 };
 
 const pagar = () => {
@@ -368,7 +215,6 @@ const stepTitle = computed(() => ({
     1: t('checkout.step_delivery'),
     2: t('checkout.step_payment'),
     3: t('checkout.step_processing'),
-    4: '¡Pago completado!',
 }[step.value]));
 </script>
 
@@ -620,7 +466,7 @@ const stepTitle = computed(() => ({
                             </div>
                             <div>
                                 <h2 class="text-lg font-extrabold text-gray-900 dark:text-white leading-tight">{{ stepTitle }}</h2>
-                                <p v-if="step < 4" class="text-xs text-gray-500 dark:text-gray-400">
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
                                     {{ totalItems }} producto{{ totalItems !== 1 ? 's' : '' }} ·
                                     <span class="font-semibold text-primary-600">{{ totalFinal.toFixed(2) }}€</span>
                                 </p>
@@ -852,23 +698,30 @@ const stepTitle = computed(() => ({
                         </p>
 
                         <!-- Stripe Card Element -->
-                        <div v-show="pagoForm.metodo === 'tarjeta'" class="space-y-3">
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                Datos de la tarjeta <span class="text-red-500">*</span>
-                            </label>
-                            <div
-                                id="stripe-card-element"
-                                class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-3.5 min-h-[46px] transition focus-within:border-primary-400 focus-within:ring-2 focus-within:ring-primary-200"
-                            ></div>
-                            <p v-if="stripeError" class="text-xs text-red-500">{{ stripeError }}</p>
-                            <div v-if="!stripeReady" class="flex items-center gap-2 text-xs text-gray-400">
-                                <svg class="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                                </svg>
-                                Cargando formulario de pago seguro…
-                            </div>
+                        <!-- Formulario oculto para Stripe Checkout (tarjeta) -->
+                        <form
+                            v-show="pagoForm.metodo === 'tarjeta'"
+                            id="stripe-checkout-form"
+                            method="POST"
+                            :action="route('checkout.session')"
+                        >
+                            <input type="hidden" name="_token" :value="csrfToken" />
+                            <input type="hidden" name="direccion_envio" :value="direccionEnvioComputed" />
+                            <input type="hidden" name="telefono_contacto" :value="envioForm.telefono_contacto.trim()" />
+                            <input type="hidden" name="notas" :value="envioForm.notas.trim()" />
+                            <template v-for="(item, i) in items" :key="item.id">
+                                <input type="hidden" :name="`items[${i}][id]`" :value="item.id" />
+                                <input type="hidden" :name="`items[${i}][cantidad]`" :value="item.cantidad" />
+                            </template>
+                        </form>
+
+                        <div v-show="pagoForm.metodo === 'tarjeta'" class="rounded-xl bg-blue-50 dark:bg-blue-900/20 px-4 py-4 text-sm text-blue-700 dark:text-blue-300 flex items-start gap-3">
+                            <svg class="h-5 w-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span>Al confirmar serás redirigido a la página segura de <strong>Stripe</strong> para introducir los datos de tu tarjeta.</span>
                         </div>
+                        <p v-if="stripeError" class="text-xs text-red-500">{{ stripeError }}</p>
 
                         <!-- Importe -->
                         <div class="rounded-xl bg-gray-50 dark:bg-gray-700/50 px-4 py-3">
@@ -901,7 +754,7 @@ const stepTitle = computed(() => ({
                         <div class="border-t border-gray-100 dark:border-gray-700 pt-4 flex flex-col gap-3">
                             <button
                                 @click="pagar"
-                                :disabled="procesando || (pagoForm.metodo === 'tarjeta' && (!cardCompleto || !stripeReady))"
+                                :disabled="procesando"
                                 class="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-green-700 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -940,26 +793,6 @@ const stepTitle = computed(() => ({
                             </svg>
                             Conexión segura SSL
                         </div>
-                    </div>
-
-                    <!-- ══════════ STEP 4: ÉXITO STRIPE ══════════ -->
-                    <div v-if="step === 4" key="step4" class="px-6 py-16 flex flex-col items-center text-center">
-                        <div class="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
-                            <svg class="h-10 w-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">¡Pago completado!</h3>
-                        <p class="text-2xl font-extrabold text-primary-600 mb-2">{{ totalPagado.toFixed(2) }}€</p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 max-w-xs mb-6">
-                            Tu pedido ha sido confirmado. Recibirás un correo de confirmación en breve.
-                        </p>
-                        <Link
-                            :href="route('pedidos.index')"
-                            class="rounded-xl bg-primary-500 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-primary-600"
-                        >
-                            Ver mis pedidos
-                        </Link>
                     </div>
 
                 </div>

@@ -6,23 +6,21 @@ use App\Mail\PedidoConfirmado;
 use App\Models\Notificacion;
 use App\Models\Pedido;
 use App\Models\Producto;
-use App\Models\RusticoinTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Stripe\Checkout\Session as StripeSession;
 use Stripe\Exception\SignatureVerificationException;
-use Stripe\PaymentIntent;
 use Stripe\Stripe;
 use Stripe\Webhook;
 
 class StripeController extends Controller
 {
     /**
-     * Crea un PaymentIntent en Stripe y devuelve el client_secret al frontend.
-     * El pedido aún NO se crea aquí — se crea solo cuando Stripe confirma el pago.
+     * Crea una Stripe Checkout Session y redirige al usuario a la página de pago de Stripe.
      */
-    public function createIntent(Request $request)
+    public function createSession(Request $request)
     {
         $validated = $request->validate([
             'items'                 => 'required|array|min:1',
@@ -33,83 +31,115 @@ class StripeController extends Controller
             'notas'                 => 'nullable|string|max:1000',
         ]);
 
-        // Calcular total real desde BD (nunca confiar en el cliente)
-        $subtotal = 0;
+        // Calcular total y construir line_items desde BD
+        $lineItems = [];
         foreach ($validated['items'] as $item) {
             $producto = Producto::findOrFail($item['id']);
 
             if (!$producto->disponible) {
-                return response()->json(['error' => "El producto \"{$producto->nombre}\" ya no está disponible."], 422);
+                return back()->withErrors(['stock' => "El producto \"{$producto->nombre}\" ya no está disponible."]);
             }
             if ($producto->stock < $item['cantidad']) {
-                return response()->json(['error' => "Stock insuficiente para \"{$producto->nombre}\". Quedan {$producto->stock} unidades."], 422);
+                return back()->withErrors(['stock' => "Stock insuficiente para \"{$producto->nombre}\". Quedan {$producto->stock} unidades."]);
             }
 
             $precioReal = (float) ($producto->precio_oferta ?? $producto->precio);
-            $subtotal  += $precioReal * $item['cantidad'];
+
+            $lineItems[] = [
+                'price_data' => [
+                    'currency'     => 'eur',
+                    'unit_amount'  => (int) round($precioReal * 100),
+                    'product_data' => [
+                        'name'   => $producto->nombre,
+                        'images' => $producto->imagen ? [asset('storage/' . $producto->imagen)] : [],
+                    ],
+                ],
+                'quantity' => $item['cantidad'],
+            ];
         }
 
-        $gastosEnvio = $subtotal >= 50 ? 0.00 : 2.50;
-        $total       = $subtotal + $gastosEnvio;
-
-        // Stripe trabaja en céntimos (enteros)
-        $amountCents = (int) round($total * 100);
+        // Gastos de envío
+        $subtotal    = collect($validated['items'])->sum(function ($item) {
+            $p = Producto::find($item['id']);
+            return (float) ($p->precio_oferta ?? $p->precio) * $item['cantidad'];
+        });
+        $gastosEnvio = $subtotal >= 50 ? 0 : 2.50;
+        if ($gastosEnvio > 0) {
+            $lineItems[] = [
+                'price_data' => [
+                    'currency'     => 'eur',
+                    'unit_amount'  => (int) round($gastosEnvio * 100),
+                    'product_data' => ['name' => 'Gastos de envío'],
+                ],
+                'quantity' => 1,
+            ];
+        }
 
         Stripe::setApiKey(config('services.stripe.secret'));
 
         try {
-            $intent = PaymentIntent::create([
-                'amount'   => $amountCents,
-                'currency' => 'eur',
-                'metadata' => [
+            $session = StripeSession::create([
+                'payment_method_types' => ['card'],
+                'line_items'           => $lineItems,
+                'mode'                 => 'payment',
+                'locale'               => 'es',
+                'success_url'          => route('checkout.success') . '?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url'           => route('carrito'),
+                'metadata'             => [
                     'user_id'           => auth()->id(),
                     'direccion_envio'   => $validated['direccion_envio'],
                     'telefono_contacto' => $validated['telefono_contacto'],
                     'notas'             => $validated['notas'] ?? '',
                     'items_json'        => json_encode($validated['items']),
                 ],
-                'automatic_payment_methods' => ['enabled' => true],
             ]);
         } catch (\Stripe\Exception\ApiErrorException $e) {
-            Log::error('[Stripe createIntent] ' . $e->getMessage());
-            return response()->json(['error' => 'Error al conectar con Stripe: ' . $e->getMessage()], 502);
+            Log::error('[Stripe createSession] ' . $e->getMessage());
+            return back()->withErrors(['stripe' => 'Error al conectar con Stripe. Inténtalo de nuevo.']);
         }
 
-        return response()->json([
-            'client_secret' => $intent->client_secret,
-            'amount'        => $total,
-        ]);
+        return redirect($session->url);
     }
 
     /**
-     * Llamado por el frontend tras confirmPayment exitoso.
-     * Crea el pedido si el webhook aún no lo ha creado (idempotente).
+     * Página de éxito: el usuario vuelve aquí tras pagar en Stripe.
+     * Verificamos la sesión y creamos el pedido si no existe.
      */
-    public function confirm(Request $request)
+    public function success(Request $request)
     {
-        $request->validate(['payment_intent_id' => 'required|string']);
+        $sessionId = $request->query('session_id');
+        if (!$sessionId) {
+            return redirect()->route('carrito');
+        }
 
         Stripe::setApiKey(config('services.stripe.secret'));
 
         try {
-            $intent = PaymentIntent::retrieve($request->payment_intent_id);
+            $session = StripeSession::retrieve([
+                'id'     => $sessionId,
+                'expand' => ['payment_intent'],
+            ]);
         } catch (\Stripe\Exception\ApiErrorException $e) {
-            return response()->json(['error' => 'No se pudo verificar el pago.'], 502);
+            Log::error('[Stripe success] ' . $e->getMessage());
+            return redirect()->route('pedidos.index')->with('error', 'No se pudo verificar el pago.');
         }
 
-        if ($intent->status !== 'succeeded') {
-            return response()->json(['error' => 'El pago no está confirmado.'], 422);
+        if ($session->payment_status !== 'paid') {
+            return redirect()->route('carrito')->with('error', 'El pago no se completó.');
         }
 
-        // Crear pedido si no existe aún (el webhook puede llegar después)
-        $this->crearPedidoDesdeIntent($intent);
+        $pedido = $this->crearPedidoDesdeSession($session);
 
-        return response()->json(['ok' => true]);
+        return inertia('CheckoutSuccess', [
+            'pedido' => $pedido ? [
+                'numero_pedido' => $pedido->numero_pedido,
+                'total'         => $pedido->total,
+            ] : null,
+        ]);
     }
 
     /**
-     * Webhook de Stripe: recibe payment_intent.succeeded y crea el pedido.
-     * Esta ruta está excluida del middleware CSRF.
+     * Webhook de Stripe: crea el pedido como respaldo si el usuario cerró el navegador.
      */
     public function webhook(Request $request)
     {
@@ -120,103 +150,112 @@ class StripeController extends Controller
         try {
             $event = Webhook::constructEvent($payload, $sigHeader, $secret);
         } catch (SignatureVerificationException $e) {
-            Log::warning('Stripe webhook signature inválida', ['error' => $e->getMessage()]);
+            Log::warning('[Stripe webhook] Firma inválida: ' . $e->getMessage());
             return response()->json(['error' => 'Invalid signature'], 400);
         }
 
-        if ($event->type === 'payment_intent.succeeded') {
-            $intent = $event->data->object;
-            $this->crearPedidoDesdeIntent($intent);
+        if ($event->type === 'checkout.session.completed') {
+            $session = $event->data->object;
+            if ($session->payment_status === 'paid') {
+                // Expand payment_intent si es necesario
+                Stripe::setApiKey(config('services.stripe.secret'));
+                $session = StripeSession::retrieve([
+                    'id'     => $session->id,
+                    'expand' => ['payment_intent'],
+                ]);
+                $this->crearPedidoDesdeSession($session);
+            }
         }
 
         return response()->json(['ok' => true]);
     }
 
     /**
-     * Crea el pedido en BD a partir de los metadatos del PaymentIntent confirmado.
+     * Crea el pedido a partir de una Checkout Session. Idempotente.
      */
-    private function crearPedidoDesdeIntent(object $intent): void
+    private function crearPedidoDesdeSession(object $session): ?Pedido
     {
-        // Evitar pedidos duplicados si el webhook llega más de una vez
-        if (Pedido::where('stripe_payment_intent_id', $intent->id)->exists()) {
-            Log::info('[Stripe] Pedido ya existe para intent ' . $intent->id);
-            return;
+        $stripeSessionId = $session->id;
+
+        // Evitar duplicados
+        if (Pedido::where('stripe_payment_intent_id', $stripeSessionId)->exists()) {
+            return Pedido::where('stripe_payment_intent_id', $stripeSessionId)->first();
         }
 
-        $meta   = $intent->metadata;
+        $meta   = $session->metadata;
         $userId = (int) $meta->user_id;
         $items  = json_decode($meta->items_json, true);
 
-        Log::info('[Stripe] Creando pedido para intent ' . $intent->id . ' user_id=' . $userId . ' items=' . count($items));
+        Log::info('[Stripe] Creando pedido session=' . $stripeSessionId . ' user=' . $userId);
 
         try {
-        $pedido = DB::transaction(function () use ($intent, $meta, $userId, $items) {
-            $subtotal = 0;
-            $itemsConPrecio = [];
+            $pedido = DB::transaction(function () use ($session, $meta, $userId, $items, $stripeSessionId) {
+                $subtotal       = 0;
+                $itemsConPrecio = [];
 
-            foreach ($items as $item) {
-                $producto   = Producto::lockForUpdate()->find($item['id']);
-                $precioReal = (float) ($producto->precio_oferta ?? $producto->precio);
-                $subtotal  += $precioReal * $item['cantidad'];
+                foreach ($items as $item) {
+                    $producto   = Producto::lockForUpdate()->findOrFail($item['id']);
+                    $precioReal = (float) ($producto->precio_oferta ?? $producto->precio);
+                    $subtotal  += $precioReal * $item['cantidad'];
 
-                $itemsConPrecio[] = array_merge($item, [
-                    'precio_real'    => $precioReal,
-                    'producto_obj'   => $producto,
-                ]);
-            }
+                    $itemsConPrecio[] = [
+                        'id'          => $item['id'],
+                        'cantidad'    => $item['cantidad'],
+                        'precio_real' => $precioReal,
+                        'producto'    => $producto,
+                    ];
+                }
 
-            $gastosEnvio = $subtotal >= 50 ? 0.00 : 2.50;
-            $total       = $subtotal + $gastosEnvio;
+                $gastosEnvio = $subtotal >= 50 ? 0.00 : 2.50;
+                $total       = $subtotal + $gastosEnvio;
 
-            $pedido = Pedido::create([
-                'user_id'                  => $userId,
-                'numero_pedido'            => Pedido::generateOrderNumber(),
-                'estado'                   => 'confirmado',
-                'subtotal'                 => $subtotal,
-                'gastos_envio'             => $gastosEnvio,
-                'total'                    => $total,
-                'direccion_envio'          => $meta->direccion_envio,
-                'telefono_contacto'        => $meta->telefono_contacto,
-                'notas'                    => $meta->notas ?? null,
-                'metodo_pago'              => 'tarjeta',
-                'stripe_payment_intent_id' => $intent->id,
-            ]);
-
-            foreach ($itemsConPrecio as $item) {
-                $producto = $item['producto_obj'];
-
-                $pedido->items()->create([
-                    'producto_id'     => $item['id'],
-                    'tienda_id'       => $producto->tienda_id,
-                    'producto_nombre' => $producto->nombre,
-                    'tienda_nombre'   => $producto->tienda->nombre ?? '',
-                    'producto_imagen' => $producto->imagen ?? null,
-                    'cantidad'        => $item['cantidad'],
-                    'precio_unitario' => $item['precio_real'],
-                    'subtotal'        => $item['precio_real'] * $item['cantidad'],
+                $pedido = Pedido::create([
+                    'user_id'                  => $userId,
+                    'numero_pedido'            => Pedido::generateOrderNumber(),
+                    'estado'                   => 'confirmado',
+                    'subtotal'                 => $subtotal,
+                    'gastos_envio'             => $gastosEnvio,
+                    'total'                    => $total,
+                    'direccion_envio'          => $meta->direccion_envio,
+                    'telefono_contacto'        => $meta->telefono_contacto,
+                    'notas'                    => $meta->notas ?? null,
+                    'metodo_pago'              => 'tarjeta',
+                    'stripe_payment_intent_id' => $stripeSessionId,
                 ]);
 
-                $producto->decrement('stock', $item['cantidad']);
-            }
+                foreach ($itemsConPrecio as $item) {
+                    $producto = $item['producto'];
+                    $pedido->items()->create([
+                        'producto_id'     => $item['id'],
+                        'tienda_id'       => $producto->tienda_id,
+                        'producto_nombre' => $producto->nombre,
+                        'tienda_nombre'   => $producto->tienda->nombre ?? '',
+                        'producto_imagen' => $producto->imagen ?? null,
+                        'cantidad'        => $item['cantidad'],
+                        'precio_unitario' => $item['precio_real'],
+                        'subtotal'        => $item['precio_real'] * $item['cantidad'],
+                    ]);
+                    $producto->decrement('stock', $item['cantidad']);
+                }
 
-            return $pedido;
-        });
+                return $pedido;
+            });
         } catch (\Throwable $e) {
-            Log::error('[Stripe] Error creando pedido para intent ' . $intent->id . ': ' . $e->getMessage());
-            return;
+            Log::error('[Stripe] Error creando pedido: ' . $e->getMessage());
+            return null;
         }
 
         Log::info('[Stripe] Pedido creado: ' . $pedido->numero_pedido);
 
-        // Email fuera de la transacción para no bloquearla
+        // Email y notificaciones fuera de la transacción
         $pedido->load(['items.tienda.user', 'user']);
+
         try {
             Mail::to($pedido->user->email)->send(new PedidoConfirmado($pedido));
         } catch (\Throwable $e) {
-            Log::error('[PedidoConfirmado email] ' . $e->getMessage(), ['pedido_id' => $pedido->id]);
+            Log::error('[Stripe] Email falló: ' . $e->getMessage());
         }
 
-        // Notificar owners
         $notificados = [];
         foreach ($pedido->items as $item) {
             $ownerId = $item->tienda?->user_id;
@@ -235,5 +274,7 @@ class StripeController extends Controller
             "Pedido #{$pedido->numero_pedido} por " . number_format($pedido->total, 2) . '€',
             route('admin.pedidos.index'), 'cart', 'primary'
         );
+
+        return $pedido;
     }
 }

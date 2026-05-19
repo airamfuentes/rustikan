@@ -144,14 +144,14 @@ Route::prefix('')->name('info.')->group(function () {
     Route::get('/cookies',                fn() => Inertia::render('Info/Cookies'))->name('cookies');
 });
 
-// Stripe
-Route::post('/checkout/intent', [\App\Http\Controllers\StripeController::class, 'createIntent'])
+// Stripe Checkout
+Route::post('/checkout/session', [\App\Http\Controllers\StripeController::class, 'createSession'])
     ->middleware(['auth', 'throttle:10,1'])
-    ->name('checkout.intent');
+    ->name('checkout.session');
 
-Route::post('/checkout/confirm', [\App\Http\Controllers\StripeController::class, 'confirm'])
-    ->middleware(['auth', 'throttle:10,1'])
-    ->name('checkout.confirm');
+Route::get('/checkout/success', [\App\Http\Controllers\StripeController::class, 'success'])
+    ->middleware('auth')
+    ->name('checkout.success');
 
 Route::post('/stripe/webhook', [\App\Http\Controllers\StripeController::class, 'webhook'])
     ->name('stripe.webhook');
