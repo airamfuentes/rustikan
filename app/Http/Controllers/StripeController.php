@@ -102,8 +102,8 @@ class StripeController extends Controller
     }
 
     /**
-     * Página de éxito: el usuario vuelve aquí tras pagar en Stripe.
-     * Verificamos la sesión y creamos el pedido si no existe.
+     * Página de éxito: Stripe redirige aquí tras el pago.
+     * No requiere auth — el user_id está en los metadatos de la sesión.
      */
     public function success(Request $request)
     {
@@ -115,20 +115,24 @@ class StripeController extends Controller
         Stripe::setApiKey(config('services.stripe.secret'));
 
         try {
-            $session = StripeSession::retrieve([
-                'id'     => $sessionId,
-                'expand' => ['payment_intent'],
-            ]);
+            $session = StripeSession::retrieve($sessionId);
         } catch (\Stripe\Exception\ApiErrorException $e) {
-            Log::error('[Stripe success] ' . $e->getMessage());
+            Log::error('[Stripe success] retrieve falló: ' . $e->getMessage());
             return redirect()->route('pedidos.index')->with('error', 'No se pudo verificar el pago.');
         }
+
+        Log::info('[Stripe success] session=' . $sessionId . ' payment_status=' . $session->payment_status);
 
         if ($session->payment_status !== 'paid') {
             return redirect()->route('carrito')->with('error', 'El pago no se completó.');
         }
 
         $pedido = $this->crearPedidoDesdeSession($session);
+
+        // Loguear al usuario si su sesión sigue activa (puede haberse perdido en redirect externo)
+        if (!auth()->check() && $pedido) {
+            auth()->loginUsingId($pedido->user_id);
+        }
 
         return inertia('CheckoutSuccess', [
             'pedido' => $pedido ? [

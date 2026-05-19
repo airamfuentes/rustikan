@@ -34,10 +34,18 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
+import { useCarrito } from '@/Composables/useCarrito';
 
 defineProps({
     pedido: Object,
+});
+
+const { vaciarCarrito } = useCarrito();
+
+onMounted(() => {
+    vaciarCarrito({ silencioso: true });
 });
 </script>

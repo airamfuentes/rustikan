@@ -150,8 +150,7 @@ Route::post('/checkout/session', [\App\Http\Controllers\StripeController::class,
     ->name('checkout.session');
 
 Route::get('/checkout/success', [\App\Http\Controllers\StripeController::class, 'success'])
-    ->middleware('auth')
-    ->name('checkout.success');
+    ->name('checkout.success'); // sin auth — el user_id viene en los metadatos de Stripe
 
 Route::post('/stripe/webhook', [\App\Http\Controllers\StripeController::class, 'webhook'])
     ->name('stripe.webhook');
