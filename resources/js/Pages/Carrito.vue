@@ -175,8 +175,15 @@ const montarStripeElement = async () => {
         hidePostalCode: true,
     });
 
-    await nextTick();
-    const container = document.getElementById('stripe-card-element');
+    // Esperar hasta que el DOM tenga el contenedor (la transición puede retrasarlo)
+    let container = null;
+    for (let i = 0; i < 20; i++) {
+        await nextTick();
+        container = document.getElementById('stripe-card-element');
+        if (container) break;
+        await new Promise(r => setTimeout(r, 50));
+    }
+
     if (container) {
         cardElement.mount(container);
         cardElement.on('ready', () => { stripeReady.value = true; });
