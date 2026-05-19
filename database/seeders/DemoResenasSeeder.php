@@ -197,15 +197,27 @@ class DemoResenasSeeder extends Seeder
         $tiendas  = Tienda::pluck('id', 'slug');
         $usuarios = User::pluck('id', 'email');
 
-        $totalCreadas = 0;
+        $totalCreadas   = 0;
+        $missingTiendas = [];
+        $missingUsers   = [];
+
+        if ($usuarios->isEmpty()) {
+            $this->command?->warn('⚠  No se encontraron usuarios en la BD. Ejecuta primero DemoUsersSeeder.');
+        }
 
         foreach ($data as $tiendaSlug => $resenas) {
             $tiendaId = $tiendas[$tiendaSlug] ?? null;
-            if (!$tiendaId) continue;
+            if (!$tiendaId) {
+                $missingTiendas[] = $tiendaSlug;
+                continue;
+            }
 
             foreach ($resenas as [$email, $puntuacion, $titulo, $comentario]) {
                 $userId = $usuarios[$email] ?? null;
-                if (!$userId) continue;
+                if (!$userId) {
+                    $missingUsers[] = $email;
+                    continue;
+                }
 
                 // Eliminar reseña previa del mismo usuario en la misma tienda
                 Resena::where('user_id', $userId)->where('tienda_id', $tiendaId)->delete();
@@ -246,5 +258,12 @@ class DemoResenasSeeder extends Seeder
         }
 
         $this->command?->info("DemoResenasSeeder: {$totalCreadas} reseñas creadas y valoraciones recalculadas.");
+
+        if ($missingTiendas) {
+            $this->command?->warn('Tiendas no encontradas (' . count($missingTiendas) . '): ' . implode(', ', $missingTiendas));
+        }
+        if ($missingUsers) {
+            $this->command?->warn('Usuarios no encontrados (' . count(array_unique($missingUsers)) . '): ' . implode(', ', array_unique($missingUsers)));
+        }
     }
 }
