@@ -137,78 +137,113 @@ const siguientePaso = () => {
     errores.value = e;
     if (Object.keys(e).length) return;
     step.value = 2;
-    nextTick(() => montarStripeElement());
+    nextTick(() => crearIntentYMontar());
 };
 
 // ── Stripe Elements ──────────────────────────────────────────────────────────
-let stripe       = null;
-let elements     = null;
-let cardElement  = null;
+let stripe        = null;
+let elements      = null;
+let paymentElement = null;
 
 const stripeReady   = ref(false);
 const stripeError   = ref('');
 const cardCompleto  = ref(false);
+const clientSecret  = ref('');
+const cargandoIntent = ref(false);
 
-const montarStripeElement = async () => {
+const direccionEnvioComputed = computed(() =>
+    [envioForm.value.calle.trim(), envioForm.value.numero.trim(), envioForm.value.puerta.trim()]
+        .filter(Boolean).join(', ')
+    + `, ${envioForm.value.cp} ${envioForm.value.localidad}`.trim()
+);
+
+const crearIntentYMontar = async () => {
     if (pagoForm.value.metodo === 'rusticoin') return;
-    if (cardElement) return; // ya montado
+    if (clientSecret.value) return; // ya creado
 
-    stripeError.value = '';
-    stripeReady.value = false;
+    stripeError.value   = '';
+    stripeReady.value   = false;
+    cardCompleto.value  = false;
+    cargandoIntent.value = true;
 
-    if (!stripe) {
-        stripe = await loadStripe(import.meta.env.VITE_STRIPE_KEY);
-    }
+    try {
+        if (!stripe) {
+            stripe = await loadStripe(import.meta.env.VITE_STRIPE_KEY);
+        }
 
-    elements = stripe.elements();
-
-    cardElement = elements.create('card', {
-        style: {
-            base: {
-                fontSize: '15px',
-                color: '#111827',
-                fontFamily: 'ui-sans-serif, system-ui, sans-serif',
-                '::placeholder': { color: '#9ca3af' },
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        const res = await fetch(route('checkout.intent'), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
             },
-            invalid: { color: '#ef4444' },
-        },
-        hidePostalCode: true,
-    });
-
-    // Esperar hasta que el DOM tenga el contenedor (la transición puede retrasarlo)
-    let container = null;
-    for (let i = 0; i < 20; i++) {
-        await nextTick();
-        container = document.getElementById('stripe-card-element');
-        if (container) break;
-        await new Promise(r => setTimeout(r, 50));
-    }
-
-    if (container) {
-        cardElement.mount(container);
-        cardElement.on('ready', () => { stripeReady.value = true; });
-        cardElement.on('change', (e) => {
-            cardCompleto.value = e.complete;
-            stripeError.value  = e.error ? e.error.message : '';
+            body: JSON.stringify({
+                items: items.value.map(i => ({ id: i.id, cantidad: i.cantidad })),
+                direccion_envio:   direccionEnvioComputed.value,
+                telefono_contacto: envioForm.value.telefono_contacto.trim(),
+                notas:             envioForm.value.notas.trim(),
+            }),
         });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            stripeError.value = data.error || 'Error al preparar el pago.';
+            cargandoIntent.value = false;
+            return;
+        }
+
+        clientSecret.value = data.client_secret;
+
+        elements = stripe.elements({ clientSecret: data.client_secret, locale: 'es' });
+        paymentElement = elements.create('payment', { layout: 'tabs' });
+
+        // Esperar DOM
+        let container = null;
+        for (let i = 0; i < 30; i++) {
+            await nextTick();
+            container = document.getElementById('stripe-card-element');
+            if (container) break;
+            await new Promise(r => setTimeout(r, 50));
+        }
+
+        if (container) {
+            paymentElement.mount(container);
+            paymentElement.on('ready', () => {
+                stripeReady.value = true;
+                cargandoIntent.value = false;
+            });
+            paymentElement.on('change', (e) => {
+                cardCompleto.value = e.complete;
+                stripeError.value  = e.error ? e.error.message : '';
+            });
+        }
+    } catch (e) {
+        stripeError.value = 'Error al conectar con el servidor de pagos.';
+        cargandoIntent.value = false;
     }
 };
 
 const desmontarStripeElement = () => {
-    if (cardElement) {
-        cardElement.destroy();
-        cardElement = null;
+    if (paymentElement) {
+        paymentElement.destroy();
+        paymentElement = null;
     }
-    stripeReady.value  = false;
-    cardCompleto.value = false;
-    stripeError.value  = '';
+    elements       = null;
+    clientSecret.value  = '';
+    stripeReady.value   = false;
+    cardCompleto.value  = false;
+    stripeError.value   = '';
+    cargandoIntent.value = false;
 };
 
 watch(() => pagoForm.value.metodo, (metodo) => {
     if (metodo === 'rusticoin') {
         desmontarStripeElement();
     } else if (step.value === 2) {
-        nextTick(() => montarStripeElement());
+        nextTick(() => crearIntentYMontar());
     }
 });
 
@@ -225,11 +260,6 @@ const restanteTarjeta = computed(() => {
 // ── Step 2: pagar ────────────────────────────────────────────────────────────
 const procesando = ref(false);
 
-const direccionEnvio = computed(() =>
-    [envioForm.value.calle.trim(), envioForm.value.numero.trim(), envioForm.value.puerta.trim()]
-        .filter(Boolean).join(', ')
-    + `, ${envioForm.value.cp} ${envioForm.value.localidad}`.trim()
-);
 
 const pagarConRusticoin = () => {
     step.value = 3;
@@ -246,7 +276,7 @@ const pagarConRusticoin = () => {
             imagen:        i.imagen,
             unidad:        i.unidad,
         })),
-        direccion_envio:   direccionEnvio.value,
+        direccion_envio:   direccionEnvioComputed.value,
         telefono_contacto: envioForm.value.telefono_contacto.trim(),
         notas:             envioForm.value.notas.trim(),
         metodo_pago:       'rusticoin',
@@ -276,35 +306,12 @@ const pagarConStripe = async () => {
     procesando.value = true;
 
     try {
-        // 1. Crear PaymentIntent en el servidor
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-        const res = await fetch(route('checkout.intent'), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
+        const { error, paymentIntent } = await stripe.confirmPayment({
+            elements,
+            confirmParams: {
+                return_url: window.location.origin + '/mis-pedidos',
             },
-            body: JSON.stringify({
-                items: items.value.map(i => ({ id: i.id, cantidad: i.cantidad })),
-                direccion_envio:   direccionEnvio.value,
-                telefono_contacto: envioForm.value.telefono_contacto.trim(),
-                notas:             envioForm.value.notas.trim(),
-            }),
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            stripeError.value = data.error || 'Error al iniciar el pago.';
-            step.value = 2;
-            procesando.value = false;
-            return;
-        }
-
-        // 2. Confirmar pago con Stripe
-        const { error, paymentIntent } = await stripe.confirmCardPayment(data.client_secret, {
-            payment_method: { card: cardElement },
+            redirect: 'if_required',
         });
 
         if (error) {
@@ -314,8 +321,7 @@ const pagarConStripe = async () => {
             return;
         }
 
-        if (paymentIntent.status === 'succeeded') {
-            // El webhook crea el pedido — vaciamos el carrito y mostramos éxito
+        if (paymentIntent && paymentIntent.status === 'succeeded') {
             vaciarCarrito({ silencioso: true });
             step.value = 4;
             procesando.value = false;
