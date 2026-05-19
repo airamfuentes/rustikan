@@ -179,6 +179,10 @@
 
                                     <input ref="logoInput" type="file" accept="image/*" @change="onLogoSelected" class="w-full text-sm text-gray-500 file:mr-4 file:rounded-lg file:border-0 file:bg-primary-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary-700 hover:file:bg-primary-100" />
                                     <p class="mt-1 text-xs text-gray-400">Se recortará en forma circular · JPG/PNG/WebP · máx. 2MB</p>
+                                    <div class="mt-2">
+                                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">O pega una URL de imagen</label>
+                                        <input v-model="form.logo_url" type="url" placeholder="https://..." class="w-full rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200" />
+                                    </div>
                                     <p v-if="form.errors.logo" class="mt-1 text-sm text-red-600">{{ form.errors.logo }}</p>
                                 </div>
 
@@ -198,6 +202,10 @@
 
                                     <input ref="portadaInput" type="file" accept="image/*" @change="onPortadaSelected" class="w-full text-sm text-gray-500 file:mr-4 file:rounded-lg file:border-0 file:bg-primary-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary-700 hover:file:bg-primary-100" />
                                     <p class="mt-1 text-xs text-gray-400">Se recortará en formato panorámico · JPG/PNG/WebP · máx. 2MB</p>
+                                    <div class="mt-2">
+                                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">O pega una URL de imagen</label>
+                                        <input v-model="form.imagen_portada_url" type="url" placeholder="https://..." class="w-full rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200" />
+                                    </div>
                                     <p v-if="form.errors.imagen_portada" class="mt-1 text-sm text-red-600">{{ form.errors.imagen_portada }}</p>
                                 </div>
 
@@ -280,6 +288,8 @@ const form = useForm({
     longitud: null,
     logo: null,
     imagen_portada: null,
+    logo_url: '',
+    imagen_portada_url: '',
 });
 
 // ── Buscador de usuarios ──────────────────────────────────────────────────

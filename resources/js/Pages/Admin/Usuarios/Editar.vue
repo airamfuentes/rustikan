@@ -51,6 +51,16 @@
                                         <p class="text-xs text-gray-400 dark:text-gray-500">JPG, PNG o GIF · Máx. 2MB</p>
                                     </div>
                                 </div>
+                                <div class="mt-3">
+                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">O pega una URL de imagen</label>
+                                    <input
+                                        v-model="form.avatar_url"
+                                        type="url"
+                                        placeholder="https://..."
+                                        class="w-full rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 text-sm outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200"
+                                        @input="onAvatarUrlInput"
+                                    />
+                                </div>
                                 <p v-if="form.errors.avatar" class="mt-2 text-sm text-red-600">{{ form.errors.avatar }}</p>
                                 <div class="mt-3 border-t border-gray-200 dark:border-gray-700 pt-3">
                                     <p class="text-xs text-gray-500 dark:text-gray-400">Usuario desde <span class="font-medium text-gray-700 dark:text-gray-300">{{ new Date(usuario.created_at).toLocaleDateString('es-ES') }}</span></p>
@@ -185,7 +195,12 @@ const props = defineProps({
     usuario: Object,
 });
 
-const avatarPreview = ref(props.usuario.avatar ? '/storage/' + props.usuario.avatar : null);
+const avatarUrl = props.usuario.avatar;
+const avatarPreview = ref(
+    avatarUrl
+        ? (avatarUrl.startsWith('http') ? avatarUrl : '/storage/' + avatarUrl)
+        : null
+);
 
 const form = useForm({
     name: props.usuario.name,
@@ -194,6 +209,7 @@ const form = useForm({
     password: '',
     password_confirmation: '',
     avatar: null,
+    avatar_url: '',
     delete_avatar: false,
 });
 
@@ -212,8 +228,17 @@ const onAvatarChange = (e) => {
 
 const removeAvatar = () => {
     form.avatar = null;
+    form.avatar_url = '';
     form.delete_avatar = true;
     avatarPreview.value = null;
+};
+
+const onAvatarUrlInput = () => {
+    if (form.avatar_url) {
+        form.avatar = null;
+        form.delete_avatar = false;
+        avatarPreview.value = form.avatar_url;
+    }
 };
 
 const submit = () => {

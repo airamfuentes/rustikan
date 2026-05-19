@@ -91,7 +91,8 @@ class UsuarioController extends Controller
             'email'     => 'required|email|unique:users,email,' . $usuario->id,
             'role'      => 'required|in:user,admin,owner,supplier',
             'password'  => 'nullable|confirmed|min:8',
-            'avatar'    => 'nullable|image|max:2048',
+            'avatar'     => 'nullable|image|max:2048',
+            'avatar_url' => 'nullable|url|max:2048',
         ]);
 
         // Guardar valores anteriores antes de actualizar
@@ -99,16 +100,20 @@ class UsuarioController extends Controller
 
         // Gestión del avatar
         if ($request->hasFile('avatar')) {
-            if ($usuario->avatar) {
+            if ($usuario->avatar && !str_starts_with($usuario->avatar, 'http')) {
                 Storage::disk('public')->delete($usuario->avatar);
             }
             $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        } elseif ($request->filled('avatar_url')) {
+            $validated['avatar'] = $request->avatar_url;
         } elseif ($request->boolean('delete_avatar')) {
-            if ($usuario->avatar) {
+            if ($usuario->avatar && !str_starts_with($usuario->avatar, 'http')) {
                 Storage::disk('public')->delete($usuario->avatar);
             }
             $validated['avatar'] = null;
         }
+
+        unset($validated['avatar_url']);
 
         unset($validated['password_confirmation']);
 
