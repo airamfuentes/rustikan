@@ -6,7 +6,6 @@ use App\Models\Categoria;
 use App\Models\Tienda;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 /**
  * 12 tiendas representativas de Lanzarote, una por owner cuando es posible.
@@ -69,7 +68,7 @@ class DemoTiendasSeeder extends Seeder
                 'owner_email' => 'antonio@bodega-geria.es',
                 'cat'         => 'vinoteca',
                 'nombre'      => 'Bodega Stratvs',
-                'slug'        => 'bodega-stratvs',
+                'slug'        => 'bodega-stratvs-demo',
                 'descripcion' => 'Bodega boutique en La Geria. Producción limitada de Malvasía Seca y Moscatel Diego, con visitas guiadas y catas.',
                 'telefono'    => '928809977',
                 'email'       => 'reservas@stratvs.es',

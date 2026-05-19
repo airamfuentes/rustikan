@@ -23,7 +23,7 @@ class CategoriaSeeder extends Seeder
         ];
 
         foreach ($categorias as $categoria) {
-            \App\Models\Categoria::create($categoria);
+            \App\Models\Categoria::firstOrCreate(['slug' => $categoria['slug']], $categoria);
         }
     }
 }
