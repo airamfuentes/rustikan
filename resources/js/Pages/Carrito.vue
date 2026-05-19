@@ -260,7 +260,7 @@ const pagarConRusticoin = () => {
 const pagarConStripe = async () => {
     erroresPago.value = {};
 
-    if (!cardCompleto.value) {
+    if (!stripeReady.value || !cardCompleto.value) {
         stripeError.value = 'Completa los datos de la tarjeta.';
         return;
     }
@@ -867,7 +867,7 @@ const stepTitle = computed(() => ({
                         <div class="border-t border-gray-100 dark:border-gray-700 pt-4 flex flex-col gap-3">
                             <button
                                 @click="pagar"
-                                :disabled="procesando || (pagoForm.metodo === 'tarjeta' && !cardCompleto)"
+                                :disabled="procesando || (pagoForm.metodo === 'tarjeta' && (!cardCompleto || !stripeReady))"
                                 class="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-green-700 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
