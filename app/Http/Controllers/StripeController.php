@@ -139,6 +139,7 @@ class StripeController extends Controller
     {
         // Evitar pedidos duplicados si el webhook llega más de una vez
         if (Pedido::where('stripe_payment_intent_id', $intent->id)->exists()) {
+            Log::info('[Stripe] Pedido ya existe para intent ' . $intent->id);
             return;
         }
 
@@ -146,6 +147,9 @@ class StripeController extends Controller
         $userId = (int) $meta->user_id;
         $items  = json_decode($meta->items_json, true);
 
+        Log::info('[Stripe] Creando pedido para intent ' . $intent->id . ' user_id=' . $userId . ' items=' . count($items));
+
+        try {
         $pedido = DB::transaction(function () use ($intent, $meta, $userId, $items) {
             $subtotal = 0;
             $itemsConPrecio = [];
@@ -197,6 +201,12 @@ class StripeController extends Controller
 
             return $pedido;
         });
+        } catch (\Throwable $e) {
+            Log::error('[Stripe] Error creando pedido para intent ' . $intent->id . ': ' . $e->getMessage());
+            return;
+        }
+
+        Log::info('[Stripe] Pedido creado: ' . $pedido->numero_pedido);
 
         // Email fuera de la transacción para no bloquearla
         $pedido->load(['items.tienda.user', 'user']);

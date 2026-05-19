@@ -340,7 +340,9 @@ const pagarConStripe = async () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
                 body: JSON.stringify({ payment_intent_id: paymentIntent.id }),
-            }).catch(() => {}); // silencioso — el webhook también lo procesa
+            }).then(r => r.json()).then(d => {
+                if (!d.ok) console.error('[checkout.confirm]', d);
+            }).catch(e => console.error('[checkout.confirm error]', e));
             vaciarCarrito({ silencioso: true });
             step.value = 4;
             procesando.value = false;
