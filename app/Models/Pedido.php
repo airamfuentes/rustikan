@@ -60,7 +60,11 @@ class Pedido extends Model
      */
     public static function generateOrderNumber(): string
     {
-        return 'PED-' . date('Y') . '-' . str_pad(static::count() + 1, 6, '0', STR_PAD_LEFT);
+        do {
+            $number = 'PED-' . date('Y') . '-' . str_pad(random_int(1, 999999), 6, '0', STR_PAD_LEFT);
+        } while (static::where('numero_pedido', $number)->exists());
+
+        return $number;
     }
 
     /**
