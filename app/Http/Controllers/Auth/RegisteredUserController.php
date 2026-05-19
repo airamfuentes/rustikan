@@ -47,13 +47,7 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name'             => 'required|string|min:2|max:60|regex:/^[\pL\s\'-]+$/u',
             'apellidos'        => 'required|string|min:2|max:80|regex:/^[\pL\s\'-]+$/u',
-            'telefono'         => ['required', 'string', function ($attr, $value, $fail) {
-                $digits = preg_replace('/^\+\d{1,3}/', '', $value); // strip country prefix
-                $digits = preg_replace('/\D/', '', $digits);
-                if (!preg_match('/^[6-9]\d{8}$/', $digits)) {
-                    $fail('El teléfono debe tener 9 dígitos y empezar por 6, 7, 8 o 9.');
-                }
-            }],
+            'telefono'         => 'required|string|regex:/^(\+\d{1,3})?[6-9][0-9]{8}$/',
             'email'            => [
                 'required', 'string', 'lowercase', 'email:rfc,dns', 'max:255',
                 'unique:'.User::class,
@@ -74,6 +68,7 @@ class RegisteredUserController extends Controller
             'password'         => ['required', 'confirmed', Rules\Password::min(8)->letters()->mixedCase()->numbers()->symbols()],
             'turnstile_token'  => 'required|string',
         ], [
+            'telefono.regex'              => 'El teléfono debe tener 9 dígitos y empezar por 6, 7, 8 o 9.',
             'name.regex'                  => 'El nombre solo puede contener letras.',
             'apellidos.regex'             => 'Los apellidos solo pueden contener letras.',
             'fecha_nacimiento.before_or_equal' => 'Debes tener al menos 14 años.',

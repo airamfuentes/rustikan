@@ -68,9 +68,16 @@ const maxLenTelefono  = computed(() => paises.find(p => p.prefijo === prefijo.va
 
 const onTelefonoInput = (e) => {
     telefonoNumero.value = e.target.value.replace(/\D/g, '').slice(0, maxLenTelefono.value);
-    form.telefono = prefijo.value + telefonoNumero.value;
+    // For Spain (+34) send only the 9 digits — backend validates without prefix
+    form.telefono = prefijo.value === '+34'
+        ? telefonoNumero.value
+        : prefijo.value + telefonoNumero.value;
 };
-watch(prefijo, () => { form.telefono = prefijo.value + telefonoNumero.value; });
+watch(prefijo, () => {
+    form.telefono = prefijo.value === '+34'
+        ? telefonoNumero.value
+        : prefijo.value + telefonoNumero.value;
+});
 
 const erroresLocales = ref({});
 
