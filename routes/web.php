@@ -144,6 +144,14 @@ Route::prefix('')->name('info.')->group(function () {
     Route::get('/cookies',                fn() => Inertia::render('Info/Cookies'))->name('cookies');
 });
 
+// Stripe
+Route::post('/checkout/intent', [\App\Http\Controllers\StripeController::class, 'createIntent'])
+    ->middleware(['auth', 'throttle:10,1'])
+    ->name('checkout.intent');
+
+Route::post('/stripe/webhook', [\App\Http\Controllers\StripeController::class, 'webhook'])
+    ->name('stripe.webhook');
+
 // Pedidos (usuario autenticado)
 Route::middleware('auth')->group(function () {
     Route::post('/pedidos', [\App\Http\Controllers\PedidoController::class, 'store'])->name('pedidos.store');

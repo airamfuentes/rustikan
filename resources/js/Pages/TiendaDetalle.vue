@@ -173,7 +173,7 @@ const whatsappUrl = computed(() => {
     const text = encodeURIComponent(`¡Mira esta tienda en Rustikan! ${props.tienda.nombre} - ${window.location.href}`);
     return `https://wa.me/${phone}?text=${text}`;
 });
-const totalResenas = computed(() => props.tienda.total_resenas ?? props.resenas.length);
+const totalResenas = computed(() => props.resenas.length || props.tienda.total_resenas || 0);
 
 const scrollToResenas = () => {
     const el = document.getElementById('seccion-resenas');

@@ -24,6 +24,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'supplier' => \App\Http\Middleware\EnsureUserIsSupplier::class,
         ]);
 
+        $middleware->validateCsrfTokens(except: [
+            'stripe/webhook',
+        ]);
+
         $middleware->trustProxies(at: env('TRUSTED_PROXIES', '*'), headers:
             Request::HEADER_X_FORWARDED_FOR |
             Request::HEADER_X_FORWARDED_HOST |

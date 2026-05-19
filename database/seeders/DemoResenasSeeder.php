@@ -233,6 +233,18 @@ class DemoResenasSeeder extends Seeder
             ]);
         }
 
+        // Recalcular TODAS las tiendas para que total_resenas y valoracion
+        // reflejen exactamente las reseñas reales en BD.
+        foreach (Tienda::all() as $tienda) {
+            $stats = Resena::where('tienda_id', $tienda->id)
+                ->selectRaw('COUNT(*) as total, AVG(puntuacion) as media')
+                ->first();
+            $tienda->update([
+                'total_resenas' => $stats->total ?? 0,
+                'valoracion'    => round($stats->media ?? 0, 2),
+            ]);
+        }
+
         $this->command?->info("DemoResenasSeeder: {$totalCreadas} reseñas creadas y valoraciones recalculadas.");
     }
 }
