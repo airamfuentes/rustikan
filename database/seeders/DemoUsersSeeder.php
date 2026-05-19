@@ -24,7 +24,9 @@ class DemoUsersSeeder extends Seeder
         ];
 
         foreach ($owners as $i => $o) {
-            User::firstOrCreate(
+            $seed   = urlencode($o['name'] . ' ' . $o['apellidos']);
+            $avatar = "https://api.dicebear.com/7.x/adventurer/svg?seed={$seed}";
+            User::updateOrCreate(
                 ['email' => $o['email']],
                 [
                     'name'              => $o['name'],
@@ -34,7 +36,7 @@ class DemoUsersSeeder extends Seeder
                     'telefono'          => $o['telefono'],
                     'direccion'         => $o['direccion'],
                     'fecha_nacimiento'  => Carbon::now()->subYears(35 + $i)->subMonths(rand(0, 11))->toDateString(),
-                    'avatar'            => null,
+                    'avatar'            => $avatar,
                     'rusticoin_balance' => 0,
                     'email_verified_at' => now(),
                 ]
@@ -42,7 +44,7 @@ class DemoUsersSeeder extends Seeder
         }
 
         // ── SUPPLIER ─────────────────────────────────────────────────────
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'almacen@rustikan.com'],
             [
                 'name'              => 'Almacén Central',
@@ -51,7 +53,7 @@ class DemoUsersSeeder extends Seeder
                 'role'              => 'supplier',
                 'telefono'          => '928800100',
                 'direccion'         => 'Polígono Industrial Argana Alta, Arrecife, Lanzarote',
-                'avatar'            => null,
+                'avatar'            => 'https://api.dicebear.com/7.x/shapes/svg?seed=rustikan-almacen',
                 'rusticoin_balance' => 0,
                 'email_verified_at' => now(),
             ]
@@ -92,7 +94,11 @@ class DemoUsersSeeder extends Seeder
             $tel       = '6' . str_pad((string)(28000000 + $idx * 13), 8, '0', STR_PAD_LEFT);
             $balance   = [0, 0, 0, 5.50, 12.00, 25.00, 50.00, 100.00][$idx % 8];
 
-            User::firstOrCreate(
+            $seed   = urlencode($nombre . ' ' . $apellidos);
+            $style  = ['adventurer', 'micah', 'personas', 'avataaars', 'lorelei'][$idx % 5];
+            $avatar = "https://api.dicebear.com/7.x/{$style}/svg?seed={$seed}";
+
+            User::updateOrCreate(
                 ['email' => $email],
                 [
                     'name'              => $nombre,
@@ -102,7 +108,7 @@ class DemoUsersSeeder extends Seeder
                     'telefono'          => $tel,
                     'direccion'         => "{$calle}, {$municipio}, Lanzarote",
                     'fecha_nacimiento'  => Carbon::now()->subYears(20 + ($idx % 35))->subMonths(($idx * 3) % 12)->toDateString(),
-                    'avatar'            => null,
+                    'avatar'            => $avatar,
                     'rusticoin_balance' => $balance,
                     'email_verified_at' => now(),
                 ]

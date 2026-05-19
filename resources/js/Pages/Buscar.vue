@@ -43,9 +43,10 @@ const categoriaImagen = {
     'artesania':           '/images/artesania.png',
 };
 
+const imgUrl = (path) => path ? (path.startsWith('http') ? path : `/storage/${path}`) : null;
 const tiendaImagen = (t) =>
-    t.imagen_portada ? `/storage/${t.imagen_portada}` :
-    t.logo ? `/storage/${t.logo}` : '/images/logo.png';
+    t.imagen_portada ? imgUrl(t.imagen_portada) :
+    t.logo ? imgUrl(t.logo) : '/images/logo.png';
 </script>
 
 <template>

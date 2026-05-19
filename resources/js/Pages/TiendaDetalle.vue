@@ -197,7 +197,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
         <NavbarPublico />
         <div class="relative overflow-hidden bg-gray-900 pt-24 pb-0">
             <img
-                :src="tienda.imagen_portada ? `/storage/${tienda.imagen_portada}` : tienda.logo ? `/storage/${tienda.logo}` : '/images/logo.png'"
+                :src="tienda.imagen_portada ? (tienda.imagen_portada.startsWith('http') ? tienda.imagen_portada : `/storage/${tienda.imagen_portada}`) : tienda.logo ? (tienda.logo.startsWith('http') ? tienda.logo : `/storage/${tienda.logo}`) : '/images/logo.png'"
                 :alt="tienda.nombre"
                 class="absolute inset-0 h-full w-full object-cover opacity-25"
             />

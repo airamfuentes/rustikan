@@ -144,7 +144,7 @@
                         <ul v-if="resenas.data.length" class="divide-y divide-gray-200 dark:divide-gray-700">
                             <li v-for="r in resenas.data" :key="r.id" class="flex flex-col gap-3 py-5 first:pt-0 last:pb-0 sm:flex-row sm:items-start sm:gap-4">
                                 <!-- Avatar -->
-                                <img v-if="r.user?.avatar" :src="`/storage/${r.user.avatar}`" :alt="r.user.name"
+                                <img v-if="r.user?.avatar" :src="r.user.avatar.startsWith('http') ? r.user.avatar : `/storage/${r.user.avatar}`" :alt="r.user.name"
                                      class="h-10 w-10 flex-shrink-0 rounded-full object-cover" />
                                 <div v-else class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-sm font-semibold text-gray-500 dark:text-gray-400">
                                     {{ (r.user?.name || '?').charAt(0).toUpperCase() }}

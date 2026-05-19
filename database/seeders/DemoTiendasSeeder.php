@@ -27,7 +27,8 @@ class DemoTiendasSeeder extends Seeder
                 'latitud'        => 29.069800,
                 'longitud'       => -13.674400,
                 'logo'           => null,
-                'imagen_portada' => null,
+                // Huerta ecológica en terreno volcánico, paisaje árido canario
+                'imagen_portada' => 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=1200&h=400&fit=crop',
             ],
             [
                 'owner_email'    => 'maria@huerta-jameos.es',
@@ -41,7 +42,8 @@ class DemoTiendasSeeder extends Seeder
                 'latitud'        => 29.143150,
                 'longitud'       => -13.498800,
                 'logo'           => null,
-                'imagen_portada' => null,
+                // Campo con vegetación verde, clima cálido mediterráneo
+                'imagen_portada' => 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=1200&h=400&fit=crop',
             ],
             [
                 'owner_email'    => 'antonio@bodega-geria.es',
@@ -55,7 +57,8 @@ class DemoTiendasSeeder extends Seeder
                 'latitud'        => 28.985430,
                 'longitud'       => -13.745670,
                 'logo'           => null,
-                'imagen_portada' => null,
+                // Viñedos en piedra volcánica, hoyos típicos de La Geria
+                'imagen_portada' => 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=1200&h=400&fit=crop',
             ],
             [
                 'owner_email'    => 'antonio@bodega-geria.es',
@@ -69,7 +72,8 @@ class DemoTiendasSeeder extends Seeder
                 'latitud'        => 28.972110,
                 'longitud'       => -13.736220,
                 'logo'           => null,
-                'imagen_portada' => null,
+                // Interior de bodega con barricas, ambiente cálido y premium
+                'imagen_portada' => 'https://images.unsplash.com/photo-1470158499416-75be9aa0c4db?w=1200&h=400&fit=crop',
             ],
             [
                 'owner_email'    => 'carmen@quesos-majorero.es',
@@ -83,7 +87,8 @@ class DemoTiendasSeeder extends Seeder
                 'latitud'        => 29.060500,
                 'longitud'       => -13.561380,
                 'logo'           => null,
-                'imagen_portada' => null,
+                // Quesos artesanales variados sobre tabla de madera
+                'imagen_portada' => 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=1200&h=400&fit=crop',
             ],
             [
                 'owner_email'    => 'carmen@quesos-majorero.es',
@@ -97,7 +102,8 @@ class DemoTiendasSeeder extends Seeder
                 'latitud'        => 29.122000,
                 'longitud'       => -13.557600,
                 'logo'           => null,
-                'imagen_portada' => null,
+                // Cabras en campo abierto, paisaje árido soleado
+                'imagen_portada' => 'https://images.unsplash.com/photo-1524024697890-3f20f59a2c38?w=1200&h=400&fit=crop',
             ],
             [
                 'owner_email'    => 'sergio@pescados-arrecife.es',
@@ -111,7 +117,8 @@ class DemoTiendasSeeder extends Seeder
                 'latitud'        => 28.957500,
                 'longitud'       => -13.547200,
                 'logo'           => null,
-                'imagen_portada' => null,
+                // Puerto pesquero con barcos, agua azul mediterránea
+                'imagen_portada' => 'https://images.unsplash.com/photo-1504309092620-4d0ec726efa4?w=1200&h=400&fit=crop',
             ],
             [
                 'owner_email'    => 'sergio@pescados-arrecife.es',
@@ -125,7 +132,8 @@ class DemoTiendasSeeder extends Seeder
                 'latitud'        => 29.149260,
                 'longitud'       => -13.464950,
                 'logo'           => null,
-                'imagen_portada' => null,
+                // Costa rocosa volcánica, piscinas naturales, mar turquesa
+                'imagen_portada' => 'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=1200&h=400&fit=crop',
             ],
             [
                 'owner_email'    => 'lucia@panaderia-norte.es',
@@ -139,7 +147,8 @@ class DemoTiendasSeeder extends Seeder
                 'latitud'        => 29.144070,
                 'longitud'       => -13.500140,
                 'logo'           => null,
-                'imagen_portada' => null,
+                // Panadería artesanal, panes recién horneados
+                'imagen_portada' => 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1200&h=400&fit=crop',
             ],
             [
                 'owner_email'    => 'lucia@panaderia-norte.es',
@@ -153,7 +162,8 @@ class DemoTiendasSeeder extends Seeder
                 'latitud'        => 28.961700,
                 'longitud'       => -13.751900,
                 'logo'           => null,
-                'imagen_portada' => null,
+                // Dulces y repostería tradicional, horno de leña rústico
+                'imagen_portada' => 'https://images.unsplash.com/photo-1486427944299-d1955d23e34d?w=1200&h=400&fit=crop',
             ],
             [
                 'owner_email'    => 'javier@artesanos-lanzarote.es',
@@ -167,7 +177,8 @@ class DemoTiendasSeeder extends Seeder
                 'latitud'        => 29.060860,
                 'longitud'       => -13.561200,
                 'logo'           => null,
-                'imagen_portada' => null,
+                // Taller artesanal con cerámica, pueblo tradicional canario
+                'imagen_portada' => 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=1200&h=400&fit=crop',
             ],
             [
                 'owner_email'    => 'javier@artesanos-lanzarote.es',
@@ -181,7 +192,8 @@ class DemoTiendasSeeder extends Seeder
                 'latitud'        => 29.052800,
                 'longitud'       => -13.671900,
                 'logo'           => null,
-                'imagen_portada' => null,
+                // Cestas de mimbre y palma, artesanía tradicional
+                'imagen_portada' => 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=1200&h=400&fit=crop',
             ],
         ];
 

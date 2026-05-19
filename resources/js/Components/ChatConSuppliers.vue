@@ -205,7 +205,7 @@ const formatFecha = (d) => {
                         class="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                     >
                         <div class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-indigo-500 text-white">
-                            <img v-if="conv.supplier.avatar" :src="`/storage/${conv.supplier.avatar}`" class="h-full w-full object-cover" />
+                            <img v-if="conv.supplier.avatar" :src="conv.supplier.avatar.startsWith('http') ? conv.supplier.avatar : `/storage/${conv.supplier.avatar}`" class="h-full w-full object-cover" />
                             <span v-else class="text-sm font-bold">{{ conv.supplier.name?.charAt(0)?.toUpperCase() }}</span>
                         </div>
                         <div class="min-w-0 flex-1">

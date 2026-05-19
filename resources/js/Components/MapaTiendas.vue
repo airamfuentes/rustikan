@@ -69,7 +69,8 @@ const crearPopup = (tienda) => {
     const starsHtml = Array.from({ length: 5 }, (_, i) =>
         `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="${i < Math.round(tienda.valoracion) ? '#f59e0b' : 'none'}" stroke="#f59e0b" stroke-width="2" class="mapa-star"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`
     ).join('');
-    const img = tienda.imagen_portada ? `/storage/${tienda.imagen_portada}` : tienda.logo ? `/storage/${tienda.logo}` : '/images/logo.png';
+    const imgUrl = (p) => p ? (p.startsWith('http') ? p : `/storage/${p}`) : null;
+    const img = tienda.imagen_portada ? imgUrl(tienda.imagen_portada) : tienda.logo ? imgUrl(tienda.logo) : '/images/logo.png';
     const nombre = escapeHtml(tienda.nombre);
     const direccion = escapeHtml(tienda.direccion);
     return `

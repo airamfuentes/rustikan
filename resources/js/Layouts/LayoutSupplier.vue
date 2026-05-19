@@ -138,7 +138,7 @@ router.on('navigate', () => { sidebarOpen.value = false; });
                     <div class="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary-500 text-white">
                         <img
                             v-if="user?.avatar"
-                            :src="`/storage/${user.avatar}`"
+                            :src="user.avatar.startsWith('http') ? user.avatar : `/storage/${user.avatar}`"
                             class="h-full w-full object-cover"
                             alt="Avatar"
                         />

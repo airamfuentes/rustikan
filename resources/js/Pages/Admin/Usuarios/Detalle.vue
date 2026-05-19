@@ -17,7 +17,7 @@
                     <div class="lg:col-span-1">
                         <div class="rounded-lg bg-white dark:bg-gray-800 p-6 shadow">
                             <div class="mb-6 flex items-center justify-center">
-                                <img v-if="usuario.avatar" :src="`/storage/${usuario.avatar}`" class="h-24 w-24 rounded-full object-cover shadow-lg" :alt="usuario.name" />
+                                <img v-if="usuario.avatar" :src="usuario.avatar.startsWith('http') ? usuario.avatar : `/storage/${usuario.avatar}`" class="h-24 w-24 rounded-full object-cover shadow-lg" :alt="usuario.name" />
                                 <div v-else class="flex h-24 w-24 items-center justify-center rounded-full bg-primary-600 text-4xl font-bold text-white">
                                     {{ usuario.name.charAt(0).toUpperCase() }}
                                 </div>

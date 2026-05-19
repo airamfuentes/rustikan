@@ -29,7 +29,7 @@ class DemoProductosSeeder extends Seeder
             ['tienda'=>'finca-el-nido','cat'=>'frutas-y-verduras','nombre'=>'Batata bonita','descripcion'=>'Batata de carne anaranjada y sabor dulce, perfecta para repostería tradicional.','precio'=>2.80,'unidad'=>'kg','stock'=>50,'imagen'=>'https://images.unsplash.com/photo-1596097635121-14b8cf8f99c1?w=600&h=600&fit=crop'],
             ['tienda'=>'finca-el-nido','cat'=>'frutas-y-verduras','nombre'=>'Plátano canario','descripcion'=>'Plátano de Canarias con denominación, dulce y de piel fina.','precio'=>2.60,'unidad'=>'kg','stock'=>40,'imagen'=>'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=600&h=600&fit=crop'],
             ['tienda'=>'finca-el-nido','cat'=>'frutas-y-verduras','nombre'=>'Calabaza canaria','descripcion'=>'Calabaza de pulpa firme, ideal para potajes y rancho canario.','precio'=>1.80,'unidad'=>'kg','stock'=>35,'imagen'=>'https://images.unsplash.com/photo-1570586437263-ab629fccc818?w=600&h=600&fit=crop'],
-            ['tienda'=>'finca-el-nido','cat'=>'frutas-y-verduras','nombre'=>'Mojo verde casero','descripcion'=>'Mojo verde elaborado con cilantro, comino, ajo y aceite de oliva canario.','precio'=>3.90,'unidad'=>'bote','stock'=>25,'imagen'=>'https://images.unsplash.com/photo-1599909533730-3a36037d4d44?w=600&h=600&fit=crop'],
+            ['tienda'=>'finca-el-nido','cat'=>'frutas-y-verduras','nombre'=>'Mojo verde casero','descripcion'=>'Mojo verde elaborado con cilantro, comino, ajo y aceite de oliva canario.','precio'=>3.90,'unidad'=>'bote','stock'=>25,'imagen'=>'https://images.unsplash.com/photo-1626200419199-391ae4be7a41?w=600&h=600&fit=crop'],
 
             // ═══════ Huerta Los Jameos ═══════
             ['tienda'=>'huerta-los-jameos','cat'=>'frutas-y-verduras','nombre'=>'Cebolla morada de Haría','descripcion'=>'Cebolla morada de cultivo tradicional, dulce y de gran tamaño.','precio'=>1.90,'unidad'=>'kg','stock'=>70,'imagen'=>'https://images.unsplash.com/photo-1599362243196-f0f1abf3e09f?w=600&h=600&fit=crop'],
@@ -58,7 +58,7 @@ class DemoProductosSeeder extends Seeder
             // ═══════ Lácteos Conejera ═══════
             ['tienda'=>'lacteos-conejera','cat'=>'lacteos-y-quesos','nombre'=>'Yogur natural artesano','descripcion'=>'Yogur de cabra natural, sin azúcares añadidos. Textura cremosa.','precio'=>2.20,'unidad'=>'ud 250 g','stock'=>80,'imagen'=>'https://images.unsplash.com/photo-1571212515416-fef01fc43637?w=600&h=600&fit=crop'],
             ['tienda'=>'lacteos-conejera','cat'=>'lacteos-y-quesos','nombre'=>'Leche fresca de cabra','descripcion'=>'Leche cruda pasteurizada en botella de vidrio retornable.','precio'=>2.80,'unidad'=>'litro','stock'=>60,'destacado'=>true,'imagen'=>'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=600&h=600&fit=crop'],
-            ['tienda'=>'lacteos-conejera','cat'=>'lacteos-y-quesos','nombre'=>'Requesón fresco','descripcion'=>'Requesón cremoso ideal para postres o tostadas con miel de palma.','precio'=>4.50,'unidad'=>'ud 400 g','stock'=>40,'imagen'=>'https://images.unsplash.com/photo-1559561853-08451507cbe7?w=600&h=600&fit=crop'],
+            ['tienda'=>'lacteos-conejera','cat'=>'lacteos-y-quesos','nombre'=>'Requesón fresco','descripcion'=>'Requesón cremoso ideal para postres o tostadas con miel de palma.','precio'=>4.50,'unidad'=>'ud 400 g','stock'=>40,'imagen'=>'https://images.unsplash.com/photo-1631897642056-97a7abebacf0?w=600&h=600&fit=crop'],
 
             // ═══════ Pescados El Charco ═══════
             ['tienda'=>'pescados-el-charco','cat'=>'pescados-y-mariscos','nombre'=>'Vieja canaria fresca','descripcion'=>'Pescado emblemático de Canarias, capturado al amanecer. Carne blanca y delicada.','precio'=>22.00,'unidad'=>'kg','stock'=>20,'destacado'=>true,'imagen'=>'https://images.unsplash.com/photo-1535397842105-faa8e88e6e8e?w=600&h=600&fit=crop'],
@@ -68,7 +68,7 @@ class DemoProductosSeeder extends Seeder
             ['tienda'=>'pescados-el-charco','cat'=>'pescados-y-mariscos','nombre'=>'Calamares de la zona','descripcion'=>'Calamares pequeños limpios, listos para freír o a la plancha.','precio'=>16.00,'unidad'=>'kg','stock'=>25,'imagen'=>'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?w=600&h=600&fit=crop'],
 
             // ═══════ Mariscos Punta Mujeres ═══════
-            ['tienda'=>'mariscos-punta-mujeres','cat'=>'pescados-y-mariscos','nombre'=>'Pulpo canario','descripcion'=>'Pulpo recogido en la costa norte. Limpio y listo para cocer.','precio'=>24.00,'unidad'=>'kg','stock'=>12,'destacado'=>true,'imagen'=>'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&h=600&fit=crop'],
+            ['tienda'=>'mariscos-punta-mujeres','cat'=>'pescados-y-mariscos','nombre'=>'Pulpo canario','descripcion'=>'Pulpo recogido en la costa norte. Limpio y listo para cocer.','precio'=>24.00,'unidad'=>'kg','stock'=>12,'destacado'=>true,'imagen'=>'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?w=600&h=600&fit=crop'],
             ['tienda'=>'mariscos-punta-mujeres','cat'=>'pescados-y-mariscos','nombre'=>'Lapas frescas','descripcion'=>'Lapas recién recolectadas en la costa norte. Para preparar a la plancha con mojo.','precio'=>18.00,'unidad'=>'kg','stock'=>15,'imagen'=>'https://images.unsplash.com/photo-1473093226795-af9932fe5856?w=600&h=600&fit=crop'],
             ['tienda'=>'mariscos-punta-mujeres','cat'=>'pescados-y-mariscos','nombre'=>'Bocinegro entero','descripcion'=>'Bocinegro de pesca artesanal. Pescado fino, ideal al horno.','precio'=>20.00,'precio_oferta'=>17.50,'oferta_activa'=>true,'unidad'=>'kg','stock'=>10,'imagen'=>'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600&h=600&fit=crop'],
             ['tienda'=>'mariscos-punta-mujeres','cat'=>'pescados-y-mariscos','nombre'=>'Camarones canarios','descripcion'=>'Camarones pequeños frescos para cocer con sal marina.','precio'=>26.00,'unidad'=>'kg','stock'=>8,'imagen'=>'https://images.unsplash.com/photo-1565280654386-466a262d4bcb?w=600&h=600&fit=crop'],
@@ -104,7 +104,7 @@ class DemoProductosSeeder extends Seeder
 
             $slug = Str::slug($p['nombre']) . '-' . substr(md5($p['tienda'].$p['nombre']), 0, 5);
 
-            Producto::firstOrCreate(
+            Producto::updateOrCreate(
                 ['slug' => $slug],
                 [
                     'tienda_id'     => $tiendaId,

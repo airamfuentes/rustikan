@@ -225,7 +225,7 @@ const initials = computed(() => {
                             <!-- Con foto -->
                             <template v-if="avatarPreview || user.avatar">
                                 <img
-                                    :src="avatarPreview ?? `/storage/${user.avatar}`"
+                                    :src="avatarPreview ?? (user.avatar?.startsWith('http') ? user.avatar : `/storage/${user.avatar}`)"
                                     class="h-full w-full object-cover"
                                     :alt="t('profile.photo')"
                                 />

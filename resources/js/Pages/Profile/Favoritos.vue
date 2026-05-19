@@ -73,7 +73,7 @@ const tiendasConCoords = computed(() =>
                 >
                     <div class="relative h-48 overflow-hidden">
                         <img
-                            :src="tienda.imagen_portada ? `/storage/${tienda.imagen_portada}` : tienda.logo ? `/storage/${tienda.logo}` : '/images/logo.png'"
+                            :src="tienda.imagen_portada ? (tienda.imagen_portada.startsWith('http') ? tienda.imagen_portada : `/storage/${tienda.imagen_portada}`) : tienda.logo ? (tienda.logo.startsWith('http') ? tienda.logo : `/storage/${tienda.logo}`) : '/images/logo.png'"
                             :alt="tienda.nombre"
                             loading="lazy"
                             class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"

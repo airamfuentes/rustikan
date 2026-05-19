@@ -351,8 +351,9 @@ const form = useForm({
 });
 
 // Imágenes actuales (del servidor)
-const logoActual    = computed(() => props.tienda.logo           ? `/storage/${props.tienda.logo}`           : null);
-const portadaActual = computed(() => props.tienda.imagen_portada ? `/storage/${props.tienda.imagen_portada}` : null);
+const imgUrl = (p) => p ? (p.startsWith('http') ? p : `/storage/${p}`) : null;
+const logoActual    = computed(() => imgUrl(props.tienda.logo));
+const portadaActual = computed(() => imgUrl(props.tienda.imagen_portada));
 
 // ── Buscador de usuarios ──────────────────────────────────────────────────
 const busquedaUsuario = ref('');

@@ -235,7 +235,7 @@ onUnmounted(() => {
                                     class="flex items-center gap-3 border-b border-gray-100 dark:border-gray-700 p-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 last:border-b-0"
                                 >
                                     <img
-                                        :src="tienda.imagen_portada ? `/storage/${tienda.imagen_portada}` : tienda.logo ? `/storage/${tienda.logo}` : '/images/logo.png'"
+                                        :src="tienda.imagen_portada ? (tienda.imagen_portada.startsWith('http') ? tienda.imagen_portada : `/storage/${tienda.imagen_portada}`) : tienda.logo ? (tienda.logo.startsWith('http') ? tienda.logo : `/storage/${tienda.logo}`) : '/images/logo.png'"
                                         :alt="tienda.nombre"
                                         loading="lazy"
                                         class="h-14 w-14 sm:h-16 sm:w-16 flex-shrink-0 rounded-full object-cover"
@@ -308,7 +308,7 @@ onUnmounted(() => {
                             @click="showProfileMenu = !showProfileMenu"
                             class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-primary-500 text-white transition-colors hover:bg-primary-600 focus:outline-none"
                         >
-                            <img v-if="user.avatar" :src="`/storage/${user.avatar}`" class="h-full w-full object-cover" alt="Avatar" />
+                            <img v-if="user.avatar" :src="user.avatar.startsWith('http') ? user.avatar : `/storage/${user.avatar}`" class="h-full w-full object-cover" alt="Avatar" />
                             <span v-else class="text-sm font-semibold">{{ user.name?.charAt(0)?.toUpperCase() }}</span>
                         </button>
 
@@ -531,7 +531,7 @@ onUnmounted(() => {
                     <div v-if="user" class="border-b border-gray-100 dark:border-gray-800 px-4 py-4">
                         <div class="flex items-center gap-3">
                             <div class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary-500 text-white">
-                                <img v-if="user.avatar" :src="`/storage/${user.avatar}`" class="h-full w-full object-cover" alt="Avatar" />
+                                <img v-if="user.avatar" :src="user.avatar.startsWith('http') ? user.avatar : `/storage/${user.avatar}`" class="h-full w-full object-cover" alt="Avatar" />
                                 <span v-else class="text-base font-semibold">{{ user.name?.charAt(0)?.toUpperCase() }}</span>
                             </div>
                             <div class="min-w-0 flex-1">

@@ -115,7 +115,7 @@
                             <tr v-for="usuario in usuarios.data" :key="usuario.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
                                 <td class="whitespace-nowrap px-6 py-4">
                                     <div class="flex items-center">
-                                        <img v-if="usuario.avatar" :src="`/storage/${usuario.avatar}`" class="h-10 w-10 flex-shrink-0 rounded-full object-cover" :alt="usuario.name" />
+                                        <img v-if="usuario.avatar" :src="usuario.avatar.startsWith('http') ? usuario.avatar : `/storage/${usuario.avatar}`" class="h-10 w-10 flex-shrink-0 rounded-full object-cover" :alt="usuario.name" />
                                         <div v-else class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-purple-600 text-sm font-bold text-white">
                                             {{ usuario.name.charAt(0).toUpperCase() }}
                                         </div>
