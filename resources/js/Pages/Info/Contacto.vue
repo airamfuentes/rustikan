@@ -9,7 +9,7 @@
         <!-- Los toasts se muestran via ToastContainer global -->
 
         <!-- Hero -->
-        <section class="bg-gradient-to-br from-sky-600 via-blue-700 to-indigo-800 pt-32 pb-20 text-white">
+        <section class="bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 pt-32 pb-20 text-white">
             <div class="mx-auto max-w-4xl px-4 text-center">
                 <div class="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm">
                     <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
@@ -17,7 +17,7 @@
                     </svg>
                 </div>
                 <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">{{ t('info.contact.title') }}</h1>
-                <p class="mt-4 text-lg text-sky-100 max-w-2xl mx-auto">
+                <p class="mt-4 text-lg text-primary-100 max-w-2xl mx-auto">
                     {{ t('info.contact.subtitle') }}
                 </p>
             </div>
@@ -118,9 +118,9 @@
                             <p class="text-sm text-orange-700 dark:text-orange-400">{{ t('info.contact.rusti_desc') }}</p>
                         </div>
 
-                        <div class="mt-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-5">
-                            <p class="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-1">{{ t('info.contact.response_time_title') }}</p>
-                            <p class="text-sm text-blue-700 dark:text-blue-400">{{ t('info.contact.response_time_desc') }}</p>
+                        <div class="mt-4 rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-800 p-5">
+                            <p class="text-sm font-semibold text-primary-900 dark:text-primary-300 mb-1">{{ t('info.contact.response_time_title') }}</p>
+                            <p class="text-sm text-primary-700 dark:text-primary-400">{{ t('info.contact.response_time_desc') }}</p>
                         </div>
                     </div>
                 </div>

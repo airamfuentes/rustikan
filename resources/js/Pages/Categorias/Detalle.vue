@@ -347,10 +347,23 @@ onUnmounted(() => {
                         <span class="text-xs font-bold uppercase tracking-widest text-primary-500">{{ t('cat_page.featured') }}</span>
                     </div>
 
-                    <Link
-                        :href="`/tienda/${tiendaDestacada.slug}`"
-                        class="group relative flex flex-col overflow-hidden rounded-3xl bg-white dark:bg-gray-800 shadow-md transition-all duration-300 hover:shadow-xl sm:flex-row"
-                    >
+                    <div class="group relative flex flex-col overflow-hidden rounded-3xl bg-white dark:bg-gray-800 shadow-md transition-all duration-300 hover:shadow-xl sm:flex-row">
+                        <!-- Botón favorito destacada — fuera del Link -->
+                        <button
+                            @click.stop="toggleFavorito(tiendaDestacada.id, tiendaDestacada.nombre)"
+                            class="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-all hover:scale-110 shadow-sm"
+                            :title="esFavorito(tiendaDestacada.id) ? t('cat_page.fav_remove') : t('cat_page.fav_add')"
+                        >
+                            <svg class="h-4 w-4 transition-colors" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                 :class="esFavorito(tiendaDestacada.id) ? 'fill-red-500 stroke-red-500' : 'fill-none stroke-gray-500'">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                            </svg>
+                        </button>
+
+                        <Link
+                            :href="`/tienda/${tiendaDestacada.slug}`"
+                            class="flex flex-col sm:flex-row flex-1"
+                        >
                         <div class="relative h-56 overflow-hidden sm:h-72 sm:w-2/5">
                             <img
                                 :src="tiendaDestacada.imagen_portada ? `/storage/${tiendaDestacada.imagen_portada}` : tiendaDestacada.logo ? `/storage/${tiendaDestacada.logo}` : '/images/logo.png'"
@@ -359,17 +372,6 @@ onUnmounted(() => {
                             />
                             <div class="absolute inset-0 bg-gradient-to-r from-transparent to-white/50 dark:to-gray-800/50 hidden sm:block"></div>
                             <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent sm:hidden"></div>
-                            <!-- Botón favorito destacada -->
-                            <button
-                                @click.prevent.stop="toggleFavorito(tiendaDestacada.id, tiendaDestacada.nombre)"
-                                class="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-all hover:scale-110 shadow-sm"
-                                :title="esFavorito(tiendaDestacada.id) ? t('cat_page.fav_remove') : t('cat_page.fav_add')"
-                            >
-                                <svg class="h-4 w-4 transition-colors" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                     :class="esFavorito(tiendaDestacada.id) ? 'fill-red-500 stroke-red-500' : 'fill-none stroke-gray-500'">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                                </svg>
-                            </button>
                         </div>
 
                         <div class="flex flex-1 flex-col justify-between p-6 sm:p-8">
@@ -411,7 +413,8 @@ onUnmounted(() => {
                                 </span>
                             </div>
                         </div>
-                    </Link>
+                        </Link>
+                    </div>
                 </div>
 
                 <!-- Skeleton durante navegación -->
@@ -428,70 +431,72 @@ onUnmounted(() => {
 
                     <!-- Vista Cuadrícula -->
                     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                        <Link
+                        <div
                             v-for="(tienda, idx) in restoTiendas"
                             :key="tienda.id"
-                            :href="`/tienda/${tienda.slug}`"
                             class="card-animate group relative flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
                             :style="{ '--delay': `${(idx + 1) * 80}ms` }"
                         >
-                            <div class="relative h-48 overflow-hidden">
-                                <img
-                                    :src="tienda.imagen_portada ? `/storage/${tienda.imagen_portada}` : tienda.logo ? `/storage/${tienda.logo}` : '/images/logo.png'"
-                                    :alt="tienda.nombre"
-                                    loading="lazy"
-                                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                />
-                                <div v-if="tienda.productos_count" class="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-gray-700 backdrop-blur-sm">
-                                    <svg class="h-3.5 w-3.5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                    </svg>
-                                    {{ tienda.productos_count }}
-                                </div>
-                                <div class="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-gray-800 backdrop-blur-sm">
-                                    <svg class="h-3.5 w-3.5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                    </svg>
-                                    {{ Number(tienda.valoracion).toFixed(1) }}
-                                </div>
-                                <!-- Botón favorito -->
-                                <button
-                                    @click.prevent.stop="toggleFavorito(tienda.id, tienda.nombre)"
-                                    class="absolute bottom-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-all hover:scale-110 shadow-sm"
-                                    :title="esFavorito(tienda.id) ? t('cat_page.fav_remove') : t('cat_page.fav_add')"
+                            <!-- Botón favorito fuera del Link para evitar conflicto de clicks -->
+                            <button
+                                @click.stop="toggleFavorito(tienda.id, tienda.nombre)"
+                                class="absolute top-[148px] right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-all hover:scale-110 shadow-sm"
+                                :title="esFavorito(tienda.id) ? t('cat_page.fav_remove') : t('cat_page.fav_add')"
+                            >
+                                <svg class="h-4 w-4 transition-colors" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                    :class="esFavorito(tienda.id) ? 'fill-red-500 stroke-red-500' : 'fill-none stroke-gray-400'"
                                 >
-                                    <svg class="h-4 w-4 transition-colors" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                        :class="esFavorito(tienda.id) ? 'fill-red-500 stroke-red-500' : 'fill-none stroke-gray-400'"
-                                    >
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                                    </svg>
-                                </button>
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
-                            </div>
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                                </svg>
+                            </button>
 
-                            <div class="flex flex-1 flex-col p-5">
-                                <h3 class="text-base font-bold text-gray-900 dark:text-white group-hover:text-primary-600 transition-colors">{{ tienda.nombre }}</h3>
-                                <p class="mt-1.5 flex-1 text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{{ tienda.descripcion }}</p>
-
-                                <div class="mt-4 flex items-center justify-between border-t border-gray-100 dark:border-gray-700 pt-3">
-                                    <div class="flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
-                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <Link :href="`/tienda/${tienda.slug}`" class="flex flex-col flex-1">
+                                <div class="relative h-48 overflow-hidden">
+                                    <img
+                                        :src="tienda.imagen_portada ? `/storage/${tienda.imagen_portada}` : tienda.logo ? `/storage/${tienda.logo}` : '/images/logo.png'"
+                                        :alt="tienda.nombre"
+                                        loading="lazy"
+                                        class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                    />
+                                    <div v-if="tienda.productos_count" class="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-gray-700 backdrop-blur-sm">
+                                        <svg class="h-3.5 w-3.5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                         </svg>
-                                        <span class="max-w-[140px] truncate">{{ tienda.direccion }}</span>
+                                        {{ tienda.productos_count }}
                                     </div>
-                                    <span class="flex items-center gap-1 text-xs text-gray-400">
-                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                    <div class="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-gray-800 backdrop-blur-sm">
+                                        <svg class="h-3.5 w-3.5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                         </svg>
-                                        {{ tienda.total_resenas }}
-                                    </span>
+                                        {{ Number(tienda.valoracion).toFixed(1) }}
+                                    </div>
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
                                 </div>
-                            </div>
+
+                                <div class="flex flex-1 flex-col p-5">
+                                    <h3 class="text-base font-bold text-gray-900 dark:text-white group-hover:text-primary-600 transition-colors">{{ tienda.nombre }}</h3>
+                                    <p class="mt-1.5 flex-1 text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{{ tienda.descripcion }}</p>
+
+                                    <div class="mt-4 flex items-center justify-between border-t border-gray-100 dark:border-gray-700 pt-3">
+                                        <div class="flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
+                                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                            <span class="max-w-[140px] truncate">{{ tienda.direccion }}</span>
+                                        </div>
+                                        <span class="flex items-center gap-1 text-xs text-gray-400">
+                                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                            </svg>
+                                            {{ tienda.total_resenas }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </Link>
 
                             <div class="absolute bottom-0 left-0 right-0 h-0.5 origin-left scale-x-0 rounded-b-2xl bg-primary-500 transition-transform duration-300 group-hover:scale-x-100"></div>
-                        </Link>
+                        </div>
                     </div>
                 </div>
             </template>

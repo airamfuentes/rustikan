@@ -9,7 +9,7 @@
         <!-- Toasts via ToastContainer global -->
 
         <!-- Hero -->
-        <section class="bg-gradient-to-br from-primary-600 via-tierra-600 to-tierra-700 pt-32 pb-20 text-white">
+        <section class="bg-gradient-to-br from-primary-600 via-primary-700 to-emerald-800 pt-32 pb-20 text-white">
             <div class="mx-auto max-w-4xl px-4 text-center">
                 <div class="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm">
                     <Briefcase class="h-8 w-8" />

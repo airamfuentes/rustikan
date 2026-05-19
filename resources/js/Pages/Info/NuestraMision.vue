@@ -7,7 +7,7 @@
         <NavbarPublico />
 
         <!-- Hero -->
-        <section class="bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 pb-20 pt-32 text-white">
+        <section class="bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 pb-20 pt-32 text-white">
             <div class="mx-auto max-w-4xl px-4 text-center">
                 <div class="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm ring-1 ring-white/20">
                     <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
@@ -22,20 +22,20 @@
         </section>
 
         <!-- Impacto — visible nada más entrar -->
-        <section class="bg-gradient-to-b from-emerald-50 to-white py-10 dark:from-emerald-950/40 dark:to-gray-900">
+        <section class="bg-gradient-to-b from-primary-50 to-white py-10 dark:from-primary-950/40 dark:to-gray-900">
             <div class="mx-auto max-w-4xl px-4 sm:px-6">
                 <h2 class="mb-6 text-center text-xl font-bold text-gray-800 dark:text-white">{{ t('info.mission.impact_title') }}</h2>
                 <div class="grid gap-4 text-center sm:grid-cols-3">
-                    <div ref="statRef" class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-sm dark:border-emerald-800/50 dark:bg-gray-800">
-                        <p class="text-4xl font-extrabold text-emerald-600 dark:text-emerald-400">{{ count }}%</p>
+                    <div ref="statRef" class="rounded-2xl border border-primary-200 bg-white p-6 shadow-sm dark:border-primary-800/50 dark:bg-gray-800">
+                        <p class="text-4xl font-extrabold text-primary-600 dark:text-primary-400">{{ count }}%</p>
                         <p class="mt-1 text-sm font-medium text-gray-600 dark:text-gray-300">{{ t('info.mission.impact_local') }}</p>
                     </div>
-                    <div class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-sm dark:border-emerald-800/50 dark:bg-gray-800">
-                        <p class="text-4xl font-extrabold text-emerald-600 dark:text-emerald-400">0€</p>
+                    <div class="rounded-2xl border border-primary-200 bg-white p-6 shadow-sm dark:border-primary-800/50 dark:bg-gray-800">
+                        <p class="text-4xl font-extrabold text-primary-600 dark:text-primary-400">0€</p>
                         <p class="mt-1 text-sm font-medium text-gray-600 dark:text-gray-300">{{ t('info.mission.impact_fee') }}</p>
                     </div>
-                    <div class="rounded-2xl border border-emerald-200 bg-white p-6 shadow-sm dark:border-emerald-800/50 dark:bg-gray-800">
-                        <Palmtree class="mx-auto mb-1 h-9 w-9 text-emerald-600 dark:text-emerald-400" />
+                    <div class="rounded-2xl border border-primary-200 bg-white p-6 shadow-sm dark:border-primary-800/50 dark:bg-gray-800">
+                        <Palmtree class="mx-auto mb-1 h-9 w-9 text-primary-600 dark:text-primary-400" />
                         <p class="text-sm font-medium text-gray-600 dark:text-gray-300">{{ t('info.mission.impact_made') }}</p>
                     </div>
                 </div>
@@ -47,7 +47,7 @@
             <div class="mx-auto max-w-4xl px-4 sm:px-6">
 
                 <!-- Misión -->
-                <div class="mb-8 rounded-2xl border border-emerald-100 bg-emerald-50 p-8 dark:border-emerald-800/60 dark:bg-emerald-900/20">
+                <div class="mb-8 rounded-2xl border border-primary-100 bg-primary-50 p-8 dark:border-primary-800/60 dark:bg-primary-900/20">
                     <h2 class="mb-3 text-xl font-bold text-gray-900 dark:text-white">{{ t('info.mission.mission_label') }}</h2>
                     <p class="leading-relaxed text-gray-700 dark:text-gray-300">
                         {{ t('info.mission.mission_text') }}
@@ -68,7 +68,7 @@
                     <div class="space-y-4">
                         <div v-for="item in compromisos" :key="item.titulo"
                              class="flex items-start gap-4 rounded-xl border border-gray-100 bg-gray-50 p-5 dark:border-gray-700 dark:bg-gray-800">
-                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400">
                                 <component :is="item.icon" class="h-5 w-5" />
                             </span>
                             <div>
