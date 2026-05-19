@@ -57,18 +57,23 @@ class StripeController extends Controller
 
         Stripe::setApiKey(config('services.stripe.secret'));
 
-        $intent = PaymentIntent::create([
-            'amount'   => $amountCents,
-            'currency' => 'eur',
-            'metadata' => [
-                'user_id'           => auth()->id(),
-                'direccion_envio'   => $validated['direccion_envio'],
-                'telefono_contacto' => $validated['telefono_contacto'],
-                'notas'             => $validated['notas'] ?? '',
-                'items_json'        => json_encode($validated['items']),
-            ],
-            'automatic_payment_methods' => ['enabled' => true],
-        ]);
+        try {
+            $intent = PaymentIntent::create([
+                'amount'   => $amountCents,
+                'currency' => 'eur',
+                'metadata' => [
+                    'user_id'           => auth()->id(),
+                    'direccion_envio'   => $validated['direccion_envio'],
+                    'telefono_contacto' => $validated['telefono_contacto'],
+                    'notas'             => $validated['notas'] ?? '',
+                    'items_json'        => json_encode($validated['items']),
+                ],
+                'automatic_payment_methods' => ['enabled' => true],
+            ]);
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            Log::error('[Stripe createIntent] ' . $e->getMessage());
+            return response()->json(['error' => 'Error al conectar con Stripe: ' . $e->getMessage()], 502);
+        }
 
         return response()->json([
             'client_secret' => $intent->client_secret,
