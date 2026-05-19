@@ -13,16 +13,14 @@ class DashboardController extends Controller
     {
         $stats = [
             'pendientes'      => Pedido::where('estado', 'pendiente')->count(),
-            'en_preparacion'  => Pedido::where('estado', 'en_preparacion')->count(),
             'confirmados'     => Pedido::where('estado', 'confirmado')->count(),
+            'en_preparacion'  => Pedido::where('estado', 'en_preparacion')->count(),
             'enviados'        => Pedido::where('estado', 'enviado')->count(),
             'incidencias'     => Pedido::where('estado', 'incidencia')->count(),
-            'entregados_hoy'  => Pedido::where('estado', 'entregado')
-                ->whereDate('updated_at', today())->count(),
         ];
 
         $pedidos_recientes = Pedido::with(['user:id,name,email', 'items'])
-            ->whereIn('estado', ['pendiente', 'en_preparacion'])
+            ->whereIn('estado', ['pendiente', 'confirmado', 'en_preparacion'])
             ->orderByDesc('created_at')
             ->limit(8)
             ->get()

@@ -23,18 +23,6 @@
                     </a>
                 </div>
 
-                <!-- Toast -->
-                <div class="fixed top-20 right-4 z-50 flex flex-col gap-2 pointer-events-none">
-                    <TransitionGroup name="toast">
-                        <div v-for="t in toasts" :key="t.id"
-                            :class="t.type === 'success' ? 'bg-green-500' : t.type === 'error' ? 'bg-red-500' : 'bg-blue-500'"
-                            class="pointer-events-auto flex items-start gap-3 rounded-xl px-4 py-3 text-white shadow-lg min-w-64 max-w-sm">
-                            <span class="font-semibold text-sm">{{ t.title }}</span>
-                            <span v-if="t.message" class="text-xs opacity-90">{{ t.message }}</span>
-                        </div>
-                    </TransitionGroup>
-                </div>
-
                 <div class="grid gap-6 lg:grid-cols-3">
                     <!-- Productos -->
                     <div class="lg:col-span-2 space-y-4">
@@ -91,7 +79,7 @@
                         </div>
 
                         <!-- Cambiar estado -->
-                        <div v-if="!['cancelado', 'entregado'].includes(pedido.estado)"
+                        <div v-if="pedido.estado !== 'cancelado'"
                             class="rounded-2xl bg-white dark:bg-gray-800 shadow overflow-hidden">
                             <div class="border-b border-gray-100 dark:border-gray-700 px-6 py-4">
                                 <h3 class="font-semibold text-gray-900 dark:text-white">Actualizar estado</h3>
@@ -143,24 +131,17 @@
 
 <script setup>
 import LayoutSupplier from '@/Layouts/LayoutSupplier.vue';
-import { Link, router, usePage } from '@inertiajs/vue3';
-import { ref, watch, onMounted, onUnmounted } from 'vue';
+import { Link, router } from '@inertiajs/vue3';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { ArrowLeft, StickyNote, FileText } from 'lucide-vue-next';
+import { useToasts } from '@/Composables/useToasts';
 
 const props = defineProps({
     pedido: { type: Object, required: true },
 });
 
-const toasts = ref([]);
+const { success: toastSuccess, error: toastError } = useToasts();
 const procesando = ref(false);
-
-const addToast = (type, title, message = '') => {
-    const id = Date.now();
-    toasts.value.push({ id, type, title, message });
-    setTimeout(() => { toasts.value = toasts.value.filter(t => t.id !== id); }, 5000);
-};
-
-const page = usePage();
 
 let pollInterval = null;
 onMounted(() => {
@@ -171,10 +152,9 @@ onMounted(() => {
 onUnmounted(() => clearInterval(pollInterval));
 
 const estadosAccion = [
-    { value: 'en_preparacion', label: 'En preparación', dotColor: 'bg-orange-400', activeClass: 'border-orange-300 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300' },
     { value: 'confirmado',     label: 'Confirmado',     dotColor: 'bg-blue-400',   activeClass: 'border-blue-300 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' },
+    { value: 'en_preparacion', label: 'En preparación', dotColor: 'bg-orange-400', activeClass: 'border-orange-300 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300' },
     { value: 'enviado',        label: 'Enviado',        dotColor: 'bg-purple-400', activeClass: 'border-purple-300 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300' },
-    { value: 'entregado',      label: 'Entregado',      dotColor: 'bg-green-400',  activeClass: 'border-green-300 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' },
     { value: 'incidencia',     label: 'Incidencia',     dotColor: 'bg-red-400',    activeClass: 'border-red-300 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300' },
 ];
 
@@ -186,8 +166,8 @@ const cambiarEstado = (nuevoEstado) => {
         { estado: nuevoEstado },
         {
             preserveScroll: true,
-            onSuccess: () => addToast('success', 'Estado actualizado', `Pedido marcado como "${estadoLabel(nuevoEstado)}"`),
-            onError:   () => addToast('error',   'Error', 'No se pudo actualizar el estado.'),
+            onSuccess: () => toastSuccess('Estado actualizado', `Pedido marcado como "${estadoLabel(nuevoEstado)}"`),
+            onError:   () => toastError('Error', 'No se pudo actualizar el estado.'),
             onFinish:  () => { procesando.value = false; },
         }
     );

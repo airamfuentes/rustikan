@@ -11,11 +11,10 @@ const props = defineProps({
 
 const statsConfig = [
     { key: 'pendientes',     label: 'Pendientes',      color: 'text-yellow-500', bg: 'bg-yellow-50 dark:bg-yellow-900/20', icon: Clock },
-    { key: 'en_preparacion', label: 'En preparación',  color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/20', icon: PackageSearch },
     { key: 'confirmados',    label: 'Confirmados',     color: 'text-blue-500',   bg: 'bg-blue-50 dark:bg-blue-900/20',     icon: CheckCircle },
+    { key: 'en_preparacion', label: 'En preparación',  color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/20', icon: PackageSearch },
     { key: 'enviados',       label: 'Enviados',        color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20', icon: TrendingUp },
     { key: 'incidencias',    label: 'Incidencias',     color: 'text-red-500',    bg: 'bg-red-50 dark:bg-red-900/20',       icon: AlertTriangle },
-    { key: 'entregados_hoy', label: 'Entregados hoy',  color: 'text-green-500',  bg: 'bg-green-50 dark:bg-green-900/20',   icon: CheckCircle },
 ];
 
 const estadoBadge = (estado) => {
@@ -55,7 +54,7 @@ const formatFecha = (d) => new Date(d).toLocaleDateString('es-ES', { day: '2-dig
             </div>
 
             <!-- Stats -->
-            <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
                 <div
                     v-for="stat in statsConfig"
                     :key="stat.key"

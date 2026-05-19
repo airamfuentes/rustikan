@@ -11,7 +11,7 @@ use Inertia\Inertia;
 
 class PedidoController extends Controller
 {
-    private const ESTADOS_PERMITIDOS = ['en_preparacion', 'confirmado', 'enviado', 'entregado', 'incidencia'];
+    private const ESTADOS_PERMITIDOS = ['confirmado', 'en_preparacion', 'enviado', 'incidencia'];
 
     public function index(Request $request)
     {
@@ -96,8 +96,8 @@ class PedidoController extends Controller
             'estado' => 'required|in:' . implode(',', self::ESTADOS_PERMITIDOS),
         ]);
 
-        if (in_array($pedido->estado, ['cancelado', 'entregado'])) {
-            return back()->with('error', 'No se puede modificar un pedido cancelado o entregado.');
+        if ($pedido->estado === 'cancelado') {
+            return back()->with('error', 'No se puede modificar un pedido cancelado.');
         }
 
         $estadoAnterior = $pedido->estado;
@@ -115,10 +115,9 @@ class PedidoController extends Controller
 
         // Notificar al cliente
         $mensajesEstado = [
+            'confirmado'     => 'Tu pedido ha sido confirmado por el almacén.',
             'en_preparacion' => 'Tu pedido está siendo preparado en nuestro almacén.',
-            'confirmado'     => 'Tu pedido ha sido confirmado y está listo.',
             'enviado'        => 'Tu pedido ha sido enviado. ¡Pronto lo recibirás!',
-            'entregado'      => '¡Tu pedido ha sido entregado! Puedes dejar una reseña de la tienda.',
             'incidencia'     => 'Ha ocurrido una incidencia con tu pedido. Nos pondremos en contacto contigo.',
         ];
 
