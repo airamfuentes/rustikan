@@ -69,11 +69,13 @@ const uploadAvatar = () => {
 // -- Información personal ------------------------------------------------------
 const today = new Date();
 const maxFechaNacimiento = computed(() => {
-    const d = new Date(today.getFullYear() - 14, today.getMonth(), today.getDate());
+    const now = new Date();
+    const d = new Date(now.getFullYear() - 18, now.getMonth(), now.getDate());
     return d.toISOString().split('T')[0];
 });
 const minFechaNacimiento = computed(() => {
-    const d = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate());
+    const now = new Date();
+    const d = new Date(now.getFullYear() - 120, now.getMonth(), now.getDate());
     return d.toISOString().split('T')[0];
 });
 
@@ -358,15 +360,13 @@ const initials = computed(() => {
                             <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ t('profile.email_locked') }}</p>
                         </div>
 
-                        <!-- Teléfono bloqueado -->
+                        <!-- Teléfono editable -->
                         <div>
                             <InputLabel for="p-telefono" :value="t('profile.phone_label')" />
-                            <div class="mt-1 flex items-center gap-2">
-                                <div class="flex flex-1 items-center rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-3 py-2">
-                                    <span class="flex-1 truncate text-sm text-gray-500 dark:text-gray-400">{{ user.telefono ?? '—' }}</span>
-                                </div>
-                            </div>
-                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ t('profile.phone_locked') }}</p>
+                            <TextInput id="p-telefono" v-model="profileForm.telefono" type="tel"
+                                class="mt-1 block w-full" autocomplete="off" inputmode="tel"
+                                maxlength="20" placeholder="+34612345678" />
+                            <InputError class="mt-1" :message="profileForm.errors.telefono" />
                         </div>
 
                         <div>

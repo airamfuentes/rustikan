@@ -32,8 +32,8 @@ class ProfileController extends Controller
     {
         $validated = $request->validated();
 
-        // Email and phone are locked once set — never overwrite them.
-        unset($validated['email'], $validated['telefono']);
+        // Email is locked — never overwrite it from this form.
+        unset($validated['email']);
 
         // Recalculate edad from fecha_nacimiento if provided
         if (!empty($validated['fecha_nacimiento'])) {

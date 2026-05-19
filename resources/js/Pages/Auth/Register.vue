@@ -35,14 +35,15 @@ const form = useForm({
     turnstile_token: '',
 });
 
-// Edad mínima 14, máxima 120
-const today = new Date();
+// Edad mínima 18, máxima 120 — el max se recalcula cada render para que el límite sea siempre hoy-18años
 const maxFechaNacimiento = computed(() => {
-    const d = new Date(today.getFullYear() - 14, today.getMonth(), today.getDate());
+    const now = new Date();
+    const d = new Date(now.getFullYear() - 18, now.getMonth(), now.getDate());
     return d.toISOString().split('T')[0];
 });
 const minFechaNacimiento = computed(() => {
-    const d = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate());
+    const now = new Date();
+    const d = new Date(now.getFullYear() - 120, now.getMonth(), now.getDate());
     return d.toISOString().split('T')[0];
 });
 
@@ -257,13 +258,13 @@ const submit = () => {
             <!-- Dirección -->
             <div class="grid gap-4 sm:grid-cols-3">
                 <div class="sm:col-span-2">
-                    <InputLabel for="calle" value="Calle / Avenida *" />
+                    <InputLabel for="calle" :value="t('auth.street_label') + ' *'" />
                     <TextInput id="calle" type="text" class="mt-1 block w-full" v-model="form.calle"
                         required autocomplete="address-line1" maxlength="100" placeholder="Calle Ejemplo" />
                     <InputError class="mt-2" :message="erroresLocales.calle || form.errors.calle" />
                 </div>
                 <div>
-                    <InputLabel for="numero" value="Número *" />
+                    <InputLabel for="numero" :value="t('auth.number_label') + ' *'" />
                     <TextInput id="numero" type="text" class="mt-1 block w-full" v-model="form.numero"
                         required maxlength="10" placeholder="12" />
                     <InputError class="mt-2" :message="erroresLocales.numero || form.errors.numero" />
@@ -272,13 +273,13 @@ const submit = () => {
 
             <div class="grid gap-4 sm:grid-cols-3">
                 <div>
-                    <InputLabel for="puerta" value="Piso / Puerta" />
+                    <InputLabel for="puerta" :value="t('auth.door_label') + ' ' + t('auth.optional_label')" />
                     <TextInput id="puerta" type="text" class="mt-1 block w-full" v-model="form.puerta"
                         maxlength="20" placeholder="2ºA" />
                     <InputError class="mt-2" :message="form.errors.puerta" />
                 </div>
                 <div>
-                    <InputLabel for="cp" value="Código postal *" />
+                    <InputLabel for="cp" :value="t('auth.cp_label') + ' *'" />
                     <div class="relative mt-1">
                         <TextInput id="cp" type="text" class="block w-full" v-model="form.cp"
                             required maxlength="5" inputmode="numeric" placeholder="35500" />
@@ -292,7 +293,7 @@ const submit = () => {
                     <InputError class="mt-2" :message="erroresLocales.cp || form.errors.cp" />
                 </div>
                 <div>
-                    <InputLabel for="localidad" value="Localidad *" />
+                    <InputLabel for="localidad" :value="t('auth.locality_label') + ' *'" />
                     <TextInput id="localidad" type="text" class="mt-1 block w-full" v-model="form.localidad"
                         required maxlength="100" placeholder="Arrecife" />
                     <InputError class="mt-2" :message="erroresLocales.localidad || form.errors.localidad" />
@@ -343,9 +344,9 @@ const submit = () => {
             <div class="flex items-center gap-2">
                 <Checkbox name="accept_terms" v-model:checked="form.accept_terms" />
                 <span class="text-sm text-tierra-700 dark:text-tierra-300">
-                    Acepto los
+                    {{ t('auth.accept_terms') }}
                     <Link :href="route('info.terminos')" target="_blank" class="underline font-medium hover:text-tierra-900 dark:hover:text-tierra-200">
-                        términos y condiciones
+                        {{ t('auth.accept_terms_link') }}
                     </Link>
                 </span>
             </div>

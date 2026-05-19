@@ -60,7 +60,7 @@ class RegisteredUserController extends Controller
             ],
             'fecha_nacimiento' => [
                 'required', 'date',
-                'before_or_equal:' . now()->subYears(14)->format('Y-m-d'),
+                'before_or_equal:' . now()->subYears(18)->format('Y-m-d'),
                 'after_or_equal:' . now()->subYears(120)->format('Y-m-d'),
             ],
             'calle'            => 'required|string|min:3|max:100',
@@ -75,7 +75,7 @@ class RegisteredUserController extends Controller
             'telefono.regex'              => 'El teléfono debe tener 9 dígitos y empezar por 6, 7, 8 o 9.',
             'name.regex'                  => 'El nombre solo puede contener letras.',
             'apellidos.regex'             => 'Los apellidos solo pueden contener letras.',
-            'fecha_nacimiento.before_or_equal' => 'Debes tener al menos 14 años.',
+            'fecha_nacimiento.before_or_equal' => 'Debes ser mayor de edad (18 años).',
             'fecha_nacimiento.after_or_equal'  => 'Fecha de nacimiento no válida.',
             'cp.regex'                    => 'El código postal debe tener 5 dígitos.',
         ]);

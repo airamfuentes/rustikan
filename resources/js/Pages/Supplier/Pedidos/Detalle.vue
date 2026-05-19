@@ -210,6 +210,7 @@ const confirmarIncidencia = () => {
         { estado: 'incidencia', motivo_incidencia: motivoIncidencia.value.trim() },
         {
             preserveScroll: true,
+            only: ['pedido'],
             onSuccess: () => toastSuccess('Incidencia registrada', 'El motivo ha quedado guardado.'),
             onError:   () => toastError('Error', 'No se pudo registrar la incidencia.'),
             onFinish:  () => { procesando.value = false; },
@@ -244,6 +245,7 @@ const cambiarEstado = (nuevoEstado) => {
         { estado: nuevoEstado },
         {
             preserveScroll: true,
+            only: ['pedido'],
             onSuccess: () => toastSuccess('Estado actualizado', `Pedido marcado como "${estadoLabel(nuevoEstado)}"`),
             onError:   () => toastError('Error', 'No se pudo actualizar el estado.'),
             onFinish:  () => { procesando.value = false; },
