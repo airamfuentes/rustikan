@@ -219,6 +219,11 @@ const crearIntentYMontar = async () => {
                 cardCompleto.value = e.complete;
                 stripeError.value  = e.error ? e.error.message : '';
             });
+            paymentElement.on('loaderror', (e) => {
+                stripeError.value = e.error?.message || 'Error al cargar el formulario de pago.';
+                cargandoIntent.value = false;
+                console.error('[Stripe loaderror]', e.error);
+            });
         }
     } catch (e) {
         stripeError.value = 'Error al conectar con el servidor de pagos.';
