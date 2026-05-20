@@ -285,7 +285,7 @@ const submit = () => {
                     <InputLabel for="cp" :value="t('auth.cp_label') + ' *'" />
                     <div class="relative mt-1">
                         <TextInput id="cp" type="text" class="block w-full" v-model="form.cp"
-                            required maxlength="5" inputmode="numeric" placeholder="35500" />
+                            required maxlength="5" inputmode="numeric" v-only-digits placeholder="35500" />
                         <span v-if="buscandoLocalidad" class="absolute right-2 top-1/2 -translate-y-1/2">
                             <svg class="animate-spin h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>

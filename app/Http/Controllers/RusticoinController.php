@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\RecargaMonedero;
 use App\Models\RusticoinTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Stripe\Checkout\Session as StripeSession;
 use Stripe\Stripe;
@@ -115,7 +117,9 @@ class RusticoinController extends Controller
             auth()->login($user);
         }
 
-        DB::transaction(function () use ($user, $cantidad, $sessionId) {
+        $nuevoSaldo = null;
+
+        DB::transaction(function () use ($user, $cantidad, $sessionId, &$nuevoSaldo) {
             $nuevoSaldo = (float) $user->rusticoin_balance + $cantidad;
             $user->forceFill(['rusticoin_balance' => $nuevoSaldo])->save();
 
@@ -128,6 +132,8 @@ class RusticoinController extends Controller
                 'stripe_session_id'=> $sessionId,
             ]);
         });
+
+        Mail::to($user->email)->send(new RecargaMonedero($user, $cantidad, $nuevoSaldo));
 
         return redirect()->route('monedero.index')
             ->with('success', number_format($cantidad, 2) . ' RustiCoins añadidos a tu monedero.');

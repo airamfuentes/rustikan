@@ -234,9 +234,9 @@ class PedidoController extends Controller
             abort(403);
         }
 
-        // Solo se pueden cancelar pedidos en estado pendiente o confirmado
-        if (!in_array($pedido->estado, ['pendiente', 'confirmado'])) {
-            return back()->with('error', 'Este pedido no se puede cancelar en su estado actual.');
+        // Solo se pueden cancelar pedidos en estado pendiente (antes de que el supplier confirme)
+        if ($pedido->estado !== 'pendiente') {
+            return back()->with('error', 'Solo puedes cancelar el pedido mientras esté pendiente de confirmación.');
         }
 
         $validated = $request->validate([
