@@ -134,8 +134,8 @@ const saveProfile = () => {
         return;
     }
 
+    // onSuccess sin addToast: el flash del backend ya genera el toast via ToastContainer
     profileForm.patch(route('profile.update'), {
-        onSuccess: () => addToast('success', t('profile.save'), 'Perfil actualizado correctamente.'),
         onError: () => addToast('error', t('profile.save_error_title'), t('profile.save_error_msg')),
     });
 };
@@ -429,8 +429,9 @@ const initials = computed(() => {
                         <div class="flex justify-end pt-2">
                             <button
                                 type="submit"
-                                :disabled="profileForm.processing"
-                                class="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-600 disabled:opacity-50"
+                                :disabled="profileForm.processing || !profileForm.isDirty"
+                                :class="['inline-flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-40',
+                                    profileForm.isDirty ? 'bg-primary-500 hover:bg-primary-600' : 'bg-gray-400']"
                             >
                                 <svg v-if="profileForm.processing" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
