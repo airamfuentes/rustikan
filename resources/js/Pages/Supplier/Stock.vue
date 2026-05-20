@@ -1,8 +1,8 @@
 <script setup>
 import LayoutSupplier from '@/Layouts/LayoutSupplier.vue';
 import { Link, router } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
-import { Package, AlertTriangle, XCircle, Store, ChevronLeft, ChevronRight, ChevronRight as ArrowRight, Search } from 'lucide-vue-next';
+import { ref, computed, watch } from 'vue';
+import { Package, AlertTriangle, XCircle, Store, ChevronLeft, ChevronRight, ChevronRight as ArrowRight, Search, SlidersHorizontal } from 'lucide-vue-next';
 
 const props = defineProps({
     tiendas: { type: Object, required: true },
@@ -10,14 +10,33 @@ const props = defineProps({
     filters: { type: Object, default: () => ({}) },
 });
 
-const search = ref(props.filters.search ?? '');
+const form = ref({
+    search:          props.filters.search          ?? '',
+    con_bajo_stock:  props.filters.con_bajo_stock  ?? false,
+    con_sin_stock:   props.filters.con_sin_stock   ?? false,
+    orden:           props.filters.orden           ?? 'problemas',
+});
+
+const hayFiltros = computed(() =>
+    form.value.search || form.value.con_bajo_stock || form.value.con_sin_stock || form.value.orden !== 'problemas'
+);
 
 const buscar = () => {
-    router.get(route('supplier.stock.index'), { search: search.value }, { preserveState: true, replace: true });
+    router.get(route('supplier.stock.index'), {
+        search:         form.value.search,
+        con_bajo_stock: form.value.con_bajo_stock ? '1' : '',
+        con_sin_stock:  form.value.con_sin_stock  ? '1' : '',
+        orden:          form.value.orden,
+    }, { preserveState: true, replace: true });
+};
+
+const limpiar = () => {
+    form.value = { search: '', con_bajo_stock: false, con_sin_stock: false, orden: 'problemas' };
+    buscar();
 };
 
 let searchDebounce = null;
-watch(search, () => {
+watch(() => form.value.search, () => {
     clearTimeout(searchDebounce);
     searchDebounce = setTimeout(buscar, 300);
 });
@@ -53,21 +72,58 @@ watch(search, () => {
                 </div>
             </div>
 
+            <!-- Filtros -->
+            <div class="flex flex-wrap gap-3 items-center">
+                <!-- Buscador -->
+                <div class="relative flex-1 min-w-48">
+                    <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <input
+                        v-model="form.search"
+                        type="text"
+                        placeholder="Buscar tienda…"
+                        class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 py-2.5 pl-9 pr-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800"
+                    />
+                </div>
+
+                <!-- Filtro: con stock bajo -->
+                <label class="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <input v-model="form.con_bajo_stock" @change="buscar" type="checkbox" class="rounded text-amber-500 focus:ring-amber-500" />
+                    <AlertTriangle class="h-3.5 w-3.5 text-amber-500" />
+                    <span class="text-sm text-amber-600 dark:text-amber-400 font-medium">Con stock bajo</span>
+                </label>
+
+                <!-- Filtro: con sin stock -->
+                <label class="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <input v-model="form.con_sin_stock" @change="buscar" type="checkbox" class="rounded text-red-500 focus:ring-red-500" />
+                    <XCircle class="h-3.5 w-3.5 text-red-500" />
+                    <span class="text-sm text-red-600 dark:text-red-400 font-medium">Con sin stock</span>
+                </label>
+
+                <!-- Ordenar -->
+                <div class="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5">
+                    <SlidersHorizontal class="h-4 w-4 text-gray-400 shrink-0" />
+                    <select
+                        v-model="form.orden"
+                        @change="buscar"
+                        class="text-sm text-gray-700 dark:text-gray-300 bg-transparent focus:outline-none cursor-pointer"
+                    >
+                        <option value="problemas">Más problemáticas primero</option>
+                        <option value="nombre">Por nombre</option>
+                    </select>
+                </div>
+
+                <!-- Limpiar -->
+                <button
+                    v-if="hayFiltros"
+                    @click="limpiar"
+                    class="rounded-xl border border-gray-200 dark:border-gray-600 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                    Limpiar
+                </button>
+            </div>
+
             <!-- Lista de tiendas -->
             <div class="rounded-2xl bg-white dark:bg-gray-800 shadow">
-
-                <!-- Buscador -->
-                <div class="border-b border-gray-100 dark:border-gray-700 px-4 py-3">
-                    <div class="relative max-w-sm">
-                        <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                        <input
-                            v-model="search"
-                            type="text"
-                            placeholder="Buscar tienda…"
-                            class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 pl-9 pr-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800"
-                        />
-                    </div>
-                </div>
 
                 <!-- Empty state -->
                 <div v-if="tiendas.data.length === 0" class="flex flex-col items-center py-16 text-center">
