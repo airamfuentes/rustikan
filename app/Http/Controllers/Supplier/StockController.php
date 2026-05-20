@@ -12,14 +12,11 @@ class StockController extends Controller
 {
     public function index(Request $request)
     {
-        $supplierId = auth()->id();
-
         $query = Tienda::withCount([
             'productos as total_productos',
             'productos as sin_stock'  => fn($q) => $q->where('stock', 0),
             'productos as bajo_stock' => fn($q) => $q->whereColumn('stock', '<=', 'stock_minimo')->where('stock', '>', 0),
         ])
-        ->where('user_id', $supplierId)
         ->where('activa', true);
 
         if ($request->filled('search')) {
@@ -27,16 +24,15 @@ class StockController extends Controller
         }
 
         if ($request->boolean('con_bajo_stock')) {
-            $query->has('productos', '>=', 1, 'and', fn($q) =>
+            $query->whereHas('productos', fn($q) =>
                 $q->whereColumn('stock', '<=', 'stock_minimo')->where('stock', '>', 0)
             );
         }
 
         if ($request->boolean('con_sin_stock')) {
-            $query->has('productos', '>=', 1, 'and', fn($q) => $q->where('stock', 0));
+            $query->whereHas('productos', fn($q) => $q->where('stock', 0));
         }
 
-        // Ordenar: más problemáticas primero por defecto, o por nombre
         $orden = $request->input('orden', 'problemas');
         if ($orden === 'nombre') {
             $query->orderBy('nombre');
@@ -46,14 +42,11 @@ class StockController extends Controller
 
         $tiendas = $query->paginate(10)->withQueryString();
 
-        // Stats solo de las tiendas del supplier
-        $tiendaIds = Tienda::where('user_id', $supplierId)->pluck('id');
-
         $stats = [
-            'total'       => Producto::whereIn('tienda_id', $tiendaIds)->count(),
-            'bajo_stock'  => Producto::whereIn('tienda_id', $tiendaIds)->whereColumn('stock', '<=', 'stock_minimo')->where('stock', '>', 0)->count(),
-            'sin_stock'   => Producto::whereIn('tienda_id', $tiendaIds)->where('stock', 0)->count(),
-            'disponibles' => Producto::whereIn('tienda_id', $tiendaIds)->where('disponible', true)->count(),
+            'total'       => Producto::count(),
+            'bajo_stock'  => Producto::whereColumn('stock', '<=', 'stock_minimo')->where('stock', '>', 0)->count(),
+            'sin_stock'   => Producto::where('stock', 0)->count(),
+            'disponibles' => Producto::where('disponible', true)->count(),
         ];
 
         return Inertia::render('Supplier/Stock', [
