@@ -458,12 +458,12 @@ onMounted(() => {
                                             <p class="text-sm font-semibold text-red-700 dark:text-red-400">
                                                 {{ !stockInfo[item.id].disponible || stockInfo[item.id].stock === 0
                                                     ? 'Producto agotado'
-                                                    : `Stock insuficiente — solo quedan ${stockInfo[item.id].stock} ${item.unidad}` }}
+                                                    : 'Cantidad no disponible' }}
                                             </p>
                                             <p class="mt-0.5 text-xs text-red-500 dark:text-red-400">
                                                 {{ !stockInfo[item.id].disponible || stockInfo[item.id].stock === 0
                                                     ? 'Este producto no está disponible en este momento.'
-                                                    : `Tienes ${item.cantidad} ${item.unidad} en el carrito pero solo hay ${stockInfo[item.id].stock} ${item.unidad}. Reduce la cantidad para continuar.` }}
+                                                    : `Solo quedan ${stockInfo[item.id].stock} ${item.unidad} disponibles. Reduce la cantidad para continuar.` }}
                                             </p>
                                         </div>
                                     </div>
