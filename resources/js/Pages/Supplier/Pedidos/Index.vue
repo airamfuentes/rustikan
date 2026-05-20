@@ -3,6 +3,7 @@ import LayoutSupplier from '@/Layouts/LayoutSupplier.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useToasts } from '@/Composables/useToasts';
+import { imgSrc } from '@/Composables/useImgSrc';
 import {
     ChevronLeft, ChevronRight, FileText, X, Package,
     MapPin, Phone, StickyNote, AlertTriangle, CheckCircle2,
@@ -380,7 +381,7 @@ const puedeConfirmar = (estado) => ['pendiente', 'confirmado'].includes(estado);
                                     <div class="h-12 w-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 shrink-0">
                                         <img
                                             v-if="item.producto?.imagen"
-                                            :src="`/storage/${item.producto.imagen}`"
+                                            :src="imgSrc(item.producto?.imagen)"
                                             :alt="item.producto?.nombre"
                                             class="h-full w-full object-cover"
                                             @error="(e) => e.target.style.display='none'"

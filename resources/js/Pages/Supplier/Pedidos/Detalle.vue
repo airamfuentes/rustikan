@@ -33,7 +33,7 @@
                             <ul class="divide-y divide-gray-100 dark:divide-gray-700">
                                 <li v-for="item in pedido.items" :key="item.id" class="flex items-center gap-4 px-6 py-4">
                                     <img v-if="item.producto?.imagen"
-                                        :src="`/storage/${item.producto.imagen}`"
+                                        :src="imgSrc(item.producto?.imagen)"
                                         :alt="item.producto.nombre"
                                         class="h-14 w-14 rounded-xl object-cover flex-shrink-0"
                                         @error="(e) => e.target.style.display='none'" />
@@ -185,6 +185,7 @@ import { Link, router } from '@inertiajs/vue3';
 import { ref, onMounted, onUnmounted } from 'vue';
 import { ArrowLeft, StickyNote, FileText, AlertTriangle } from 'lucide-vue-next';
 import { useToasts } from '@/Composables/useToasts';
+import { imgSrc } from '@/Composables/useImgSrc';
 
 const props = defineProps({
     pedido: { type: Object, required: true },

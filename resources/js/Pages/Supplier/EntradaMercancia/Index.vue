@@ -2,16 +2,18 @@
 import LayoutSupplier from '@/Layouts/LayoutSupplier.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
+import { imgSrc } from '@/Composables/useImgSrc';
 import {
     PackagePlus, Search, SlidersHorizontal, Store, ChevronLeft, ChevronRight,
     CalendarDays, FileText, Truck, AlertTriangle, Plus
 } from 'lucide-vue-next';
 
 const props = defineProps({
-    entradas: { type: Object, required: true },
-    tiendas:  { type: Array,  required: true },
-    stats:    { type: Object, required: true },
-    filters:  { type: Object, default: () => ({}) },
+    entradas:          { type: Object,  required: true },
+    tiendas:           { type: Array,   required: true },
+    stats:             { type: Object,  required: true },
+    filters:           { type: Object,  default: () => ({}) },
+    _migrationPending: { type: Boolean, default: false },
 });
 
 const form = ref({
@@ -67,6 +69,15 @@ const formatDate = (str) => {
                 >
                     <Plus class="h-4 w-4" /> Nueva entrada
                 </Link>
+            </div>
+
+            <!-- Migración pendiente -->
+            <div v-if="_migrationPending" class="rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-5 py-4 flex items-center gap-3">
+                <AlertTriangle class="h-5 w-5 text-amber-500 shrink-0" />
+                <div>
+                    <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">Migración pendiente</p>
+                    <p class="text-xs text-amber-700 dark:text-amber-400">Ejecuta <code class="bg-amber-100 dark:bg-amber-900 px-1 rounded">php artisan migrate --force</code> en el servidor para activar esta sección.</p>
+                </div>
             </div>
 
             <!-- Stats -->
@@ -187,7 +198,7 @@ const formatDate = (str) => {
                                         <div class="h-10 w-10 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 shrink-0">
                                             <img
                                                 v-if="entrada.producto?.imagen"
-                                                :src="`/storage/${entrada.producto.imagen}`"
+                                                :src="imgSrc(entrada.producto.imagen)"
                                                 :alt="entrada.producto.nombre"
                                                 class="h-full w-full object-cover"
                                                 @error="(e) => e.target.style.display='none'"

@@ -3,6 +3,7 @@ import LayoutSupplier from '@/Layouts/LayoutSupplier.vue';
 import { Link, useForm, router } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
 import { ArrowLeft, PackagePlus, AlertTriangle, Package, Store, Search } from 'lucide-vue-next';
+import { imgSrc } from '@/Composables/useImgSrc';
 
 const props = defineProps({
     tiendas:   { type: Array, required: true },
@@ -134,7 +135,7 @@ const submit = () => {
                                 <div class="h-12 w-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 shrink-0">
                                     <img
                                         v-if="prod.imagen"
-                                        :src="`/storage/${prod.imagen}`"
+                                        :src="imgSrc(prod.imagen)"
                                         :alt="prod.nombre"
                                         class="h-full w-full object-cover"
                                         @error="(e) => e.target.style.display='none'"

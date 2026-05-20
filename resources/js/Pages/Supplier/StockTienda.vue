@@ -3,6 +3,7 @@ import LayoutSupplier from '@/Layouts/LayoutSupplier.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import { Package, AlertTriangle, XCircle, ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-vue-next';
+import { imgSrc } from '@/Composables/useImgSrc';
 
 const props = defineProps({
     tienda:   { type: Object, required: true },
@@ -139,7 +140,7 @@ const stockClass = (prod) => {
                                     <div class="flex items-center gap-3">
                                         <img
                                             v-if="prod.imagen"
-                                            :src="`/storage/${prod.imagen}`"
+                                            :src="imgSrc(prod.imagen)"
                                             :alt="prod.nombre"
                                             loading="lazy"
                                             class="h-10 w-10 rounded-lg object-cover flex-shrink-0"

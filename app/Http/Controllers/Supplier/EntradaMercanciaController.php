@@ -7,12 +7,23 @@ use App\Models\EntradaMercancia;
 use App\Models\Producto;
 use App\Models\Tienda;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 
 class EntradaMercanciaController extends Controller
 {
     public function index(Request $request)
     {
+        if (!Schema::hasTable('entradas_mercancia')) {
+            return Inertia::render('Supplier/EntradaMercancia/Index', [
+                'entradas' => ['data' => [], 'last_page' => 1, 'total' => 0, 'from' => null, 'to' => null, 'prev_page_url' => null, 'next_page_url' => null],
+                'tiendas'  => [],
+                'stats'    => ['total_entradas' => 0, 'hoy' => 0, 'total_unidades' => 0, 'proveedores' => 0],
+                'filters'  => [],
+                '_migrationPending' => true,
+            ]);
+        }
+
         $query = EntradaMercancia::with([
             'producto:id,nombre,unidad,imagen',
             'tienda:id,nombre,logo',
@@ -82,6 +93,10 @@ class EntradaMercanciaController extends Controller
 
     public function store(Request $request)
     {
+        if (!Schema::hasTable('entradas_mercancia')) {
+            return back()->with('error', 'La tabla de entradas no está disponible aún. Ejecuta las migraciones pendientes.');
+        }
+
         $data = $request->validate([
             'producto_id'      => ['required', 'exists:productos,id'],
             'cantidad_entrada'  => ['required', 'integer', 'min:1'],
