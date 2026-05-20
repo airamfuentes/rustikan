@@ -4,7 +4,7 @@ import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import { useI18n } from '@/Composables/useI18n';
 import { useToasts } from '@/Composables/useToasts';
-import { FileText } from 'lucide-vue-next';
+import { FileText, Coins, CreditCard } from 'lucide-vue-next';
 
 const props = defineProps({
     pedidosActivos:     { type: Array,  required: true },
@@ -74,19 +74,26 @@ const closeRating = () => {
 };
 
 // -- Cancelar pedido
-const cancelModal = ref(null); // pedido object o null
-const cancelando  = ref(false);
+const cancelModal    = ref(null); // pedido object o null
+const cancelando     = ref(false);
+const tipoReembolso  = ref('rusticoin');
 
-const abrirCancelar = (pedido) => { cancelModal.value = pedido; };
+const abrirCancelar = (pedido) => {
+    tipoReembolso.value = 'rusticoin';
+    cancelModal.value = pedido;
+};
 const cerrarCancelar = () => { cancelModal.value = null; };
 
 const confirmarCancelar = () => {
     if (!cancelModal.value || cancelando.value) return;
     cancelando.value = true;
-    router.post(route('pedidos.cancelar', cancelModal.value.id), { tipo_reembolso: 'rusticoin' }, {
+    router.post(route('pedidos.cancelar', cancelModal.value.id), { tipo_reembolso: tipoReembolso.value }, {
         preserveScroll: true,
         onSuccess: () => {
-            toastSuccess('Pedido cancelado', 'El reembolso en RustiCoin ha sido procesado.');
+            const msg = tipoReembolso.value === 'tarjeta'
+                ? 'El reembolso se procesará en tu tarjeta en 5-10 días hábiles.'
+                : 'El reembolso en RustiCoin ha sido procesado.';
+            toastSuccess('Pedido cancelado', msg);
             cerrarCancelar();
         },
         onError: () => {
@@ -196,7 +203,7 @@ const submitRating = (tiendaId) => {
                                                class="inline-flex items-center gap-1.5 font-medium text-orange-600 dark:text-orange-400 hover:underline whitespace-nowrap"><FileText class="h-3.5 w-3.5" /> {{ t('orders.view_invoice') }}</a>
                                             <span>{{ t('orders.subtotal') }} {{ Number(pedido.subtotal).toFixed(2) }}€ + {{ t('orders.shipping') }} {{ pedido.gastos_envio == 0 ? t('orders.free') : Number(pedido.gastos_envio).toFixed(2) + '€' }}</span>
                                             <button
-                                                v-if="['pendiente', 'confirmado'].includes(pedido.estado)"
+                                                v-if="pedido.estado === 'pendiente'"
                                                 @click.stop="abrirCancelar(pedido)"
                                                 class="inline-flex items-center gap-1 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 px-2.5 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-900/40"
                                             >
@@ -324,23 +331,62 @@ const submitRating = (tiendaId) => {
     <Transition enter-active-class="transition-opacity duration-200" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="transition-opacity duration-150" leave-from-class="opacity-100" leave-to-class="opacity-0">
         <div v-if="cancelModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" @click.self="cerrarCancelar">
             <div class="w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 shadow-xl p-6">
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Cancelar pedido</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                    Pedido <span class="font-semibold text-gray-700 dark:text-gray-300">{{ cancelModal.numero_pedido }}</span> por
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Cancelar pedido</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    Pedido <span class="font-semibold text-gray-700 dark:text-gray-300">{{ cancelModal.numero_pedido }}</span> ·
                     <span class="font-semibold text-gray-700 dark:text-gray-300">{{ Number(cancelModal.total).toFixed(2) }}€</span>
                 </p>
 
-                <div class="mt-4 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-4 text-sm">
-                    <p class="font-semibold text-blue-800 dark:text-blue-300 mb-1">Reembolso en RustiCoin</p>
-                    <p class="text-blue-700 dark:text-blue-400">El importe total se abonará inmediatamente en tu monedero RustiCoin y podrás usarlo en tu próxima compra.</p>
-                </div>
+                <!-- Opción RustiCoin (siempre disponible) -->
+                <button
+                    type="button"
+                    @click="tipoReembolso = 'rusticoin'"
+                    :class="['w-full text-left rounded-xl border-2 p-4 mb-3 transition-colors',
+                        tipoReembolso === 'rusticoin'
+                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                            : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500']"
+                >
+                    <div class="flex items-start gap-3">
+                        <div :class="['mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
+                            tipoReembolso === 'rusticoin' ? 'bg-primary-100 dark:bg-primary-900/40' : 'bg-gray-100 dark:bg-gray-700']">
+                            <Coins :class="['h-4 w-4', tipoReembolso === 'rusticoin' ? 'text-primary-600 dark:text-primary-400' : 'text-gray-400']" />
+                        </div>
+                        <div>
+                            <p :class="['font-semibold text-sm', tipoReembolso === 'rusticoin' ? 'text-primary-700 dark:text-primary-300' : 'text-gray-800 dark:text-gray-200']">Reembolso en RustiCoin</p>
+                            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">El importe se abona inmediatamente en tu monedero y puedes usarlo en tu próxima compra.</p>
+                        </div>
+                        <div :class="['ml-auto mt-1 h-4 w-4 shrink-0 rounded-full border-2 flex items-center justify-center',
+                            tipoReembolso === 'rusticoin' ? 'border-primary-500' : 'border-gray-300 dark:border-gray-500']">
+                            <div v-if="tipoReembolso === 'rusticoin'" class="h-2 w-2 rounded-full bg-primary-500" />
+                        </div>
+                    </div>
+                </button>
 
-                <div class="mt-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 p-4 text-sm text-gray-600 dark:text-gray-400">
-                    <p>¿Prefieres el reembolso a tu tarjeta? Escríbenos a
-                        <a href="mailto:info@rustikan.com" class="font-medium text-primary-600 dark:text-primary-400 hover:underline">info@rustikan.com</a>
-                        indicando el número de pedido.
-                    </p>
-                </div>
+                <!-- Opción tarjeta (solo si pagó con tarjeta) -->
+                <button
+                    v-if="cancelModal.metodo_pago === 'tarjeta'"
+                    type="button"
+                    @click="tipoReembolso = 'tarjeta'"
+                    :class="['w-full text-left rounded-xl border-2 p-4 transition-colors',
+                        tipoReembolso === 'tarjeta'
+                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                            : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500']"
+                >
+                    <div class="flex items-start gap-3">
+                        <div :class="['mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
+                            tipoReembolso === 'tarjeta' ? 'bg-blue-100 dark:bg-blue-900/40' : 'bg-gray-100 dark:bg-gray-700']">
+                            <CreditCard :class="['h-4 w-4', tipoReembolso === 'tarjeta' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400']" />
+                        </div>
+                        <div>
+                            <p :class="['font-semibold text-sm', tipoReembolso === 'tarjeta' ? 'text-blue-700 dark:text-blue-300' : 'text-gray-800 dark:text-gray-200']">Reembolso a la tarjeta original</p>
+                            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Stripe devolverá el importe automáticamente a la tarjeta con la que pagaste en 5-10 días hábiles.</p>
+                        </div>
+                        <div :class="['ml-auto mt-1 h-4 w-4 shrink-0 rounded-full border-2 flex items-center justify-center',
+                            tipoReembolso === 'tarjeta' ? 'border-blue-500' : 'border-gray-300 dark:border-gray-500']">
+                            <div v-if="tipoReembolso === 'tarjeta'" class="h-2 w-2 rounded-full bg-blue-500" />
+                        </div>
+                    </div>
+                </button>
 
                 <div class="mt-6 flex gap-3 justify-end">
                     <button @click="cerrarCancelar" class="rounded-lg border border-gray-200 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700">
@@ -348,7 +394,7 @@ const submitRating = (tiendaId) => {
                     </button>
                     <button @click="confirmarCancelar" :disabled="cancelando" class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-50">
                         <svg v-if="cancelando" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
-                        {{ cancelando ? 'Cancelando…' : 'Cancelar y recibir RustiCoin' }}
+                        {{ cancelando ? 'Cancelando…' : 'Confirmar cancelación' }}
                     </button>
                 </div>
             </div>
