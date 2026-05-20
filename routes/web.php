@@ -240,6 +240,7 @@ Route::middleware(['auth', 'admin', 'throttle:60,1'])->prefix('admin')->name('ad
 
     // Reseñas de una tienda (listado + moderación)
     Route::get('/tiendas/{tienda}/resenas', [\App\Http\Controllers\Admin\TiendaController::class, 'resenas'])->name('tiendas.resenas');
+    Route::get('/tiendas/{tienda}/albaranes', [\App\Http\Controllers\Admin\TiendaController::class, 'albaranes'])->name('tiendas.albaranes');
     Route::delete('/tiendas/{tienda}/resenas/{resena}', [\App\Http\Controllers\Admin\TiendaController::class, 'destroyResena'])->name('tiendas.resenas.destroy');
     
     // Productos (anidados bajo tiendas)

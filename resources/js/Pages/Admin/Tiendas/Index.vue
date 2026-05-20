@@ -100,8 +100,12 @@
                 <div class="overflow-hidden bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <!-- Tabla de tiendas -->
-                        <div class="overflow-x-auto -mx-6 px-6" style="-webkit-overflow-scrolling: touch;">
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <!-- Top scrollbar mirror -->
+                        <div ref="topScroll" class="overflow-x-auto -mx-6 px-6 mb-0.5" style="height:12px;" @scroll="onTopScroll">
+                            <div :style="{ width: tableWidth + 'px', height: '1px' }"></div>
+                        </div>
+                        <div ref="tableWrap" class="overflow-x-auto -mx-6 px-6" style="-webkit-overflow-scrolling: touch;" @scroll="onWrapScroll">
+                            <table ref="tableEl" class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead class="bg-gray-50 dark:bg-gray-700/50">
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Tienda</th>
@@ -173,6 +177,9 @@
                                         </td>
                                         <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                                             <div class="flex justify-end gap-2">
+                                                <Link :href="route('admin.tiendas.albaranes', tienda.id)" class="text-amber-600 hover:text-amber-900">
+                                                    Albaranes
+                                                </Link>
                                                 <Link :href="route('admin.tiendas.productos.index', tienda.id)" class="text-green-600 hover:text-green-900">
                                                     Productos
                                                 </Link>
@@ -232,7 +239,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import { Link, router } from '@inertiajs/vue3';
-import { reactive } from 'vue';
+import { reactive, ref, onMounted } from 'vue';
 import { ArrowLeft, Eye, EyeOff, Star } from 'lucide-vue-next';
 import CategoriaIcono from '@/Components/CategoriaIcono.vue';
 
@@ -242,6 +249,38 @@ const props = defineProps({
     categorias: Array,
     filters: Object,
 });
+
+// Dual scrollbar sync
+const topScroll  = ref(null);
+const tableWrap  = ref(null);
+const tableEl    = ref(null);
+const tableWidth = ref(0);
+
+onMounted(() => {
+    if (tableEl.value) {
+        const ro = new ResizeObserver(() => {
+            tableWidth.value = tableEl.value?.scrollWidth ?? 0;
+        });
+        ro.observe(tableEl.value);
+        tableWidth.value = tableEl.value.scrollWidth;
+    }
+});
+
+let syncingTop = false, syncingWrap = false;
+
+const onTopScroll = () => {
+    if (syncingWrap) return;
+    syncingTop = true;
+    if (tableWrap.value) tableWrap.value.scrollLeft = topScroll.value.scrollLeft;
+    syncingTop = false;
+};
+
+const onWrapScroll = () => {
+    if (syncingTop) return;
+    syncingWrap = true;
+    if (topScroll.value) topScroll.value.scrollLeft = tableWrap.value.scrollLeft;
+    syncingWrap = false;
+};
 
 const form = reactive({
     search: props.filters?.search || '',

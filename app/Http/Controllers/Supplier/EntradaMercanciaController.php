@@ -109,35 +109,49 @@ class EntradaMercanciaController extends Controller
         }
 
         $data = $request->validate([
-            'producto_id'      => ['required', 'exists:productos,id'],
-            'cantidad_entrada'  => ['required', 'integer', 'min:1'],
-            'numero_documento'  => ['nullable', 'string', 'max:255'],
-            'proveedor'         => ['nullable', 'string', 'max:255'],
-            'notas'             => ['nullable', 'string', 'max:1000'],
+            'tienda_id'              => ['required', 'exists:tiendas,id'],
+            'productos'              => ['required', 'array', 'min:1'],
+            'productos.*.producto_id'=> ['required', 'exists:productos,id'],
+            'productos.*.cantidad'   => ['required', 'integer', 'min:1'],
+            'numero_documento'       => ['required', 'string', 'max:255'],
+            'proveedor'              => ['nullable', 'string', 'max:255'],
+            'notas'                  => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $producto = Producto::findOrFail($data['producto_id']);
+        $totalUnidades = 0;
+        $nombresProds  = [];
 
-        $stockAnterior = $producto->stock;
-        $stockNuevo    = $stockAnterior + $data['cantidad_entrada'];
+        foreach ($data['productos'] as $item) {
+            $producto = Producto::findOrFail($item['producto_id']);
 
-        // Update stock — triggers ProductoObserver for email alerts
-        $producto->update(['stock' => $stockNuevo]);
+            $stockAnterior = $producto->stock;
+            $stockNuevo    = $stockAnterior + $item['cantidad'];
 
-        EntradaMercancia::create([
-            'producto_id'      => $producto->id,
-            'tienda_id'        => $producto->tienda_id,
-            'usuario_id'       => auth()->id(),
-            'stock_anterior'   => $stockAnterior,
-            'cantidad_entrada' => $data['cantidad_entrada'],
-            'stock_nuevo'      => $stockNuevo,
-            'numero_documento' => $data['numero_documento'] ?? null,
-            'proveedor'        => $data['proveedor'] ?? null,
-            'notas'            => $data['notas'] ?? null,
-        ]);
+            // Update stock — triggers ProductoObserver for email alerts
+            $producto->update(['stock' => $stockNuevo]);
+
+            EntradaMercancia::create([
+                'producto_id'      => $producto->id,
+                'tienda_id'        => $data['tienda_id'],
+                'usuario_id'       => auth()->id(),
+                'stock_anterior'   => $stockAnterior,
+                'cantidad_entrada' => $item['cantidad'],
+                'stock_nuevo'      => $stockNuevo,
+                'numero_documento' => $data['numero_documento'],
+                'proveedor'        => $data['proveedor'] ?? null,
+                'notas'            => $data['notas'] ?? null,
+            ]);
+
+            $totalUnidades += $item['cantidad'];
+            $nombresProds[] = $producto->nombre;
+        }
+
+        $resumen = count($nombresProds) === 1
+            ? "+{$totalUnidades} uds. de {$nombresProds[0]}"
+            : count($nombresProds) . " productos, {$totalUnidades} unidades totales";
 
         return redirect()->route('supplier.entradas.index')
-            ->with('success', "Entrada registrada: +{$data['cantidad_entrada']} {$producto->unidad} de {$producto->nombre}");
+            ->with('success', "Entrada registrada — albarán {$data['numero_documento']}: {$resumen}");
     }
 
     public function productosDetienda(Request $request, Tienda $tienda)

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Tienda;
 use App\Models\Categoria;
+use App\Models\EntradaMercancia;
 use App\Models\User;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
@@ -404,5 +405,53 @@ class TiendaController extends Controller
         );
 
         return back()->with('success', 'Estado actualizado');
+    }
+
+    public function albaranes(Request $request, Tienda $tienda)
+    {
+        if (!\Illuminate\Support\Facades\Schema::hasTable('entradas_mercancia')) {
+            return Inertia::render('Admin/Tiendas/Albaranes', [
+                'tienda'   => $tienda,
+                'entradas' => ['data' => [], 'last_page' => 1, 'total' => 0, 'from' => null, 'to' => null, 'prev_page_url' => null, 'next_page_url' => null],
+                'filters'  => [],
+                '_migrationPending' => true,
+            ]);
+        }
+
+        $query = EntradaMercancia::with(['producto:id,nombre,unidad,imagen', 'usuario:id,name'])
+            ->where('tienda_id', $tienda->id)
+            ->latest();
+
+        if ($request->filled('search')) {
+            $term = $request->search;
+            $query->where(function ($q) use ($term) {
+                $q->whereHas('producto', fn($p) => $p->where('nombre', 'like', "%{$term}%"))
+                  ->orWhere('numero_documento', 'like', "%{$term}%")
+                  ->orWhere('proveedor', 'like', "%{$term}%");
+            });
+        }
+
+        if ($request->filled('desde')) {
+            $query->whereDate('created_at', '>=', $request->desde);
+        }
+
+        if ($request->filled('hasta')) {
+            $query->whereDate('created_at', '<=', $request->hasta);
+        }
+
+        $entradas = $query->paginate(25)->withQueryString();
+
+        $stats = [
+            'total_entradas' => EntradaMercancia::where('tienda_id', $tienda->id)->count(),
+            'total_unidades' => (int) EntradaMercancia::where('tienda_id', $tienda->id)->sum('cantidad_entrada'),
+            'hoy'            => EntradaMercancia::where('tienda_id', $tienda->id)->whereDate('created_at', today())->count(),
+        ];
+
+        return Inertia::render('Admin/Tiendas/Albaranes', [
+            'tienda'   => $tienda,
+            'entradas' => $entradas,
+            'stats'    => $stats,
+            'filters'  => $request->only(['search', 'desde', 'hasta']),
+        ]);
     }
 }
