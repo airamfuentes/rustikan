@@ -163,16 +163,11 @@ const toggle = async () => {
     if (!abierto.value) {
         abierto.value = true;
         await cargar();
-        // Marcamos el badge como visto localmente, pero NO borramos del servidor todavía
-        // Las notificaciones se eliminan solo cuando el usuario hace click en una,
-        // o cuando cierra el panel (limpiarTodas se llama en el close)
+        // Solo reseteamos el badge localmente — las notificaciones se borran
+        // del servidor únicamente cuando el usuario hace click en una o en "Eliminar todas"
         yaVistas.value = true;
         count.value = 0;
     } else {
-        // Al cerrar, limpiar del servidor si había notificaciones cargadas
-        if (notificaciones.value.length > 0) {
-            limpiarTodas();
-        }
         abierto.value = false;
     }
 };
@@ -193,6 +188,11 @@ const cargar = async () => {
 };
 
 const abrirNotificacion = (n) => {
+    fetch(route('notificaciones.leer', n.id), {
+        method: 'POST',
+        keepalive: true,
+        headers: notifHeaders(),
+    });
     notificaciones.value = notificaciones.value.filter(x => x.id !== n.id);
     abierto.value = false;
     if (n.enlace) {
@@ -212,25 +212,10 @@ const formatDate = (dateStr) => {
 
 const handleOutsideClick = (e) => {
     if (menuRef.value && !menuRef.value.contains(e.target) && abierto.value) {
-        if (notificaciones.value.length > 0) {
-            limpiarTodas();
-        }
         abierto.value = false;
     }
 };
 
 onMounted(() => document.addEventListener('mousedown', handleOutsideClick));
-onBeforeUnmount(() => {
-    document.removeEventListener('mousedown', handleOutsideClick);
-    // Si quedaban notificaciones sin limpiar (p.ej. navegó sin abrir campana)
-    // las eliminamos igualmente con keepalive para que sobreviva la navegación.
-    if (!yaVistas.value && count.value > 0) {
-        fetch(route('notificaciones.leer-todas'), {
-            method: 'POST',
-            keepalive: true,
-            headers: notifHeaders(),
-        });
-        yaVistas.value = true;
-    }
-});
+onBeforeUnmount(() => document.removeEventListener('mousedown', handleOutsideClick));
 </script>
