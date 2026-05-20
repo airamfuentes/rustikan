@@ -387,11 +387,13 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                     v-for="producto in productosFiltrados"
                     :key="producto.id"
                     :class="[
-                        'group relative flex flex-col overflow-hidden rounded-2xl shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl',
+                        'group relative flex flex-col overflow-hidden rounded-2xl shadow-sm transition-all duration-300',
                         isDark ? 'bg-gray-800' : 'bg-white',
-                        producto.stock > 0 ? 'cursor-pointer' : 'opacity-75',
+                        producto.stock > 0 && producto.disponible
+                            ? 'cursor-pointer hover:-translate-y-1 hover:shadow-xl'
+                            : 'opacity-70 cursor-not-allowed',
                     ]"
-                    @click="abrirModal(producto)"
+                    @click="producto.stock > 0 && producto.disponible ? abrirModal(producto) : null"
                 >
                     <!-- Imagen -->
                     <div class="relative aspect-square overflow-hidden">
@@ -411,12 +413,18 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                             Destacado
                         </div>
 
-                        <div v-if="producto.stock > 0 && producto.stock <= producto.stock_minimo" class="absolute bottom-3 left-3 rounded-full bg-orange-500 px-2.5 py-1 text-xs font-bold text-white shadow">
-                            {{ t('store.last_units') }}
+                        <div v-if="producto.stock > 0 && producto.stock <= producto.stock_minimo" class="absolute bottom-3 left-3 flex items-center gap-1 rounded-full bg-orange-500 px-2.5 py-1 text-xs font-bold text-white shadow">
+                            <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                            </svg>
+                            {{ t('store.last_units') }} ({{ producto.stock }})
                         </div>
 
-                        <div v-if="producto.stock === 0" class="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                            <span class="rounded-full bg-red-600 px-4 py-2 text-sm font-bold text-white">{{ t('store.out_of_stock') }}</span>
+                        <div v-if="producto.stock === 0 || !producto.disponible" class="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/55 backdrop-blur-sm">
+                            <svg class="h-8 w-8 text-white opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                            </svg>
+                            <span class="rounded-full bg-red-600 px-4 py-2 text-sm font-bold text-white shadow-lg">{{ t('store.out_of_stock') }}</span>
                         </div>
 
                         <!-- Hover "Ver detalle" -->
@@ -474,6 +482,9 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
 
                         <!-- Barra stock bajo -->
                         <div v-if="producto.stock > 0 && producto.stock <= producto.stock_minimo" class="mt-2">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-xs font-semibold text-orange-600 dark:text-orange-400">¡Últimas {{ producto.stock }} unidades!</span>
+                            </div>
                             <div :class="['h-1.5 w-full overflow-hidden rounded-full', isDark ? 'bg-gray-700' : 'bg-gray-100']">
                                 <div class="h-full rounded-full bg-orange-400" :style="{ width: `${Math.min((producto.stock / producto.stock_minimo) * 100, 100)}%` }"></div>
                             </div>

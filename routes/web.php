@@ -146,7 +146,7 @@ Route::prefix('')->name('info.')->group(function () {
 
 // Stripe Checkout
 Route::post('/checkout/session', [\App\Http\Controllers\StripeController::class, 'createSession'])
-    ->middleware(['auth', 'throttle:10,1'])
+    ->middleware(['auth', 'throttle:20,1'])
     ->name('checkout.session');
 
 Route::get('/checkout/success', [\App\Http\Controllers\StripeController::class, 'success'])

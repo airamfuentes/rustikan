@@ -37,10 +37,10 @@ class StripeController extends Controller
             $producto = Producto::findOrFail($item['id']);
 
             if (!$producto->disponible) {
-                return back()->withErrors(['stock' => "El producto \"{$producto->nombre}\" ya no está disponible."]);
+                return response()->json(['error' => "El producto \"{$producto->nombre}\" ya no está disponible."], 422);
             }
             if ($producto->stock < $item['cantidad']) {
-                return back()->withErrors(['stock' => "Stock insuficiente para \"{$producto->nombre}\". Quedan {$producto->stock} unidades."]);
+                return response()->json(['error' => "Stock insuficiente para \"{$producto->nombre}\". Quedan {$producto->stock} unidades."], 422);
             }
 
             $precioReal = (float) ($producto->precio_oferta ?? $producto->precio);
@@ -95,9 +95,13 @@ class StripeController extends Controller
             ]);
         } catch (\Stripe\Exception\ApiErrorException $e) {
             Log::error('[Stripe createSession] ' . $e->getMessage());
-            return back()->withErrors(['stripe' => 'Error al conectar con Stripe. Inténtalo de nuevo.']);
+            return response()->json(['error' => 'Error al conectar con Stripe. Inténtalo de nuevo.'], 500);
         }
 
+        // Return JSON so the frontend can redirect — allows proper error handling
+        if (request()->expectsJson() || request()->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json(['url' => $session->url]);
+        }
         return redirect($session->url);
     }
 

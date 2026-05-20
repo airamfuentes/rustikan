@@ -235,17 +235,48 @@ const pagarConRusticoin = () => {
     });
 };
 
-const pagarConStripe = () => {
+const pagarConStripe = async () => {
+    if (procesando.value) return;
     stripeError.value = '';
-    step.value = 3;
-    procesando.value = true;
+    procesando.value  = true;
+    step.value        = 3;
 
-    // Envío de formulario nativo — el backend redirige a Stripe Checkout
-    const form = document.getElementById('stripe-checkout-form');
-    // Refresh CSRF token in case the session was renewed since page load
-    const tokenInput = form.querySelector('input[name="_token"]');
-    if (tokenInput) tokenInput.value = getCsrfToken();
-    form.submit();
+    try {
+        const body = new URLSearchParams();
+        body.append('_token', getCsrfToken());
+        body.append('direccion_envio', direccionEnvioComputed.value);
+        body.append('telefono_contacto', envioForm.value.telefono_contacto.trim());
+        body.append('notas', envioForm.value.notas.trim());
+        items.value.forEach((item, i) => {
+            body.append(`items[${i}][id]`, item.id);
+            body.append(`items[${i}][cantidad]`, item.cantidad);
+        });
+
+        const res  = await fetch(route('checkout.session'), {
+            method:  'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body,
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+            // 422 stock error, 429 rate limit, 500 Stripe error
+            const msg = res.status === 429
+                ? 'Demasiados intentos. Espera un momento e inténtalo de nuevo.'
+                : (data.error || 'Error al procesar el pago. Inténtalo de nuevo.');
+            stripeError.value = msg;
+            procesando.value  = false;
+            step.value        = 2;
+            return;
+        }
+
+        // Redirect to Stripe Checkout
+        window.location.href = data.url;
+    } catch {
+        stripeError.value = 'Error de conexión. Comprueba tu internet e inténtalo de nuevo.';
+        procesando.value  = false;
+        step.value        = 2;
+    }
 };
 
 const pagar = () => {
@@ -399,7 +430,18 @@ onMounted(() => {
                                     </button>
                                 </div>
 
-                                <!-- Banner de stock agotado / insuficiente -->
+                                <!-- Banner stock bajo (ok pero cerca del mínimo) -->
+                                <div
+                                    v-if="stockInfo[item.id] && stockInfo[item.id].ok && stockInfo[item.id].stock > 0 && stockInfo[item.id].stock <= stockInfo[item.id].stock_minimo"
+                                    class="mt-3 flex items-center gap-2 rounded-xl border border-orange-200 dark:border-orange-700 bg-orange-50 dark:bg-orange-900/20 px-4 py-2.5"
+                                >
+                                    <AlertTriangle class="h-4 w-4 shrink-0 text-orange-500" />
+                                    <p class="text-sm font-semibold text-orange-700 dark:text-orange-400">
+                                        ¡Últimas unidades! Solo quedan <strong>{{ stockInfo[item.id].stock }}</strong> en stock.
+                                    </p>
+                                </div>
+
+                                <!-- Banner stock agotado / cantidad insuficiente -->
                                 <div
                                     v-if="stockInfo[item.id] && !stockInfo[item.id].ok"
                                     class="mt-3 flex flex-col gap-2 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 px-4 py-3"
@@ -408,21 +450,21 @@ onMounted(() => {
                                         <AlertTriangle class="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
                                         <div>
                                             <p class="text-sm font-semibold text-red-700 dark:text-red-400">
-                                                {{ stockInfo[item.id].stock === 0 || !stockInfo[item.id].disponible
+                                                {{ !stockInfo[item.id].disponible || stockInfo[item.id].stock === 0
                                                     ? 'Producto agotado'
-                                                    : `Stock insuficiente — solo quedan ${stockInfo[item.id].stock} unidades` }}
+                                                    : `Stock insuficiente — solo quedan ${stockInfo[item.id].stock} unidad${stockInfo[item.id].stock === 1 ? '' : 'es'}` }}
                                             </p>
                                             <p class="mt-0.5 text-xs text-red-500 dark:text-red-400">
-                                                {{ stockInfo[item.id].stock === 0 || !stockInfo[item.id].disponible
+                                                {{ !stockInfo[item.id].disponible || stockInfo[item.id].stock === 0
                                                     ? 'Este producto no está disponible en este momento.'
-                                                    : 'Reduce la cantidad para poder continuar con el pedido.' }}
+                                                    : `Tienes ${item.cantidad} en el carrito pero solo hay ${stockInfo[item.id].stock}. Reduce la cantidad para continuar.` }}
                                             </p>
                                         </div>
                                     </div>
 
-                                    <!-- Avísame cuando vuelva — solo si agotado del todo y usuario logueado -->
+                                    <!-- Avísame cuando vuelva — solo si agotado del todo -->
                                     <label
-                                        v-if="stockInfo[item.id].stock === 0 || !stockInfo[item.id].disponible"
+                                        v-if="!stockInfo[item.id].disponible || stockInfo[item.id].stock === 0"
                                         class="flex cursor-pointer items-center gap-2.5 rounded-lg bg-white dark:bg-gray-800 border border-red-200 dark:border-red-700 px-3 py-2 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
                                         @click.prevent="toggleAlerta(item.id)"
                                     >
@@ -436,7 +478,7 @@ onMounted(() => {
                                         </div>
                                         <span class="text-xs font-medium text-gray-700 dark:text-gray-300">
                                             {{ stockInfo[item.id].subscribed
-                                                ? 'Te avisaremos cuando vuelva a estar disponible'
+                                                ? '✓ Te avisaremos por email cuando vuelva a estar disponible'
                                                 : 'Avísame por email cuando vuelva a estar disponible' }}
                                         </span>
                                     </label>
@@ -810,24 +852,6 @@ onMounted(() => {
                         <p v-if="pagoForm.metodo === 'rusticoin' && rcDisponible < totalFinal" class="text-xs text-red-500 text-center">
                             Saldo insuficiente. <Link :href="route('monedero.index')" class="underline font-semibold">Recargar monedero</Link>
                         </p>
-
-                        <!-- Stripe Card Element -->
-                        <!-- Formulario oculto para Stripe Checkout (tarjeta) -->
-                        <form
-                            v-show="pagoForm.metodo === 'tarjeta'"
-                            id="stripe-checkout-form"
-                            method="POST"
-                            :action="route('checkout.session')"
-                        >
-                            <input type="hidden" name="_token" :value="getCsrfToken()" />
-                            <input type="hidden" name="direccion_envio" :value="direccionEnvioComputed" />
-                            <input type="hidden" name="telefono_contacto" :value="envioForm.telefono_contacto.trim()" />
-                            <input type="hidden" name="notas" :value="envioForm.notas.trim()" />
-                            <template v-for="(item, i) in items" :key="item.id">
-                                <input type="hidden" :name="`items[${i}][id]`" :value="item.id" />
-                                <input type="hidden" :name="`items[${i}][cantidad]`" :value="item.cantidad" />
-                            </template>
-                        </form>
 
                         <div v-show="pagoForm.metodo === 'tarjeta'" class="rounded-xl bg-blue-50 dark:bg-blue-900/20 px-4 py-4 text-sm text-blue-700 dark:text-blue-300 flex items-start gap-3">
                             <svg class="h-5 w-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
