@@ -27,7 +27,7 @@ const buscar = () => {
         con_bajo_stock: form.value.con_bajo_stock ? '1' : '',
         con_sin_stock:  form.value.con_sin_stock  ? '1' : '',
         orden:          form.value.orden,
-    }, { preserveState: true, replace: true });
+    }, { preserveState: true, preserveScroll: true });
 };
 
 const limpiar = () => {
