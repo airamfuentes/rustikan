@@ -1,11 +1,25 @@
 <script setup>
 import LayoutSupplier from '@/Layouts/LayoutSupplier.vue';
-import { Link } from '@inertiajs/vue3';
-import { Package, AlertTriangle, XCircle, Store, ChevronLeft, ChevronRight, ChevronRight as ArrowRight } from 'lucide-vue-next';
+import { Link, router } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
+import { Package, AlertTriangle, XCircle, Store, ChevronLeft, ChevronRight, ChevronRight as ArrowRight, Search } from 'lucide-vue-next';
 
 const props = defineProps({
     tiendas: { type: Object, required: true },
     stats:   { type: Object, required: true },
+    filters: { type: Object, default: () => ({}) },
+});
+
+const search = ref(props.filters.search ?? '');
+
+const buscar = () => {
+    router.get(route('supplier.stock.index'), { search: search.value }, { preserveState: true, replace: true });
+};
+
+let searchDebounce = null;
+watch(search, () => {
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(buscar, 300);
 });
 </script>
 
@@ -41,6 +55,19 @@ const props = defineProps({
 
             <!-- Lista de tiendas -->
             <div class="rounded-2xl bg-white dark:bg-gray-800 shadow">
+
+                <!-- Buscador -->
+                <div class="border-b border-gray-100 dark:border-gray-700 px-4 py-3">
+                    <div class="relative max-w-sm">
+                        <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                        <input
+                            v-model="search"
+                            type="text"
+                            placeholder="Buscar tienda…"
+                            class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 pl-9 pr-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800"
+                        />
+                    </div>
+                </div>
 
                 <!-- Empty state -->
                 <div v-if="tiendas.data.length === 0" class="flex flex-col items-center py-16 text-center">

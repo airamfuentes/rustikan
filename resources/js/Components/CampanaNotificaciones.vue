@@ -163,13 +163,16 @@ const toggle = async () => {
     if (!abierto.value) {
         abierto.value = true;
         await cargar();
-        // En cuanto se muestran, las eliminamos del servidor
+        // Marcamos el badge como visto localmente, pero NO borramos del servidor todavía
+        // Las notificaciones se eliminan solo cuando el usuario hace click en una,
+        // o cuando cierra el panel (limpiarTodas se llama en el close)
+        yaVistas.value = true;
+        count.value = 0;
+    } else {
+        // Al cerrar, limpiar del servidor si había notificaciones cargadas
         if (notificaciones.value.length > 0) {
             limpiarTodas();
-        } else {
-            yaVistas.value = true;
         }
-    } else {
         abierto.value = false;
     }
 };
@@ -208,7 +211,10 @@ const formatDate = (dateStr) => {
 };
 
 const handleOutsideClick = (e) => {
-    if (menuRef.value && !menuRef.value.contains(e.target)) {
+    if (menuRef.value && !menuRef.value.contains(e.target) && abierto.value) {
+        if (notificaciones.value.length > 0) {
+            limpiarTodas();
+        }
         abierto.value = false;
     }
 };

@@ -160,7 +160,7 @@
                                     "{{ pedido.notas }}"
                                 </div>
                                 <div v-if="pedido.motivo_incidencia" class="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 text-xs text-red-700 dark:text-red-300">
-                                    <p class="font-semibold mb-1">⚠ Motivo incidencia (almacén):</p>
+                                    <p class="flex items-center gap-1 font-semibold mb-1"><AlertTriangle class="h-3.5 w-3.5" /> Motivo incidencia (almacén):</p>
                                     <p>{{ pedido.motivo_incidencia }}</p>
                                 </div>
                             </div>
@@ -269,7 +269,7 @@
 import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref, reactive, computed } from 'vue';
-import { ArrowLeft, XCircle, FileText, Lock } from 'lucide-vue-next';
+import { ArrowLeft, XCircle, FileText, Lock, AlertTriangle } from 'lucide-vue-next';
 import { useToasts } from '@/Composables/useToasts';
 
 const props = defineProps({

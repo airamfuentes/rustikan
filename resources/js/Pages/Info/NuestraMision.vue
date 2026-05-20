@@ -15,7 +15,7 @@
                     </svg>
                 </div>
                 <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">{{ t('info.mission.title') }}</h1>
-                <p class="mx-auto mt-4 max-w-2xl text-lg text-emerald-100">
+                <p class="mx-auto mt-4 max-w-2xl text-lg text-primary-100">
                     {{ t('info.mission.subtitle') }}
                 </p>
             </div>

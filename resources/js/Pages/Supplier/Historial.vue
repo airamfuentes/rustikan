@@ -1,7 +1,7 @@
 <script setup>
 import LayoutSupplier from '@/Layouts/LayoutSupplier.vue';
 import { Link, router } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { ClipboardList, ChevronLeft, ChevronRight, FileText } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -29,6 +29,12 @@ const limpiar = () => {
     form.value = { search: '', estado: '', fecha_desde: '', fecha_hasta: '' };
     buscar();
 };
+
+let searchDebounce = null;
+watch(() => form.value.search, () => {
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(buscar, 300);
+});
 
 const estadosFiltro = [
     { value: 'pendiente',      label: 'Pendiente' },
@@ -98,7 +104,6 @@ const urlExportar = computed(() => {
                 <div class="flex-1 min-w-48">
                     <input
                         v-model="form.search"
-                        @keyup.enter="buscar"
                         type="text"
                         placeholder="Buscar por nº pedido o cliente..."
                         class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
