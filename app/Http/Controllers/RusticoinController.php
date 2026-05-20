@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\RusticoinTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use Stripe\Checkout\Session as StripeSession;
+use Stripe\Stripe;
 
 class RusticoinController extends Controller
 {
@@ -29,70 +32,104 @@ class RusticoinController extends Controller
     }
 
     /**
-     * Añadir fondos al monedero (simula pago con tarjeta)
+     * Crea una Stripe Checkout Session para recargar el monedero.
      */
     public function recargar(Request $request)
     {
         $request->validate([
-            'cantidad' => 'required|numeric|min:1|max:500',
+            'cantidad' => 'required|integer|min:1|max:500',
         ]);
 
+        $cantidad = (int) $request->cantidad;
         $user     = auth()->user();
-        $cantidad = (float) $request->cantidad;
 
-        DB::transaction(function () use ($user, $cantidad) {
-            $nuevoSaldo = (float) $user->rusticoin_balance + $cantidad;
+        Stripe::setApiKey(config('services.stripe.secret'));
 
-            $user->forceFill(['rusticoin_balance' => $nuevoSaldo])->save();
-
-            RusticoinTransaction::create([
-                'user_id'       => $user->id,
-                'tipo'          => 'recarga',
-                'cantidad'      => $cantidad,
-                'saldo_despues' => $nuevoSaldo,
-                'descripcion'   => "Recarga de {$cantidad} RustiCoins",
+        try {
+            $session = StripeSession::create([
+                'payment_method_types' => ['card'],
+                'line_items'           => [
+                    [
+                        'price_data' => [
+                            'currency'     => 'eur',
+                            'unit_amount'  => $cantidad * 100,
+                            'product_data' => [
+                                'name' => "Recarga Monedero RustiCoin ({$cantidad} RC)",
+                            ],
+                        ],
+                        'quantity' => 1,
+                    ],
+                ],
+                'mode'        => 'payment',
+                'locale'      => 'es',
+                'success_url' => route('monedero.recarga.success') . '?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url'  => route('monedero.index'),
+                'metadata'    => [
+                    'user_id'  => $user->id,
+                    'cantidad' => $cantidad,
+                ],
             ]);
-        });
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            Log::error('[Stripe recarga monedero] ' . $e->getMessage());
+            return back()->withErrors(['stripe' => 'Error al conectar con Stripe. Inténtalo de nuevo.']);
+        }
 
-        return back()->with('success', number_format($cantidad, 2) . ' RustiCoins añadidos a tu monedero.');
+        return Inertia::location($session->url);
     }
 
     /**
-     * Retirar fondos del monedero (simula reembolso a tarjeta)
+     * Stripe redirige aquí tras el pago de recarga exitoso.
      */
-    public function retirar(Request $request)
+    public function recargaSuccess(Request $request)
     {
-        $user = auth()->user();
+        $sessionId = $request->query('session_id');
+        if (!$sessionId) {
+            return redirect()->route('monedero.index');
+        }
 
-        $request->validate([
-            'cantidad' => [
-                'required',
-                'numeric',
-                'min:1',
-                function ($attribute, $value, $fail) use ($user) {
-                    if ($value > (float) $user->rusticoin_balance) {
-                        $fail('No tienes suficiente saldo para retirar esa cantidad.');
-                    }
-                },
-            ],
-        ]);
+        Stripe::setApiKey(config('services.stripe.secret'));
 
-        $cantidad = (float) $request->cantidad;
+        try {
+            $session = StripeSession::retrieve($sessionId);
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            Log::error('[Stripe recargaSuccess] retrieve falló: ' . $e->getMessage());
+            return redirect()->route('monedero.index')->with('error', 'No se pudo verificar el pago.');
+        }
 
-        DB::transaction(function () use ($user, $cantidad) {
-            $nuevoSaldo = (float) $user->rusticoin_balance - $cantidad;
+        if ($session->payment_status !== 'paid') {
+            return redirect()->route('monedero.index')->with('error', 'El pago no se completó.');
+        }
 
+        // Idempotencia: evitar duplicados usando el session ID como referencia
+        if (RusticoinTransaction::where('stripe_session_id', $sessionId)->exists()) {
+            return redirect()->route('monedero.index')->with('success', 'Tu recarga ya fue procesada anteriormente.');
+        }
+
+        $userId   = (int) $session->metadata->user_id;
+        $cantidad = (float) $session->metadata->cantidad;
+
+        $user = \App\Models\User::findOrFail($userId);
+
+        // Loguear al usuario si su sesión se perdió en el redirect externo
+        if (!auth()->check()) {
+            auth()->login($user);
+        }
+
+        DB::transaction(function () use ($user, $cantidad, $sessionId) {
+            $nuevoSaldo = (float) $user->rusticoin_balance + $cantidad;
             $user->forceFill(['rusticoin_balance' => $nuevoSaldo])->save();
 
             RusticoinTransaction::create([
-                'user_id'       => $user->id,
-                'tipo'          => 'retiro',
-                'cantidad'      => -$cantidad,
-                'saldo_despues' => $nuevoSaldo,
-                'descripcion'   => "Retirada de {$cantidad} RustiCoins",
+                'user_id'          => $user->id,
+                'tipo'             => 'recarga',
+                'cantidad'         => $cantidad,
+                'saldo_despues'    => $nuevoSaldo,
+                'descripcion'      => "Recarga de {$cantidad} RustiCoins vía Stripe",
+                'stripe_session_id'=> $sessionId,
             ]);
         });
 
-        return back()->with('success', number_format($cantidad, 2) . ' RustiCoins retirados. El reembolso se procesará en 5-10 días hábiles.');
+        return redirect()->route('monedero.index')
+            ->with('success', number_format($cantidad, 2) . ' RustiCoins añadidos a tu monedero.');
     }
 }

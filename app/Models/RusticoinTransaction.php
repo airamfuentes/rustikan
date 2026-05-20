@@ -13,6 +13,7 @@ class RusticoinTransaction extends Model
         'saldo_despues',
         'descripcion',
         'pedido_id',
+        'stripe_session_id',
     ];
 
     protected $casts = [

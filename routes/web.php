@@ -170,7 +170,7 @@ Route::middleware('auth')->group(function () {
     // Monedero RustiCoin
     Route::get('/monedero', [\App\Http\Controllers\RusticoinController::class, 'index'])->name('monedero.index');
     Route::post('/monedero/recargar', [\App\Http\Controllers\RusticoinController::class, 'recargar'])->name('monedero.recargar');
-    Route::post('/monedero/retirar', [\App\Http\Controllers\RusticoinController::class, 'retirar'])->name('monedero.retirar');
+    Route::get('/monedero/recarga/success', [\App\Http\Controllers\RusticoinController::class, 'recargaSuccess'])->name('monedero.recarga.success');
 
     // Notificaciones
     Route::get('/notificaciones', [\App\Http\Controllers\NotificacionController::class, 'index'])->name('notificaciones.index');

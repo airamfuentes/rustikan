@@ -9,7 +9,10 @@ use App\Models\Pedido;
 use App\Models\RusticoinTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use Stripe\Checkout\Session as StripeSession;
+use Stripe\Stripe;
 
 class PedidoController extends Controller
 {
@@ -119,6 +122,22 @@ class PedidoController extends Controller
 
         $numPedidoCancelar = $pedido->numero_pedido ?? $pedido->id;
 
+        // Reembolso Stripe si aplica (fuera de la transacción DB para no bloquearla en caso de error de red)
+        $stripeReembolsoOk = false;
+        if ($tipoReembolso === 'tarjeta' && $pedido->stripe_payment_intent_id && $pedido->metodo_pago === 'tarjeta') {
+            try {
+                Stripe::setApiKey(config('services.stripe.secret'));
+                $session = StripeSession::retrieve($pedido->stripe_payment_intent_id);
+                if ($session->payment_intent) {
+                    \Stripe\Refund::create(['payment_intent' => $session->payment_intent]);
+                    $stripeReembolsoOk = true;
+                }
+            } catch (\Throwable $e) {
+                Log::error('[Stripe refund admin] Pedido #' . $numPedidoCancelar . ': ' . $e->getMessage());
+                // No interrumpir la cancelación si falla el reembolso
+            }
+        }
+
         DB::transaction(function () use ($pedido, $tipoReembolso, $numPedidoCancelar) {
             $pedido->update(['estado' => 'cancelado']);
 
@@ -147,7 +166,9 @@ class PedidoController extends Controller
             if ($pedido->user_id) {
                 $msgReembolso = match ($tipoReembolso) {
                     'rusticoin' => ' Se han abonado ' . number_format($pedido->total, 2) . ' RC a tu monedero RustiCoin.',
-                    'tarjeta'   => ' El reembolso a tu tarjeta se procesará en 5-7 días hábiles.',
+                    'tarjeta'   => $stripeReembolsoOk
+                        ? ' El reembolso se ha procesado automáticamente a tu tarjeta y puede tardar 5-10 días en aparecer.'
+                        : ' El reembolso a tu tarjeta se procesará en 5-10 días hábiles.',
                     default     => '',
                 };
 
@@ -167,7 +188,9 @@ class PedidoController extends Controller
         if ($tipoReembolso === 'rusticoin') {
             $msgFlash .= ' RustiCoins abonados al cliente.';
         } elseif ($tipoReembolso === 'tarjeta') {
-            $msgFlash .= ' Reembolso a tarjeta iniciado.';
+            $msgFlash .= $stripeReembolsoOk
+                ? ' Reembolso procesado automáticamente vía Stripe.'
+                : ' Reembolso a tarjeta pendiente de procesar.';
         }
 
         // Email al cliente con plantilla

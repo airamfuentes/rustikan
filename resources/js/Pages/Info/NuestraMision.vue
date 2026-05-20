@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-white dark:bg-gray-900">
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Head>
             <title>Nuestra misión – Rustikan · Producto local, justo y sostenible</title>
             <meta name="description" content="100% productores locales, 0€ de comisión de alta y hecho en Lanzarote. Apostamos por un modelo de consumo justo, de proximidad y respetuoso con la isla.">
@@ -22,7 +22,7 @@
         </section>
 
         <!-- Impacto — visible nada más entrar -->
-        <section class="bg-primary-50 py-10 dark:bg-primary-950/40">
+        <section class="bg-gray-50 py-10 dark:bg-gray-900">
             <div class="mx-auto max-w-4xl px-4 sm:px-6">
                 <h2 class="mb-6 text-center text-xl font-bold text-gray-800 dark:text-white">{{ t('info.mission.impact_title') }}</h2>
                 <div class="grid gap-4 text-center sm:grid-cols-3">
