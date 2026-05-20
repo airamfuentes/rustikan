@@ -138,7 +138,7 @@ const siguientePaso = () => {
 };
 
 const stripeError = ref('');
-const csrfToken   = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+const getCsrfToken = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 
 const direccionEnvioComputed = computed(() =>
     [envioForm.value.calle.trim(), envioForm.value.numero.trim(), envioForm.value.puerta.trim()]
@@ -198,6 +198,9 @@ const pagarConStripe = () => {
 
     // Envío de formulario nativo — el backend redirige a Stripe Checkout
     const form = document.getElementById('stripe-checkout-form');
+    // Refresh CSRF token in case the session was renewed since page load
+    const tokenInput = form.querySelector('input[name="_token"]');
+    if (tokenInput) tokenInput.value = getCsrfToken();
     form.submit();
 };
 
@@ -704,7 +707,7 @@ const stepTitle = computed(() => ({
                             method="POST"
                             :action="route('checkout.session')"
                         >
-                            <input type="hidden" name="_token" :value="csrfToken" />
+                            <input type="hidden" name="_token" :value="getCsrfToken()" />
                             <input type="hidden" name="direccion_envio" :value="direccionEnvioComputed" />
                             <input type="hidden" name="telefono_contacto" :value="envioForm.telefono_contacto.trim()" />
                             <input type="hidden" name="notas" :value="envioForm.notas.trim()" />
