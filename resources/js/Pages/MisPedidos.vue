@@ -89,16 +89,8 @@ const confirmarCancelar = () => {
     cancelando.value = true;
     router.post(route('pedidos.cancelar', cancelModal.value.id), { tipo_reembolso: tipoReembolso.value }, {
         preserveScroll: true,
-        onSuccess: () => {
-            const msg = tipoReembolso.value === 'tarjeta'
-                ? 'El reembolso se procesará en tu tarjeta en 5-10 días hábiles.'
-                : 'El reembolso en RustiCoin ha sido procesado.';
-            toastSuccess('Pedido cancelado', msg);
-            cerrarCancelar();
-        },
-        onError: () => {
-            useToasts().error('Error', 'No se pudo cancelar el pedido.');
-        },
+        onSuccess: () => { cerrarCancelar(); },
+        onError: () => { useToasts().error('Error', 'No se pudo cancelar el pedido.'); },
         onFinish: () => { cancelando.value = false; },
     });
 };

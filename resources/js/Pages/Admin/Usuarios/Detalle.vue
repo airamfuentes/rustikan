@@ -51,7 +51,7 @@
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm text-gray-600 dark:text-gray-400">Total Gastado:</span>
                                     <span class="text-lg font-bold text-green-600 dark:text-green-400">
-                                        {{ Number(usuario.pedidos_sum || 0).toFixed(2) }}€
+                                        {{ Number(usuario.pedidos_sum_total || 0).toFixed(2) }}€
                                     </span>
                                 </div>
                             </div>
@@ -86,11 +86,13 @@
                                         </div>
                                         <span :class="{
                                             'bg-yellow-100 text-yellow-800': pedido.estado === 'pendiente',
-                                            'bg-blue-100 text-blue-800': pedido.estado === 'en_proceso',
-                                            'bg-green-100 text-green-800': pedido.estado === 'completado',
+                                            'bg-blue-100 text-blue-800': pedido.estado === 'confirmado',
+                                            'bg-orange-100 text-orange-800': pedido.estado === 'en_preparacion',
+                                            'bg-purple-100 text-purple-800': pedido.estado === 'enviado',
+                                            'bg-green-100 text-green-800': pedido.estado === 'entregado',
                                             'bg-red-100 text-red-800': pedido.estado === 'cancelado'
-                                        }" class="rounded-full px-3 py-1 text-xs font-semibold">
-                                            {{ pedido.estado }}
+                                        }" class="rounded-full px-3 py-1 text-xs font-semibold capitalize">
+                                            {{ pedido.estado.replace('_', ' ') }}
                                         </span>
                                     </div>
                                     

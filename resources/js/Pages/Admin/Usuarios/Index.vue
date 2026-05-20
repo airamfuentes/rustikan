@@ -136,7 +136,7 @@
                                     </span>
                                 </td>
                                 <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-white">{{ usuario.pedidos_count || 0 }}</td>
-                                <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">{{ Number(usuario.pedidos_sum || 0).toFixed(2) }}€</td>
+                                <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">{{ Number(usuario.pedidos_sum_total || 0).toFixed(2) }}€</td>
                                 <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ new Date(usuario.created_at).toLocaleDateString('es-ES') }}</td>
                                 <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                                     <div class="flex justify-end gap-3">
