@@ -104,15 +104,10 @@ const ejecutarSalida = () => {
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-const estadoBadgeClass = (estado) => ({
-    en_preparacion: 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300',
-    confirmado:     'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
-}[estado] ?? 'bg-gray-100 text-gray-800');
+const estadoBadgeClass = () =>
+    'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300';
 
-const estadoLabel = (estado) => ({
-    en_preparacion: 'En preparación',
-    confirmado:     'Confirmado',
-}[estado] ?? estado);
+const estadoLabel = () => 'En preparación';
 
 const formatFecha = (d) => new Date(d).toLocaleDateString('es-ES', {
     day: '2-digit', month: 'short', year: 'numeric',
@@ -214,7 +209,7 @@ const stockClass = (prod) => {
                 <div v-if="pedidosFiltrados.length === 0" class="rounded-2xl bg-white dark:bg-gray-800 shadow flex flex-col items-center py-20 text-center">
                     <PackageCheck class="mx-auto h-14 w-14 text-gray-300 dark:text-gray-600 mb-3" />
                     <p class="font-semibold text-gray-700 dark:text-gray-300">No hay pedidos listos para salida</p>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Los pedidos confirmados y en preparación aparecerán aquí.</p>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Solo aparecen pedidos en estado <strong>En preparación</strong>.</p>
                     <Link
                         :href="route('supplier.pedidos.index')"
                         class="mt-5 inline-flex items-center gap-2 rounded-xl bg-primary-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-600 transition-colors"

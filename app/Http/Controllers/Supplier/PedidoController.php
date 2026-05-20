@@ -19,7 +19,7 @@ class PedidoController extends Controller
     public function salidasIndex(Request $request)
     {
         $query = Pedido::with(['user:id,name,email', 'items.producto:id,nombre,stock,stock_minimo,unidad,imagen', 'items.tienda:id,nombre'])
-            ->whereIn('estado', ['confirmado', 'en_preparacion'])
+            ->where('estado', 'en_preparacion')
             ->orderBy('created_at', 'asc');
 
         if ($request->filled('search')) {
@@ -47,7 +47,7 @@ class PedidoController extends Controller
 
         $pedidos = Pedido::with(['user', 'items'])
             ->whereIn('id', $request->pedido_ids)
-            ->whereIn('estado', ['confirmado', 'en_preparacion'])
+            ->where('estado', 'en_preparacion')
             ->get();
 
         $procesados = 0;
