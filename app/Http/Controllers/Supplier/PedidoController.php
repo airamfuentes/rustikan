@@ -6,16 +6,92 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Notificacion;
 use App\Models\Pedido;
+use App\Mail\PedidoConfirmado;
+use App\Mail\PedidoEnviado;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 
 class PedidoController extends Controller
 {
     private const ESTADOS_PERMITIDOS = ['confirmado', 'en_preparacion', 'enviado', 'incidencia'];
 
+    public function salidasIndex(Request $request)
+    {
+        $query = Pedido::with(['user:id,name,email', 'items.producto:id,nombre,stock,stock_minimo,unidad,imagen', 'items.tienda:id,nombre'])
+            ->whereIn('estado', ['confirmado', 'en_preparacion'])
+            ->orderBy('created_at', 'asc');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('numero_pedido', 'like', "%{$search}%")
+                  ->orWhereHas('user', fn($q) => $q->where('name', 'like', "%{$search}%"));
+            });
+        }
+
+        $pedidos = $query->get();
+
+        return Inertia::render('Supplier/Salidas/Index', [
+            'pedidos' => $pedidos,
+            'filters' => $request->only(['search']),
+        ]);
+    }
+
+    public function darSalida(Request $request)
+    {
+        $request->validate([
+            'pedido_ids'   => ['required', 'array', 'min:1'],
+            'pedido_ids.*' => ['exists:pedidos,id'],
+        ]);
+
+        $pedidos = Pedido::with(['user', 'items'])
+            ->whereIn('id', $request->pedido_ids)
+            ->whereIn('estado', ['confirmado', 'en_preparacion'])
+            ->get();
+
+        $procesados = 0;
+        foreach ($pedidos as $pedido) {
+            $estadoAnterior = $pedido->estado;
+            $pedido->update(['estado' => 'enviado']);
+            $procesados++;
+
+            ActivityLog::log(
+                'supplier_dar_salida',
+                "Pedido #{$pedido->numero_pedido} marcado como enviado ({$estadoAnterior} → enviado)",
+                'editar',
+                'purple',
+                $pedido
+            );
+
+            if ($pedido->user_id) {
+                Notificacion::enviar(
+                    $pedido->user_id,
+                    'pedido_enviado',
+                    'Tu pedido está en camino',
+                    '¡Tu pedido ha sido enviado! El repartidor ya lo tiene. ¡Pronto lo recibirás!',
+                    route('pedidos.index'),
+                    'cart',
+                    'purple'
+                );
+
+                if ($pedido->user?->email) {
+                    try {
+                        Mail::to($pedido->user->email)->send(new PedidoEnviado($pedido));
+                    } catch (\Throwable) {}
+                }
+            }
+        }
+
+        return back()->with('success', $procesados === 1
+            ? "Pedido marcado como enviado correctamente."
+            : "{$procesados} pedidos marcados como enviados correctamente."
+        );
+    }
+
     public function index(Request $request)
     {
-        $query = Pedido::with(['user', 'items.producto', 'items.tienda'])
+        $query = Pedido::with(['user:id,name,email', 'items.producto:id,nombre,stock,stock_minimo,unidad,imagen', 'items.tienda:id,nombre'])
             ->whereNotIn('estado', ['cancelado'])
             ->orderBy('created_at', 'desc');
 
@@ -53,7 +129,8 @@ class PedidoController extends Controller
         $pedido->load(['user', 'items.producto', 'items.tienda']);
 
         return Inertia::render('Supplier/Pedidos/Detalle', [
-            'pedido' => $pedido,
+            'pedido'    => $pedido,
+            'facturaUrl' => route('supplier.exportar.pedido', $pedido),
         ]);
     }
 
@@ -104,6 +181,11 @@ class PedidoController extends Controller
         $estadoAnterior = $pedido->estado;
         $nuevoEstado    = $request->estado;
 
+        // Confirmar → auto-avanza a en_preparacion
+        if ($nuevoEstado === 'confirmado') {
+            $nuevoEstado = 'en_preparacion';
+        }
+
         $updateData = ['estado' => $nuevoEstado];
         if ($nuevoEstado === 'incidencia') {
             $updateData['motivo_incidencia'] = $request->motivo_incidencia;
@@ -150,6 +232,25 @@ class PedidoController extends Controller
             );
         }
 
-        return back()->with('success', "Pedido actualizado a: {$nuevoEstado}");
+        // Enviar email al cliente según estado
+        if ($pedido->user?->email) {
+            try {
+                if ($nuevoEstado === 'en_preparacion') {
+                    $pedido->load(['user', 'items']);
+                    Mail::to($pedido->user->email)->send(new PedidoConfirmado($pedido));
+                } elseif ($nuevoEstado === 'enviado') {
+                    $pedido->load(['user', 'items']);
+                    Mail::to($pedido->user->email)->send(new PedidoEnviado($pedido));
+                }
+            } catch (\Throwable) {}
+        }
+
+        $labels = [
+            'en_preparacion' => 'En preparación',
+            'enviado'        => 'Enviado',
+            'incidencia'     => 'Incidencia',
+        ];
+
+        return back()->with('success', "Pedido actualizado: " . ($labels[$nuevoEstado] ?? $nuevoEstado));
     }
 }

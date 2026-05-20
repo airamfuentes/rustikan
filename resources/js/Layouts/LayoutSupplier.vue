@@ -7,7 +7,7 @@ import ScrollToTop from '@/Components/ScrollToTop.vue';
 import {
     LayoutDashboard, PackageSearch, ClipboardList,
     Package, LogOut, Menu, X, ChevronRight,
-    Warehouse, Moon, Sun
+    Warehouse, Moon, Sun, PackagePlus, Truck
 } from 'lucide-vue-next';
 
 const page      = usePage();
@@ -42,7 +42,21 @@ const navItems = computed(() => [
         label: 'Inventario / Stock',
         href: route('supplier.stock'),
         icon: Package,
-        active: route().current('supplier.stock'),
+        active: route().current('supplier.stock') || route().current('supplier.stock.tienda'),
+        badge: null,
+    },
+    {
+        label: 'Entrada mercancía',
+        href: route('supplier.entradas.index'),
+        icon: PackagePlus,
+        active: route().current('supplier.entradas.*'),
+        badge: null,
+    },
+    {
+        label: 'Salida de pedidos',
+        href: route('supplier.salidas.index'),
+        icon: Truck,
+        active: route().current('supplier.salidas.*'),
         badge: null,
     },
 ]);

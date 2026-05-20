@@ -297,6 +297,14 @@ Route::prefix('supplier')->name('supplier.')->middleware(['auth', 'supplier'])->
     Route::get('/stock', [\App\Http\Controllers\Supplier\StockController::class, 'index'])->name('stock');
     Route::get('/stock/{tienda}', [\App\Http\Controllers\Supplier\StockController::class, 'tienda'])->name('stock.tienda');
 
+    Route::get('/salidas', [\App\Http\Controllers\Supplier\PedidoController::class, 'salidasIndex'])->name('salidas.index');
+    Route::post('/salidas/dar-salida', [\App\Http\Controllers\Supplier\PedidoController::class, 'darSalida'])->name('salidas.dar');
+
+    Route::get('/entradas', [\App\Http\Controllers\Supplier\EntradaMercanciaController::class, 'index'])->name('entradas.index');
+    Route::get('/entradas/crear', [\App\Http\Controllers\Supplier\EntradaMercanciaController::class, 'create'])->name('entradas.create');
+    Route::post('/entradas', [\App\Http\Controllers\Supplier\EntradaMercanciaController::class, 'store'])->name('entradas.store');
+    Route::get('/entradas/tienda/{tienda}/productos', [\App\Http\Controllers\Supplier\EntradaMercanciaController::class, 'productosDetienda'])->name('entradas.productos');
+
     // Exportaciones supplier (PDF imprimible)
     Route::get('/exportar/pedidos',           [\App\Http\Controllers\Supplier\ExportController::class, 'pedidosPdf'])->name('exportar.pedidos');
     Route::get('/exportar/historial',         [\App\Http\Controllers\Supplier\ExportController::class, 'historialPdf'])->name('exportar.historial');
