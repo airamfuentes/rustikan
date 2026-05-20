@@ -417,7 +417,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                             <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
                             </svg>
-                            {{ t('store.last_units') }} ({{ producto.stock }})
+                            {{ t('store.last_units') }} ({{ producto.stock }} {{ producto.unidad }})
                         </div>
 
                         <div v-if="producto.stock === 0 || !producto.disponible" class="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/55 backdrop-blur-sm">
@@ -483,7 +483,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                         <!-- Barra stock bajo -->
                         <div v-if="producto.stock > 0 && producto.stock <= producto.stock_minimo" class="mt-2">
                             <div class="flex items-center justify-between mb-1">
-                                <span class="text-xs font-semibold text-orange-600 dark:text-orange-400">¡Últimas {{ producto.stock }} unidades!</span>
+                                <span class="text-xs font-semibold text-orange-600 dark:text-orange-400">¡Últimas {{ producto.stock }} {{ producto.unidad }}!</span>
                             </div>
                             <div :class="['h-1.5 w-full overflow-hidden rounded-full', isDark ? 'bg-gray-700' : 'bg-gray-100']">
                                 <div class="h-full rounded-full bg-orange-400" :style="{ width: `${Math.min((producto.stock / producto.stock_minimo) * 100, 100)}%` }"></div>
@@ -845,7 +845,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                         <!-- Stock bajo -->
                         <p v-if="productoModal.stock > 0 && productoModal.stock <= productoModal.stock_minimo"
                             class="mt-2 flex items-center gap-1 text-xs font-medium text-orange-500">
-                            <AlertTriangle class="h-3.5 w-3.5" /> {{ t('store.last_units') }}
+                            <AlertTriangle class="h-3.5 w-3.5" /> {{ t('store.last_units') }} — solo quedan {{ productoModal.stock }} {{ productoModal.unidad }}
                         </p>
 
                         <!-- Selector de cantidad -->

@@ -19,9 +19,15 @@ const {
     totalPrecio,
     itemsAgrupadosPorTienda,
     eliminarItem,
-    actualizarCantidad,
+    actualizarCantidad: _actualizarCantidad,
     vaciarCarrito,
 } = useCarrito();
+
+// Wrap actualizarCantidad to re-check stock after every quantity change
+const actualizarCantidad = (productoId, delta) => {
+    _actualizarCantidad(productoId, delta);
+    checkStock();
+};
 
 const gastosEnvio = computed(() => (totalPrecio.value >= 50 ? 0 : totalPrecio.value > 0 ? 2.5 : 0));
 const totalFinal  = computed(() => totalPrecio.value + gastosEnvio.value);
@@ -437,7 +443,7 @@ onMounted(() => {
                                 >
                                     <AlertTriangle class="h-4 w-4 shrink-0 text-orange-500" />
                                     <p class="text-sm font-semibold text-orange-700 dark:text-orange-400">
-                                        ¡Últimas unidades! Solo quedan <strong>{{ stockInfo[item.id].stock }}</strong> en stock.
+                                        ¡Últimas unidades! Solo quedan <strong>{{ stockInfo[item.id].stock }} {{ item.unidad }}</strong> en stock.
                                     </p>
                                 </div>
 
@@ -452,12 +458,12 @@ onMounted(() => {
                                             <p class="text-sm font-semibold text-red-700 dark:text-red-400">
                                                 {{ !stockInfo[item.id].disponible || stockInfo[item.id].stock === 0
                                                     ? 'Producto agotado'
-                                                    : `Stock insuficiente — solo quedan ${stockInfo[item.id].stock} unidad${stockInfo[item.id].stock === 1 ? '' : 'es'}` }}
+                                                    : `Stock insuficiente — solo quedan ${stockInfo[item.id].stock} ${item.unidad}` }}
                                             </p>
                                             <p class="mt-0.5 text-xs text-red-500 dark:text-red-400">
                                                 {{ !stockInfo[item.id].disponible || stockInfo[item.id].stock === 0
                                                     ? 'Este producto no está disponible en este momento.'
-                                                    : `Tienes ${item.cantidad} en el carrito pero solo hay ${stockInfo[item.id].stock}. Reduce la cantidad para continuar.` }}
+                                                    : `Tienes ${item.cantidad} ${item.unidad} en el carrito pero solo hay ${stockInfo[item.id].stock} ${item.unidad}. Reduce la cantidad para continuar.` }}
                                             </p>
                                         </div>
                                     </div>
