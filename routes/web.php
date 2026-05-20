@@ -180,7 +180,14 @@ Route::middleware('auth')->group(function () {
     // Tiendas favoritas
     Route::get('/mis-favoritas', [\App\Http\Controllers\FavoritoController::class, 'index'])->name('favoritos.index');
     Route::post('/favoritos/{tienda}/toggle', [\App\Http\Controllers\FavoritoController::class, 'toggle'])->name('favoritos.toggle');
+
+    // Alertas de stock
+    Route::post('/stock-alerts/{producto}/toggle', [\App\Http\Controllers\StockAlertController::class, 'toggle'])->name('stock-alerts.toggle');
+    Route::get('/stock-alerts/mis-alertas', [\App\Http\Controllers\StockAlertController::class, 'misAlertas'])->name('stock-alerts.mis-alertas');
 });
+
+// Cart stock check (accessible to guests too, but returns subscribed=false for guests)
+Route::post('/carrito/check-stock', [\App\Http\Controllers\StockAlertController::class, 'checkCarrito'])->name('carrito.check-stock');
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function (\Illuminate\Http\Request $request) {

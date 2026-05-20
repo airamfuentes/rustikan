@@ -4,7 +4,7 @@ import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { useCarrito } from '@/Composables/useCarrito';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import { useI18n } from '@/Composables/useI18n';
-import { ChevronLeft } from 'lucide-vue-next';
+import { AlertTriangle, ChevronLeft } from 'lucide-vue-next';
 import {
     validarTelefonoEs, validarCP, validarDireccion,
 } from '@/Composables/useValidaciones';
@@ -26,6 +26,49 @@ const {
 const gastosEnvio = computed(() => (totalPrecio.value >= 50 ? 0 : totalPrecio.value > 0 ? 2.5 : 0));
 const totalFinal  = computed(() => totalPrecio.value + gastosEnvio.value);
 const handleVaciar = () => vaciarCarrito();
+
+// ─── Stock check ─────────────────────────────────────────────────────────────
+// Map: producto_id → { ok, stock, stock_minimo, disponible, subscribed }
+const stockInfo       = ref({});
+const checkingStock   = ref(false);
+const csrfMeta        = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+
+const itemsConProblema = computed(() =>
+    items.value.filter(i => stockInfo.value[i.id] && !stockInfo.value[i.id].ok)
+);
+const hayProblemaStock = computed(() => itemsConProblema.value.length > 0);
+
+const checkStock = async () => {
+    if (!items.value.length) return;
+    checkingStock.value = true;
+    try {
+        const res = await fetch(route('carrito.check-stock'), {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfMeta() },
+            body:    JSON.stringify({ items: items.value.map(i => ({ id: i.id, cantidad: i.cantidad })) }),
+        });
+        const data = await res.json();
+        const map = {};
+        for (const entry of data.items) map[entry.id] = entry;
+        stockInfo.value = map;
+    } catch { /* silently fail */ } finally {
+        checkingStock.value = false;
+    }
+};
+
+const toggleAlerta = async (productoId) => {
+    if (!user.value) { router.visit(route('login')); return; }
+    try {
+        const res  = await fetch(route('stock-alerts.toggle', productoId), {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfMeta() },
+        });
+        const data = await res.json();
+        if (stockInfo.value[productoId]) {
+            stockInfo.value[productoId].subscribed = data.subscribed;
+        }
+    } catch { /* silently fail */ }
+};
 
 // ─── Checkout multi-step ──────────────────────────────────────────────────────
 const mostrarCheckout = ref(false);
@@ -102,6 +145,7 @@ const abrirCheckout = () => {
     erroresPago.value = {};
     step.value        = 1;
     mostrarCheckout.value = true;
+    checkStock();
 };
 
 const cerrarCheckout = () => { if (step.value < 3) mostrarCheckout.value = false; };
@@ -218,6 +262,10 @@ const stepTitle = computed(() => ({
     2: t('checkout.step_payment'),
     3: t('checkout.step_processing'),
 }[step.value]));
+
+onMounted(() => {
+    if (items.value.length > 0) checkStock();
+});
 </script>
 
 <template>
@@ -291,61 +339,108 @@ const stepTitle = computed(() => ({
                             <div
                                 v-for="item in grupo.items"
                                 :key="item.id"
-                                class="flex flex-wrap items-center gap-3 sm:gap-4 px-3 sm:px-5 py-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                                class="flex flex-col px-3 sm:px-5 py-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
                             >
-                                <!-- Imagen -->
-                                <img
-                                    :src="item.imagen || '/images/logo.png'"
-                                    :alt="item.nombre"
-                                    loading="lazy"
-                                    class="h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0 rounded-xl object-cover shadow-sm"
-                                />
+                                <!-- Fila principal -->
+                                <div class="flex flex-wrap items-center gap-3 sm:gap-4">
+                                    <!-- Imagen -->
+                                    <img
+                                        :src="item.imagen || '/images/logo.png'"
+                                        :alt="item.nombre"
+                                        loading="lazy"
+                                        :class="['h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0 rounded-xl object-cover shadow-sm transition-opacity',
+                                            stockInfo[item.id] && !stockInfo[item.id].ok ? 'opacity-50 grayscale' : '']"
+                                    />
 
-                                <!-- Info -->
-                                <div class="min-w-0 flex-1 basis-[calc(100%-5rem)] sm:basis-auto">
-                                    <h3 class="font-semibold text-gray-900 dark:text-white">{{ item.nombre }}</h3>
-                                    <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{{ item.precio.toFixed(2) }}€ / {{ item.unidad }}</p>
-                                </div>
+                                    <!-- Info -->
+                                    <div class="min-w-0 flex-1 basis-[calc(100%-5rem)] sm:basis-auto">
+                                        <h3 class="font-semibold text-gray-900 dark:text-white">{{ item.nombre }}</h3>
+                                        <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{{ item.precio.toFixed(2) }}€ / {{ item.unidad }}</p>
+                                    </div>
 
-                                <!-- Controles de cantidad -->
-                                <div class="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-600 px-3 py-1.5">
+                                    <!-- Controles de cantidad -->
+                                    <div class="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-600 px-3 py-1.5">
+                                        <button
+                                            @click="actualizarCantidad(item.id, -1)"
+                                            class="flex h-7 w-7 items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200"
+                                            aria-label="Reducir cantidad"
+                                        >
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                                            </svg>
+                                        </button>
+                                        <span class="w-8 text-center text-sm font-bold text-gray-800 dark:text-gray-200">{{ item.cantidad }}</span>
+                                        <button
+                                            @click="actualizarCantidad(item.id, 1)"
+                                            class="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-500 text-white transition-colors hover:bg-primary-600"
+                                            aria-label="Aumentar cantidad"
+                                        >
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <!-- Precio de línea -->
+                                    <div class="ml-auto sm:ml-0 sm:w-20 text-right">
+                                        <span class="font-bold text-gray-900 dark:text-white">{{ (item.precio * item.cantidad).toFixed(2) }}€</span>
+                                    </div>
+
+                                    <!-- Eliminar -->
                                     <button
-                                        @click="actualizarCantidad(item.id, -1)"
-                                        class="flex h-7 w-7 items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200"
-                                        aria-label="Reducir cantidad"
+                                        @click="eliminarItem(item.id)"
+                                        class="flex h-8 w-8 items-center justify-center rounded-full text-gray-300 transition-colors hover:bg-red-50 hover:text-red-500"
+                                        aria-label="Eliminar producto"
                                     >
-                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
                                     </button>
-                                    <span class="w-8 text-center text-sm font-bold text-gray-800 dark:text-gray-200">{{ item.cantidad }}</span>
-                                    <button
-                                        @click="actualizarCantidad(item.id, 1)"
-                                        class="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-500 text-white transition-colors hover:bg-primary-600"
-                                        aria-label="Aumentar cantidad"
-                                    >
-                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                        </svg>
-                                    </button>
                                 </div>
 
-                                <!-- Precio de línea -->
-                                <div class="ml-auto sm:ml-0 sm:w-20 text-right">
-                                    <span class="font-bold text-gray-900 dark:text-white">{{ (item.precio * item.cantidad).toFixed(2) }}€</span>
-                                </div>
-
-                                <!-- Eliminar -->
-                                <button
-                                    @click="eliminarItem(item.id)"
-                                    class="flex h-8 w-8 items-center justify-center rounded-full text-gray-300 transition-colors hover:bg-red-50 hover:text-red-500"
-                                    aria-label="Eliminar producto"
+                                <!-- Banner de stock agotado / insuficiente -->
+                                <div
+                                    v-if="stockInfo[item.id] && !stockInfo[item.id].ok"
+                                    class="mt-3 flex flex-col gap-2 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 px-4 py-3"
                                 >
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
+                                    <div class="flex items-start gap-2">
+                                        <AlertTriangle class="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
+                                        <div>
+                                            <p class="text-sm font-semibold text-red-700 dark:text-red-400">
+                                                {{ stockInfo[item.id].stock === 0 || !stockInfo[item.id].disponible
+                                                    ? 'Producto agotado'
+                                                    : `Stock insuficiente — solo quedan ${stockInfo[item.id].stock} unidades` }}
+                                            </p>
+                                            <p class="mt-0.5 text-xs text-red-500 dark:text-red-400">
+                                                {{ stockInfo[item.id].stock === 0 || !stockInfo[item.id].disponible
+                                                    ? 'Este producto no está disponible en este momento.'
+                                                    : 'Reduce la cantidad para poder continuar con el pedido.' }}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Avísame cuando vuelva — solo si agotado del todo y usuario logueado -->
+                                    <label
+                                        v-if="stockInfo[item.id].stock === 0 || !stockInfo[item.id].disponible"
+                                        class="flex cursor-pointer items-center gap-2.5 rounded-lg bg-white dark:bg-gray-800 border border-red-200 dark:border-red-700 px-3 py-2 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                                        @click.prevent="toggleAlerta(item.id)"
+                                    >
+                                        <div :class="['flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors',
+                                            stockInfo[item.id].subscribed
+                                                ? 'border-primary-500 bg-primary-500'
+                                                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700']">
+                                            <svg v-if="stockInfo[item.id].subscribed" class="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </div>
+                                        <span class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                                            {{ stockInfo[item.id].subscribed
+                                                ? 'Te avisaremos cuando vuelva a estar disponible'
+                                                : 'Avísame por email cuando vuelva a estar disponible' }}
+                                        </span>
+                                    </label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -392,15 +487,31 @@ const stepTitle = computed(() => ({
                         </div>
 
                         <div class="px-6 pb-6">
+                            <!-- Stock problem notice in sidebar -->
+                            <div v-if="hayProblemaStock" class="mb-3 flex items-start gap-2 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 px-4 py-3">
+                                <AlertTriangle class="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
+                                <p class="text-xs font-medium text-red-700 dark:text-red-400">
+                                    Hay {{ itemsConProblema.length === 1 ? '1 producto' : `${itemsConProblema.length} productos` }} sin stock suficiente. Elimínalos o ajusta la cantidad para continuar.
+                                </p>
+                            </div>
+
                             <button
                                 @click="abrirCheckout"
-                                class="group flex w-full items-center justify-center gap-2 rounded-xl bg-primary-500 py-4 text-sm font-bold text-white shadow-sm transition-all hover:bg-primary-600 hover:shadow-md"
+                                :disabled="hayProblemaStock || checkingStock"
+                                :class="['group flex w-full items-center justify-center gap-2 rounded-xl py-4 text-sm font-bold text-white shadow-sm transition-all',
+                                    hayProblemaStock || checkingStock
+                                        ? 'bg-gray-400 cursor-not-allowed opacity-60'
+                                        : 'bg-primary-500 hover:bg-primary-600 hover:shadow-md']"
                             >
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg v-if="checkingStock" class="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                </svg>
+                                <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
-                                {{ t('cart.checkout') }}
+                                {{ checkingStock ? 'Verificando stock…' : t('cart.checkout') }}
                             </button>
 
                             <ul class="mt-4 space-y-2 text-xs text-gray-400">
