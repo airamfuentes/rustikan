@@ -71,15 +71,6 @@ const formatDate = (str) => {
                 </Link>
             </div>
 
-            <!-- Migración pendiente -->
-            <div v-if="_migrationPending" class="rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-5 py-4 flex items-center gap-3">
-                <AlertTriangle class="h-5 w-5 text-amber-500 shrink-0" />
-                <div>
-                    <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">Migración pendiente</p>
-                    <p class="text-xs text-amber-700 dark:text-amber-400">Ejecuta <code class="bg-amber-100 dark:bg-amber-900 px-1 rounded">php artisan migrate --force</code> en el servidor para activar esta sección.</p>
-                </div>
-            </div>
-
             <!-- Stats -->
             <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
                 <div class="rounded-2xl bg-white dark:bg-gray-800 shadow px-5 py-4 space-y-1">
