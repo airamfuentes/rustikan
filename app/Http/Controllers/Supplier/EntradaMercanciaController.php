@@ -86,19 +86,19 @@ class EntradaMercanciaController extends Controller
     {
         $tiendas = Tienda::select('id', 'nombre')->where('activa', true)->orderBy('nombre')->get();
 
-        $tiendaId = $request->tienda_id ?? $tiendas->first()?->id;
-
-        $productos = $tiendaId
-            ? Producto::select('id', 'nombre', 'stock', 'stock_minimo', 'unidad', 'imagen', 'tienda_id')
-                ->where('tienda_id', $tiendaId)
-                ->orderBy('nombre')
-                ->get()
-            : collect();
+        // Next albaran number: global counter across all tiendas
+        $siguiente = 1;
+        if (Schema::hasTable('entradas_mercancia')) {
+            try {
+                $siguiente = EntradaMercancia::max('id') + 1;
+                if ($siguiente < 1) $siguiente = 1;
+            } catch (\Throwable) {}
+        }
+        $nextAlbaran = 'ALB-' . date('Y') . '-' . str_pad($siguiente, 4, '0', STR_PAD_LEFT);
 
         return Inertia::render('Supplier/EntradaMercancia/Create', [
-            'tiendas'   => $tiendas,
-            'productos' => $productos,
-            'filters'   => ['tienda_id' => $tiendaId],
+            'tiendas'     => $tiendas,
+            'nextAlbaran' => $nextAlbaran,
         ]);
     }
 
@@ -118,32 +118,36 @@ class EntradaMercanciaController extends Controller
             'notas'                  => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $totalUnidades = 0;
-        $nombresProds  = [];
+        try {
+            $totalUnidades = 0;
+            $nombresProds  = [];
 
-        foreach ($data['productos'] as $item) {
-            $producto = Producto::findOrFail($item['producto_id']);
+            foreach ($data['productos'] as $item) {
+                $producto = Producto::findOrFail($item['producto_id']);
 
-            $stockAnterior = $producto->stock;
-            $stockNuevo    = $stockAnterior + $item['cantidad'];
+                $stockAnterior = $producto->stock;
+                $stockNuevo    = $stockAnterior + $item['cantidad'];
 
-            // Update stock — triggers ProductoObserver for email alerts
-            $producto->update(['stock' => $stockNuevo]);
+                // Update stock — triggers ProductoObserver for email alerts
+                $producto->update(['stock' => $stockNuevo]);
 
-            EntradaMercancia::create([
-                'producto_id'      => $producto->id,
-                'tienda_id'        => $data['tienda_id'],
-                'usuario_id'       => auth()->id(),
-                'stock_anterior'   => $stockAnterior,
-                'cantidad_entrada' => $item['cantidad'],
-                'stock_nuevo'      => $stockNuevo,
-                'numero_documento' => $data['numero_documento'],
-                'proveedor'        => $data['proveedor'] ?? null,
-                'notas'            => $data['notas'] ?? null,
-            ]);
+                EntradaMercancia::create([
+                    'producto_id'      => $producto->id,
+                    'tienda_id'        => $data['tienda_id'],
+                    'usuario_id'       => auth()->id(),
+                    'stock_anterior'   => $stockAnterior,
+                    'cantidad_entrada' => $item['cantidad'],
+                    'stock_nuevo'      => $stockNuevo,
+                    'numero_documento' => $data['numero_documento'],
+                    'proveedor'        => $data['proveedor'] ?? null,
+                    'notas'            => $data['notas'] ?? null,
+                ]);
 
-            $totalUnidades += $item['cantidad'];
-            $nombresProds[] = $producto->nombre;
+                $totalUnidades += $item['cantidad'];
+                $nombresProds[] = $producto->nombre;
+            }
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Error al guardar la entrada: ' . $e->getMessage());
         }
 
         $resumen = count($nombresProds) === 1
