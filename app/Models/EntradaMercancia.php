@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class EntradaMercancia extends Model
 {
+    protected $table = 'entradas_mercancia';
+
     protected $fillable = [
         'producto_id',
         'tienda_id',
