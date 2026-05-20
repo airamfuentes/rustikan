@@ -22,7 +22,7 @@ const hayFiltros = computed(() =>
 );
 
 const buscar = () => {
-    router.get(route('supplier.stock.index'), {
+    router.get(route('supplier.stock'), {
         search:         form.value.search,
         con_bajo_stock: form.value.con_bajo_stock ? '1' : '',
         con_sin_stock:  form.value.con_sin_stock  ? '1' : '',
