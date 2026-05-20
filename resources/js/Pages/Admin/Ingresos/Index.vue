@@ -148,13 +148,17 @@
                     <!-- Top Tiendas -->
                     <div class="rounded-lg bg-white dark:bg-gray-800 p-6 shadow">
                         <h3 class="mb-4 text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2"><Store class="h-5 w-5 text-gray-500" /> Top 10 Tiendas por Ingresos</h3>
-                        <div class="space-y-3">
+                        <div v-if="ingresos_por_tienda.length === 0" class="flex flex-col items-center py-8 text-center">
+                            <Store class="h-10 w-10 text-gray-300 dark:text-gray-600 mb-2" />
+                            <p class="text-sm text-gray-400 dark:text-gray-500">Sin datos para el período seleccionado.</p>
+                        </div>
+                        <div v-else class="space-y-3">
                             <div v-for="(tienda, index) in ingresos_por_tienda" :key="tienda.id" class="flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 p-3">
                                 <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-600 text-white font-bold text-sm">
                                     {{ index + 1 }}
                                 </div>
                                 <div class="h-10 w-10 flex-shrink-0">
-                                    <img v-if="tienda.logo" :src="`/storage/${tienda.logo}`" :alt="sinEmojis(tienda.nombre)" class="h-10 w-10 rounded-full object-cover">
+                                    <img v-if="tienda.logo" :src="tienda.logo.startsWith('http') ? tienda.logo : `/storage/${tienda.logo}`" :alt="sinEmojis(tienda.nombre)" class="h-10 w-10 rounded-full object-cover">
                                     <div v-else class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 font-semibold">
                                         {{ sinEmojis(tienda.nombre).charAt(0) }}
                                     </div>
@@ -173,19 +177,25 @@
                     <!-- Ingresos por Categoría -->
                     <div class="rounded-lg bg-white dark:bg-gray-800 p-6 shadow">
                         <h3 class="mb-4 text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2"><FolderOpen class="h-5 w-5 text-gray-500" /> Ingresos por Categoría</h3>
-                        <div class="space-y-3">
+                        <div v-if="ingresos_por_categoria.length === 0" class="flex flex-col items-center py-8 text-center">
+                            <FolderOpen class="h-10 w-10 text-gray-300 dark:text-gray-600 mb-2" />
+                            <p class="text-sm text-gray-400 dark:text-gray-500">Sin datos para el período seleccionado.</p>
+                        </div>
+                        <div v-else class="space-y-3">
                             <div v-for="categoria in ingresos_por_categoria" :key="categoria.categoria" class="rounded-lg border dark:border-gray-700 p-4">
                                 <div class="flex items-center justify-between mb-2">
                                     <div class="flex items-center gap-2">
-                                        <img v-if="categoria.imagen" :src="`/storage/${categoria.imagen}`" :alt="categoria.categoria" class="h-8 w-8 rounded-full object-cover" />
-                                        <div v-else class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-sm">{{ categoria.icono || '🏷️' }}</div>
+                                        <img v-if="categoria.imagen" :src="categoria.imagen.startsWith('http') ? categoria.imagen : `/storage/${categoria.imagen}`" :alt="categoria.categoria" class="h-8 w-8 rounded-full object-cover" />
+                                        <div v-else class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 text-sm font-bold">
+                                            {{ (categoria.categoria || 'S')[0] }}
+                                        </div>
                                         <span class="font-medium text-gray-900 dark:text-white">{{ categoria.categoria }}</span>
                                     </div>
                                     <span class="text-lg font-bold text-green-600 dark:text-green-400">{{ formatPrice(categoria.total_ingresos) }}€</span>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <div class="h-4 w-full rounded-full bg-gray-200 dark:bg-gray-700">
-                                        <div class="h-4 rounded-full bg-gradient-to-r from-green-400 to-green-600" :style="{ width: calcularPorcentajeCategoria(categoria.total_ingresos) }"></div>
+                                    <div class="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+                                        <div class="h-2 rounded-full bg-gradient-to-r from-green-400 to-green-600 transition-all duration-500" :style="{ width: calcularPorcentajeCategoria(categoria.total_ingresos) }"></div>
                                     </div>
                                     <span class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ categoria.total_pedidos }} pedidos</span>
                                 </div>

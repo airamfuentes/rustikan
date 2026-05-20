@@ -495,7 +495,15 @@ const initials = computed(() => {
 
                         <!-- Formulario cambio contraseña -->
                         <div class="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-700/30 p-5 shadow-sm">
-                            <h4 class="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('profile.change_password_title') }}</h4>
+                            <div class="mb-4 flex items-center justify-between">
+                                <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('profile.change_password_title') }}</h4>
+                                <Link
+                                    :href="route('password.request')"
+                                    class="text-xs text-primary-600 dark:text-primary-400 hover:underline"
+                                >
+                                    ¿Olvidaste tu contraseña?
+                                </Link>
+                            </div>
                             <form @submit.prevent="updatePassword" class="space-y-4">
                                 <div>
                                     <InputLabel for="s-current" :value="t('profile.current_password')" />

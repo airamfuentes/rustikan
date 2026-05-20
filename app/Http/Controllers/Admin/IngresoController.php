@@ -21,7 +21,9 @@ class IngresoController extends Controller
 
         $comisionPct = 10.0;
 
-        $ingresosTotales = (float) Pedido::where('estado', 'entregado')
+        $estadosActivos = ['entregado', 'confirmado', 'en_preparacion', 'enviado'];
+
+        $ingresosTotales = (float) Pedido::whereIn('estado', $estadosActivos)
             ->whereBetween('created_at', [$fecha_desde, $fecha_hasta])
             ->sum('total');
         $ingresosPeriodo = $ingresosTotales;
@@ -29,17 +31,17 @@ class IngresoController extends Controller
         $stats = [
             'ingresos_totales'      => $ingresosTotales,
             'ingresos_periodo'      => $ingresosPeriodo,
-            'pedidos_completados'   => Pedido::where('estado', 'entregado')
+            'pedidos_completados'   => Pedido::whereIn('estado', $estadosActivos)
                 ->whereBetween('created_at', [$fecha_desde, $fecha_hasta])
                 ->count(),
-            'ticket_promedio'       => Pedido::where('estado', 'entregado')
+            'ticket_promedio'       => Pedido::whereIn('estado', $estadosActivos)
                 ->whereBetween('created_at', [$fecha_desde, $fecha_hasta])
                 ->avg('total') ?? 0,
-            'ingresos_mes_actual'   => Pedido::where('estado', 'entregado')
+            'ingresos_mes_actual'   => Pedido::whereIn('estado', $estadosActivos)
                 ->whereMonth('created_at', now()->month)
                 ->whereYear('created_at', now()->year)
                 ->sum('total'),
-            'ingresos_mes_anterior' => Pedido::where('estado', 'entregado')
+            'ingresos_mes_anterior' => Pedido::whereIn('estado', $estadosActivos)
                 ->whereMonth('created_at', now()->subMonth()->month)
                 ->whereYear('created_at', now()->subMonth()->year)
                 ->sum('total'),
@@ -59,7 +61,7 @@ class IngresoController extends Controller
             DB::raw('SUM(total) as total'),
             DB::raw('COUNT(*) as cantidad')
         )
-        ->where('estado', 'entregado')
+        ->whereIn('estado', $estadosActivos)
         ->whereBetween('created_at', [$fecha_desde, $fecha_hasta])
         ->groupBy('mes')
         ->orderBy('mes', 'asc')
@@ -76,7 +78,7 @@ class IngresoController extends Controller
                 DB::raw('SUM(pedido_items.subtotal) as total_ingresos'),
                 DB::raw('COUNT(DISTINCT pedidos.id) as total_pedidos')
             )
-            ->where('pedidos.estado', 'entregado')
+            ->whereIn('pedidos.estado', $estadosActivos)
             ->whereBetween('pedidos.created_at', [$fecha_desde, $fecha_hasta])
             ->groupBy('tiendas.id', 'tiendas.nombre', 'tiendas.logo')
             ->orderBy('total_ingresos', 'desc')
@@ -87,15 +89,15 @@ class IngresoController extends Controller
         $ingresos_por_categoria = DB::table('pedido_items')
             ->join('pedidos', 'pedido_items.pedido_id', '=', 'pedidos.id')
             ->join('tiendas', 'pedido_items.tienda_id', '=', 'tiendas.id')
-            ->join('categorias', 'tiendas.categoria_id', '=', 'categorias.id')
+            ->leftJoin('categorias', 'tiendas.categoria_id', '=', 'categorias.id')
             ->select(
-                'categorias.nombre as categoria',
+                DB::raw('COALESCE(categorias.nombre, "Sin categoría") as categoria'),
                 'categorias.icono',
                 'categorias.imagen',
                 DB::raw('SUM(pedido_items.subtotal) as total_ingresos'),
                 DB::raw('COUNT(DISTINCT pedidos.id) as total_pedidos')
             )
-            ->where('pedidos.estado', 'entregado')
+            ->whereIn('pedidos.estado', $estadosActivos)
             ->whereBetween('pedidos.created_at', [$fecha_desde, $fecha_hasta])
             ->groupBy('categorias.id', 'categorias.nombre', 'categorias.icono', 'categorias.imagen')
             ->orderBy('total_ingresos', 'desc')
@@ -114,7 +116,7 @@ class IngresoController extends Controller
                 DB::raw('SUM(pedido_items.cantidad) as total_vendido'),
                 DB::raw('SUM(pedido_items.subtotal) as total_ingresos')
             )
-            ->where('pedidos.estado', 'entregado')
+            ->whereIn('pedidos.estado', $estadosActivos)
             ->whereBetween('pedidos.created_at', [$fecha_desde, $fecha_hasta])
             ->groupBy('productos.id', 'productos.nombre', 'productos.imagen', 'tiendas.id', 'tiendas.nombre')
             ->orderBy('total_ingresos', 'desc')
