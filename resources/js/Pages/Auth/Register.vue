@@ -14,9 +14,12 @@ import {
     validarNombre, validarEmail, validarCP,
     evaluarPassword,
 } from '@/Composables/useValidaciones';
+import { Eye, EyeOff } from 'lucide-vue-next';
 
 const { t } = useI18n();
 const RECAPTCHA_SITE_KEY = usePage().props.recaptchaSiteKey;
+const showPassword = ref(false);
+const showPasswordConfirm = ref(false);
 
 const form = useForm({
     name: '',
@@ -273,7 +276,7 @@ const submit = () => {
 
             <div class="grid gap-4 sm:grid-cols-3">
                 <div>
-                    <InputLabel for="puerta" :value="t('auth.door_label') + ' ' + t('auth.optional_label')" />
+                    <InputLabel for="puerta" :value="t('auth.door_label')" />
                     <TextInput id="puerta" type="text" class="mt-1 block w-full" v-model="form.puerta"
                         maxlength="20" placeholder="2ºA" />
                     <InputError class="mt-2" :message="form.errors.puerta" />
@@ -303,16 +306,23 @@ const submit = () => {
             <div>
                 <InputLabel for="password" :value="t('auth.password')" />
 
-                <TextInput
-                    id="password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password"
-                    required
-                    autocomplete="new-password"
-                    minlength="8"
-                    maxlength="128"
-                />
+                <div class="relative mt-1">
+                    <TextInput
+                        id="password"
+                        :type="showPassword ? 'text' : 'password'"
+                        class="block w-full pr-10"
+                        v-model="form.password"
+                        required
+                        autocomplete="new-password"
+                        minlength="8"
+                        maxlength="128"
+                    />
+                    <button type="button" @click="showPassword = !showPassword"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <EyeOff v-if="showPassword" class="h-4 w-4" />
+                        <Eye v-else class="h-4 w-4" />
+                    </button>
+                </div>
 
                 <InputError class="mt-2" :message="erroresLocales.password || form.errors.password" />
                 <PasswordStrength :password="form.password" />
@@ -324,16 +334,23 @@ const submit = () => {
                     :value="t('auth.confirm_password_label')"
                 />
 
-                <TextInput
-                    id="password_confirmation"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password_confirmation"
-                    required
-                    autocomplete="new-password"
-                    minlength="8"
-                    maxlength="128"
-                />
+                <div class="relative mt-1">
+                    <TextInput
+                        id="password_confirmation"
+                        :type="showPasswordConfirm ? 'text' : 'password'"
+                        class="block w-full pr-10"
+                        v-model="form.password_confirmation"
+                        required
+                        autocomplete="new-password"
+                        minlength="8"
+                        maxlength="128"
+                    />
+                    <button type="button" @click="showPasswordConfirm = !showPasswordConfirm"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <EyeOff v-if="showPasswordConfirm" class="h-4 w-4" />
+                        <Eye v-else class="h-4 w-4" />
+                    </button>
+                </div>
 
                 <InputError
                     class="mt-2"

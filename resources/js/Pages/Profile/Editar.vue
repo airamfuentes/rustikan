@@ -9,6 +9,7 @@ import NavbarPublico from '@/Components/NavbarPublico.vue';
 import { useI18n } from '@/Composables/useI18n';
 import { useToasts } from '@/Composables/useToasts';
 import { evaluarPassword, validarNombre, validarCP } from '@/Composables/useValidaciones';
+import { Eye, EyeOff } from 'lucide-vue-next';
 import { useFileUpload } from '@/Composables/useFileUpload';
 
 const { validate: validateFile } = useFileUpload();
@@ -147,6 +148,10 @@ const passwordForm = useForm({
 });
 
 const erroresPassword = ref({});
+const showCurrentPw = ref(false);
+const showNewPw = ref(false);
+const showConfirmPw = ref(false);
+const showDeletePw = ref(false);
 
 const updatePassword = () => {
     const e = {};
@@ -494,18 +499,33 @@ const initials = computed(() => {
                             <form @submit.prevent="updatePassword" class="space-y-4">
                                 <div>
                                     <InputLabel for="s-current" :value="t('profile.current_password')" />
-                                    <TextInput id="s-current" v-model="passwordForm.current_password" type="password" class="mt-1 block w-full" autocomplete="current-password" maxlength="128" />
+                                    <div class="relative mt-1">
+                                        <TextInput id="s-current" v-model="passwordForm.current_password" :type="showCurrentPw ? 'text' : 'password'" class="block w-full pr-10" autocomplete="current-password" maxlength="128" />
+                                        <button type="button" @click="showCurrentPw = !showCurrentPw" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                            <EyeOff v-if="showCurrentPw" class="h-4 w-4" /><Eye v-else class="h-4 w-4" />
+                                        </button>
+                                    </div>
                                     <InputError class="mt-1" :message="erroresPassword.current_password || passwordForm.errors.current_password" />
                                 </div>
                                 <div>
                                     <InputLabel for="s-new" :value="t('profile.new_password')" />
-                                    <TextInput id="s-new" v-model="passwordForm.password" type="password" class="mt-1 block w-full" autocomplete="new-password" minlength="8" maxlength="128" />
+                                    <div class="relative mt-1">
+                                        <TextInput id="s-new" v-model="passwordForm.password" :type="showNewPw ? 'text' : 'password'" class="block w-full pr-10" autocomplete="new-password" minlength="8" maxlength="128" />
+                                        <button type="button" @click="showNewPw = !showNewPw" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                            <EyeOff v-if="showNewPw" class="h-4 w-4" /><Eye v-else class="h-4 w-4" />
+                                        </button>
+                                    </div>
                                     <InputError class="mt-1" :message="erroresPassword.password || passwordForm.errors.password" />
                                     <PasswordStrength :password="passwordForm.password" />
                                 </div>
                                 <div>
                                     <InputLabel for="s-confirm" :value="t('profile.confirm_password')" />
-                                    <TextInput id="s-confirm" v-model="passwordForm.password_confirmation" type="password" class="mt-1 block w-full" autocomplete="new-password" minlength="8" maxlength="128" />
+                                    <div class="relative mt-1">
+                                        <TextInput id="s-confirm" v-model="passwordForm.password_confirmation" :type="showConfirmPw ? 'text' : 'password'" class="block w-full pr-10" autocomplete="new-password" minlength="8" maxlength="128" />
+                                        <button type="button" @click="showConfirmPw = !showConfirmPw" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                            <EyeOff v-if="showConfirmPw" class="h-4 w-4" /><Eye v-else class="h-4 w-4" />
+                                        </button>
+                                    </div>
                                     <InputError class="mt-1" :message="erroresPassword.password_confirmation || passwordForm.errors.password_confirmation" />
                                 </div>
                                 <div class="flex justify-end pt-1">
@@ -610,13 +630,18 @@ const initials = computed(() => {
                                     <!-- Paso 2: confirmar contraseña -->
                                     <div v-else-if="deleteStep === 2" class="mt-4 space-y-3">
                                         <p class="text-sm text-red-700 font-medium">{{ t('profile.delete_confirm_password') }}</p>
-                                        <TextInput
-                                            id="del-pass"
-                                            v-model="deleteForm.password"
-                                            type="password"
-                                            class="mt-1 block w-full"
-                                            :placeholder="t('profile.delete_password_placeholder')"
-                                        />
+                                        <div class="relative mt-1">
+                                            <TextInput
+                                                id="del-pass"
+                                                v-model="deleteForm.password"
+                                                :type="showDeletePw ? 'text' : 'password'"
+                                                class="block w-full pr-10"
+                                                :placeholder="t('profile.delete_password_placeholder')"
+                                            />
+                                            <button type="button" @click="showDeletePw = !showDeletePw" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                                <EyeOff v-if="showDeletePw" class="h-4 w-4" /><Eye v-else class="h-4 w-4" />
+                                            </button>
+                                        </div>
                                         <InputError :message="deleteForm.errors.password" />
                                         <div class="flex gap-3 pt-1">
                                             <button

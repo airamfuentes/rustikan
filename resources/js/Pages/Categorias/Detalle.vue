@@ -121,7 +121,11 @@ onMounted(() => {
     setupObserver();
     observeCards();
     document.addEventListener('click', handleClickOutsideSort);
-    router.on('start', () => { isNavigating.value = true; });
+    router.on('start', (e) => {
+        // No mostrar skeleton si es un reload parcial (ej. toggleFavorito)
+        if (e.detail?.visit?.only?.length) return;
+        isNavigating.value = true;
+    });
     router.on('finish', () => { isNavigating.value = false; });
 });
 

@@ -9,6 +9,7 @@ import Recaptcha from '@/Components/Recaptcha.vue';
 import { ref } from 'vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { useI18n } from '@/Composables/useI18n';
+import { Eye, EyeOff } from 'lucide-vue-next';
 
 defineProps({
     canResetPassword: {
@@ -20,6 +21,7 @@ defineProps({
 });
 
 const { t } = useI18n();
+const showPassword = ref(false);
 const RECAPTCHA_SITE_KEY = usePage().props.recaptchaSiteKey;
 const recaptchaRef = ref(null);
 
@@ -73,14 +75,21 @@ const submit = () => {
             <div class="mt-4">
                 <InputLabel for="password" :value="t('auth.password')" />
 
-                <TextInput
-                    id="password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password"
-                    required
-                    autocomplete="current-password"
-                />
+                <div class="relative mt-1">
+                    <TextInput
+                        id="password"
+                        :type="showPassword ? 'text' : 'password'"
+                        class="block w-full pr-10"
+                        v-model="form.password"
+                        required
+                        autocomplete="current-password"
+                    />
+                    <button type="button" @click="showPassword = !showPassword"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <EyeOff v-if="showPassword" class="h-4 w-4" />
+                        <Eye v-else class="h-4 w-4" />
+                    </button>
+                </div>
 
                 <InputError class="mt-2" :message="form.errors.password" />
             </div>

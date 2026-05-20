@@ -22,7 +22,7 @@
         </section>
 
         <!-- Impacto — visible nada más entrar -->
-        <section class="bg-gradient-to-b from-primary-50 to-white py-10 dark:from-primary-950/40 dark:to-gray-900">
+        <section class="bg-primary-50 py-10 dark:bg-primary-950/40">
             <div class="mx-auto max-w-4xl px-4 sm:px-6">
                 <h2 class="mb-6 text-center text-xl font-bold text-gray-800 dark:text-white">{{ t('info.mission.impact_title') }}</h2>
                 <div class="grid gap-4 text-center sm:grid-cols-3">

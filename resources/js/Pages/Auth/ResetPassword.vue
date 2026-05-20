@@ -9,6 +9,7 @@ import { Head, useForm } from '@inertiajs/vue3';
 import { useI18n } from '@/Composables/useI18n';
 import { ref } from 'vue';
 import { evaluarPassword } from '@/Composables/useValidaciones';
+import { Eye, EyeOff } from 'lucide-vue-next';
 
 const { t } = useI18n();
 
@@ -31,6 +32,8 @@ const form = useForm({
 });
 
 const erroresLocales = ref({});
+const showPassword = ref(false);
+const showPasswordConfirm = ref(false);
 
 const submit = () => {
     const e = {};
@@ -70,16 +73,23 @@ const submit = () => {
             <div class="mt-4">
                 <InputLabel for="password" :value="t('auth.reset_new_password')" />
 
-                <TextInput
-                    id="password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password"
-                    required
-                    autocomplete="new-password"
-                    minlength="8"
-                    maxlength="128"
-                />
+                <div class="relative mt-1">
+                    <TextInput
+                        id="password"
+                        :type="showPassword ? 'text' : 'password'"
+                        class="block w-full pr-10"
+                        v-model="form.password"
+                        required
+                        autocomplete="new-password"
+                        minlength="8"
+                        maxlength="128"
+                    />
+                    <button type="button" @click="showPassword = !showPassword"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <EyeOff v-if="showPassword" class="h-4 w-4" />
+                        <Eye v-else class="h-4 w-4" />
+                    </button>
+                </div>
 
                 <InputError class="mt-2" :message="erroresLocales.password || form.errors.password" />
                 <PasswordStrength :password="form.password" />
@@ -91,16 +101,23 @@ const submit = () => {
                     :value="t('auth.reset_confirm_password')"
                 />
 
-                <TextInput
-                    id="password_confirmation"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password_confirmation"
-                    required
-                    autocomplete="new-password"
-                    minlength="8"
-                    maxlength="128"
-                />
+                <div class="relative mt-1">
+                    <TextInput
+                        id="password_confirmation"
+                        :type="showPasswordConfirm ? 'text' : 'password'"
+                        class="block w-full pr-10"
+                        v-model="form.password_confirmation"
+                        required
+                        autocomplete="new-password"
+                        minlength="8"
+                        maxlength="128"
+                    />
+                    <button type="button" @click="showPasswordConfirm = !showPasswordConfirm"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <EyeOff v-if="showPasswordConfirm" class="h-4 w-4" />
+                        <Eye v-else class="h-4 w-4" />
+                    </button>
+                </div>
 
                 <InputError
                     class="mt-2"
