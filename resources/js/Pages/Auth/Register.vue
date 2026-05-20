@@ -216,6 +216,7 @@ const submit = () => {
                             required
                             autocomplete="tel-national"
                             inputmode="numeric"
+                            v-only-digits
                             :placeholder="prefijo === '+34' ? '612345678' : ''"
                             :maxlength="maxLenTelefono"
                             class="flex-1 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none"
@@ -298,7 +299,7 @@ const submit = () => {
                 <div>
                     <InputLabel for="localidad" :value="t('auth.locality_label') + ' *'" />
                     <TextInput id="localidad" type="text" class="mt-1 block w-full" v-model="form.localidad"
-                        required maxlength="100" placeholder="Arrecife" />
+                        required maxlength="100" v-only-letters placeholder="Arrecife" />
                     <InputError class="mt-2" :message="erroresLocales.localidad || form.errors.localidad" />
                 </div>
             </div>

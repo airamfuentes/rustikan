@@ -578,6 +578,7 @@ const stepTitle = computed(() => ({
                                         :placeholder="t('checkout.city')"
                                         autocomplete="address-level2"
                                         maxlength="80"
+                                        v-only-letters
                                         :class="['w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2',
                                             errores.localidad ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 dark:border-gray-600 focus:border-primary-400 focus:ring-primary-200',
                                             'dark:bg-gray-700 dark:text-white dark:placeholder-gray-500']"

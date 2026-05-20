@@ -223,7 +223,7 @@ class StripeController extends Controller
                 $pedido = Pedido::create([
                     'user_id'                  => $userId,
                     'numero_pedido'            => Pedido::generateOrderNumber(),
-                    'estado'                   => 'confirmado',
+                    'estado'                   => 'pendiente',
                     'subtotal'                 => $subtotal,
                     'gastos_envio'             => $gastosEnvio,
                     'total'                    => $total,

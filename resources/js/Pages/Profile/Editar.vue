@@ -370,7 +370,7 @@ const initials = computed(() => {
                             <InputLabel for="p-telefono" :value="t('profile.phone_label')" />
                             <TextInput id="p-telefono" v-model="profileForm.telefono" type="tel"
                                 class="mt-1 block w-full" autocomplete="off" inputmode="tel"
-                                maxlength="20" placeholder="+34612345678" />
+                                maxlength="20" v-only-phone placeholder="+34612345678" />
                             <InputError class="mt-1" :message="profileForm.errors.telefono" />
                         </div>
 
@@ -421,7 +421,7 @@ const initials = computed(() => {
                             <div>
                                 <InputLabel for="p-localidad" value="Localidad" />
                                 <TextInput id="p-localidad" v-model="profileForm.localidad" type="text"
-                                    class="mt-1 block w-full" maxlength="100" placeholder="Arrecife" />
+                                    class="mt-1 block w-full" maxlength="100" v-only-letters placeholder="Arrecife" />
                                 <InputError class="mt-1" :message="profileForm.errors.localidad" />
                             </div>
                         </div>
