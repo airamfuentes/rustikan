@@ -12,17 +12,24 @@ use Inertia\Inertia;
 
 class EntradaMercanciaController extends Controller
 {
+    private function emptyResponse(Request $request): \Inertia\Response
+    {
+        return Inertia::render('Supplier/EntradaMercancia/Index', [
+            'entradas'          => ['data' => [], 'last_page' => 1, 'total' => 0, 'from' => null, 'to' => null, 'prev_page_url' => null, 'next_page_url' => null],
+            'tiendas'           => [],
+            'stats'             => ['total_entradas' => 0, 'hoy' => 0, 'total_unidades' => 0, 'proveedores' => 0],
+            'filters'           => [],
+            '_migrationPending' => true,
+        ]);
+    }
+
     public function index(Request $request)
     {
         if (!Schema::hasTable('entradas_mercancia')) {
-            return Inertia::render('Supplier/EntradaMercancia/Index', [
-                'entradas' => ['data' => [], 'last_page' => 1, 'total' => 0, 'from' => null, 'to' => null, 'prev_page_url' => null, 'next_page_url' => null],
-                'tiendas'  => [],
-                'stats'    => ['total_entradas' => 0, 'hoy' => 0, 'total_unidades' => 0, 'proveedores' => 0],
-                'filters'  => [],
-                '_migrationPending' => true,
-            ]);
+            return $this->emptyResponse($request);
         }
+
+        try {
 
         $query = EntradaMercancia::with([
             'producto:id,nombre,unidad,imagen',
@@ -69,6 +76,10 @@ class EntradaMercanciaController extends Controller
             'stats'    => $stats,
             'filters'  => $request->only(['search', 'tienda_id', 'desde', 'hasta']),
         ]);
+
+        } catch (\Throwable) {
+            return $this->emptyResponse($request);
+        }
     }
 
     public function create(Request $request)
