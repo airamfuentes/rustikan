@@ -193,7 +193,7 @@ class PedidoController extends Controller
         $userId = auth()->id();
 
         $pedidosActivos = Pedido::where('user_id', $userId)
-            ->whereIn('estado', ['pendiente', 'confirmado', 'preparando', 'en_camino'])
+            ->whereNotIn('estado', ['entregado', 'cancelado'])
             ->with(['items.tienda:id,nombre,slug'])
             ->withCount('items')
             ->orderBy('created_at', 'desc')

@@ -7,7 +7,7 @@ import { imgSrc } from '@/Composables/useImgSrc';
 import {
     ChevronLeft, ChevronRight, FileText, X, Package,
     MapPin, Phone, StickyNote, AlertTriangle, CheckCircle2,
-    Clock, Truck, Loader2
+    Loader2
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -182,12 +182,6 @@ const puedeConfirmar = (estado) => ['pendiente', 'confirmado'].includes(estado);
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Gestiona y actualiza el estado de los pedidos</p>
                     </div>
                     <div class="flex items-center gap-3">
-                        <Link
-                            :href="route('supplier.salidas.index')"
-                            class="inline-flex items-center gap-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 px-3 py-2 text-sm font-semibold text-white transition-colors"
-                        >
-                            <Truck class="h-4 w-4" /> Dar salida
-                        </Link>
                         <a :href="urlExportar" target="_blank"
                            class="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20 px-3 py-2 text-sm font-medium text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-colors">
                             <FileText class="h-4 w-4" /> Exportar PDF

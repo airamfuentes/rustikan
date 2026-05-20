@@ -35,7 +35,7 @@ class PedidoController extends Controller
 
         if ($request->filled('estado')) {
             if ($request->estado === 'en_proceso') {
-                $query->whereIn('estado', ['confirmado', 'preparando', 'en_camino']);
+                $query->whereIn('estado', ['confirmado', 'en_preparacion', 'preparando', 'en_camino', 'enviado']);
             } else {
                 $query->where('estado', $request->estado);
             }
