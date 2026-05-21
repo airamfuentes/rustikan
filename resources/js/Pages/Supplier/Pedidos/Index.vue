@@ -3,7 +3,7 @@ import LayoutSupplier from '@/Layouts/LayoutSupplier.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useToasts } from '@/Composables/useToasts';
-import { imgSrc } from '@/Composables/useImgSrc';
+import { imgSrc, onImgError } from '@/Composables/useImgSrc';
 import {
     ChevronLeft, ChevronRight, FileText, X, Package,
     MapPin, Phone, StickyNote, AlertTriangle, CheckCircle2,
@@ -378,7 +378,7 @@ const puedeConfirmar = (estado) => ['pendiente', 'confirmado'].includes(estado);
                                             :src="imgSrc(item.producto?.imagen)"
                                             :alt="item.producto?.nombre"
                                             class="h-full w-full object-cover"
-                                            @error="(e) => e.target.style.display='none'"
+                                            @error="onImgError"
                                         />
                                         <div v-else class="h-full w-full flex items-center justify-center">
                                             <Package class="h-5 w-5 text-gray-400" />

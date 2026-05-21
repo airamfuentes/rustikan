@@ -104,7 +104,7 @@
                                             <div class="h-9 w-9 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 shrink-0">
                                                 <img v-if="entrada.producto?.imagen" :src="imgSrc(entrada.producto.imagen)"
                                                     :alt="entrada.producto.nombre" class="h-full w-full object-cover"
-                                                    @error="(e) => e.target.style.display='none'" />
+                                                    @error="onImgError" />
                                             </div>
                                             <span class="text-sm font-medium text-gray-900 dark:text-white">{{ entrada.producto?.nombre ?? '—' }}</span>
                                         </div>
@@ -170,7 +170,7 @@ import AuthenticatedLayout from '@/Layouts/LayoutAutenticado.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
 import { ArrowLeft, Search, CalendarDays, FileText, Truck, ChevronLeft, ChevronRight } from 'lucide-vue-next';
-import { imgSrc } from '@/Composables/useImgSrc';
+import { imgSrc, onImgError } from '@/Composables/useImgSrc';
 
 const props = defineProps({
     tienda:  { type: Object, required: true },

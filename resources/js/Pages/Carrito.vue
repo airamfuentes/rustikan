@@ -5,6 +5,7 @@ import { useCarrito } from '@/Composables/useCarrito';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import { useI18n } from '@/Composables/useI18n';
 import { AlertTriangle, ChevronLeft } from 'lucide-vue-next';
+import { onImgError } from '@/Composables/useImgSrc';
 import {
     validarTelefonoEs, validarCP, validarDireccion,
 } from '@/Composables/useValidaciones';
@@ -380,6 +381,7 @@ onMounted(() => {
                                         loading="lazy"
                                         :class="['h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0 rounded-xl object-cover shadow-sm transition-opacity',
                                             stockInfo[item.id] && !stockInfo[item.id].ok ? 'opacity-50 grayscale' : '']"
+                                        @error="onImgError"
                                     />
 
                                     <!-- Info -->

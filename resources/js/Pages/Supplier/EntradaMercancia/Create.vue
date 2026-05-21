@@ -6,7 +6,7 @@ import {
     ArrowLeft, PackagePlus, AlertTriangle, Package, Store, Search,
     Plus, Minus, Trash2, FileText, Truck, X, ChevronDown
 } from 'lucide-vue-next';
-import { imgSrc } from '@/Composables/useImgSrc';
+import { imgSrc, onImgError } from '@/Composables/useImgSrc';
 
 const props = defineProps({
     tiendas:     { type: Array,  required: true },
@@ -300,7 +300,7 @@ const submit = () => {
                                 <div class="h-9 w-9 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 shrink-0">
                                     <img v-if="prod.imagen" :src="imgSrc(prod.imagen)" :alt="prod.nombre"
                                         class="h-full w-full object-cover"
-                                        @error="(e) => e.target.style.display='none'" />
+                                        @error="onImgError" />
                                     <div v-else class="h-full w-full flex items-center justify-center">
                                         <Package class="h-4 w-4 text-gray-400" />
                                     </div>
@@ -334,7 +334,7 @@ const submit = () => {
                                 <div class="h-11 w-11 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 shrink-0">
                                     <img v-if="item.producto.imagen" :src="imgSrc(item.producto.imagen)"
                                         :alt="item.producto.nombre" class="h-full w-full object-cover"
-                                        @error="(e) => e.target.style.display='none'" />
+                                        @error="onImgError" />
                                     <div v-else class="h-full w-full flex items-center justify-center">
                                         <Package class="h-5 w-5 text-gray-400" />
                                     </div>

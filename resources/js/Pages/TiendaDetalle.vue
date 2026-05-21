@@ -12,6 +12,7 @@ import { useFavoritos } from '@/Composables/useFavoritos';
 import { Store, Package, Star, AlertTriangle, Check } from 'lucide-vue-next';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import { useToasts } from '@/Composables/useToasts';
+import { onImgError } from '@/Composables/useImgSrc';
 
 const { success: toastSuccess, error: toastError } = useToasts();
 
@@ -240,6 +241,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                 :src="tienda.imagen_portada ? (tienda.imagen_portada.startsWith('http') ? tienda.imagen_portada : `/storage/${tienda.imagen_portada}`) : tienda.logo ? (tienda.logo.startsWith('http') ? tienda.logo : `/storage/${tienda.logo}`) : '/images/logo.png'"
                 :alt="tienda.nombre"
                 class="absolute inset-0 h-full w-full object-cover opacity-25"
+                @error="onImgError"
             />
             <div class="absolute inset-0 bg-gradient-to-b from-gray-900/60 via-gray-900/80 to-gray-900"></div>
 
@@ -263,7 +265,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                 <div class="flex flex-col items-start gap-6 sm:flex-row sm:items-end sm:justify-between">
                     <div class="flex items-center gap-5">
                         <div v-if="tienda.logo" class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-full bg-white/10 shadow-2xl ring-2 ring-white/20">
-                            <img :src="`/storage/${tienda.logo}`" :alt="tienda.nombre" class="h-full w-full object-cover" />
+                            <img :src="`/storage/${tienda.logo}`" :alt="tienda.nombre" class="h-full w-full object-cover" @error="onImgError" />
                         </div>
                         <div v-else class="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-full bg-white/10 shadow-2xl ring-2 ring-white/20">
                             <Store class="h-9 w-9 text-white/70" />
@@ -442,6 +444,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                             :alt="producto.nombre"
                             loading="lazy"
                             class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            @error="onImgError"
                         />
 
                         <div class="absolute left-3 top-3 rounded-full bg-primary-500 px-2.5 py-1 text-xs font-bold text-white shadow">Km 0</div>
@@ -858,7 +861,7 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
 
                     <!-- Imagen -->
                     <div class="relative aspect-video overflow-hidden">
-                        <img :src="productoModal.imagen || '/images/logo.png'" :alt="productoModal.nombre" class="h-full w-full object-cover" />
+                        <img :src="productoModal.imagen || '/images/logo.png'" :alt="productoModal.nombre" class="h-full w-full object-cover" @error="onImgError" />
 
                         <!-- Badges -->
                         <div class="absolute left-4 top-4 flex flex-wrap gap-2">

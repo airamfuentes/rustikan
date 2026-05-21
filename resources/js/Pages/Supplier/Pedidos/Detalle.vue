@@ -36,7 +36,7 @@
                                         :src="imgSrc(item.producto?.imagen)"
                                         :alt="item.producto.nombre"
                                         class="h-14 w-14 rounded-xl object-cover flex-shrink-0"
-                                        @error="(e) => e.target.style.display='none'" />
+                                        @error="onImgError" />
                                     <div class="flex-1 min-w-0">
                                         <p class="font-medium text-gray-900 dark:text-white truncate">{{ item.producto?.nombre ?? '—' }}</p>
                                         <p class="text-sm text-gray-500 dark:text-gray-400">{{ item.tienda?.nombre ?? '' }}</p>
@@ -185,7 +185,7 @@ import { Link, router } from '@inertiajs/vue3';
 import { ref, onMounted, onUnmounted } from 'vue';
 import { ArrowLeft, StickyNote, FileText, AlertTriangle } from 'lucide-vue-next';
 import { useToasts } from '@/Composables/useToasts';
-import { imgSrc } from '@/Composables/useImgSrc';
+import { imgSrc, onImgError } from '@/Composables/useImgSrc';
 
 const props = defineProps({
     pedido: { type: Object, required: true },

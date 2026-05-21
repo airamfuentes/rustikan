@@ -2,7 +2,7 @@
 import LayoutSupplier from '@/Layouts/LayoutSupplier.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
-import { imgSrc } from '@/Composables/useImgSrc';
+import { imgSrc, onImgError } from '@/Composables/useImgSrc';
 import {
     PackagePlus, Search, SlidersHorizontal, Store, ChevronLeft, ChevronRight,
     CalendarDays, FileText, Truck, AlertTriangle, Plus
@@ -192,7 +192,7 @@ const formatDate = (str) => {
                                                 :src="imgSrc(entrada.producto.imagen)"
                                                 :alt="entrada.producto.nombre"
                                                 class="h-full w-full object-cover"
-                                                @error="(e) => e.target.style.display='none'"
+                                                @error="onImgError"
                                             />
                                         </div>
                                         <div>

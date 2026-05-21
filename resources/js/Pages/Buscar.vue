@@ -9,6 +9,7 @@ import { useI18n } from '@/Composables/useI18n';
 import { useCategorias } from '@/Composables/useCategorias';
 import { useFavoritos } from '@/Composables/useFavoritos';
 import { Search, ArrowLeft, Store, Package, Star, X, Home, ChevronRight } from 'lucide-vue-next';
+import { onImgError } from '@/Composables/useImgSrc';
 
 useDarkMode();
 const { t } = useI18n();
@@ -160,6 +161,7 @@ const tiendaImagen = (t) =>
                                     :alt="tienda.nombre"
                                     loading="lazy"
                                     class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                    @error="onImgError"
                                 />
                                 <span v-if="tienda.categoria" class="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-gray-700 backdrop-blur-sm">
                                     {{ categoriaNombre(tienda.categoria) }}
@@ -225,6 +227,7 @@ const tiendaImagen = (t) =>
                                     :alt="producto.nombre"
                                     loading="lazy"
                                     class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                    @error="onImgError"
                                 />
                                 <div class="absolute left-2 top-2 rounded-full bg-primary-500 px-2 py-0.5 text-[10px] font-bold text-white shadow">Km 0</div>
                             </div>
@@ -330,6 +333,7 @@ const tiendaImagen = (t) =>
                                     :alt="tienda.nombre"
                                     loading="lazy"
                                     class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                    @error="onImgError"
                                 />
                                 <span v-if="tienda.categoria" class="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-gray-700 backdrop-blur-sm">
                                     {{ categoriaNombre(tienda.categoria) }}

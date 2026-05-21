@@ -3,7 +3,7 @@ import LayoutSupplier from '@/Layouts/LayoutSupplier.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import { Package, AlertTriangle, XCircle, ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-vue-next';
-import { imgSrc } from '@/Composables/useImgSrc';
+import { imgSrc, onImgError } from '@/Composables/useImgSrc';
 
 const props = defineProps({
     tienda:   { type: Object, required: true },
@@ -144,7 +144,7 @@ const stockClass = (prod) => {
                                             :alt="prod.nombre"
                                             loading="lazy"
                                             class="h-10 w-10 rounded-lg object-cover flex-shrink-0"
-                                            @error="(e) => e.target.style.display='none'"
+                                            @error="onImgError"
                                         />
                                         <div v-else class="h-10 w-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center shrink-0">
                                             <Package class="h-5 w-5 text-gray-400" />

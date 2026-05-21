@@ -13,6 +13,7 @@ import { useCategorias } from '@/Composables/useCategorias';
 import { ArrowLeft, Type } from 'lucide-vue-next';
 import NavbarPublico from '@/Components/NavbarPublico.vue';
 import CategoriaIcono from '@/Components/CategoriaIcono.vue';
+import { onImgError } from '@/Composables/useImgSrc';
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
@@ -373,6 +374,7 @@ onUnmounted(() => {
                                 :src="tiendaDestacada.imagen_portada ? (tiendaDestacada.imagen_portada.startsWith('http') ? tiendaDestacada.imagen_portada : `/storage/${tiendaDestacada.imagen_portada}`) : tiendaDestacada.logo ? (tiendaDestacada.logo.startsWith('http') ? tiendaDestacada.logo : `/storage/${tiendaDestacada.logo}`) : '/images/logo.png'"
                                 :alt="tiendaDestacada.nombre"
                                 class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                @error="onImgError"
                             />
                             <div class="absolute inset-0 bg-gradient-to-r from-transparent to-white/50 dark:to-gray-800/50 hidden sm:block"></div>
                             <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent sm:hidden"></div>
@@ -461,6 +463,7 @@ onUnmounted(() => {
                                         :alt="tienda.nombre"
                                         loading="lazy"
                                         class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                        @error="onImgError"
                                     />
                                     <div v-if="tienda.productos_count" class="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-gray-700 backdrop-blur-sm">
                                         <svg class="h-3.5 w-3.5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
