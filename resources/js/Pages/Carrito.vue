@@ -461,26 +461,26 @@ onMounted(() => {
                                         </div>
                                     </div>
 
-                                    <!-- Avísame cuando vuelva — solo si agotado del todo -->
-                                    <label
-                                        v-if="!stockInfo[item.id].disponible || stockInfo[item.id].stock === 0"
-                                        class="flex cursor-pointer items-center gap-2.5 rounded-lg bg-white dark:bg-gray-800 border border-red-200 dark:border-red-700 px-3 py-2 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                                    <!-- Avísame cuando haya stock -->
+                                    <button
+                                        type="button"
+                                        class="flex cursor-pointer items-center gap-2.5 rounded-lg bg-white dark:bg-gray-800 border border-red-200 dark:border-red-700 px-3 py-2 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors w-full text-left"
                                         @click.prevent="toggleAlerta(item.id)"
                                     >
-                                        <div :class="['flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors',
-                                            stockInfo[item.id].subscribed
-                                                ? 'border-primary-500 bg-primary-500'
-                                                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700']">
-                                            <svg v-if="stockInfo[item.id].subscribed" class="h-3 w-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                                            </svg>
-                                        </div>
+                                        <svg :class="['h-5 w-5 shrink-0 transition-colors', stockInfo[item.id].subscribed ? 'text-primary-500' : 'text-gray-400']"
+                                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                        </svg>
                                         <span class="text-xs font-medium text-gray-700 dark:text-gray-300">
                                             {{ stockInfo[item.id].subscribed
-                                                ? '✓ Te avisaremos por email cuando vuelva a estar disponible'
-                                                : 'Avísame por email cuando vuelva a estar disponible' }}
+                                                ? 'Activado · Te avisaremos cuando haya stock'
+                                                : 'Avísame por email cuando haya stock disponible' }}
                                         </span>
-                                    </label>
+                                        <svg v-if="stockInfo[item.id].subscribed" class="ml-auto h-4 w-4 shrink-0 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
                         </div>

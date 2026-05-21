@@ -59,6 +59,7 @@ La plataforma está pensada para funcionar en producción real, con gestión de 
 - Mapa interactivo de productores en Lanzarote
 - Chat en tiempo real con el equipo de soporte
 - Sistema de notificaciones en campana
+- Alertas automáticas por email cuando un producto sin stock vuelve a estar disponible
 
 ### Para el productor (Owner)
 - Panel de gestión de tienda: descripción, imágenes, horarios, contacto
@@ -72,15 +73,18 @@ La plataforma está pensada para funcionar en producción real, con gestión de 
 - Panel de pedidos en tiempo real con polling automático (5 segundos)
 - Búsqueda y filtrado de pedidos con debounce instantáneo
 - Gestión de estados: pendiente → en preparación → enviado → entregado
+- Salida de pedidos: checklist masiva para marcar múltiples pedidos como enviados de una vez
 - Modal de incidencias con motivo obligatorio (visible en admin)
 - Inventario global de stock con alertas de bajo stock y sin stock
 - Búsqueda de tiendas en la vista de inventario
+- **Entrada de mercancía**: registro multi-producto bajo un mismo albarán, con numeración automática correlativa (ALB-YYYY-XXXX), búsqueda de tienda por nombre, auto-relleno del proveedor y ajuste de stock en tiempo real
 - Historial completo de pedidos gestionados con exportación a PDF
 - Chat directo con administración
 
 ### Para el administrador
 - Dashboard con KPIs: ventas, usuarios, pedidos, ingresos
 - Gestión completa de usuarios, tiendas, productos y categorías
+- **Albaranes por tienda**: historial completo de entradas de mercancía con búsqueda, filtros de fecha y estadísticas (total de entradas, unidades, entradas de hoy)
 - Aprobación/rechazo de solicitudes de cambio de tiendas
 - Gestión de solicitudes de creación de nueva tienda
 - Gestión de solicitudes de empleo (TrabajaConNosotros)
@@ -88,6 +92,7 @@ La plataforma está pensada para funcionar en producción real, con gestión de 
 - Exportación de facturas e historial en PDF
 - Gestión de reseñas
 - Panel de ingresos con gráficos por período
+- Activar/desactivar tiendas (recepción de pedidos) y visibilidad pública desde tabla con toggle switches
 
 ---
 
@@ -107,11 +112,13 @@ La plataforma está pensada para funcionar en producción real, con gestión de 
 │  ├── Owner/            ├── Tienda                   │
 │  ├── Supplier/         ├── Producto                 │
 │  └── Auth/             ├── Pedido / PedidoItem      │
-│                        ├── Notificacion             │
-│  Middleware/           ├── Resena                   │
-│  ├── RoleCheck         ├── RusticoinTransaction     │
-│  └── VerifyEmail       ├── MensajeChat              │
-│                        └── ActivityLog              │
+│                        ├── EntradaMercancia         │
+│  Middleware/           ├── StockAlert               │
+│  ├── RoleCheck         ├── Notificacion             │
+│  └── VerifyEmail       ├── Resena                   │
+│                        ├── RusticoinTransaction     │
+│  Observers/            ├── MensajeChat              │
+│  └── ProductoObserver  └── ActivityLog              │
 └────────────────────┬────────────────────────────────┘
                      │
          ┌───────────┼───────────┐
@@ -134,6 +141,18 @@ La plataforma está pensada para funcionar en producción real, con gestión de 
 
 ### Rusticoin
 Moneda interna de fidelización. Los usuarios acumulan Rusticoins con sus compras y pueden usarlos como método de pago alternativo a Stripe. El saldo se gestiona con transacciones auditadas en base de datos.
+
+### Entrada de mercancía (Supplier)
+El supplier registra la llegada de stock al almacén. Cada entrada agrupa múltiples productos bajo un mismo albarán, con numeración automática correlativa (ALB-YYYY-XXXX). Al seleccionar una tienda se auto-rellena el proveedor y se cargan sus productos disponibles. El stock de cada producto se actualiza automáticamente al guardar.
+
+### Alertas de stock (StockAlert)
+Los usuarios pueden suscribirse a un aviso cuando un producto sin stock vuelva a estar disponible. El `ProductoObserver` detecta la transición de stock 0 → positivo y envía automáticamente el email `StockDisponible` a todos los suscriptores del producto.
+
+### Emails automáticos
+- **PedidoConfirmado**: se envía al usuario cuando el supplier mueve el pedido a `en_preparacion`
+- **PedidoEnviado**: se envía al usuario cuando el pedido pasa a `enviado`
+- **StockDisponible**: se envía a los usuarios suscritos cuando un producto con stock 0 es repuesto
+- **RecargaMonedero**: confirmación de recarga de Rusticoins
 
 ### Sistema de notificaciones
 Notificaciones en campana con badge contador. Las notificaciones se cargan al abrir el panel y se eliminan del servidor al cerrarlo. Soporte para iconos y colores por tipo de evento.
@@ -178,7 +197,9 @@ app/
 │   ├── Owner/          # Panel del productor
 │   ├── Supplier/       # Panel del almacén
 │   └── Auth/           # Registro, login, verificación
+├── Mail/               # Mailables (PedidoConfirmado, PedidoEnviado, StockDisponible…)
 ├── Models/             # Eloquent models
+├── Observers/          # ProductoObserver (alertas de stock)
 └── Http/Middleware/
 
 resources/js/

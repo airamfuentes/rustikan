@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { Head, Link, usePage, useForm } from '@inertiajs/vue3';
+import { Head, Link, usePage, useForm, router } from '@inertiajs/vue3';
 import CarritoCompra from '@/Components/CarritoCompra.vue';
 import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
 import DarkModeToggle from '@/Components/DarkModeToggle.vue';
@@ -17,6 +17,36 @@ const { success: toastSuccess, error: toastError } = useToasts();
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
+
+const alertasActivas = ref(new Set());
+const togglingAlerta = ref(new Set());
+
+const csrfMeta = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+
+const toggleAlerta = async (productoId) => {
+    if (!user.value) { router.visit(route('login')); return; }
+    if (togglingAlerta.value.has(productoId)) return;
+    togglingAlerta.value = new Set([...togglingAlerta.value, productoId]);
+    try {
+        const res  = await fetch(route('stock-alerts.toggle', productoId), {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfMeta() },
+        });
+        const data = await res.json();
+        const next = new Set(alertasActivas.value);
+        if (data.subscribed) {
+            next.add(productoId);
+        } else {
+            next.delete(productoId);
+        }
+        alertasActivas.value = next;
+    } catch { /* silently fail */ } finally {
+        const next = new Set(togglingAlerta.value);
+        next.delete(productoId);
+        togglingAlerta.value = next;
+    }
+};
+
 const { isDark, toggleDark } = useDarkMode();
 const { t } = useI18n();
 const { nombre: categoriaNombre } = useCategorias();
@@ -113,7 +143,17 @@ const añadirDesdeModal = () => {
 };
 
 const onKeydown = (e) => { if (e.key === 'Escape') cerrarModal(); };
-onMounted(() => document.addEventListener('keydown', onKeydown));
+onMounted(async () => {
+    document.addEventListener('keydown', onKeydown);
+    if (!user.value) return;
+    try {
+        const res  = await fetch(route('stock-alerts.mis-alertas'), {
+            headers: { 'X-CSRF-TOKEN': csrfMeta() },
+        });
+        const data = await res.json();
+        alertasActivas.value = new Set(data.producto_ids ?? []);
+    } catch { /* silently fail */ }
+});
 onUnmounted(() => document.removeEventListener('keydown', onKeydown));
 
 // ─── Reseñas ──────────────────────────────────────────────────────────────────
@@ -420,11 +460,28 @@ const avatarColor = (inicial) => avatarColors[inicial.charCodeAt(0) % avatarColo
                             {{ t('store.last_units') }} ({{ producto.stock }} {{ producto.unidad }})
                         </div>
 
-                        <div v-if="producto.stock === 0 || !producto.disponible" class="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/55 backdrop-blur-sm">
+                        <div v-if="producto.stock === 0 || !producto.disponible" class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/55 backdrop-blur-sm">
                             <svg class="h-8 w-8 text-white opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
                             </svg>
                             <span class="rounded-full bg-red-600 px-4 py-2 text-sm font-bold text-white shadow-lg">{{ t('store.out_of_stock') }}</span>
+                            <button
+                                type="button"
+                                @click.stop="toggleAlerta(producto.id)"
+                                :disabled="togglingAlerta.has(producto.id)"
+                                :class="[
+                                    'flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold shadow-lg transition-all',
+                                    alertasActivas.has(producto.id)
+                                        ? 'bg-primary-500 text-white'
+                                        : 'bg-white/90 text-gray-800 hover:bg-white',
+                                ]"
+                            >
+                                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                {{ alertasActivas.has(producto.id) ? 'Aviso activado' : 'Avísame cuando llegue' }}
+                            </button>
                         </div>
 
                         <!-- Hover "Ver detalle" -->
