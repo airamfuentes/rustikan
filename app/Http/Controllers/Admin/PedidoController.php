@@ -138,7 +138,7 @@ class PedidoController extends Controller
             }
         }
 
-        DB::transaction(function () use ($pedido, $tipoReembolso, $numPedidoCancelar) {
+        DB::transaction(function () use ($pedido, $tipoReembolso, $numPedidoCancelar, $stripeReembolsoOk) {
             $pedido->update(['estado' => 'cancelado']);
 
             if ($tipoReembolso === 'rusticoin' && $pedido->user_id && $pedido->total > 0) {
