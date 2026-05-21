@@ -120,6 +120,7 @@ class PedidoController extends Controller
 
         $tipoReembolso = $request->input('tipo_reembolso', 'ninguno'); // ninguno, tarjeta, rusticoin
 
+        $pedido->loadMissing(['user', 'items.tienda']);
         $numPedidoCancelar = $pedido->numero_pedido ?? $pedido->id;
 
         // Reembolso Stripe si aplica (fuera de la transacción DB para no bloquearla en caso de error de red)
@@ -180,6 +181,25 @@ class PedidoController extends Controller
                     route('pedidos.index'),
                     'x',
                     'red'
+                );
+            }
+
+            // Notificar a los owners de las tiendas afectadas
+            $ownerIds = $pedido->items
+                ->pluck('tienda.user_id')
+                ->filter()
+                ->unique()
+                ->values();
+
+            foreach ($ownerIds as $ownerId) {
+                Notificacion::enviar(
+                    $ownerId,
+                    'pedido_cancelado_owner',
+                    'Un pedido de tu tienda ha sido cancelado',
+                    "El administrador ha cancelado el pedido #{$numPedidoCancelar} que incluía productos de tu tienda.",
+                    route('supplier.pedidos.index'),
+                    'x',
+                    'orange'
                 );
             }
         });

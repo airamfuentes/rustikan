@@ -365,6 +365,9 @@ const submit = () => {
                                     v-model.number="item.cantidad"
                                     type="number"
                                     min="1"
+                                    max="99999"
+                                    inputmode="numeric"
+                                    v-only-digits
                                     class="flex-1 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-3 text-center text-sm font-semibold text-gray-900 dark:text-white focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-800"
                                     @change="item.cantidad = Math.max(1, item.cantidad)"
                                 />

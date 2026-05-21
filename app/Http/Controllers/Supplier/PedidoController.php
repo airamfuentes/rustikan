@@ -227,7 +227,7 @@ class PedidoController extends Controller
             );
         }
 
-        // Notificar admins si incidencia
+        // Notificar admins si incidencia + notificar también al cliente
         if ($nuevoEstado === 'incidencia') {
             Notificacion::enviarAdmins(
                 'incidencia_pedido',
