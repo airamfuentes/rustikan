@@ -30,7 +30,8 @@ const toggleAlerta = async (productoId) => {
     togglingAlerta.value = new Set([...togglingAlerta.value, productoId]);
     try {
         const res  = await fetch(route('stock-alerts.toggle', productoId), {
-            method:  'POST',
+            method:      'POST',
+            credentials: 'same-origin',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfMeta() },
         });
         const data = await res.json();
@@ -149,6 +150,7 @@ onMounted(async () => {
     if (!user.value) return;
     try {
         const res  = await fetch(route('stock-alerts.mis-alertas'), {
+            credentials: 'same-origin',
             headers: { 'X-CSRF-TOKEN': csrfMeta() },
         });
         const data = await res.json();

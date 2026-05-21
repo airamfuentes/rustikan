@@ -238,6 +238,9 @@ class TiendaController extends Controller
             $validated['logo'] = $request->file('logo')->store('tiendas/logos', 'public');
         } elseif ($request->filled('logo_url')) {
             $validated['logo'] = $this->storeFromUrl($request->logo_url, 'tiendas/logos');
+        } else {
+            // No se subió archivo ni URL → no tocar la imagen existente
+            unset($validated['logo']);
         }
 
         // Subir nueva portada
@@ -248,6 +251,9 @@ class TiendaController extends Controller
             $validated['imagen_portada'] = $request->file('imagen_portada')->store('tiendas/portadas', 'public');
         } elseif ($request->filled('imagen_portada_url')) {
             $validated['imagen_portada'] = $this->storeFromUrl($request->imagen_portada_url, 'tiendas/portadas');
+        } else {
+            // No se subió archivo ni URL → no tocar la imagen existente
+            unset($validated['imagen_portada']);
         }
 
         // Limpiar flags auxiliares antes de guardar

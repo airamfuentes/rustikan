@@ -58,10 +58,15 @@ const select = (code) => {
             :aria-expanded="isOpen"
             aria-haspopup="listbox"
             @click.stop="toggle"
-            class="flex h-9 w-9 items-center justify-center rounded-full border-2 bg-white dark:bg-gray-800 text-xl shadow-sm transition-all duration-200 hover:scale-110 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary-400"
+            class="flex h-9 w-9 items-center justify-center rounded-full border-2 bg-white dark:bg-gray-800 shadow-sm transition-all duration-200 hover:scale-110 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary-400 overflow-hidden"
             :class="isOpen ? 'border-primary-400 scale-110 shadow-md' : 'border-gray-200 dark:border-gray-600 hover:border-primary-300 dark:hover:border-primary-400'"
         >
-            <span role="img" :aria-label="currentLocale.label" class="select-none leading-none">{{ currentLocale.flag }}</span>
+            <img
+                :src="`https://flagcdn.com/w40/${currentLocale.countryCode}.png`"
+                :alt="currentLocale.label"
+                class="h-full w-full object-cover"
+                draggable="false"
+            />
         </button>
 
         <!-- Dropdown: círculos apilados hacia abajo -->
@@ -87,9 +92,14 @@ const select = (code) => {
                     :aria-selected="false"
                     :title="lang.label"
                     @click="select(lang.code)"
-                    class="flex h-9 w-9 items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-xl shadow-sm transition-all duration-200 hover:scale-110 hover:border-primary-400 dark:hover:border-primary-400 hover:shadow-md focus:outline-none"
+                    class="flex h-9 w-9 items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm transition-all duration-200 hover:scale-110 hover:border-primary-400 dark:hover:border-primary-400 hover:shadow-md focus:outline-none overflow-hidden"
                 >
-                    <span role="img" :aria-label="lang.label" class="select-none leading-none">{{ lang.flag }}</span>
+                    <img
+                        :src="`https://flagcdn.com/w40/${lang.countryCode}.png`"
+                        :alt="lang.label"
+                        class="h-full w-full object-cover"
+                        draggable="false"
+                    />
                 </button>
             </div>
         </Transition>

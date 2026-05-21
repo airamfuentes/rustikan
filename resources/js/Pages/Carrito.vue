@@ -47,7 +47,8 @@ const checkStock = async () => {
     checkingStock.value = true;
     try {
         const res = await fetch(route('carrito.check-stock'), {
-            method:  'POST',
+            method:      'POST',
+            credentials: 'same-origin',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfMeta() },
             body:    JSON.stringify({ items: items.value.map(i => ({ id: i.id, cantidad: i.cantidad })) }),
         });
@@ -64,7 +65,8 @@ const toggleAlerta = async (productoId) => {
     if (!user.value) { router.visit(route('login')); return; }
     try {
         const res  = await fetch(route('stock-alerts.toggle', productoId), {
-            method:  'POST',
+            method:      'POST',
+            credentials: 'same-origin',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfMeta() },
         });
         const data = await res.json();
@@ -253,8 +255,12 @@ const pagarConStripe = async () => {
         });
 
         const res  = await fetch(route('checkout.session'), {
-            method:  'POST',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            method:      'POST',
+            credentials: 'same-origin',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': getCsrfToken(),
+            },
             body,
         });
         const data = await res.json();

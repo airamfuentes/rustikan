@@ -160,8 +160,8 @@ export const vOnlySignedDecimal = {
                 return;
             }
             if (e.key === '-') {
-                // Solo permitido al principio del campo
-                if (e.target.selectionStart !== 0 || e.target.value.startsWith('-')) e.preventDefault();
+                // selectionStart es null en type="number" — bloquear solo si ya hay signo
+                if (e.target.value.startsWith('-')) e.preventDefault();
                 return;
             }
             e.preventDefault();

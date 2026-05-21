@@ -8,11 +8,11 @@ import { ref, computed } from 'vue';
 const locale = ref('es');
 
 const AVAILABLE_LOCALES = [
-    { code: 'es', label: 'Español',  flag: '🇪🇸' },
-    { code: 'en', label: 'English',   flag: '🇬🇧' },
-    { code: 'fr', label: 'Français',  flag: '🇫🇷' },
-    { code: 'de', label: 'Deutsch',   flag: '🇩🇪' },
-    { code: 'it', label: 'Italiano',  flag: '🇮🇹' },
+    { code: 'es', label: 'Español',  countryCode: 'es' },
+    { code: 'en', label: 'English',  countryCode: 'gb' },
+    { code: 'fr', label: 'Français', countryCode: 'fr' },
+    { code: 'de', label: 'Deutsch',  countryCode: 'de' },
+    { code: 'it', label: 'Italiano', countryCode: 'it' },
 ];
 
 const STORAGE_KEY = 'rustikan_locale';
