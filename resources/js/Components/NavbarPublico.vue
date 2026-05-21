@@ -275,8 +275,8 @@ onUnmounted(() => {
                     <LanguageSwitcher />
                     <DarkModeToggle />
 
-                    <!-- Notificaciones para admin/owner -->
-                    <CampanaNotificaciones v-if="user && (user.role === 'admin' || user.role === 'owner')" />
+                    <!-- Notificaciones para todos los usuarios autenticados -->
+                    <CampanaNotificaciones v-if="user" />
 
                     <Link
                         v-if="!user"
@@ -405,8 +405,8 @@ onUnmounted(() => {
                     >
                         <Search class="h-5 w-5" />
                     </button>
-                    <!-- Campana (solo admin/owner) -->
-                    <CampanaNotificaciones v-if="user && (user.role === 'admin' || user.role === 'owner')" />
+                    <!-- Campana -->
+                    <CampanaNotificaciones v-if="user" />
                     <CarritoCompra />
                     <button
                         @click="showMobileMenu = true"
