@@ -152,7 +152,7 @@ Los usuarios pueden suscribirse a un aviso cuando un producto sin stock vuelva a
 - **PedidoConfirmado**: se envía al usuario cuando el supplier mueve el pedido a `en_preparacion`
 - **PedidoEnviado**: se envía al usuario cuando el pedido pasa a `enviado`
 - **StockDisponible**: se envía a los usuarios suscritos cuando un producto con stock 0 es repuesto
-- **RecargaMonedero**: confirmación de recarga de Rusticoins
+- **RecargaMonedero**: confirmación de recarga de Rusticoins.
 
 ### Sistema de notificaciones
 Notificaciones en campana con badge contador. Las notificaciones se cargan al abrir el panel y se eliminan del servidor al cerrarlo. Soporte para iconos y colores por tipo de evento.
