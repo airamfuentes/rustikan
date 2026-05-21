@@ -463,7 +463,7 @@ onMounted(() => {
                                             <p class="mt-0.5 text-xs text-red-500 dark:text-red-400">
                                                 {{ !stockInfo[item.id].disponible || stockInfo[item.id].stock === 0
                                                     ? 'Este producto no está disponible en este momento.'
-                                                    : `Solo quedan ${stockInfo[item.id].stock} ${item.unidad} disponibles. Reduce la cantidad para continuar.` }}
+                                                    : 'No tenemos suficiente stock para esta cantidad. Reduce el pedido para continuar.' }}
                                             </p>
                                         </div>
                                     </div>
