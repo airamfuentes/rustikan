@@ -71,37 +71,17 @@ Route::get('/tienda/{tienda:slug}', function (\App\Models\Tienda $tienda) {
     }
 
     // Determinar si el usuario autenticado puede reseñar.
-    // Regla: 1 reseña por pedido. Mientras tenga pedidos sin reseñar en esta
-    // tienda, puede crear una nueva. No exponemos al user el contador.
-    $canReview    = false;
+    // Regla temporal: 1 reseña por usuario por tienda, sin requerir pedido previo.
+    $canReview     = false;
     $userReviewIds = [];
     $user = auth()->user();
-    if ($user) {
-        // Las reseñas existentes del user en esta tienda (para que el front
-        // pueda marcarlas visualmente y mostrar botón de eliminar).
+    if ($user && in_array($user->role, ['user', 'admin'])) {
         $userReviewIds = $tienda->resenas()
             ->where('user_id', $user->id)
             ->pluck('id')
             ->all();
 
-        if ($user->role === 'admin') {
-            // Admin: siempre puede dejar/actualizar su reseña libre
-            $canReview = empty($userReviewIds);
-        } elseif ($user->role === 'user') {
-            // Pedidos del user en esta tienda (no cancelados)
-            $totalPedidos = \App\Models\Pedido::where('user_id', $user->id)
-                ->whereNotIn('estado', ['cancelado'])
-                ->whereHas('items', fn ($q) => $q->where('tienda_id', $tienda->id))
-                ->count();
-
-            // Reseñas del user asociadas a un pedido en esta tienda
-            $totalResenadas = $tienda->resenas()
-                ->where('user_id', $user->id)
-                ->whereNotNull('pedido_id')
-                ->count();
-
-            $canReview = $totalPedidos > $totalResenadas;
-        }
+        $canReview = empty($userReviewIds);
     }
 
     return Inertia::render('TiendaDetalle', [

@@ -157,29 +157,60 @@ const cerrarCheckout = () => { if (step.value < 3) mostrarCheckout.value = false
 
 const siguientePaso = () => {
     const e = {};
-    if (!envioForm.value.calle.trim() || envioForm.value.calle.trim().length < 3) {
+
+    // Calle
+    const calle = envioForm.value.calle.trim();
+    if (!calle) {
         e.calle = t('checkout.street_required');
-    } else if (envioForm.value.calle.length > 100) {
-        e.calle = 'La calle es demasiado larga (máximo 100).';
-    }
-    if (!envioForm.value.numero.trim()) {
+    } else if (calle.length < 3) {
+        e.calle = 'La calle debe tener al menos 3 caracteres.';
+    } else if (calle.length > 100) {
+        e.calle = 'La calle es demasiado larga (máximo 100 caracteres).';
+    } else if (!/\d/.test(calle) && !envioForm.value.numero.trim()) {
+        // Aviso suave: si la calle no tiene número y el campo número está vacío
         e.numero = t('checkout.number_required');
-    } else if (envioForm.value.numero.length > 10) {
-        e.numero = 'Número demasiado largo.';
     }
+
+    // Número
+    const numero = envioForm.value.numero.trim();
+    if (!numero) {
+        e.numero = t('checkout.number_required');
+    } else if (!/^[0-9a-zA-Z\-\/]+$/.test(numero)) {
+        e.numero = 'Número no válido (solo dígitos, letras, - o /).';
+    } else if (numero.length > 10) {
+        e.numero = 'Número demasiado largo (máximo 10 caracteres).';
+    }
+
+    // Puerta (opcional pero con límite)
+    const puerta = envioForm.value.puerta.trim();
+    if (puerta.length > 20) {
+        e.puerta = 'Piso/puerta demasiado largo (máximo 20 caracteres).';
+    }
+
+    // Código postal
     const cpErr = validarCP(envioForm.value.cp, { soloLanzarote: true });
     if (cpErr) e.cp = cpErr;
-    if (!envioForm.value.localidad.trim()) {
+
+    // Localidad
+    const localidad = envioForm.value.localidad.trim();
+    if (!localidad) {
         e.localidad = t('checkout.city_required');
+    } else if (localidad.length < 2) {
+        e.localidad = 'Indica una localidad válida.';
     }
+
+    // Teléfono
     const telLimpio = envioForm.value.telefono_contacto.replace(/\D/g, '');
     if (!envioForm.value.telefono_contacto.trim()) {
         e.telefono_contacto = t('checkout.phone_required');
-    } else if (telLimpio.length === 9 && !/^[6-9]/.test(telLimpio)) {
-        e.telefono_contacto = 'Móvil español: empieza por 6, 7, 8 o 9.';
     } else if (telLimpio.length < 9) {
-        e.telefono_contacto = 'Teléfono demasiado corto.';
+        e.telefono_contacto = 'El teléfono debe tener al menos 9 dígitos.';
+    } else if (telLimpio.length > 15) {
+        e.telefono_contacto = 'El teléfono es demasiado largo.';
+    } else if (telLimpio.length === 9 && !/^[6-9]/.test(telLimpio)) {
+        e.telefono_contacto = 'Móvil español: debe empezar por 6, 7, 8 o 9.';
     }
+
     errores.value = e;
     if (Object.keys(e).length) return;
     step.value = 2;
