@@ -4,7 +4,7 @@
 
 **Marketplace local de productores de Lanzarote**
 
-Conecta a productores, artesanos y pequeños negocios de Lanzarote con consumidores locales. Compra directa, sostenible y sin intermediarios.
+Conecta a productores, artesanos y pequeños negocios de Lanzarote con consumidores. Compra directa, sostenible y fomentando la economía circular.
 
 ---
 
