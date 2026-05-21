@@ -10,7 +10,6 @@ const props = defineProps({
 const page = usePage();
 const user = computed(() => page.props.auth?.user);
 
-// ── Formulario del código ─────────────────────────────────────────────────────
 const digits  = ref(['', '', '', '', '', '']);
 const inputs  = ref([]);
 const codeErr = ref('');
@@ -40,7 +39,6 @@ const onPaste = (e) => {
     e.preventDefault();
 };
 
-// ── Envío del código ─────────────────────────────────────────────────────────
 const verifyForm = useForm({ code: '' });
 
 const submitCode = () => {
@@ -56,7 +54,6 @@ const submitCode = () => {
     });
 };
 
-// ── Reenvío ───────────────────────────────────────────────────────────────────
 const resendForm  = useForm({});
 const sent        = computed(() => props.status === 'verification-link-sent');
 const submitResend = () => resendForm.post(route('verification.send'));

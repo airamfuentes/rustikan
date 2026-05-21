@@ -77,7 +77,6 @@ class DashboardController extends Controller
                 'usuario' => $log->user?->name ?? 'Sistema',
             ]);
 
-        // ── Beneficios / comisiones Rustikan (10%) ────────────────────────────────
         $comisionPct = 10.0;
 
         $comisionesPorMes = [];

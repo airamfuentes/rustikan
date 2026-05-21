@@ -10,18 +10,15 @@ const props = defineProps({
     counts:  { type: Object, default: () => ({}) },
 });
 
-// ── Filtro por estado (server-side) ──────────────────────────────────────
 const estadoFiltro = ref(props.estado);
 
-// ── Imagen helper ────────────────────────────────────────────────────────
 const imgUrl = (path) => {
     if (!path) return null;
     return path.startsWith('http') ? path : `/storage/${path}`;
 };
 
-// ── Rechazo modal ─────────────────────────────────────────────────────────
-const rechazando = ref(null); // { solicitud } | null
-const rechazandoTodas = ref(null); // tienda | null
+const rechazando = ref(null);
+const rechazandoTodas = ref(null);
 const motivoRechazo = ref('');
 
 const abrirRechazar = (solicitud) => {
@@ -51,7 +48,6 @@ const submitRechazarTodas = () => {
     }, { onSuccess: cerrarModal });
 };
 
-// ── Aprobar ───────────────────────────────────────────────────────────────
 const aprobar = (solicitud) => {
     router.post(route('admin.solicitudes.aprobar', solicitud.id));
 };
@@ -59,7 +55,6 @@ const aprobarTodas = (tienda) => {
     router.post(route('admin.solicitudes.aprobar-todas', tienda.id));
 };
 
-// ── Helpers display ───────────────────────────────────────────────────────
 const tipoLabel = (tipo) => ({
     update_tienda:   'Cambio tienda',
     create_producto: 'Nuevo producto',
@@ -98,11 +93,10 @@ const formatValor = (campo, valor) => {
 };
 
 
-// ── Filtros y paginación ─────────────────────────────────────────────────
 const filtros = ref({
     busqueda: '',
-    tipo:     'todos',  // todos · update_tienda · create_producto · update_producto · delete_producto
-    rango:    'todos',  // todos · hoy · semana · mes
+    tipo:     'todos',
+    rango:    'todos',
 });
 const tiendaPagina = ref(1);
 const TIENDAS_PER_PAGE = 5;

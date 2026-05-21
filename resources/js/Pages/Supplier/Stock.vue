@@ -2,7 +2,7 @@
 import LayoutSupplier from '@/Layouts/LayoutSupplier.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
-import { Package, AlertTriangle, XCircle, Store, ChevronLeft, ChevronRight, ChevronRight as ArrowRight, Search, SlidersHorizontal } from 'lucide-vue-next';
+import { Package, AlertTriangle, XCircle, Store, ChevronLeft, ChevronRight as ArrowRight, Search, SlidersHorizontal } from 'lucide-vue-next';
 
 const props = defineProps({
     tiendas: { type: Object, required: true },

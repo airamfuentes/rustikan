@@ -1,8 +1,6 @@
 import { ref, computed, watch } from 'vue';
 import { useToasts } from '@/Composables/useToasts';
 
-// ─── Estado singleton ───────────────────────────────────────────────────────
-// La instancia es única: todos los componentes comparten el mismo carrito.
 const STORAGE_KEY = 'rustikan_carrito';
 
 const leerStorage = () => {
@@ -15,15 +13,12 @@ const leerStorage = () => {
 
 const items = ref(leerStorage());
 
-// Persistir automáticamente en localStorage ante cualquier cambio
 watch(items, (valor) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(valor));
 }, { deep: true });
 
-// ─── Composable ─────────────────────────────────────────────────────────────
 export function useCarrito() {
 
-    /** Número total de unidades en el carrito */
     const totalItems = computed(() =>
         items.value.reduce((sum, item) => sum + item.cantidad, 0)
     );

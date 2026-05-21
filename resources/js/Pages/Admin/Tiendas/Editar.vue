@@ -355,7 +355,6 @@ const imgUrl = (p) => p ? (p.startsWith('http') ? p : `/storage/${p}`) : null;
 const logoActual    = computed(() => imgUrl(props.tienda.logo));
 const portadaActual = computed(() => imgUrl(props.tienda.imagen_portada));
 
-// ── Buscador de usuarios ──────────────────────────────────────────────────
 const busquedaUsuario = ref('');
 
 const usuariosFiltrados = computed(() => {

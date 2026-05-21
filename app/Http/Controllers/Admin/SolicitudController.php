@@ -213,10 +213,6 @@ class SolicitudController extends Controller
         return back()->with('success', "Se rechazaron {$count} cambios de {$tienda->nombre}.");
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // PRIVADOS
-    // ─────────────────────────────────────────────────────────────────────────
-
     /**
      * Aplicar el cambio al modelo correspondiente.
      */

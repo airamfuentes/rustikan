@@ -23,13 +23,11 @@ const props = defineProps({
 const page = usePage();
 const { success: toastSuccess, error: toastError, info: toastInfo } = useToasts();
 
-// ── Imagen helper ───────────────────────────────────────────────────────────
 const imgUrl = (path) => {
     if (!path) return null;
     return path.startsWith('http') ? path : `/storage/${path}`;
 };
 
-// ── Gráfica ─────────────────────────────────────────────────────────────────
 const maxIngresos = computed(() => {
     const vals = props.ingresosGrafica.map(d => d.total);
     return Math.max(...vals, 1);
@@ -37,10 +35,8 @@ const maxIngresos = computed(() => {
 
 const barHeight = (total) => Math.max((total / maxIngresos.value) * 100, total > 0 ? 4 : 0);
 
-// ── Tab activo ───────────────────────────────────────────────────────────────
 const tab = ref('resumen');
 
-// ── Estado label ─────────────────────────────────────────────────────────────
 const estadoConfig = {
     pendiente:   { label: 'Pendiente',   cls: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300' },
     en_proceso:  { label: 'En proceso',  cls: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300' },
@@ -53,7 +49,6 @@ const estadoConfig = {
 };
 const getEstado = (e) => estadoConfig[e] ?? { label: e, cls: 'bg-gray-100 text-gray-700' };
 
-// ── Solicitudes ───────────────────────────────────────────────────────────────
 const solicitudEstadoCls = (estado) => ({
     pendiente:  'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
     aprobado:   'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
@@ -68,13 +63,8 @@ const solicitudEstadoLabel = (estado) => ({
 
 const pendientesCount = computed(() => props.solicitudes.filter(s => s.estado === 'pendiente').length);
 
-// ════════════════════════════════════════════════════════════════════════════
-// FILTROS Y PAGINACIÓN
-// ════════════════════════════════════════════════════════════════════════════
-
 const PER_PAGE = 8;
 
-// ── Pedidos: filtros ─────────────────────────────────────────────────────────
 const pedidosFiltros = ref({
     busqueda: '',
     estado:   'todos',

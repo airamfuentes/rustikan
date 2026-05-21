@@ -14,7 +14,6 @@ const {
     actualizarCantidad,
 } = useCarrito();
 
-// ─── Visibilidad del dropdown ────────────────────────────────────────────────
 const abierto   = ref(false);
 const contenedor = ref(null);
 

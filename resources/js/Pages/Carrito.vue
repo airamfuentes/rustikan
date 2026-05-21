@@ -23,7 +23,6 @@ const {
     vaciarCarrito,
 } = useCarrito();
 
-// Wrap actualizarCantidad to re-check stock after every quantity change
 const actualizarCantidad = (productoId, delta) => {
     _actualizarCantidad(productoId, delta);
     checkStock();
@@ -33,8 +32,6 @@ const gastosEnvio = computed(() => (totalPrecio.value >= 50 ? 0 : totalPrecio.va
 const totalFinal  = computed(() => totalPrecio.value + gastosEnvio.value);
 const handleVaciar = () => vaciarCarrito();
 
-// ─── Stock check ─────────────────────────────────────────────────────────────
-// Map: producto_id → { ok, stock, stock_minimo, disponible, subscribed }
 const stockInfo       = ref({});
 const checkingStock   = ref(false);
 const csrfMeta        = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';
@@ -76,7 +73,6 @@ const toggleAlerta = async (productoId) => {
     } catch { /* silently fail */ }
 };
 
-// ─── Checkout multi-step ──────────────────────────────────────────────────────
 const mostrarCheckout = ref(false);
 const step            = ref(1); // 1: envío, 2: pago, 3: procesando
 const errores         = ref({});
@@ -156,7 +152,6 @@ const abrirCheckout = () => {
 
 const cerrarCheckout = () => { if (step.value < 3) mostrarCheckout.value = false; };
 
-// ── Step 1: validar datos de envío ───────────────────────────────────────────
 const siguientePaso = () => {
     const e = {};
     if (!envioForm.value.calle.trim() || envioForm.value.calle.trim().length < 3) {
@@ -196,7 +191,6 @@ const direccionEnvioComputed = computed(() =>
     + `, ${envioForm.value.cp} ${envioForm.value.localidad}`.trim()
 );
 
-// ── RustiCoin ────────────────────────────────────────────────────────────────
 const rcDisponible    = computed(() => user.value?.rusticoin_balance ?? 0);
 const rcMaxMixto      = computed(() => Math.min(rcDisponible.value, Math.max(0, totalFinal.value - 0.01)));
 const restanteTarjeta = computed(() => {
@@ -204,7 +198,6 @@ const restanteTarjeta = computed(() => {
     return Math.max(0, totalFinal.value - (pagoForm.value.rcACusar || 0));
 });
 
-// ── Step 2: pagar ────────────────────────────────────────────────────────────
 const procesando = ref(false);
 
 

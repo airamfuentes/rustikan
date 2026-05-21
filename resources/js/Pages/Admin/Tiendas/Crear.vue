@@ -292,7 +292,6 @@ const form = useForm({
     imagen_portada_url: '',
 });
 
-// ── Buscador de usuarios ──────────────────────────────────────────────────
 const busquedaUsuario = ref('');
 
 const usuariosFiltrados = computed(() => {

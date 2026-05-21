@@ -213,7 +213,6 @@ const form = useForm({
     delete_avatar: false,
 });
 
-// ── Avatar ────────────────────────────────────────────────────────────────
 const onAvatarChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;

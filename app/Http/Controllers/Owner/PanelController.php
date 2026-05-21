@@ -138,7 +138,6 @@ class PanelController extends Controller
             ? round((($ingresosMesActual - $ingresosMesAnterior) / $ingresosMesAnterior) * 100, 1)
             : ($ingresosMesActual > 0 ? 100 : 0);
 
-        // ── Beneficios (comisión 10%) ──────────────────────────────────────────────
         $comisionPct = 10.0;
 
         // Ingresos brutos por mes (últimos 12 meses)
