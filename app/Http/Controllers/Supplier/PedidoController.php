@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Supplier;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\MarcarPedidoEntregado;
 use App\Models\ActivityLog;
 use App\Models\Notificacion;
 use App\Models\Pedido;
@@ -55,6 +56,8 @@ class PedidoController extends Controller
             $estadoAnterior = $pedido->estado;
             $pedido->update(['estado' => 'enviado']);
             $procesados++;
+
+            MarcarPedidoEntregado::dispatch($pedido->id)->delay(now()->addSeconds(30));
 
             ActivityLog::log(
                 'supplier_dar_salida',
@@ -191,6 +194,10 @@ class PedidoController extends Controller
             $updateData['motivo_incidencia'] = $request->motivo_incidencia;
         }
         $pedido->update($updateData);
+
+        if ($nuevoEstado === 'enviado') {
+            MarcarPedidoEntregado::dispatch($pedido->id)->delay(now()->addSeconds(30));
+        }
 
         ActivityLog::log(
             'supplier_cambiar_estado',
