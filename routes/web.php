@@ -70,8 +70,8 @@ Route::get('/tienda/{tienda:slug}', function (\App\Models\Tienda $tienda) {
         $distribucion[$i] = $count;
     }
 
-    // Determinar si el usuario autenticado puede reseñar.
-    // Regla temporal: 1 reseña por usuario por tienda, sin requerir pedido previo.
+    // Puede reseñar si: tiene rol user/admin, no ha reseñado ya esta tienda,
+    // y tiene al menos un pedido entregado en esta tienda en los últimos 30 días.
     $canReview     = false;
     $userReviewIds = [];
     $user = auth()->user();
@@ -81,7 +81,13 @@ Route::get('/tienda/{tienda:slug}', function (\App\Models\Tienda $tienda) {
             ->pluck('id')
             ->all();
 
-        $canReview = empty($userReviewIds);
+        if (empty($userReviewIds)) {
+            $canReview = \App\Models\Pedido::where('user_id', $user->id)
+                ->where('estado', 'entregado')
+                ->where('created_at', '>=', now()->subDays(30))
+                ->whereHas('items', fn ($q) => $q->where('tienda_id', $tienda->id))
+                ->exists();
+        }
     }
 
     return Inertia::render('TiendaDetalle', [

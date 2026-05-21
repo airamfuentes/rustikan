@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pedido;
+use App\Models\PedidoItem;
 use App\Models\Resena;
 use App\Models\Tienda;
 use Illuminate\Http\Request;
@@ -23,7 +25,18 @@ class ResenaController extends Controller
             'comentario' => 'required|string|min:10|max:1000',
         ]);
 
-        // 1 reseña por usuario por tienda (sin restricción de pedido previo por ahora)
+        // Debe tener al menos un pedido entregado en esta tienda en los últimos 30 días
+        $tienePedido = Pedido::where('user_id', $user->id)
+            ->where('estado', 'entregado')
+            ->where('created_at', '>=', now()->subDays(30))
+            ->whereHas('items', fn ($q) => $q->where('tienda_id', $tienda->id))
+            ->exists();
+
+        if (!$tienePedido) {
+            return back()->with('error', 'Solo puedes reseñar tiendas en las que hayas realizado un pedido entregado en los últimos 30 días.');
+        }
+
+        // 1 reseña por usuario por tienda
         $yaReseno = Resena::where('user_id', $user->id)
             ->where('tienda_id', $tienda->id)
             ->exists();
@@ -32,10 +45,18 @@ class ResenaController extends Controller
             return back()->with('error', 'Ya has dejado una reseña en esta tienda.');
         }
 
+        // Asociar el pedido más reciente entregado en esta tienda
+        $pedido = Pedido::where('user_id', $user->id)
+            ->where('estado', 'entregado')
+            ->where('created_at', '>=', now()->subDays(30))
+            ->whereHas('items', fn ($q) => $q->where('tienda_id', $tienda->id))
+            ->latest()
+            ->first();
+
         Resena::create(array_merge($validated, [
             'user_id'   => $user->id,
             'tienda_id' => $tienda->id,
-            'pedido_id' => null,
+            'pedido_id' => $pedido?->id,
         ]));
 
         $tienda->recalcularValoracion();
