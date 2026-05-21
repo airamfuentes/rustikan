@@ -206,23 +206,37 @@ const confirmarIncidencia = () => {
     if (!motivoIncidencia.value.trim()) return;
     incidenciaModal.value = false;
     procesando.value = true;
+    let notificado = false;
     router.post(
         route('supplier.pedidos.estado', props.pedido.id),
         { estado: 'incidencia', motivo_incidencia: motivoIncidencia.value.trim() },
         {
             preserveScroll: true,
-            only: ['pedido'],
-            onSuccess: () => toastSuccess('Incidencia registrada', 'El motivo ha quedado guardado.'),
-            onError:   () => toastError('Error', 'No se pudo registrar la incidencia.'),
-            onFinish:  () => { procesando.value = false; },
+            only: ['pedido', 'flash'],
+            onSuccess: () => {
+                if (!notificado) {
+                    notificado = true;
+                    toastSuccess('Incidencia registrada', 'El motivo ha quedado guardado.');
+                }
+            },
+            onError:  () => toastError('Error', 'No se pudo registrar la incidencia.'),
+            onFinish: () => { procesando.value = false; },
         }
     );
 };
 
 let pollInterval = null;
+const recargando = ref(false);
+
 onMounted(() => {
     pollInterval = setInterval(() => {
-        if (!procesando.value) router.reload({ only: ['pedido'] });
+        if (!procesando.value && !recargando.value) {
+            recargando.value = true;
+            router.reload({
+                only: ['pedido'],
+                onFinish: () => { recargando.value = false; },
+            });
+        }
     }, 5000);
 });
 onUnmounted(() => clearInterval(pollInterval));
@@ -241,15 +255,21 @@ const cambiarEstado = (nuevoEstado) => {
         return;
     }
     procesando.value = true;
+    let notificado = false;
     router.post(
         route('supplier.pedidos.estado', props.pedido.id),
         { estado: nuevoEstado },
         {
             preserveScroll: true,
-            only: ['pedido'],
-            onSuccess: () => toastSuccess('Estado actualizado', `Pedido marcado como "${estadoLabel(nuevoEstado)}"`),
-            onError:   () => toastError('Error', 'No se pudo actualizar el estado.'),
-            onFinish:  () => { procesando.value = false; },
+            only: ['pedido', 'flash'],
+            onSuccess: () => {
+                if (!notificado) {
+                    notificado = true;
+                    toastSuccess('Estado actualizado', `Pedido marcado como "${estadoLabel(nuevoEstado)}"`);
+                }
+            },
+            onError:  () => toastError('Error', 'No se pudo actualizar el estado.'),
+            onFinish: () => { procesando.value = false; },
         }
     );
 };
