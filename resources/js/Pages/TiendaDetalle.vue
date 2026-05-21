@@ -22,7 +22,11 @@ const user = computed(() => page.props.auth.user);
 const alertasActivas = ref(new Set());
 const togglingAlerta = ref(new Set());
 
-const csrfMeta = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+const csrfMeta = () => {
+    const cookie = document.cookie.split('; ').find(r => r.startsWith('XSRF-TOKEN='));
+    if (cookie) return decodeURIComponent(cookie.split('=')[1]);
+    return document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+};
 
 const toggleAlerta = async (productoId) => {
     if (!user.value) { router.visit(route('login')); return; }

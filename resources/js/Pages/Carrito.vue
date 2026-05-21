@@ -35,7 +35,11 @@ const handleVaciar = () => vaciarCarrito();
 
 const stockInfo       = ref({});
 const checkingStock   = ref(false);
-const csrfMeta        = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+const csrfToken = () => {
+    const cookie = document.cookie.split('; ').find(r => r.startsWith('XSRF-TOKEN='));
+    if (cookie) return decodeURIComponent(cookie.split('=')[1]);
+    return document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+};
 
 const itemsConProblema = computed(() =>
     items.value.filter(i => stockInfo.value[i.id] && !stockInfo.value[i.id].ok)
@@ -49,7 +53,7 @@ const checkStock = async () => {
         const res = await fetch(route('carrito.check-stock'), {
             method:      'POST',
             credentials: 'same-origin',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfMeta() },
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken() },
             body:    JSON.stringify({ items: items.value.map(i => ({ id: i.id, cantidad: i.cantidad })) }),
         });
         const data = await res.json();
@@ -67,7 +71,7 @@ const toggleAlerta = async (productoId) => {
         const res  = await fetch(route('stock-alerts.toggle', productoId), {
             method:      'POST',
             credentials: 'same-origin',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfMeta() },
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken() },
         });
         const data = await res.json();
         if (stockInfo.value[productoId]) {
@@ -217,7 +221,7 @@ const siguientePaso = () => {
 };
 
 const stripeError = ref('');
-const getCsrfToken = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+const getCsrfToken = csrfToken;
 
 const direccionEnvioComputed = computed(() =>
     [envioForm.value.calle.trim(), envioForm.value.numero.trim(), envioForm.value.puerta.trim()]
@@ -275,8 +279,12 @@ const pagarConStripe = async () => {
     step.value        = 3;
 
     try {
+        // Obtener token CSRF fresco del servidor para evitar 419 por token expirado
+        const csrfRes = await fetch(route('csrf.token'), { credentials: 'same-origin' });
+        const { token: freshToken } = await csrfRes.json();
+
         const body = new URLSearchParams();
-        body.append('_token', getCsrfToken());
+        body.append('_token', freshToken);
         body.append('direccion_envio', direccionEnvioComputed.value);
         body.append('telefono_contacto', envioForm.value.telefono_contacto.trim());
         body.append('notas', envioForm.value.notas.trim());
@@ -290,7 +298,7 @@ const pagarConStripe = async () => {
             credentials: 'same-origin',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': getCsrfToken(),
+                'X-CSRF-TOKEN': freshToken,
             },
             body,
         });

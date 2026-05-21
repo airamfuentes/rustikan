@@ -124,6 +124,9 @@ Route::prefix('')->name('info.')->group(function () {
     Route::get('/cookies',                fn() => Inertia::render('Info/Cookies'))->name('cookies');
 });
 
+// CSRF token fresco para fetch manual
+Route::get('/csrf-token', fn () => response()->json(['token' => csrf_token()]))->middleware('web')->name('csrf.token');
+
 // Stripe Checkout
 Route::post('/checkout/session', [\App\Http\Controllers\StripeController::class, 'createSession'])
     ->middleware(['auth', 'throttle:20,1'])
