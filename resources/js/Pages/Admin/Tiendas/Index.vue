@@ -146,21 +146,28 @@
                                             {{ tienda.productos_count }}
                                         </td>
                                         <td class="whitespace-nowrap px-6 py-4">
-                                            <div class="flex flex-col gap-1">
-                                                <button 
+                                            <div class="flex items-center gap-2">
+                                                <!-- Toggle activa -->
+                                                <button
                                                     @click="toggleActive(tienda)"
-                                                    class="inline-flex rounded-full px-2 text-xs font-semibold leading-5"
-                                                    :class="tienda.activa ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-red-100 text-red-800 hover:bg-red-200'"
+                                                    :title="tienda.activa ? 'Desactivar tienda' : 'Activar tienda'"
+                                                    :class="['relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none',
+                                                        tienda.activa ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600']"
                                                 >
-                                                    {{ tienda.activa ? 'Activa' : 'Inactiva' }}
+                                                    <span :class="['pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200',
+                                                        tienda.activa ? 'translate-x-4' : 'translate-x-0']" />
                                                 </button>
-                                                <button 
+                                                <!-- Toggle visible -->
+                                                <button
                                                     @click="toggleVisible(tienda)"
-                                                    class="inline-flex rounded-full px-2 text-xs font-semibold leading-5"
-                                                    :class="tienda.visible ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'"
+                                                    :title="tienda.visible ? 'Ocultar tienda' : 'Hacer visible'"
+                                                    :class="['flex items-center justify-center h-7 w-7 rounded-lg transition-colors',
+                                                        tienda.visible
+                                                            ? 'text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+                                                            : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700']"
                                                 >
-                                                    <Eye v-if="tienda.visible" class="inline h-3.5 w-3.5" /> <EyeOff v-else class="inline h-3.5 w-3.5" />
-                                                    {{ tienda.visible ? 'Visible' : 'Oculta' }}
+                                                    <Eye v-if="tienda.visible" class="h-4 w-4" />
+                                                    <EyeOff v-else class="h-4 w-4" />
                                                 </button>
                                             </div>
                                         </td>
