@@ -209,8 +209,8 @@ class PedidoController extends Controller
 
         // Notificar al cliente
         $mensajesEstado = [
-            'confirmado'     => 'Tu pedido ha sido confirmado por el almacén.',
-            'en_preparacion' => 'Tu pedido está siendo preparado en nuestro almacén.',
+            'confirmado'     => 'Tu pedido ha sido confirmado y está siendo procesado.',
+            'en_preparacion' => 'Tu pedido está siendo preparado por la tienda.',
             'enviado'        => 'Tu pedido ha sido enviado. ¡Pronto lo recibirás!',
             'incidencia'     => 'Ha ocurrido una incidencia con tu pedido. Nos pondremos en contacto contigo.',
         ];
