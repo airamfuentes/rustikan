@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\DB;
 
 class DemoFresh extends Command
 {
-    protected $signature   = 'demo:fresh {--seed : Re-seed demo data after cleaning}';
-    protected $description = 'Limpia tablas transaccionales y opcionalmente re-seedea datos demo';
+    protected $signature   = 'demo:fresh';
+    protected $description = 'Limpia tablas transaccionales (pedidos, reseñas, notificaciones, etc.)';
 
     public function handle(): int
     {
@@ -61,15 +61,7 @@ class DemoFresh extends Command
 
         $this->info('Limpieza completada.');
 
-        if ($this->option('seed')) {
-            $this->info('Re-seeding datos demo…');
-            $this->call('db:seed', ['--class' => 'DemoUsersSeeder', '--force' => true]);
-            $this->call('db:seed', ['--class' => 'DemoTiendasSeeder', '--force' => true]);
-            $this->call('db:seed', ['--class' => 'DemoProductosSeeder', '--force' => true]);
-            $this->call('db:seed', ['--class' => 'DemoResenasSeeder', '--force' => true]);
-        }
-
-        $this->info('¡Listo para el vídeo! 🎬');
+        $this->info('¡Limpieza completada!');
         return self::SUCCESS;
     }
 }
