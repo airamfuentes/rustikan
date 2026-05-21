@@ -12,30 +12,33 @@ class DemoUsersSeeder extends Seeder
 {
     public function run(): void
     {
-        // ── OWNERS ──────────────────────────────────────────────────────
-        $owners = [
-            ['name' => 'Domingo', 'apellidos' => 'Perdomo Cabrera',    'email' => 'domingo@finca-el-nido.es',      'telefono' => '628100201', 'direccion' => 'C/ Volcán 12, Tinajo, Lanzarote'],
-            ['name' => 'María',   'apellidos' => 'Hernández Curbelo',  'email' => 'maria@huerta-jameos.es',        'telefono' => '628100202', 'direccion' => 'Camino de Los Jameos 3, Haría, Lanzarote'],
-            ['name' => 'Antonio', 'apellidos' => 'Betancor Suárez',    'email' => 'antonio@bodega-geria.es',       'telefono' => '628100203', 'direccion' => 'La Geria s/n, Yaiza, Lanzarote'],
-            ['name' => 'Carmen',  'apellidos' => 'Reyes Padilla',      'email' => 'carmen@quesos-majorero.es',     'telefono' => '628100204', 'direccion' => 'C/ Real 45, Teguise, Lanzarote'],
-            ['name' => 'Sergio',  'apellidos' => 'Acuña Toledo',       'email' => 'sergio@pescados-arrecife.es',   'telefono' => '628100205', 'direccion' => 'Muelle Comercial, Arrecife, Lanzarote'],
-            ['name' => 'Lucía',   'apellidos' => 'Pérez Cabrera',      'email' => 'lucia@panaderia-norte.es',      'telefono' => '628100206', 'direccion' => 'C/ Iglesia 8, Haría, Lanzarote'],
-            ['name' => 'Javier',  'apellidos' => 'Morales Rivero',     'email' => 'javier@artesanos-lanzarote.es', 'telefono' => '628100207', 'direccion' => 'C/ César Manrique 22, Teguise, Lanzarote'],
-        ];
+        // ── OWNERS (20) ──────────────────────────────────────────────────
+        $firstNames = ['Domingo','María','Antonio','Carmen','Sergio','Lucía','Javier','Ana','Pablo','Isabel','Miguel','Laura','Carlos','Raquel','Rubén','Nerea','Diego','Marta','Fernando','Sara'];
+        $lastNames1 = ['Perdomo','Hernández','Betancor','Reyes','Acuña','Pérez','Morales','González','Rodríguez','Santana'];
+        $lastNames2 = ['Cabrera','Curbelo','Suárez','Padilla','Toledo','Rivero','Rivera','Martín','Marrero','Brito'];
 
-        foreach ($owners as $i => $o) {
-            $seed   = urlencode($o['name'] . ' ' . $o['apellidos']);
+        foreach (range(0, 19) as $i) {
+            $name = $firstNames[$i % count($firstNames)];
+            $ap1  = $lastNames1[$i % count($lastNames1)];
+            $ap2  = $lastNames2[($i + 3) % count($lastNames2)];
+            $apellidos = $ap1 . ' ' . $ap2;
+            $email = Str::slug($name . '.' . explode(' ', $apellidos)[0]) . ".owner{$i}@rustikan-demo.es";
+            $telefono = '6' . str_pad((string)(28000000 + $i), 8, '0', STR_PAD_LEFT);
+            $direccion = 'C/ Demo ' . (10 + $i) . ', Lanzarote';
+
+            $seed   = urlencode($name . ' ' . $apellidos);
             $avatar = "https://api.dicebear.com/7.x/adventurer/svg?seed={$seed}";
+
             User::updateOrCreate(
-                ['email' => $o['email']],
+                ['email' => $email],
                 [
-                    'name'              => $o['name'],
-                    'apellidos'         => $o['apellidos'],
+                    'name'              => $name,
+                    'apellidos'         => $apellidos,
                     'password'          => Hash::make('password'),
                     'role'              => 'owner',
-                    'telefono'          => $o['telefono'],
-                    'direccion'         => $o['direccion'],
-                    'fecha_nacimiento'  => Carbon::now()->subYears(35 + $i)->subMonths(rand(0, 11))->toDateString(),
+                    'telefono'          => $telefono,
+                    'direccion'         => $direccion,
+                    'fecha_nacimiento'  => Carbon::now()->subYears(30 + ($i % 20))->subMonths(rand(0, 11))->toDateString(),
                     'avatar'            => $avatar,
                     'rusticoin_balance' => 0,
                     'email_verified_at' => now(),
