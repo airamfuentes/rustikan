@@ -167,7 +167,7 @@ Los owners no pueden modificar directamente ciertos datos de su tienda (nombre, 
 Cuando el supplier no puede procesar un pedido, abre un modal de incidencia que obliga a escribir el motivo. Ese motivo queda registrado en el pedido y es visible en el panel de administración.
 
 ### Exportación PDF
-Facturas de pedidos y exportaciones del historial disponibles para admin y supplier.
+Facturas de pedidos y exportaciones del historial disponibles para admin y supplier
 
 ---
 
@@ -234,6 +234,6 @@ database/
 
 <div align="center">
 
-Hecho con cariño en Lanzarote
+Hecho con cariño por un lanzaroteño, en Lanzarote.
 
 </div>
